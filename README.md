@@ -1,9 +1,10 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.envimate/mapmate/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.envimate/mapmate)
 
-<img src="mapmate-logo.png" width="400px" />
+<img src="mapmate-logo.png" width="400px" align="left"/>
+
 # Mapmate
+
 A library that helps you (de)serialize your DDD domains.
-Available in the official [Maven Repository](https://mvnrepository.com/artifact/com.envimate/mapmate)
 
 ### Preface
 
