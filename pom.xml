@@ -31,7 +31,7 @@
     </parent>
     <artifactId>mapmate</artifactId>
     <packaging>jar</packaging>
-    <version>1.6.5</version>
+    <version>1.6.6</version>
 
     <name>mapmate</name>
     <description>
@@ -41,8 +41,8 @@
     <url>https://bitbucket.org/envimate/mapmate</url>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
         <aws.sdk.version>1.11.285</aws.sdk.version>
         <checkstyle.suppressions.location>
             ${project.basedir}/src/test/checkstyle/checkstyle-suppressions.xml
