@@ -6,7 +6,7 @@
 A library that helps you (de)serialize your DDD domains.
 
 ### Preface
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+Almost any modern application nowadays is dealing with mapping incoming requests to a subset of Domain Objects and outputting resulting subset of Domain Objects to a certain format (be that json, yaml, xml, ...). As a result we keep writing the "same" code over and over again. We parse the Strings into Domain Objects, we validate those upon initialization, we process the requests and we do the mapping again to output certain Response. While there are numerous frameworks that help you on some of the stages of this process, we believe there is a need of a simple, non-invasive library that would allow you to integrate this process into your application seamlessly and concentrate on your Business logic. 
 
 ### Table of Content
 - [Preface](#markdown-header-preface)
