@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
 
 import static com.envimate.mapmate.DefinitionNotFoundException.definitionNotFound;
 import static com.envimate.mapmate.deserialization.builder.DeserializerBuilder.aDeserializerBuilder;
+import static com.envimate.mapmate.injector.Injector.empty;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.lang.reflect.Array.newInstance;
 
@@ -90,7 +91,7 @@ public final class Deserializer {
         validateNotNull(targetType, "targetType");
         validateNotNull(injectorProducer, "jsonInjector");
         final ExceptionTracker exceptionTracker = new ExceptionTracker(input, this.validationMappings);
-        final Injector injector = injectorProducer.inject(Injector.empty());
+        final Injector injector = injectorProducer.inject(empty());
         final T deserialized = deserialize(input, targetType, exceptionTracker, injector);
         final List<ValidationError> validationErrors = exceptionTracker.resolve();
         if (!validationErrors.isEmpty()) {
@@ -133,7 +134,7 @@ public final class Deserializer {
             final Injector injector) {
         // inject here
         final Object injected = injector.getInjectionForPropertyPath(exceptionTracker.getPosition(), targetType);
-        if(injected != null && injected.getClass() == targetType) {
+        if (injected != null && injected.getClass() == targetType) {
             return (T) injected;
         }
 

@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import static com.envimate.mapmate.serialization.builder.SerializerBuilder.aSerializerBuilder;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.util.Objects.isNull;
 
 @SuppressWarnings("rawtypes")
 public final class Serializer {
@@ -64,16 +65,28 @@ public final class Serializer {
                             final Function<Map<String, Object>, Map<String, Object>> jsonInjector) {
         validateNotNull(object, "object");
         Object normalized = normalize(object);
-        if(normalized instanceof Map) {
+        if (normalized instanceof Map) {
             normalized = jsonInjector.apply((Map<String, Object>) normalized);
         }
         return this.marshaller.marshal(normalized);
     }
 
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> serializeToMap(final Object object) {
+        if(isNull(object)) {
+            return new HashMap<>();
+        }
+        final Object normalized = normalize(object);
+        if (!(normalized instanceof Map)) {
+            throw new UnsupportedOperationException("Only DTOs can be serialized to map");
+        }
+        return (Map<String, Object>) normalized;
+    }
+
     private Object normalize(final Object object) {
         this.circularReferenceDetector.detect(object);
 
-        if (Objects.isNull(object)) {
+        if (isNull(object)) {
             return null;
         }
 
@@ -90,11 +103,11 @@ public final class Serializer {
 
     private Object serializeDefinition(final Object object) {
         final Definition definition = this.definitions.getDefinitionForObject(object);
-        if(definition instanceof SerializableCustomPrimitive) {
+        if (definition instanceof SerializableCustomPrimitive) {
             final SerializableCustomPrimitive customPrimitive = (SerializableCustomPrimitive) definition;
             return customPrimitive.serialize(object);
         }
-        if(definition instanceof SerializableDataTransferObject) {
+        if (definition instanceof SerializableDataTransferObject) {
             final SerializableDataTransferObject dataTransferObject = (SerializableDataTransferObject) definition;
             return dataTransferObject.serialize(object, this::normalize);
         }

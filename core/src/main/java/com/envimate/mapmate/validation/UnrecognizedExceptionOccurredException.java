@@ -21,6 +21,8 @@
 
 package com.envimate.mapmate.validation;
 
+import static java.lang.String.valueOf;
+
 public final class UnrecognizedExceptionOccurredException extends RuntimeException {
     public final Throwable unmappedException;
     public final String originalInput;
@@ -37,10 +39,10 @@ public final class UnrecognizedExceptionOccurredException extends RuntimeExcepti
     public static UnrecognizedExceptionOccurredException fromException(
             final String field,
             final Throwable unmappedException,
-            final String originalInput) {
+            final Object originalInput) {
         final String msg = String.format("unrecognized exception occurred during deserialization for field '%s': %s : %s",
                 field, unmappedException.getClass().getName(), unmappedException.getMessage());
         return new UnrecognizedExceptionOccurredException(
-                msg, unmappedException, originalInput);
+                msg, unmappedException, valueOf(originalInput));
     }
 }

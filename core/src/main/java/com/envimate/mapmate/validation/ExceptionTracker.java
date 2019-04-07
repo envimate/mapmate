@@ -32,9 +32,9 @@ public final class ExceptionTracker {
     private final String position;
     private final ValidationMappings validationMappings;
     private final List<ExceptionTracker> children;
-    private final String originalInput;
+    private final Object originalInput;
 
-    public ExceptionTracker(final String originalInput, final ValidationMappings validationMappings) {
+    public ExceptionTracker(final Object originalInput, final ValidationMappings validationMappings) {
         this.originalInput = originalInput;
         this.validationErrors = new ArrayList<>(0);
         this.validationMappings = validationMappings;
@@ -42,7 +42,7 @@ public final class ExceptionTracker {
         this.children = new ArrayList<>(0);
     }
 
-    private ExceptionTracker(final String originalInput, final String position, final ValidationMappings validationMappings) {
+    private ExceptionTracker(final Object originalInput, final String position, final ValidationMappings validationMappings) {
         this.originalInput = originalInput;
         this.validationErrors = new ArrayList<>(0);
         this.validationMappings = validationMappings;
