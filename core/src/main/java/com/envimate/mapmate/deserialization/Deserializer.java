@@ -81,6 +81,20 @@ public final class Deserializer {
         return aDeserializerBuilder();
     }
 
+    public <T> T deserializeFromMap(final Map<String, Object> input, final Class<T> targetType) {
+        Objects.requireNonNull(input);
+
+        final Definition definition = this.definitions.getDefinitionForType(targetType)
+                .orElseThrow(() -> definitionNotFound(targetType));
+
+        if (!definition.isDataTransferObject()) {
+            throw new UnsupportedOperationException("Only DTOs can be deserialized from map but found: " + definition);
+        }
+        final ExceptionTracker exceptionTracker = new ExceptionTracker("not av", this.validationMappings);
+
+        return deserialize(input, targetType, exceptionTracker, empty());
+    }
+
     public <T> T deserialize(final String input, final Class<T> targetType) {
         return deserialize(input, targetType, injector -> injector);
     }
@@ -147,7 +161,7 @@ public final class Deserializer {
             final DeserializableDataTransferObject<T> deserializableDataTransferObject =
                     (DeserializableDataTransferObject) definition;
 
-            if(injected != null) {
+            if (injected != null) {
                 return deserializeDataTransferObject(
                         (Map<String, Object>) injected,
                         deserializableDataTransferObject,
@@ -165,7 +179,7 @@ public final class Deserializer {
         if (definition instanceof DeserializableCustomPrimitive) {
             final DeserializableCustomPrimitive deserializableCustomPrimitive = (DeserializableCustomPrimitive) definition;
 
-            if(injected != null) {
+            if (injected != null) {
                 return deserializeCustomPrimitive(
                         (String) injected,
                         deserializableCustomPrimitive,
@@ -197,7 +211,7 @@ public final class Deserializer {
 
             final Object injected = injector.getInjectionForPropertyNameOrInstance(
                     exceptionTracker.getWouldBePosition(elementName), elementType);
-            if(injected != null) {
+            if (injected != null) {
                 elements.put(elementName, injected);
             } else {
                 final Object elementInput = input.get(elementName);

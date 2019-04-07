@@ -31,12 +31,11 @@
     </parent>
     <packaging>jar</packaging>
     <artifactId>core</artifactId>
-    <version>${parent.version}</version>
+    <version>1.6.9</version>
     <name>MapMate - Core Library</name>
 
 
     <properties>
-        <aws.sdk.version>1.11.285</aws.sdk.version>
         <checkstyle.suppressions.location>
             ${project.basedir}/src/test/checkstyle/checkstyle-suppressions.xml
         </checkstyle.suppressions.location>
