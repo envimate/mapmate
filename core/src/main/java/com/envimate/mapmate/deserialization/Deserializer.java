@@ -95,6 +95,10 @@ public final class Deserializer {
         return deserialize(input, targetType, exceptionTracker, empty());
     }
 
+    public Map<String, Object> deserializeToMap(final String input) {
+        return unmarshaller.unmarshal(input, Map.class);
+    }
+
     public <T> T deserialize(final String input, final Class<T> targetType) {
         return deserialize(input, targetType, injector -> injector);
     }
