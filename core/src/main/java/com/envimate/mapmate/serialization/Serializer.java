@@ -71,6 +71,10 @@ public final class Serializer {
         return this.marshaller.marshal(normalized);
     }
 
+    public String serializeFromMap(final Map<String, Object> map) {
+        return this.marshaller.marshal(map);
+    }
+
     @SuppressWarnings("unchecked")
     public Map<String, Object> serializeToMap(final Object object) {
         if(isNull(object)) {
