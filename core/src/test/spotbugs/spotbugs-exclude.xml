@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+  ~ Copyright (c) 2019 envimate GmbH - https://envimate.com/.
   ~
   ~ Licensed to the Apache Software Foundation (ASF) under one
   ~ or more contributor license agreements.  See the NOTICE file
@@ -28,5 +28,25 @@
         <Class name="com.envimate.mapmate.filters.paths.ResourcesPath" />
         <Method name="basenamesOfChildren" />
         <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE"/>
+    </Match>
+    <Match>
+        <Class name="com.envimate.mapmate.MapmateTest" />
+        <Bug pattern="NS_DANGEROUS_NON_SHORT_CIRCUIT" />
+    </Match>
+    <Match>
+        <Class name="com.envimate.mapmate.deserialization.DeserializerTest" />
+        <Bug pattern="NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS" />
+    </Match>
+    <Match>
+        <Class name="com.envimate.mapmate.domain.valid.AComplexValidatedType" />
+        <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" />
+    </Match>
+    <Match>
+        <Class name="com.envimate.mapmate.domain.valid.ACyclicType" />
+        <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" />
+    </Match>
+    <Match>
+        <Class name="com.envimate.mapmate.examples.domain.User" />
+        <Bug pattern="UUF_UNUSED_PUBLIC_OR_PROTECTED_FIELD" />
     </Match>
 </FindBugsFilter>

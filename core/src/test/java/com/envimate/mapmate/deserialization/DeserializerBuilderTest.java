@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +9,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -48,16 +48,14 @@ import static junit.framework.TestCase.fail;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
+@SuppressWarnings("deprecation")
 public final class DeserializerBuilderTest {
 
     @Test
     public void givenValidDataTransferObject_whenBuildingWithDataTransferObject_thenReturnsCorrectDeserializer() {
-        //given
         final Class<?> given = AComplexType.class;
-
-        //when
         final Deserializer result = aDeserializer()
-                .withUnmarshaller(new Gson()::fromJson)
+                .withJsonUnmarshaller(new Gson()::fromJson)
                 .withDataTransferObject(given)
                 .deserializedUsingTheSingleFactoryMethod()
                 .withCustomPrimitive(AString.class)
@@ -65,8 +63,6 @@ public final class DeserializerBuilderTest {
                 .withCustomPrimitive(ANumber.class)
                 .deserializedUsingTheMethodNamed("fromString")
                 .build();
-
-        //then
         assertThat(result.getDefinitions().countCustomPrimitives(), is(equalTo(3)));
         assertThat(result.getDefinitions().countDataTransferObjects(), is(equalTo(1)));
         assertThat(result.getDefinitions(), containsValidDeserializableDTOForType(AComplexType.class));
@@ -79,15 +75,12 @@ public final class DeserializerBuilderTest {
 
     @Test
     public void givenDataTransferObjectWithoutFactoryMethods_whenBuildingWithDataTransferObject_thenThrowsException() {
-        //given
         final Class<?> given = AComplexTypeWithoutFactoryMethods.class;
         final String expectedMessage = "no factory method found " +
                 "on type 'class com.envimate.mapmate.domain.invalid.AComplexTypeWithoutFactoryMethods'";
-
-        //when
         try {
             aDeserializer()
-                    .withUnmarshaller(new Gson()::fromJson)
+                    .withJsonUnmarshaller(new Gson()::fromJson)
                     .withDataTransferObject(given)
                     .deserializedUsingTheSingleFactoryMethod()
                     .validateNoUnsupportedOutgoingReferences()
@@ -100,15 +93,12 @@ public final class DeserializerBuilderTest {
 
     @Test
     public void givenDataTransferObjectWithMultipleFactoryMethods_whenBuildingWithDataTransferObject_thenThrowsException() {
-        //given
         final Class<?> given = AComplexTypeWithMultipleFactoryMethods.class;
         final String expectedMessage = "multiple factory methods found " +
                 "for type 'com.envimate.mapmate.domain.invalid.AComplexTypeWithMultipleFactoryMethods'";
-
-        //when
         try {
             aDeserializer()
-                    .withUnmarshaller(new Gson()::fromJson)
+                    .withJsonUnmarshaller(new Gson()::fromJson)
                     .withDataTransferObject(given)
                     .deserializedUsingTheSingleFactoryMethod()
                     .validateNoUnsupportedOutgoingReferences()
@@ -122,7 +112,6 @@ public final class DeserializerBuilderTest {
     @SuppressWarnings("rawtypes")
     @Test
     public void givenDataTransferObjectWithAdapterMethod_whenBuildingWithDataTransferObject_thenReturnsCorrectDesererializer() {
-        //given
         final Class<?> givenType = AComplexType.class;
         final DeserializationDTOMethod given = new DeserializationDTOMethod() {
             @Override
@@ -135,15 +124,11 @@ public final class DeserializerBuilderTest {
                 return new HashMap<>();
             }
         };
-
-        //when
         final Deserializer result = aDeserializer()
-                .withUnmarshaller(new Gson()::fromJson)
+                .withJsonUnmarshaller(new Gson()::fromJson)
                 .withDataTransferObject(givenType)
                 .deserializedUsing(given)
                 .build();
-
-        //then
         assertThat(result.getDefinitions().countDataTransferObjects(), is(equalTo(1)));
         assertThat(result.getDefinitions(), containsValidDeserializableDTOForType(AComplexType.class));
     }
@@ -151,15 +136,12 @@ public final class DeserializerBuilderTest {
     @SuppressWarnings("rawtypes")
     @Test
     public void givenDataTransferObjectWithNullAdapterMethod_whenBuildingWithDataTransferObject_thenThrowsError() {
-        //given
         final Class<?> givenType = AComplexType.class;
         final DeserializationDTOMethod givenAdapter = null;
         final String expectedMessage = "method must not be null";
-
-        //when
         try {
             aDeserializer()
-                    .withUnmarshaller(new Gson()::fromJson)
+                    .withJsonUnmarshaller(new Gson()::fromJson)
                     .withDataTransferObject(givenType)
                     .deserializedUsing(givenAdapter)
                     .build();
@@ -171,14 +153,11 @@ public final class DeserializerBuilderTest {
 
     @Test
     public void givenNull_whenBuildingWithDataTransferObject_thenThrowError() {
-        //given
         final Class<?> given = null;
         final String expectedMessage = "type must not be null";
-
-        //when
         try {
             aDeserializer()
-                    .withUnmarshaller(new Gson()::fromJson)
+                    .withJsonUnmarshaller(new Gson()::fromJson)
                     .withDataTransferObject(given)
                     .deserializedUsingTheSingleFactoryMethod()
                     .build();
@@ -190,32 +169,24 @@ public final class DeserializerBuilderTest {
 
     @Test
     public void givenValidCustomPrimitive_whenBuildingWithCustomPrimitive_thenReturnsCorrectDeserializer() {
-        //given
         final Class<?> given = AString.class;
-
-        //when
         final Deserializer result = aDeserializer()
-                .withUnmarshaller(new Gson()::fromJson)
+                .withJsonUnmarshaller(new Gson()::fromJson)
                 .withCustomPrimitive(given)
                 .deserializedUsingTheMethodNamed("fromString")
                 .build();
-
-        //then
         assertThat(result.getDefinitions().countCustomPrimitives(), is(equalTo(2)));
         assertThat(result.getDefinitions(), containsValidCustomPrimitiveForType(AString.class));
     }
 
     @Test
     public void givenCustomPrimitiveWithWrongMethod_whenBuildingWithCustomPrimitive_thenThrowError() {
-        //given
         final Class<?> given = AString.class;
         final String expectedMessage = "class 'com.envimate.mapmate.domain.valid.AString' does not have a static method" +
                 " with a single String argument named 'nonexistingmethod'";
-
-        //when
         try {
             aDeserializer()
-                    .withUnmarshaller(new Gson()::fromJson)
+                    .withJsonUnmarshaller(new Gson()::fromJson)
                     .withCustomPrimitive(given)
                     .deserializedUsingTheMethodNamed("nonexistingmethod")
                     .build();
@@ -227,14 +198,11 @@ public final class DeserializerBuilderTest {
 
     @Test
     public void givenCustomPrimitiveWithEmptyMethod_whenBuildingWithCustomPrimitive_thenThrowError() {
-        //given
         final Class<?> given = AString.class;
         final String expectedMessage = "methodName must not be empty";
-
-        //when
         try {
             aDeserializer()
-                    .withUnmarshaller(new Gson()::fromJson)
+                    .withJsonUnmarshaller(new Gson()::fromJson)
                     .withCustomPrimitive(given)
                     .deserializedUsingTheMethodNamed("")
                     .build();
@@ -246,14 +214,11 @@ public final class DeserializerBuilderTest {
 
     @Test
     public void givenCustomPrimitiveWithNullMethod_whenBuildingWithCustomPrimitive_thenThrowError() {
-        //given
         final Class<?> given = AString.class;
         final String expectedMessage = "methodName must not be empty";
-
-        //when
         try {
             aDeserializer()
-                    .withUnmarshaller(new Gson()::fromJson)
+                    .withJsonUnmarshaller(new Gson()::fromJson)
                     .withCustomPrimitive(given)
                     .deserializedUsingTheMethodNamed(null)
                     .build();
@@ -265,14 +230,11 @@ public final class DeserializerBuilderTest {
 
     @Test
     public void givenNull_whenBuildingWithCustomPrimitive_thenThrowError() {
-        //given
         final Class<?> given = null;
         final String expectedMessage = "type must not be null";
-
-        //when
         try {
             aDeserializer()
-                    .withUnmarshaller(new Gson()::fromJson)
+                    .withJsonUnmarshaller(new Gson()::fromJson)
                     .withCustomPrimitive(given)
                     .deserializedUsingTheMethodNamed("fromString")
                     .build();
@@ -284,14 +246,11 @@ public final class DeserializerBuilderTest {
 
     @Test
     public void givenEmptyPackage_whenBuilding_thenThrowsError() {
-        //when
         final String given = "";
         final String expectedMessage = "packageName must not be empty";
-
-        //when
         try {
             aDeserializer()
-                    .withUnmarshaller(new Gson()::fromJson)
+                    .withJsonUnmarshaller(new Gson()::fromJson)
                     .thatScansThePackage(given)
                     .forCustomPrimitives()
                     .filteredBy(includingAll())
@@ -309,14 +268,11 @@ public final class DeserializerBuilderTest {
 
     @Test
     public void givenNullPackage_whenBuilding_thenThrowsError() {
-        //when
         final String given = null;
         final String expectedMessage = "packageName must not be empty";
-
-        //when
         try {
             aDeserializer()
-                    .withUnmarshaller(new Gson()::fromJson)
+                    .withJsonUnmarshaller(new Gson()::fromJson)
                     .thatScansThePackage(given)
                     .forCustomPrimitives()
                     .filteredBy(includingAll())
@@ -334,15 +290,12 @@ public final class DeserializerBuilderTest {
 
     @Test
     public void givenExcludingCustomPrimitiveWithScannablePackage_whenBuilding_thenThrowsError() {
-        //when
         final String given = "com.envimate.mapmate.domain.scannable";
         final String expectedMessage = "definitions contain field of unknown type" +
                 " com.envimate.mapmate.domain.scannable.AScannableString";
-
-        //when
         try {
             aDeserializer()
-                    .withUnmarshaller(new Gson()::fromJson)
+                    .withJsonUnmarshaller(new Gson()::fromJson)
                     .thatScansThePackage(given)
                     .forCustomPrimitives()
                     .filteredBy(allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument())
@@ -364,12 +317,9 @@ public final class DeserializerBuilderTest {
 
     @Test
     public void givenExcludingDataTransferObjectWithScannablePackage_whenBuilding_thenReturnsDeserializerWithoutExcludedDefinition() {
-        //when
         final String given = "com.envimate.mapmate.domain.scannable";
-
-        //when
         final Deserializer result = aDeserializer()
-                .withUnmarshaller(new Gson()::fromJson)
+                .withJsonUnmarshaller(new Gson()::fromJson)
                 .thatScansThePackage(given)
                 .forCustomPrimitives()
                 .filteredBy(allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument())
@@ -380,8 +330,6 @@ public final class DeserializerBuilderTest {
                 .excluding(AComplexTypeWithMap.class)
                 .thatAre().deserializedUsingTheSingleFactoryMethod()
                 .build();
-
-        //then
         assertThat(result.getDefinitions().countCustomPrimitives(), is(equalTo(3)));
         assertThat(result.getDefinitions().countDataTransferObjects(), is(equalTo(2)));
         assertThat(result.getDefinitions(), containsValidCustomPrimitiveForType(AScannableString.class));
@@ -389,14 +337,11 @@ public final class DeserializerBuilderTest {
 
     @Test
     public void givenExcludingNullWithScannablePackage_whenBuilding_thenThrowsException() {
-        //when
         final String given = "com.envimate.mapmate.domain.scannable";
         final String expectedMessage = "excluded must not be null";
-
-        //when
         try {
             aDeserializer()
-                    .withUnmarshaller(new Gson()::fromJson)
+                    .withJsonUnmarshaller(new Gson()::fromJson)
                     .thatScansThePackage(given)
                     .forCustomPrimitives()
                     .filteredBy(allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument())

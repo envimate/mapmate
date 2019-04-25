@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -28,7 +28,6 @@ import com.envimate.mapmate.domain.valid.*;
 import com.envimate.mapmate.serialization.methods.SerializationCPMethod;
 import com.envimate.mapmate.validators.CustomTypeValidationException;
 import com.google.gson.Gson;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -36,6 +35,7 @@ import java.util.Map;
 
 import static com.envimate.mapmate.Defaults.theDefaultSerializer;
 import static com.envimate.mapmate.filters.ClassFilters.*;
+import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.serialization.Serializer.aSerializer;
 import static junit.framework.TestCase.fail;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -47,7 +47,7 @@ public final class SerializerTest {
     @Test
     public void testMethodReferenceInCPSerializationMethod() {
         final Serializer serializer = aSerializer()
-                .withMarshaller(new Gson()::toJson)
+                .withJsonMarshaller(new Gson()::toJson)
                 .withDataTransferObject(AComplexType.class)
                 .serializedByItsPublicFields()
                 .withCustomPrimitive(AString.class)
@@ -61,53 +61,37 @@ public final class SerializerTest {
                 AString.fromString("qwer"),
                 ANumber.fromInt(1),
                 ANumber.fromInt(5555));
-        final String result = serializer.serialize(aComplexType);
-        Assert.assertThat(result, is("{\"number1\":\"1\",\"number2\":\"5555\",\"stringA\":\"asdf\",\"stringB\":\"qwer\"}"));
+        final String result = serializer.serializeToJson(aComplexType);
+        assertThat(result, is("{\"number1\":\"1\",\"number2\":\"5555\",\"stringA\":\"asdf\",\"stringB\":\"qwer\"}"));
     }
 
     @Test
     public void givenStringDomain_whenSerializing_thenReturnsJsonString() {
-        //given
         final AString given = AString.fromString("test@test.test");
-
-        //when
-        final String result = theDefaultSerializer().serialize(given);
-
-        //then
+        final String result = theDefaultSerializer().serializeToJson(given);
         assertThat(result, is(equalTo("\"test@test.test\"")));
     }
 
     @Test
     public void givenNumberDomain_whenSerializing_thenReturnsJsonString() {
-        //given
         final ANumber given = ANumber.fromInt(123);
-
-        //when
-        final String result = theDefaultSerializer().serialize(given);
-
-        //then
+        final String result = theDefaultSerializer().serializeToJson(given);
         assertThat(result, is(equalTo("\"123\"")));
     }
 
     @Test
     public void givenComplexDomain_whenSerializing_thenReturnsJsonString() {
-        //given
         final AComplexType given = AComplexType.aComplexType(
                 AString.fromString("a"),
                 AString.fromString("b"),
                 ANumber.fromInt(1),
                 ANumber.fromInt(2));
-
-        //when
-        final String result = theDefaultSerializer().serialize(given);
-
-        //then
+        final String result = theDefaultSerializer().serializeToJson(given);
         assertThat(result, is(equalTo("{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"a\",\"stringB\":\"b\"}")));
     }
 
     @Test
     public void givenComplexDomainWithCollections_whenSerializing_thenReturnsJsonString() {
-        //given
         final AComplexTypeWithCollections given = AComplexTypeWithCollections.aComplexTypeWithCollection(
                 Lists.of(new AString[] {
                         AString.fromString("a"),
@@ -118,59 +102,40 @@ public final class SerializerTest {
                         ANumber.fromInt(2),
                         ANumber.fromInt(3),
                 });
-
-        //when
-        final String result = theDefaultSerializer().serialize(given);
-
-        //then
+        final String result = theDefaultSerializer().serializeToJson(given);
         assertThat(result, is(equalTo("{\"array\":[\"1\",\"2\",\"3\"],\"arrayList\":[\"a\",\"b\",\"c\"]}")));
     }
 
     @Test
     public void givenComplexDomainWithMap_whenSerializing_thenReturnsJsonString() {
-        //given
         final Map<AString, ANumber> hashMap1 = new HashMap<>(2);
         hashMap1.put(AString.fromString("a"), ANumber.fromInt(1));
         hashMap1.put(AString.fromString("b"), ANumber.fromInt(2));
-
         final HashMap<AString, ANumber> hashMap2 = new HashMap<>(2);
         hashMap2.put(AString.fromString("c"), ANumber.fromInt(3));
         hashMap2.put(AString.fromString("d"), ANumber.fromInt(4));
-
         final AComplexTypeWithMap given = AComplexTypeWithMap.aComplexTypeWithMap(hashMap1, hashMap2, null);
-
-        //when
-        final String result = theDefaultSerializer().serialize(given);
-
-        //then
+        final String result = theDefaultSerializer().serializeToJson(given);
         assertThat(result, is(equalTo("{\"map\":{\"a\":\"1\",\"b\":\"2\"},\"hashMap\":{\"d\":\"4\",\"c\":\"3\"}}")));
     }
 
     @Test
     public void givenComplexDomainWithMapContainingComplexDomains_whenSerializing_thenReturnsJsonString() {
-        //given
         final AComplexType aComplexType1 = AComplexType.aComplexType(
                 AString.fromString("a"),
                 AString.fromString("b"),
                 ANumber.fromInt(1),
                 ANumber.fromInt(2));
-
         final AComplexType aComplexType2 = AComplexType.aComplexType(
                 AString.fromString("c"),
                 AString.fromString("d"),
                 ANumber.fromInt(3),
                 ANumber.fromInt(4));
-
         final HashMap<AString, AComplexType> hashMap = new HashMap<>(2);
         hashMap.put(AString.fromString("a"), aComplexType1);
         hashMap.put(AString.fromString("b"), aComplexType2);
-
         final AComplexTypeWithMap given = AComplexTypeWithMap.aComplexTypeWithMap(null, null, hashMap);
-
-        //when
-        final String result = theDefaultSerializer().serialize(given);
-
-        //then
+        final String result = theDefaultSerializer().serializeToJson(given);
         assertThat(result, is(equalTo("{\"complexMap\":{" +
                 "\"a\":{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"a\",\"stringB\":\"b\"}," +
                 "\"b\":{\"number1\":\"3\",\"number2\":\"4\",\"stringA\":\"c\",\"stringB\":\"d\"}}}")));
@@ -178,7 +143,6 @@ public final class SerializerTest {
 
     @Test
     public void givenComplexNestedDomain_whenSerializing_thenReturnsJsonString() {
-        //given
         final AComplexNestedType given = AComplexNestedType.aComplexNestedType(
                 AComplexType.aComplexType(
                         AString.fromString("a"),
@@ -190,11 +154,7 @@ public final class SerializerTest {
                         AString.fromString("d"),
                         ANumber.fromInt(3),
                         ANumber.fromInt(4)));
-
-        //when
-        final String result = theDefaultSerializer().serialize(given);
-
-        //then
+        final String result = theDefaultSerializer().serializeToJson(given);
         assertThat(result, is(equalTo("{\"complexType2\":" +
                 "{\"number1\":\"3\",\"number2\":\"4\",\"stringA\":\"c\",\"stringB\":\"d\"}," +
                 "\"complexType1\":" +
@@ -203,12 +163,9 @@ public final class SerializerTest {
 
     @Test
     public void givenNull_whenSerializing_thenThrowsError() {
-        //given
         final String expectedMessage = "object must not be null";
-
-        //when
         try {
-            final String result = theDefaultSerializer().serialize(null);
+            theDefaultSerializer().serializeToJson(null);
             fail("should throw NullPointerException");
         } catch (final CustomTypeValidationException result) {
             assertThat(result.getMessage(), is(equalTo(expectedMessage)));
@@ -217,13 +174,11 @@ public final class SerializerTest {
 
     @Test
     public void givenNonConfiguredComplexDomain_whenSerializing_thenThrowsError() {
-        //given
         final ANonConfiguredDomain given = new ANonConfiguredDomain();
         final String expectedMessage = "no definition found for type 'com.envimate.mapmate.serialization.SerializerTest$ANonConfiguredDomain'";
 
-        //when
         try {
-            theDefaultSerializer().serialize(given);
+            theDefaultSerializer().serializeToJson(given);
             fail("should throw UnsupportedOperationException");
         } catch (final DefinitionNotFoundException result) {
             assertThat(result.getMessage(), is(equalTo(expectedMessage)));
@@ -232,7 +187,6 @@ public final class SerializerTest {
 
     @Test
     public void givenCyclicType_whenSerializing_thenThrowsError() {
-        //given
         final ACyclicType given1 = ACyclicType.aCyclicType(AString.fromString("a"));
         final ACyclicType given2 = ACyclicType.aCyclicType(AString.fromString("b"));
         given1.aCyclicType = given2;
@@ -241,9 +195,8 @@ public final class SerializerTest {
         final String expectedMessage = "a circular reference has been detected for objects " +
                 "of type com.envimate.mapmate.domain.valid.ACyclicType";
 
-        //when
         try {
-            theDefaultSerializer().serialize(given1);
+            theDefaultSerializer().serializeToJson(given1);
             fail("should throw CircularReferenceException");
         } catch (final CircularReferenceException result) {
             assertThat(result.getMessage(), is(equalTo(expectedMessage)));
@@ -252,7 +205,6 @@ public final class SerializerTest {
 
     @Test
     public void givenNonCyclicType_whenSerializing_thenDoesNotThrowsError() {
-        //given
         final ACyclicType given1 = ACyclicType.aCyclicType(AString.fromString("a"));
         final ACyclicType given2 = ACyclicType.aCyclicType(AString.fromString("b"));
         final ACyclicType given3 = ACyclicType.aCyclicType(AString.fromString("c"));
@@ -260,23 +212,17 @@ public final class SerializerTest {
         given1.aCyclicType = given2;
         given2.aCyclicType = given3;
 
-        //when
-        final String result = theDefaultSerializer().serialize(given1);
+        theDefaultSerializer().serializeToJson(given1);
     }
 
     @Test
     public void givenComplexDomainWithNullValues_whenSerializing_thenExcludesFromJson() {
-        //given
         final AComplexType given = AComplexType.aComplexType(
                 AString.fromString("a"),
                 null,
                 ANumber.fromInt(1),
                 null);
-
-        //when
-        final String result = theDefaultSerializer().serialize(given);
-
-        //then
+        final String result = theDefaultSerializer().serializeToJson(given);
         assertThat(result, is(equalTo("{\"number1\":\"1\",\"stringA\":\"a\"}")));
     }
 
@@ -286,9 +232,8 @@ public final class SerializerTest {
 
     @Test
     public void givenComplexDomainUsingCustomDTOMethod_whenSerializing_thenReturnsJsonString() {
-        //given
         final Serializer serializer = aSerializer()
-                .withMarshaller(new Gson()::toJson)
+                .withJsonMarshaller(new Gson()::toJson)
                 .thatScansThePackage("com.envimate.mapmate.domain.valid")
                 .forCustomPrimitives()
                 .filteredBy(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("internalValueForMapping"))
@@ -306,19 +251,14 @@ public final class SerializerTest {
                 AString.fromString("b"),
                 ANumber.fromInt(1),
                 ANumber.fromInt(2));
-
-        //when
-        final String result = serializer.serialize(given);
-
-        //then
+        final String result = serializer.serializeToJson(given);
         assertThat(result, is(equalTo("\"test\"")));
     }
 
     @Test
     public void givenComplexDomainUsingCustomCPMethod_whenSerializing_thenReturnsJsonString() {
-        //given
         final Serializer serializer = aSerializer()
-                .withMarshaller(new Gson()::toJson)
+                .withJsonMarshaller(new Gson()::toJson)
                 .thatScansThePackage("com.envimate.mapmate.domain.valid")
                 .forCustomPrimitives()
                 .filteredBy(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("internalValueForMapping"))
@@ -331,11 +271,11 @@ public final class SerializerTest {
                 .withCustomPrimitive(AString.class)
                 .serializedUsing(new SerializationCPMethod() {
                     @Override
-                    public void verifyCompatibility(Class<?> targetType) {
+                    public void verifyCompatibility(final Class<?> targetType) {
                     }
 
                     @Override
-                    public String serialize(Object object) {
+                    public String serialize(final Object object) {
                         return "test";
                     }
                 })
@@ -345,19 +285,14 @@ public final class SerializerTest {
                 AString.fromString("b"),
                 ANumber.fromInt(1),
                 ANumber.fromInt(2));
-
-        //when
-        final String result = serializer.serialize(given);
-
-        //then
+        final String result = serializer.serializeToJson(given);
         assertThat(result, is(equalTo("{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"test\",\"stringB\":\"test\"}")));
     }
 
     @Test
     public void givenComplexDomainUsingCustomCPStaticMethod_whenSerializing_thenReturnsJsonString() {
-        //given
         final Serializer serializer = aSerializer()
-                .withMarshaller(new Gson()::toJson)
+                .withJsonMarshaller(new Gson()::toJson)
                 .thatScansThePackage("com.envimate.mapmate.domain.valid")
                 .forCustomPrimitives()
                 .filteredBy(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("internalValueForMapping"))
@@ -370,11 +305,11 @@ public final class SerializerTest {
                 .withCustomPrimitive(AString.class)
                 .serializedUsing(new SerializationCPMethod() {
                     @Override
-                    public void verifyCompatibility(Class<?> targetType) {
+                    public void verifyCompatibility(final Class<?> targetType) {
                     }
 
                     @Override
-                    public String serialize(Object object) {
+                    public String serialize(final Object object) {
                         return AStrings.provide(object);
                     }
                 })
@@ -384,11 +319,7 @@ public final class SerializerTest {
                 AString.fromString("b"),
                 ANumber.fromInt(1),
                 ANumber.fromInt(2));
-
-        //when
-        final String result = serializer.serialize(given);
-
-        //then
+        final String result = serializer.serializeToJson(given);
         assertThat(result, is(equalTo("{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"provided\",\"stringB\":\"provided\"}")));
     }
 
@@ -399,14 +330,10 @@ public final class SerializerTest {
                 AString.fromString("b"),
                 ANumber.fromInt(1),
                 ANumber.fromInt(2));
-
-        //when
-        final String result = theDefaultSerializer().serialize(given, input -> {
+        final String result = theDefaultSerializer().serialize(given, json(), input -> {
             input.put("stringA", "test");
             return input;
         });
-
-        //then
         assertThat(result, is(equalTo("{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"test\",\"stringB\":\"b\"}")));
     }
 }

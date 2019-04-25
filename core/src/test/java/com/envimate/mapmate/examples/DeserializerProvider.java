@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -38,7 +38,7 @@ class DeserializerProvider implements Provider<Deserializer> {
     @Override
     public Deserializer get() {
         return aDeserializer()
-                .withUnmarshaller(new Gson()::fromJson)
+                .withJsonUnmarshaller(new Gson()::fromJson)
                 .thatScansThePackage("com.envimate.mapmate.examples.domain")
                 .forCustomPrimitives()
                 .filteredBy(includingAll())

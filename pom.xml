@@ -26,12 +26,12 @@
     <parent>
         <groupId>com.envimate</groupId>
         <artifactId>envimate-opensource-parent</artifactId>
-        <version>1.0.10</version>
+        <version>1.0.18</version>
     </parent>
     <packaging>pom</packaging>
     <groupId>com.envimate.mapmate</groupId>
     <artifactId>mapmate-parent</artifactId>
-    <version>1.6.12</version>
+    <version>1.6.13</version>
     <modules>
         <module>core</module>
     </modules>

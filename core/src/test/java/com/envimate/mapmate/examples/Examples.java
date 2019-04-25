@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -66,7 +66,7 @@ public final class Examples {
 
                 ));
 
-        final String result = this.serializer.serialize(queen);
+        final String result = this.serializer.serializeToJson(queen);
         System.out.println(result);
     }
 
@@ -85,7 +85,7 @@ public final class Examples {
                 "\"region\":\"Noord-Holland\"," +
                 "\"city\":\"Amsterdam\"}}";
 
-        final Person queen = this.deserializer.deserialize(json, Person.class);
+        final Person queen = this.deserializer.deserializeJson(json, Person.class);
 
         System.out.println(queen.fullName.textual());
         System.out.println(queen.address.textual());
@@ -104,7 +104,7 @@ public final class Examples {
                 "\"city\":\"Amsterdam\"}}";
 
         try {
-            this.deserializer.deserialize(json, ValidPerson.class);
+            this.deserializer.deserializeJson(json, ValidPerson.class);
         } catch (AggregatedValidationException e) {
             System.out.println(e.getValidationErrors());
         }
@@ -115,7 +115,7 @@ public final class Examples {
         final DeserializationDTOMethod deserializerAdapter = complexPersonAdapter();
 
         final Deserializer deserializer = aDeserializer()
-                .withUnmarshaller(new Gson()::fromJson)
+                .withJsonUnmarshaller(new Gson()::fromJson)
                 .thatScansThePackage("com.envimate.mapmate.examples.domain")
                 .forCustomPrimitives()
                 .filteredBy(includingAll())
@@ -151,19 +151,17 @@ public final class Examples {
                 "  ]\n" +
                 "}";
 
-        final ComplexPerson personWithComplexes = deserializer.deserialize(json, ComplexPerson.class);
+        final ComplexPerson personWithComplexes = deserializer.deserializeJson(json, ComplexPerson.class);
 
         System.out.println(personWithComplexes);
     }
 
     private DeserializationDTOMethod complexPersonAdapter() {
-
-
         return new DeserializationDTOMethod() {
             @Override
             public Object deserialize(Class<?> targetType, Map<String, Object> elements) throws Exception {
-                FirstName[] firstNames = (FirstName[]) elements.get("firstNames");
-                Address[] addresses = (Address[]) elements.get("addresses");
+                final FirstName[] firstNames = (FirstName[]) elements.get("firstNames");
+                final Address[] addresses = (Address[]) elements.get("addresses");
                 return ComplexPerson.person(
                         Arrays.asList(firstNames),
                         Arrays.asList(addresses));

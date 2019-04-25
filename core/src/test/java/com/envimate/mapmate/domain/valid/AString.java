@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,9 +21,11 @@
 
 package com.envimate.mapmate.domain.valid;
 
-import java.io.Serializable;
-import java.util.Objects;
+import lombok.EqualsAndHashCode;
 
+import java.io.Serializable;
+
+@EqualsAndHashCode
 public final class AString implements Serializable {
     private final String value;
 
@@ -40,23 +42,6 @@ public final class AString implements Serializable {
 
     public String internalValueForMapping() {
         return this.value;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final AString aString = (AString) o;
-        return Objects.equals(this.value, aString.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.value);
     }
 
     @Override

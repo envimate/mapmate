@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,10 +22,14 @@
 package com.envimate.mapmate.deserialization.builder;
 
 import com.envimate.mapmate.deserialization.*;
+import com.envimate.mapmate.marshalling.MarshallerRegistry;
+import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.validation.*;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import static com.envimate.mapmate.deserialization.DeserializableCustomPrimitive.deserializableCustomPrimitive;
 import static com.envimate.mapmate.deserialization.DeserializableDataTransferObject.deserializableDataTransferObject;
@@ -34,13 +38,14 @@ import static com.envimate.mapmate.deserialization.Deserializer.theDeserializer;
 import static com.envimate.mapmate.deserialization.builder.CustomPrimitiveDeserializationMethodBuilder.aCustomPrimitiveDeserializationMethodBuilder;
 import static com.envimate.mapmate.deserialization.builder.DataTransferObjectDeserializationMethodBuilder.aDataTransferObjectDeserializationMethodBuilder;
 import static com.envimate.mapmate.deserialization.builder.ScannablePackageBuilder.aScannablePackageBuilder;
+import static com.envimate.mapmate.marshalling.MarshallerRegistry.marshallerRegistry;
+import static com.envimate.mapmate.marshalling.MarshallingType.*;
 import static com.envimate.mapmate.reflections.PackageName.fromString;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static com.envimate.mapmate.validators.RequiredStringValidator.validateNotNullNorEmpty;
 
 public final class DeserializerBuilder {
-
-    private Unmarshaller unmarshaller;
+    private final Map<MarshallingType, Unmarshaller> unmarshallers;
     private final List<DeserializableDefinitions> definitions;
     private final ValidationMappings validationMappings;
     private final ThrowableClassList mappedExceptions;
@@ -48,6 +53,7 @@ public final class DeserializerBuilder {
     private boolean validateNoUnsupportedOutgoingReferences;
 
     private DeserializerBuilder() {
+        this.unmarshallers = new HashMap<>();
         this.definitions = new LinkedList<>();
         this.validationMappings = ValidationMappings.empty();
         this.mappedExceptions = ThrowableClassList.empty();
@@ -61,10 +67,25 @@ public final class DeserializerBuilder {
         return new DeserializerBuilder();
     }
 
-    public DeserializerBuilder withUnmarshaller(final Unmarshaller unmarshaller) {
-        validateNotNull(unmarshaller, "unmarshaller");
-        this.unmarshaller = unmarshaller;
-        return this;
+    public UnmarshallerStage unmarshallingTheType(final MarshallingType marshallingType) {
+        validateNotNull(marshallingType, "marshallingType");
+        return unmarshaller -> {
+            validateNotNull(unmarshaller, "unmarshaller");
+            this.unmarshallers.put(marshallingType, unmarshaller);
+            return this;
+        };
+    }
+
+    public DeserializerBuilder withJsonUnmarshaller(final Unmarshaller unmarshaller) {
+        return unmarshallingTheType(json()).using(unmarshaller);
+    }
+
+    public DeserializerBuilder withXmlUnmarshaller(final Unmarshaller unmarshaller) {
+        return unmarshallingTheType(xml()).using(unmarshaller);
+    }
+
+    public DeserializerBuilder withYamlUnmarshaller(final Unmarshaller unmarshaller) {
+        return unmarshallingTheType(yaml()).using(unmarshaller);
     }
 
     public ScannablePackageBuilder thatScansThePackage(final String packageName) {
@@ -107,7 +128,7 @@ public final class DeserializerBuilder {
     }
 
     public DeserializerBuilder mappingExceptionUsingList(final Class<? extends Throwable> exceptionType,
-                                                     final ExceptionMappingList mapping) {
+                                                         final ExceptionMappingList mapping) {
         validateNotNull(exceptionType, "exceptionType");
         validateNotNull(mapping, "mapping");
         this.validationMappings.putOneToMany(exceptionType, mapping);
@@ -131,7 +152,7 @@ public final class DeserializerBuilder {
     }
 
     public Deserializer build() {
-        if(this.mappedExceptions.containsDuplicates()) {
+        if (this.mappedExceptions.containsDuplicates()) {
             throw DuplicateExceptionMappingsFoundException.fromSet(this.mappedExceptions.getDuplicates());
         }
 
@@ -141,8 +162,9 @@ public final class DeserializerBuilder {
         }
         allDefinitions = merge(allDefinitions, theSpeciallyTreatedCustomPrimitives());
 
+        final MarshallerRegistry<Unmarshaller> marshallerRegistry = marshallerRegistry(this.unmarshallers);
         return theDeserializer(
-                this.unmarshaller,
+                marshallerRegistry,
                 allDefinitions,
                 this.validationMappings,
                 this.onValidationErrors,

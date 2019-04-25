@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -26,46 +26,44 @@ import com.envimate.mapmate.deserialization.builder.DeserializerBuilder;
 import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
 import com.envimate.mapmate.injector.Injector;
 import com.envimate.mapmate.injector.InjectorLambda;
+import com.envimate.mapmate.marshalling.MarshallerRegistry;
+import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.validation.ExceptionTracker;
 import com.envimate.mapmate.validation.ValidationError;
 import com.envimate.mapmate.validation.ValidationErrorsMapping;
 import com.envimate.mapmate.validation.ValidationMappings;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import static com.envimate.mapmate.DefinitionNotFoundException.definitionNotFound;
 import static com.envimate.mapmate.deserialization.builder.DeserializerBuilder.aDeserializerBuilder;
 import static com.envimate.mapmate.injector.Injector.empty;
+import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.lang.reflect.Array.newInstance;
 
 @SuppressWarnings({"unchecked", "CastToConcreteClass", "rawtypes"})
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Deserializer {
-
-    private static final Pattern COMPILE = Pattern.compile("\"");
+    private static final Pattern PATTERN = Pattern.compile("\"");
     private final DeserializableDefinitions definitions;
-    private final Unmarshaller unmarshaller;
+    private final MarshallerRegistry<Unmarshaller> unmarshallers;
     private final ValidationMappings validationMappings;
     private final ValidationErrorsMapping onValidationErrors;
 
-    private Deserializer(final Unmarshaller unmarshaller,
-                         final DeserializableDefinitions definitions,
-                         final ValidationMappings validationMappings,
-                         final ValidationErrorsMapping onValidationErrors) {
-        this.unmarshaller = unmarshaller;
-        this.definitions = definitions;
-        this.validationMappings = validationMappings;
-        this.onValidationErrors = onValidationErrors;
-    }
-
-    public static Deserializer theDeserializer(final Unmarshaller unmarshaller,
+    public static Deserializer theDeserializer(final MarshallerRegistry<Unmarshaller> unmarshallers,
                                                final DeserializableDefinitions definitions,
                                                final ValidationMappings exceptionMapping,
                                                final ValidationErrorsMapping onValidationErrors,
                                                final boolean validateNoUnsupportedOutgoingReferences) {
-        validateNotNull(unmarshaller, "unmarshaller");
+        validateNotNull(unmarshallers, "unmarshallers");
         validateNotNull(definitions, "definitions");
         validateNotNull(exceptionMapping, "validationMappings");
         validateNotNull(onValidationErrors, "onValidationErrors");
@@ -74,15 +72,16 @@ public final class Deserializer {
             definitions.validateNoUnsupportedOutgoingReferences();
         }
 
-        return new Deserializer(unmarshaller, definitions, exceptionMapping, onValidationErrors);
+        return new Deserializer(definitions, unmarshallers, exceptionMapping, onValidationErrors);
     }
 
     public static DeserializerBuilder aDeserializer() {
         return aDeserializerBuilder();
     }
 
-    public <T> T deserializeFromMap(final Map<String, Object> input, final Class<T> targetType) {
-        Objects.requireNonNull(input);
+    public <T> T deserializeFromMap(final Map<String, Object> input,
+                                    final Class<T> targetType) {
+        validateNotNull(input, "input");
 
         final Definition definition = this.definitions.getDefinitionForType(targetType)
                 .orElseThrow(() -> definitionNotFound(targetType));
@@ -92,25 +91,41 @@ public final class Deserializer {
         }
         final ExceptionTracker exceptionTracker = new ExceptionTracker("not av", this.validationMappings);
 
-        return deserialize(input, targetType, exceptionTracker, empty());
+        return deserializeInternal(input, targetType, exceptionTracker, empty());
     }
 
-    public Map<String, Object> deserializeToMap(final String input) {
-        return unmarshaller.unmarshal(input, Map.class);
+    public Map<String, Object> deserializeToMap(final String input,
+                                                final MarshallingType type) {
+        return this.unmarshallers.getForType(type).unmarshal(input, Map.class);
     }
 
-    public <T> T deserialize(final String input, final Class<T> targetType) {
-        return deserialize(input, targetType, injector -> injector);
+    public <T> T deserializeJson(final String json,
+                                 final Class<T> targetType) {
+        return deserialize(json, targetType, json());
     }
 
-    public <T> T deserialize(final String input, final Class<T> targetType,
+    public <T> T deserializeJson(final String json,
+                                 final Class<T> targetType,
+                                 final InjectorLambda injectorLambda) {
+        return deserialize(json, targetType, json(), injectorLambda);
+    }
+
+    public <T> T deserialize(final String input,
+                             final Class<T> targetType,
+                             final MarshallingType marshallingType) {
+        return deserialize(input, targetType, marshallingType, injector -> injector);
+    }
+
+    public <T> T deserialize(final String input,
+                             final Class<T> targetType,
+                             final MarshallingType marshallingType,
                              final InjectorLambda injectorProducer) {
         validateNotNull(input, "originalInput");
         validateNotNull(targetType, "targetType");
         validateNotNull(injectorProducer, "jsonInjector");
         final ExceptionTracker exceptionTracker = new ExceptionTracker(input, this.validationMappings);
         final Injector injector = injectorProducer.inject(empty());
-        final T deserialized = deserialize(input, targetType, exceptionTracker, injector);
+        final T deserialized = deserializeString(input, targetType, exceptionTracker, injector, marshallingType);
         final List<ValidationError> validationErrors = exceptionTracker.resolve();
         if (!validationErrors.isEmpty()) {
             this.onValidationErrors.map(validationErrors);
@@ -119,10 +134,12 @@ public final class Deserializer {
         return deserialized;
     }
 
-    private <T> T deserialize(final String input, final Class<T> targetType,
-                              final ExceptionTracker exceptionTracker,
-                              final Injector injector) {
-        Objects.requireNonNull(input);
+    private <T> T deserializeString(final String input,
+                                    final Class<T> targetType,
+                                    final ExceptionTracker exceptionTracker,
+                                    final Injector injector,
+                                    final MarshallingType marshallingType) {
+        validateNotNull(input, "input");
         if (input.isEmpty()) {
             return null;
         }
@@ -132,25 +149,24 @@ public final class Deserializer {
 
         final String trimmedInput = input.trim();
         final Object inputObject;
+        final Unmarshaller unmarshaller = this.unmarshallers.getForType(marshallingType);
         if (targetType.isArray() || Collection.class.isAssignableFrom(targetType)) {
-            inputObject = this.unmarshaller.unmarshal(trimmedInput, List.class);
+            inputObject = unmarshaller.unmarshal(trimmedInput, List.class);
         } else if (definition.isDataTransferObject()) {
-            inputObject = this.unmarshaller.unmarshal(trimmedInput, Map.class);
+            inputObject = unmarshaller.unmarshal(trimmedInput, Map.class);
         } else if (definition.isCustomPrimitive()) {
-            inputObject = COMPILE.matcher(trimmedInput).replaceAll("");
+            inputObject = PATTERN.matcher(trimmedInput).replaceAll("");
         } else {
             throw new UnsupportedOperationException(definition.getClass().getName());
         }
 
-        return deserialize(inputObject, targetType, exceptionTracker, injector);
+        return deserializeInternal(inputObject, targetType, exceptionTracker, injector);
     }
 
-    private <T> T deserialize(
-            final Object input,
-            final Class<T> targetType,
-            final ExceptionTracker exceptionTracker,
-            final Injector injector) {
-        // inject here
+    private <T> T deserializeInternal(final Object input,
+                                      final Class<T> targetType,
+                                      final ExceptionTracker exceptionTracker,
+                                      final Injector injector) {
         final Object injected = injector.getInjectionForPropertyPath(exceptionTracker.getPosition(), targetType);
         if (injected != null && injected.getClass() == targetType) {
             return (T) injected;
@@ -187,14 +203,12 @@ public final class Deserializer {
                 return deserializeCustomPrimitive(
                         (String) injected,
                         deserializableCustomPrimitive,
-                        exceptionTracker,
-                        injector);
+                        exceptionTracker);
             } else {
                 return deserializeCustomPrimitive(
                         (String) input,
                         deserializableCustomPrimitive,
-                        exceptionTracker,
-                        injector);
+                        exceptionTracker);
             }
 
         }
@@ -220,7 +234,7 @@ public final class Deserializer {
             } else {
                 final Object elementInput = input.get(elementName);
                 if (elementInput != null) {
-                    final Object elementObject = deserialize(
+                    final Object elementObject = deserializeInternal(
                             elementInput,
                             elementType,
                             exceptionTracker.stepInto(elementName),
@@ -244,7 +258,7 @@ public final class Deserializer {
 
     private <T> T deserializeCustomPrimitive(final String input,
                                              final DeserializableCustomPrimitive definition,
-                                             final ExceptionTracker exceptionTracker, final Injector injector) {
+                                             final ExceptionTracker exceptionTracker) {
         try {
             return (T) definition.deserialize(input);
         } catch (final Exception e) {
@@ -253,25 +267,24 @@ public final class Deserializer {
         }
     }
 
-    private <T> T deserializeArray(
-            final List input,
-            final Class<T> targetType,
-            final ExceptionTracker exceptionTracker,
-            final Injector injector) {
+    private <T> T deserializeArray(final List input,
+                                   final Class<T> targetType,
+                                   final ExceptionTracker exceptionTracker,
+                                   final Injector injector) {
         final Object[] output = (Object[]) newInstance(targetType.getComponentType(), input.size());
 
         for (int i = 0; i < input.size(); i++) {
             final Object value = input.get(i);
             final String indexIndication = String.format("[%s]", i);
             if (value instanceof Map) {
-                output[i] = deserialize(
+                output[i] = deserializeInternal(
                         (Map) input.get(i),
                         targetType.getComponentType(),
                         exceptionTracker.stepInto(indexIndication),
                         injector);
             } else {
-                output[i] = deserialize(
-                        (String) input.get(i),
+                output[i] = deserializeInternal(
+                        input.get(i),
                         targetType.getComponentType(),
                         exceptionTracker.stepInto(indexIndication),
                         injector);

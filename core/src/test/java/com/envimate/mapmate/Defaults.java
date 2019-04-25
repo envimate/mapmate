@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -41,7 +41,7 @@ public final class Defaults {
 
     public static Serializer theDefaultSerializer() {
         return aSerializer()
-                .withMarshaller(new Gson()::toJson)
+                .withJsonMarshaller(new Gson()::toJson)
                 .thatScansThePackage("com.envimate.mapmate.domain.valid")
                 .forCustomPrimitives()
                 .filteredBy(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("internalValueForMapping"))
@@ -56,7 +56,7 @@ public final class Defaults {
     @SuppressWarnings("CastToConcreteClass")
     public static Deserializer theDefaultDeserializer() {
         return aDeserializer()
-                .withUnmarshaller(new Gson()::fromJson)
+                .withJsonUnmarshaller(new Gson()::fromJson)
                 .thatScansThePackage("com.envimate.mapmate.domain.valid")
                 .forCustomPrimitives()
                 .filteredBy(allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument())

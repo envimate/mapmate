@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,11 +21,19 @@
 
 package com.envimate.mapmate.serialization.builder;
 
+import com.envimate.mapmate.marshalling.MarshallerRegistry;
+import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.serialization.*;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
+import static com.envimate.mapmate.marshalling.MarshallerRegistry.marshallerRegistry;
+import static com.envimate.mapmate.marshalling.MarshallingType.*;
 import static com.envimate.mapmate.reflections.PackageName.fromString;
 import static com.envimate.mapmate.serialization.SerializableCustomPrimitive.serializableCustomPrimitive;
 import static com.envimate.mapmate.serialization.SerializableDataTransferObject.serializableDataTransferObject;
@@ -37,23 +45,34 @@ import static com.envimate.mapmate.serialization.builder.ScannablePackageBuilder
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static com.envimate.mapmate.validators.RequiredStringValidator.validateNotNullNorEmpty;
 
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SerializerBuilder {
-
-    private Marshaller externalMarshaller;
-    private final List<SerializableDefinitions> definitions;
-
-    private SerializerBuilder() {
-        this.definitions = new LinkedList<>();
-    }
+    private final Map<MarshallingType, Marshaller> marshallers = new HashMap<>();
+    private final List<SerializableDefinitions> definitions = new LinkedList<>();
 
     public static SerializerBuilder aSerializerBuilder() {
         return new SerializerBuilder();
     }
 
-    public SerializerBuilder withMarshaller(final Marshaller marshaller) {
-        validateNotNull(marshaller, "marshaller");
-        this.externalMarshaller = marshaller;
-        return this;
+    public MarshallerStage marshallingTheType(final MarshallingType marshallingType) {
+        validateNotNull(marshallingType, "marshallingType");
+        return marshaller -> {
+            validateNotNull(marshaller, "marshaller");
+            this.marshallers.put(marshallingType, marshaller);
+            return this;
+        };
+    }
+
+    public SerializerBuilder withJsonMarshaller(final Marshaller marshaller) {
+        return marshallingTheType(json()).using(marshaller);
+    }
+
+    public SerializerBuilder withXmlMarshaller(final Marshaller marshaller) {
+        return marshallingTheType(xml()).using(marshaller);
+    }
+
+    public SerializerBuilder withYamlMarshaller(final Marshaller marshaller) {
+        return marshallingTheType(yaml()).using(marshaller);
     }
 
     public ScannablePackageBuilder thatScansThePackage(final String packageName) {
@@ -88,9 +107,10 @@ public final class SerializerBuilder {
 
     public Serializer build() {
         SerializableDefinitions allDefinitions = empty();
-        for(final SerializableDefinitions definitions : this.definitions) {
+        for (final SerializableDefinitions definitions : this.definitions) {
             allDefinitions = merge(allDefinitions, definitions);
         }
-        return theSerializer(this.externalMarshaller, allDefinitions);
+        final MarshallerRegistry<Marshaller> marshallerRegistry = marshallerRegistry(this.marshallers);
+        return theSerializer(marshallerRegistry, allDefinitions);
     }
 }

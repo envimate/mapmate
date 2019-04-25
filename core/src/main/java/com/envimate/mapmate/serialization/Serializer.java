@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,62 +22,77 @@
 package com.envimate.mapmate.serialization;
 
 import com.envimate.mapmate.Definition;
+import com.envimate.mapmate.marshalling.MarshallerRegistry;
+import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.serialization.builder.SerializerBuilder;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.serialization.builder.SerializerBuilder.aSerializerBuilder;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.util.Objects.isNull;
 
 @SuppressWarnings("rawtypes")
 public final class Serializer {
-    private final Marshaller marshaller;
+    private final MarshallerRegistry<Marshaller> marshallers;
     private final CircularReferenceDetector circularReferenceDetector;
     private final SerializableDefinitions definitions;
 
-    private Serializer(final Marshaller marshaller,
+    private Serializer(final MarshallerRegistry<Marshaller> marshallers,
                        final CircularReferenceDetector circularReferenceDetector,
                        final SerializableDefinitions definitions) {
-        this.marshaller = marshaller;
+        this.marshallers = marshallers;
         this.circularReferenceDetector = circularReferenceDetector;
         this.definitions = definitions;
     }
 
-    public static Serializer theSerializer(final Marshaller marshaller,
+    public static Serializer theSerializer(final MarshallerRegistry<Marshaller> marshallers,
                                            final SerializableDefinitions definitions) {
         final CircularReferenceDetector circularReferenceDetector = new CircularReferenceDetector();
-        return new Serializer(marshaller, circularReferenceDetector, definitions);
+        return new Serializer(marshallers, circularReferenceDetector, definitions);
     }
 
     public static SerializerBuilder aSerializer() {
         return aSerializerBuilder();
     }
 
-    public String serialize(final Object object) {
-        return serialize(object, input -> input);
+    public String serializeToJson(final Object object) {
+        return serialize(object, json());
+    }
+
+    public String serialize(final Object object,
+                            final MarshallingType marshallingType) {
+        return serialize(object, marshallingType, input -> input);
     }
 
     @SuppressWarnings("unchecked")
     public String serialize(final Object object,
+                            final MarshallingType marshallingType,
                             final Function<Map<String, Object>, Map<String, Object>> jsonInjector) {
         validateNotNull(object, "object");
         Object normalized = normalize(object);
         if (normalized instanceof Map) {
             normalized = jsonInjector.apply((Map<String, Object>) normalized);
         }
-        return this.marshaller.marshal(normalized);
+        return this.marshallers
+                .getForType(marshallingType)
+                .marshal(normalized);
     }
 
-    public String serializeFromMap(final Map<String, Object> map) {
-        return this.marshaller.marshal(map);
+    public String serializeFromMap(final Map<String, Object> map,
+                                   final MarshallingType marshallingType) {
+        return this.marshallers.getForType(marshallingType).marshal(map);
     }
 
     @SuppressWarnings("unchecked")
     public Map<String, Object> serializeToMap(final Object object) {
-        if(isNull(object)) {
+        if (isNull(object)) {
             return new HashMap<>();
         }
         final Object normalized = normalize(object);

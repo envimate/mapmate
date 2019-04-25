@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -43,7 +43,8 @@ import static com.envimate.mapmate.domain.valid.AComplexType.aComplexType;
 import static com.envimate.mapmate.domain.valid.ANumber.fromInt;
 import static com.envimate.mapmate.domain.valid.AString.fromString;
 import static com.envimate.mapmate.domain.valid.AnException.anException;
-import static com.envimate.mapmate.filters.ClassFilters.*;
+import static com.envimate.mapmate.filters.ClassFilters.allBut;
+import static com.envimate.mapmate.filters.ClassFilters.allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument;
 import static junit.framework.TestCase.fail;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -56,37 +57,22 @@ public final class DeserializerTest {
 
     @Test
     public void givenStringJson_whenDeserializing_thenReturnAStringObject() {
-        //given
         final String given = "\"string with special symbols like \' \"";
-
-        //when
-        final AString result = theDefaultDeserializer().deserialize(given, AString.class);
-
-        //then
+        final AString result = theDefaultDeserializer().deserializeJson(given, AString.class);
         assertThat(result.internalValueForMapping(), is(equalTo("string with special symbols like ' ")));
     }
 
     @Test
     public void givenNumberJson_whenDeserializing_thenReturnANumberObject() {
-        //given
         final String given = "49";
-
-        //when
-        final ANumber result = theDefaultDeserializer().deserialize(given, ANumber.class);
-
-        //then
+        final ANumber result = theDefaultDeserializer().deserializeJson(given, ANumber.class);
         assertThat(result.internalValueForMapping(), is(equalTo("49")));
     }
 
     @Test
     public void givenComplexTypeJson_whenDeserializing_thenReturnAComplexObject() {
-        //given
         final String given = "{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"a\",\"stringB\":\"b\"}";
-
-        //when
-        final AComplexType result = theDefaultDeserializer().deserialize(given, AComplexType.class);
-
-        //then
+        final AComplexType result = theDefaultDeserializer().deserializeJson(given, AComplexType.class);
         assertThat(result.stringA.internalValueForMapping(), is(equalTo("a")));
         assertThat(result.stringB.internalValueForMapping(), is(equalTo("b")));
         assertThat(result.number1.internalValueForMapping(), is(equalTo("1")));
@@ -95,13 +81,8 @@ public final class DeserializerTest {
 
     @Test
     public void givenComplexTypeWithArray_whenDeserializing_thenReturnObject() {
-        //given
         final String given = "{\"array\":[\"1\", \"2\", \"3\"]}";
-
-        //when
-        final AComplexTypeWithArray result = theDefaultDeserializer().deserialize(given, AComplexTypeWithArray.class);
-
-        //then
+        final AComplexTypeWithArray result = theDefaultDeserializer().deserializeJson(given, AComplexTypeWithArray.class);
         assertThat(result, is(notNullValue()));
         assertThat(result.array, is(notNullValue()));
         assertThat(result.array.length, is(equalTo(3)));
@@ -112,35 +93,25 @@ public final class DeserializerTest {
 
     @Test
     public void givenComplexTypeWithInvalidArray_whenDeserializing_thenThrowCorrectException() {
-        //given
         final String given = "{\"array\":[\"1\", \"51\", \"53\"]}";
-
-        //when
         try {
-            final AComplexTypeWithArray result = theDefaultDeserializer().deserialize(given, AComplexTypeWithArray.class);
+            final AComplexTypeWithArray result = theDefaultDeserializer().deserializeJson(given, AComplexTypeWithArray.class);
             fail("should throw exception");
         } catch (final AggregatedValidationException e) {
             assertThat(e.getValidationErrors(), is(notNullValue()));
             assertThat(e.getValidationErrors().size(), is(equalTo(2)));
-//            assertThat(e.validationErrors, containsValidationException("array.[1]", AnException.class));
-//            assertThat(e.validationErrors, containsValidationException("array.[2]", AnException.class));
         }
     }
 
     @Test
     public void givenComplexNestedTypeJson_whenDeserializing_thenReturnAComplexObject() {
-        //given
         final String given = "{" +
                 "\"complexType1\":" +
                 "{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"a\",\"stringB\":\"b\"}," +
                 "\"complexType2\":" +
                 "{\"number1\":\"3\",\"number2\":\"4\",\"stringA\":\"c\",\"stringB\":\"d\"}" +
                 "}";
-
-        //when
-        final AComplexNestedType result = theDefaultDeserializer().deserialize(given, AComplexNestedType.class);
-
-        //then
+        final AComplexNestedType result = theDefaultDeserializer().deserializeJson(given, AComplexNestedType.class);
         assertThat(result, is(not(equalTo(null))));
         assertThat(result.complexType1, is(not(equalTo(null))));
         assertThat(result.complexType2, is(not(equalTo(null))));
@@ -156,13 +127,10 @@ public final class DeserializerTest {
 
     @Test
     public void givenNull_whenDeserializing_thenThrowsError() {
-        //given
         final String given = null;
         final String expectedMessage = "originalInput must not be null";
-
-        //when
         try {
-            theDefaultDeserializer().deserialize(given, AComplexType.class);
+            theDefaultDeserializer().deserializeJson(given, AComplexType.class);
             fail("should throw NullPointerException");
         } catch (final CustomTypeValidationException result) {
             assertThat(result.getMessage(), is(equalTo(expectedMessage)));
@@ -171,24 +139,18 @@ public final class DeserializerTest {
 
     @Test
     public void givenEmpty_whenDeserializing_thenReturnsNull() {
-        //given
         final String given = "";
-
-        //when
-        final AComplexType result = theDefaultDeserializer().deserialize(given, AComplexType.class);
+        final AComplexType result = theDefaultDeserializer().deserializeJson(given, AComplexType.class);
         assertThat(result, is(nullValue()));
     }
 
     @Test
     public void givenInvalidJson_whenDeserializing_thenThrowsError() {
-        //given
         final String given = "{\"number1\";\"1\",\"number2\":\"2\",\"stringA\"=\"a\",\"stringB\":\"b\"}";
         final String expectedMessage = "com.google.gson.stream.MalformedJsonException: Expected ':' " +
                 "at line 1 column 12 path $.";
-
-        //when
         try {
-            theDefaultDeserializer().deserialize(given, AComplexType.class);
+            theDefaultDeserializer().deserializeJson(given, AComplexType.class);
             fail("should throw JsonSyntaxException");
         } catch (final JsonSyntaxException result) {
             assertThat(result.getMessage(), is(equalTo(expectedMessage)));
@@ -197,13 +159,8 @@ public final class DeserializerTest {
 
     @Test
     public void givenIncompleteJson_whenDeserializing_thenFillsWithNull() {
-        //given
         final String given = "{\"number1\":\"1\",\"stringA\":\"a\"}";
-
-        //when
-        final AComplexType result = theDefaultDeserializer().deserialize(given, AComplexType.class);
-
-        //then
+        final AComplexType result = theDefaultDeserializer().deserializeJson(given, AComplexType.class);
         assertThat(result.stringA, is(notNullValue()));
         assertThat(result.stringB, is(nullValue()));
         assertThat(result.number1, is(notNullValue()));
@@ -212,13 +169,8 @@ public final class DeserializerTest {
 
     @Test
     public void givenJsonWithValidValues_whenDeserializing_thenReturnsObject() {
-        //given
         final String given = "{\"number1\":\"21\",\"number2\":\"2\",\"stringA\":\"a\",\"stringB\":\"b\"}";
-
-        //when
-        final AComplexTypeWithValidations result = theDefaultDeserializer().deserialize(given, AComplexTypeWithValidations.class);
-
-        //then
+        final AComplexTypeWithValidations result = theDefaultDeserializer().deserializeJson(given, AComplexTypeWithValidations.class);
         assertThat(result, is(notNullValue()));
         assertThat(result.number1, is(equalTo(fromInt(21))));
         assertThat(result.stringA, is(equalTo(fromString("a"))));
@@ -227,29 +179,20 @@ public final class DeserializerTest {
 
     @Test
     public void givenJsonWithNestedValidationExceptions_whenDeserializing_thenReturnsOnlyOneValidationException() {
-        //given
         final String given = "{\"node\": {\"leaf\":\"1234\"}}";
-
-        //when
         try {
             final AComplexNestedValidatedType intermediate =
-                    theDefaultDeserializer().deserialize(given, AComplexNestedValidatedType.class);
+                    theDefaultDeserializer().deserializeJson(given, AComplexNestedValidatedType.class);
             fail("should throw validation exception");
         } catch (final AggregatedValidationException result) {
             assertThat(result.getValidationErrors().size(), is(equalTo(1)));
-//            final ExceptionEntry entry = result.validationErrors.stream().findFirst().orElse(null);
-//            assertThat(entry, is(notNullValue()));
-//            assertThat(entry.getFrom(), is(equalTo("node.leaf")));
-//            assertThat(entry.getBlamed(), is(equalTo(new String[]{"node.leaf"})));
-//            assertThat(entry.getException(), is(instanceOf(AnException.class)));
         }
     }
 
     @Test
     public void givenJson_whenDeserializingUsingAdapter_thenReturnsObject() {
-        //given
         final Deserializer deserializer = aDeserializer()
-                .withUnmarshaller(new Gson()::fromJson)
+                .withJsonUnmarshaller(new Gson()::fromJson)
                 .withDataTransferObject(AComplexTypeWithCollections.class)
                 .deserializedUsing(new DeserializationDTOMethod() {
                     @Override
@@ -269,11 +212,7 @@ public final class DeserializerTest {
                 })
                 .build();
         final String given = "{}";
-
-        //when
-        final AComplexTypeWithCollections result = deserializer.deserialize(given, AComplexTypeWithCollections.class);
-
-        //then
+        final AComplexTypeWithCollections result = deserializer.deserializeJson(given, AComplexTypeWithCollections.class);
         assertThat(result.arrayList, hasItem(fromString("a")));
         assertThat(result.arrayList, hasItem(fromString("b")));
         assertThat(result.array.length, is(equalTo(2)));
@@ -281,9 +220,8 @@ public final class DeserializerTest {
 
     @Test
     public void givenJson_whenDeserializingUsingDeserializingDTOMethod_thenUsesCustomMethod() {
-        //given
         final Deserializer deserializer = aDeserializer()
-                .withUnmarshaller(new Gson()::fromJson)
+                .withJsonUnmarshaller(new Gson()::fromJson)
                 .thatScansThePackage("com.envimate.mapmate.domain.valid")
                 .forCustomPrimitives()
                 .filteredBy(allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument())
@@ -318,19 +256,14 @@ public final class DeserializerTest {
                 })
                 .build();
         final String given = "{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"a\",\"stringB\":\"b\"}";
-
-        //when
-        final AComplexType result = deserializer.deserialize(given, AComplexType.class);
-
-        //then
+        final AComplexType result = deserializer.deserializeJson(given, AComplexType.class);
         assertThat(result, is(notNullValue()));
     }
 
     @Test
     public void givenJson_whenDeserializingUsingDeserializingCPMethod_thenUsesCustomMethod() {
-        //given
         final Deserializer deserializer = aDeserializer()
-                .withUnmarshaller(new Gson()::fromJson)
+                .withJsonUnmarshaller(new Gson()::fromJson)
                 .thatScansThePackage("com.envimate.mapmate.domain.valid")
                 .forCustomPrimitives()
                 .filteredBy(allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument())
@@ -358,11 +291,7 @@ public final class DeserializerTest {
                 .build();
 
         final String given = "{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"a\",\"stringB\":\"b\"}";
-
-        //when
-        final AComplexType result = deserializer.deserialize(given, AComplexType.class);
-
-        //then
+        final AComplexType result = deserializer.deserializeJson(given, AComplexType.class);
         assertThat(result, is(notNullValue()));
         assertThat(result.stringA, is(nullValue()));
         assertThat(result.stringB, is(nullValue()));
@@ -372,10 +301,9 @@ public final class DeserializerTest {
 
     @Test
     public void givenCustomProviderForcustomPrimitive_whenDeserializing_returnsProvidedInstance() {
-        //given
         final String given = "{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"a\",\"stringB\":\"b\"}";
         final Deserializer deserializer = aDeserializer()
-                .withUnmarshaller(new Gson()::fromJson)
+                .withJsonUnmarshaller(new Gson()::fromJson)
                 .withDataTransferObject(AComplexType.class)
                 .deserializedUsingTheSingleFactoryMethod()
                 .withCustomPrimitive(ANumber.class)
@@ -383,11 +311,7 @@ public final class DeserializerTest {
                 .withCustomPrimitive(AString.class)
                 .deserializedUsingTheStaticMethod(DeserializerTest::aStaticProviderMethod)
                 .build();
-
-        //when
-        final AComplexType result = deserializer.deserialize(given, AComplexType.class);
-
-        //then
+        final AComplexType result = deserializer.deserializeJson(given, AComplexType.class);
         assertThat(result.stringA.internalValueForMapping(), is(equalTo("test")));
         assertThat(result.stringB.internalValueForMapping(), is(equalTo("test")));
     }
@@ -398,10 +322,9 @@ public final class DeserializerTest {
 
     @Test
     public void givenCustomProviderWithValidationExceptionForCustomPrimitive_whenDeserializing_returnsValidationException() {
-        //given
         final String given = "{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"a\",\"stringB\":\"b\"}";
         final Deserializer deserializer = aDeserializer()
-                .withUnmarshaller(new Gson()::fromJson)
+                .withJsonUnmarshaller(new Gson()::fromJson)
                 .withDataTransferObject(AComplexType.class)
                 .deserializedUsingTheSingleFactoryMethod()
                 .withCustomPrimitive(ANumber.class)
@@ -410,10 +333,8 @@ public final class DeserializerTest {
                 .deserializedUsingTheStaticMethod(DeserializerTest::aStaticProviderMethodThrowingException)
                 .mappingExceptionUsing(AnException.class, (t, p) -> new ValidationError(t.getMessage(), p))
                 .build();
-
-        //when
         try {
-            final AComplexType result = deserializer.deserialize(given, AComplexType.class);
+            final AComplexType result = deserializer.deserializeJson(given, AComplexType.class);
             fail("should throw an exception");
         } catch (final AggregatedValidationException result) {
             assertThat(result.getValidationErrors().size(), is(equalTo(2)));
@@ -426,9 +347,8 @@ public final class DeserializerTest {
 
     @Test
     public void givenComplexTypeJsonWithCustomCPMethod_whenDeserializing_thenReturnAComplexObject() {
-        //given
         final Deserializer deserializer = aDeserializer()
-                .withUnmarshaller(new Gson()::fromJson)
+                .withJsonUnmarshaller(new Gson()::fromJson)
                 .thatScansThePackage("com.envimate.mapmate.domain.valid")
                 .forCustomPrimitives()
                 .filteredBy(allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument())
@@ -459,11 +379,7 @@ public final class DeserializerTest {
                 })
                 .build();
         final String given = "{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"a\",\"stringB\":\"b\"}";
-
-        //when
-        final AComplexType result = deserializer.deserialize(given, AComplexType.class);
-
-        //then
+        final AComplexType result = deserializer.deserializeJson(given, AComplexType.class);
         assertThat(result.stringA.internalValueForMapping(), is(equalTo("test")));
         assertThat(result.stringB.internalValueForMapping(), is(equalTo("test")));
         assertThat(result.number1.internalValueForMapping(), is(equalTo("1")));
@@ -472,9 +388,8 @@ public final class DeserializerTest {
 
     @Test
     public void givenComplexTypeJsonWithCustomDTOMethod_whenDeserializing_thenReturnAComplexObject() {
-        //given
         final Deserializer deserializer = aDeserializer()
-                .withUnmarshaller(new Gson()::fromJson)
+                .withJsonUnmarshaller(new Gson()::fromJson)
                 .thatScansThePackage("com.envimate.mapmate.domain.valid")
                 .forCustomPrimitives().filteredBy(allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument())
                 .excluding(AnException.class)
@@ -508,11 +423,7 @@ public final class DeserializerTest {
                 })
                 .build();
         final String given = "{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"a\",\"stringB\":\"b\"}";
-
-        //when
-        final AComplexType result = deserializer.deserialize(given, AComplexType.class);
-
-        //then
+        final AComplexType result = deserializer.deserializeJson(given, AComplexType.class);
         assertThat(result.stringA.internalValueForMapping(), is(equalTo("test")));
         assertThat(result.stringB.internalValueForMapping(), is(equalTo("test")));
         assertThat(result.number1.internalValueForMapping(), is(equalTo("1")));
@@ -521,20 +432,15 @@ public final class DeserializerTest {
 
     @Test
     public void givenComplexTypeJsonWithInjectorUsingPropertyNameAndStringValue_whenDeserializing_thenReturnAComplexObject() {
-        //given
         final String given = "{" +
                 "\"complexType1\":" +
                 "{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"a\",\"stringB\":\"b\"}," +
                 "\"complexType2\":" +
                 "{\"number1\":\"3\",\"number2\":\"4\",\"stringA\":\"c\",\"stringB\":\"d\"}" +
                 "}";
-
-        //when
-        final AComplexNestedType result =  theDefaultDeserializer().deserialize(given, AComplexNestedType.class, (injector) -> injector
+        final AComplexNestedType result = theDefaultDeserializer().deserializeJson(given, AComplexNestedType.class, injector -> injector
                 .put("complexType1.stringB", "test")
                 .put("complexType2.number1", "45"));
-
-        //then
         assertThat(result.complexType1.stringA.internalValueForMapping(), is(equalTo("a")));
         assertThat(result.complexType1.stringB.internalValueForMapping(), is(equalTo("test")));
         assertThat(result.complexType1.number1.internalValueForMapping(), is(equalTo("1")));
@@ -547,20 +453,15 @@ public final class DeserializerTest {
 
     @Test
     public void givenComplexTypeJsonWithInjectorUsingPropertyNameAndInstance_whenDeserializing_thenReturnAComplexObject() {
-        //given
         final String given = "{" +
                 "\"complexType1\":" +
                 "{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"a\",\"stringB\":\"b\"}," +
                 "\"complexType2\":" +
                 "{\"number1\":\"3\",\"number2\":\"4\",\"stringA\":\"c\",\"stringB\":\"d\"}" +
                 "}";
-
-        //when
-        final AComplexNestedType result =  theDefaultDeserializer().deserialize(given, AComplexNestedType.class, (injector) -> injector
-                .put("complexType1.stringB", AString.fromString("test"))
+        final AComplexNestedType result = theDefaultDeserializer().deserializeJson(given, AComplexNestedType.class, injector -> injector
+                .put("complexType1.stringB", fromString("test"))
                 .put("complexType2.number1", ANumber.fromString("45")));
-
-        //then
         assertThat(result.complexType1.stringA.internalValueForMapping(), is(equalTo("a")));
         assertThat(result.complexType1.stringB.internalValueForMapping(), is(equalTo("test")));
         assertThat(result.complexType1.number1.internalValueForMapping(), is(equalTo("1")));
@@ -573,20 +474,15 @@ public final class DeserializerTest {
 
     @Test
     public void givenComplexTypeJsonWithInjectorUsingInstanceAndType_whenDeserializing_thenReturnAComplexObject() {
-        //given
         final String given = "{" +
                 "\"complexType1\":" +
                 "{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"a\",\"stringB\":\"b\"}," +
                 "\"complexType2\":" +
                 "{\"number1\":\"3\",\"number2\":\"4\",\"stringA\":\"c\",\"stringB\":\"d\"}" +
                 "}";
-        final Serializable givenInterface = AString.fromString("test");
-
-        //when
-        final AComplexNestedType result =  theDefaultDeserializer().deserialize(given, AComplexNestedType.class, (injector) -> injector
+        final Serializable givenInterface = fromString("test");
+        final AComplexNestedType result = theDefaultDeserializer().deserializeJson(given, AComplexNestedType.class, injector -> injector
                 .put(AString.class, givenInterface));
-
-        //then
         assertThat(result.complexType1.stringA.internalValueForMapping(), is(equalTo("test")));
         assertThat(result.complexType1.stringB.internalValueForMapping(), is(equalTo("test")));
         assertThat(result.complexType1.number1.internalValueForMapping(), is(equalTo("1")));
@@ -599,20 +495,15 @@ public final class DeserializerTest {
 
     @Test
     public void givenComplexTypeJsonWithInjectorUsingInstance_whenDeserializing_thenReturnAComplexObject() {
-        //given
         final String given = "{" +
                 "\"complexType1\":" +
                 "{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"a\",\"stringB\":\"b\"}," +
                 "\"complexType2\":" +
                 "{\"number1\":\"3\",\"number2\":\"4\",\"stringA\":\"c\",\"stringB\":\"d\"}" +
                 "}";
-
-        //when
-        final AComplexNestedType result =  theDefaultDeserializer().deserialize(given, AComplexNestedType.class, (injector) -> injector
-                .put(AString.fromString("test"))
-                .put(AString.fromString("test")));
-
-        //then
+        final AComplexNestedType result = theDefaultDeserializer().deserializeJson(given, AComplexNestedType.class, injector -> injector
+                .put(fromString("test"))
+                .put(fromString("test")));
         assertThat(result.complexType1.stringA.internalValueForMapping(), is(equalTo("test")));
         assertThat(result.complexType1.stringB.internalValueForMapping(), is(equalTo("test")));
         assertThat(result.complexType1.number1.internalValueForMapping(), is(equalTo("1")));
@@ -625,19 +516,14 @@ public final class DeserializerTest {
 
     @Test
     public void givenComplexTypeWithIncompleteJsonWithInjectorUsingInstance_whenDeserializing_thenReturnAComplexObject() {
-        //given
         final String given = "{" +
                 "\"complexType1\":" +
                 "{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"a\",\"stringB\":\"b\"}," +
                 "\"complexType2\":" +
                 "{\"number1\":\"3\",\"number2\":\"4\"}" +
                 "}";
-
-        //when
-        final AComplexNestedType result =  theDefaultDeserializer().deserialize(given, AComplexNestedType.class, (injector) -> injector
-                .put(AString.fromString("test")));
-
-        //then
+        final AComplexNestedType result = theDefaultDeserializer().deserializeJson(given, AComplexNestedType.class, injector -> injector
+                .put(fromString("test")));
         assertThat(result.complexType1.stringA.internalValueForMapping(), is(equalTo("test")));
         assertThat(result.complexType1.stringB.internalValueForMapping(), is(equalTo("test")));
         assertThat(result.complexType1.number1.internalValueForMapping(), is(equalTo("1")));
@@ -650,19 +536,14 @@ public final class DeserializerTest {
 
     @Test
     public void givenComplexTypeWithIncompleteJsonWithInjectorUsingPropertyPath_whenDeserializing_thenReturnAComplexObject() {
-        //given
         final String given = "{" +
                 "\"complexType1\":" +
                 "{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"a\",\"stringB\":\"b\"}," +
                 "\"complexType2\":" +
                 "{\"number1\":\"3\",\"number2\":\"4\"}" +
                 "}";
-
-        //when
-        final AComplexNestedType result =  theDefaultDeserializer().deserialize(given, AComplexNestedType.class, (injector) -> injector
-                .put("complexType2.stringA", AString.fromString("test")));
-
-        //then
+        final AComplexNestedType result = theDefaultDeserializer().deserializeJson(given, AComplexNestedType.class, injector -> injector
+                .put("complexType2.stringA", fromString("test")));
         assertThat(result.complexType1.stringA.internalValueForMapping(), is(equalTo("a")));
         assertThat(result.complexType1.stringB.internalValueForMapping(), is(equalTo("b")));
         assertThat(result.complexType1.number1.internalValueForMapping(), is(equalTo("1")));

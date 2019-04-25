@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -43,16 +43,14 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
+@SuppressWarnings("deprecation")
 public final class SerializerBuilderTest {
 
     @Test
     public void givenValidDataTransferObject_whenBuildingWithDataTransferObject_thenReturnsCorrectSerializer() {
-        //given
         final Class<?> given = AComplexType.class;
-
-        //when
         final Serializer result = aSerializer()
-                .withMarshaller(new Gson()::toJson)
+                .withJsonMarshaller(new Gson()::toJson)
                 .withDataTransferObject(given)
                 .serializedByItsPublicFields()
                 .withCustomPrimitive(AString.class)
@@ -60,8 +58,6 @@ public final class SerializerBuilderTest {
                 .withCustomPrimitive(ANumber.class)
                 .serializedUsingTheMethodNamed("internalValueForMapping")
                 .build();
-
-        //then
         assertThat(result.getDefinitions().countDataTransferObjects(), is(equalTo(1)));
         assertThat(result.getDefinitions().countCustomPrimitives(), is(equalTo(2)));
         assertThat(result.getDefinitions(), containsValidSerializableDTOForType(AComplexType.class));
@@ -69,11 +65,8 @@ public final class SerializerBuilderTest {
 
     @Test
     public void givenNull_whenBuildingWithDataTransferObject_thenThrowError() {
-        //given
         final Class<?> given = null;
         final String expectedMessage = "type must not be null";
-
-        //when
         try {
             aSerializer()
                     .withDataTransferObject(given)
@@ -87,17 +80,12 @@ public final class SerializerBuilderTest {
 
     @Test
     public void givenValidCustomPrimitive_whenBuildingWithCustomPrimitive_thenReturnsCorrectDeserializer() {
-        //given
         final Class<?> given = AString.class;
-
-        //when
         final Serializer result = aSerializer()
-                .withMarshaller(new Gson()::toJson)
+                .withJsonMarshaller(new Gson()::toJson)
                 .withCustomPrimitive(given)
                 .serializedUsingTheMethodNamed("internalValueForMapping")
                 .build();
-
-        //then
         assertThat(result.getDefinitions().countCustomPrimitives(), is(CoreMatchers.equalTo(1)));
         assertThat(result.getDefinitions().countDataTransferObjects(), is(CoreMatchers.equalTo(0)));
         assertThat(result.getDefinitions(), containsValidCustomPrimitiveForType(AString.class));
@@ -105,12 +93,9 @@ public final class SerializerBuilderTest {
 
     @Test
     public void givenCustomPrimitiveWithWrongMethod_whenBuildingWithCustomPrimitive_thenThrowError() {
-        //given
         final Class<?> given = AString.class;
         final String expectedMessage = "class 'com.envimate.mapmate.domain.valid.AString' does not have a zero " +
                 "argument String method named 'fromString'";
-
-        //when
         try {
             aSerializer()
                     .withCustomPrimitive(given)
@@ -124,11 +109,8 @@ public final class SerializerBuilderTest {
 
     @Test
     public void givenCustomPrimitiveWithEmptyMethod_whenBuildingWithCustomPrimitive_thenThrowError() {
-        //given
         final Class<?> given = AString.class;
         final String expectedMessage = "methodName must not be empty";
-
-        //when
         try {
             aSerializer()
                     .withCustomPrimitive(given)
@@ -142,11 +124,8 @@ public final class SerializerBuilderTest {
 
     @Test
     public void givenCustomPrimitiveWithNullMethod_whenBuildingWithCustomPrimitive_thenThrowError() {
-        //given
         final Class<?> given = AString.class;
         final String expectedMessage = "methodName must not be empty";
-
-        //when
         try {
             aSerializer()
                     .withCustomPrimitive(given)
@@ -160,11 +139,8 @@ public final class SerializerBuilderTest {
 
     @Test
     public void givenNull_whenBuildingWithCustomPrimitive_thenThrowError() {
-        //given
         final Class<?> given = null;
         final String expectedMessage = "type must not be null";
-
-        //when
         try {
             aSerializer()
                     .withCustomPrimitive(given)
@@ -178,12 +154,9 @@ public final class SerializerBuilderTest {
 
     @Test
     public void givenScannablePackage_whenBuilding_thenReturnCorrectSerializer() {
-        //when
         final String given = "com.envimate.mapmate.domain.scannable";
-
-        //when
         final Serializer result = aSerializer()
-                .withMarshaller(new Gson()::toJson)
+                .withJsonMarshaller(new Gson()::toJson)
                 .thatScansThePackage(given)
                 .forCustomPrimitives()
                 .filteredBy(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("internalValueForMapping"))
@@ -193,8 +166,6 @@ public final class SerializerBuilderTest {
                 .filteredBy(allBut(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("internalValueForMapping")))
                 .thatAre().serializedByItsPublicFields()
                 .build();
-
-        //then
         assertThat(result.getDefinitions().countCustomPrimitives(), is(CoreMatchers.equalTo(2)));
         assertThat(result.getDefinitions().countDataTransferObjects(), is(CoreMatchers.equalTo(2)));
         assertThat(result.getDefinitions(), containsValidCustomPrimitiveForType(AScannableString.class));
@@ -204,14 +175,11 @@ public final class SerializerBuilderTest {
 
     @Test
     public void givenEmptyPackage_whenBuilding_thenThrowsError() {
-        //when
         final String given = "";
         final String expectedMessage = "packageName must not be empty";
-
-        //when
         try {
             aSerializer()
-                    .withMarshaller(new Gson()::toJson)
+                    .withJsonMarshaller(new Gson()::toJson)
                     .thatScansThePackage(given)
                     .forCustomPrimitives()
                     .filteredBy(includingAll())
@@ -229,14 +197,11 @@ public final class SerializerBuilderTest {
 
     @Test
     public void givenNullPackage_whenBuilding_thenThrowsError() {
-        //when
         final String given = null;
         final String expectedMessage = "packageName must not be empty";
-
-        //when
         try {
             final Serializer result = aSerializer()
-                    .withMarshaller(new Gson()::toJson)
+                    .withJsonMarshaller(new Gson()::toJson)
                     .thatScansThePackage(given)
                     .forCustomPrimitives()
                     .filteredBy(includingAll())
@@ -254,12 +219,9 @@ public final class SerializerBuilderTest {
 
     @Test
     public void givenExcludingDataTransferObjectWithScannablePackage_whenBuilding_thenReturnsDeserializerWithoutExcludedDefinition() {
-        //when
         final String given = "com.envimate.mapmate.domain.scannable";
-
-        //when
         final Serializer result = aSerializer()
-                .withMarshaller(new Gson()::toJson)
+                .withJsonMarshaller(new Gson()::toJson)
                 .thatScansThePackage(given)
                 .forCustomPrimitives()
                 .filteredBy(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("internalValueForMapping"))
@@ -270,8 +232,6 @@ public final class SerializerBuilderTest {
                 .excluding(AScannableComplexType.class)
                 .thatAre().serializedByItsPublicFields()
                 .build();
-
-        //then
         assertThat(result.getDefinitions().countCustomPrimitives(), is(CoreMatchers.equalTo(2)));
         assertThat(result.getDefinitions().countDataTransferObjects(), is(CoreMatchers.equalTo(1)));
         assertThat(result.getDefinitions(), containsValidCustomPrimitiveForType(AScannableString.class));
@@ -281,14 +241,11 @@ public final class SerializerBuilderTest {
 
     @Test
     public void givenExcludingNullWithScannablePackage_whenBuilding_thenThrowsException() {
-        //when
         final String given = "com.envimate.mapmate.domain.scannable";
         final String expectedMessage = "excluded must not be null";
-
-        //when
         try {
             aSerializer()
-                    .withMarshaller(new Gson()::toJson)
+                    .withJsonMarshaller(new Gson()::toJson)
                     .thatScansThePackage(given)
                     .forCustomPrimitives()
                     .filteredBy(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("internalValueForMapping"))
