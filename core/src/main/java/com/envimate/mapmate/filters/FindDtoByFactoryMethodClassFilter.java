@@ -19,26 +19,31 @@
  * under the License.
  */
 
-package com.envimate.mapmate.deserialization.methods;
-
-import com.envimate.mapmate.reflections.Reflections;
+package com.envimate.mapmate.filters;
 
 import java.lang.reflect.Method;
 
-public final class NamedFactoryMethodDTODeserializationMethod implements DeserializationDTOMethodFactory {
-    private final String name;
+import static java.lang.reflect.Modifier.isStatic;
+import static java.util.Arrays.stream;
 
-    private NamedFactoryMethodDTODeserializationMethod(final String name) {
-        this.name = name;
+final class FindDtoByFactoryMethodClassFilter implements ClassFilter {
+
+    private FindDtoByFactoryMethodClassFilter() {
     }
 
-    public static DeserializationDTOMethodFactory namedFactoryMethodDTODeserializationMethod(final String name) {
-        return new NamedFactoryMethodDTODeserializationMethod(name);
+    static ClassFilter findDtoByFactoryMethodClassFilter() {
+        return new FindDtoByFactoryMethodClassFilter();
     }
 
     @Override
-    public DeserializationDTOMethod createFor(final Class<?> targetType) {
-        final Method method = Reflections.factoryMethodByName(targetType, this.name);
-        return DeserializationDTOMethodByReflectionMethod.usingMethod(method);
+    public boolean include(final Class<?> type) {
+        final Method[] methods = type.getMethods();
+        return stream(methods)
+                .filter(method -> isStatic(method.getModifiers()))
+                .filter(method -> method.getReturnType().equals(type))
+                .anyMatch(method ->
+                        stream(method.getParameterTypes())
+                        .anyMatch(aClass -> !aClass.equals(String.class))
+                );
     }
 }

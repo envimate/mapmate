@@ -31,18 +31,19 @@ public final class UnrecognizedExceptionOccurredException extends RuntimeExcepti
             final String msg,
             final Throwable unmappedException,
             final String originalInput) {
-        super(msg);
+        super(msg, unmappedException);
         this.unmappedException = unmappedException;
         this.originalInput = originalInput;
     }
 
     public static UnrecognizedExceptionOccurredException fromException(
+            final String messageProvidingDebugInformation,
             final String field,
             final Throwable unmappedException,
             final Object originalInput) {
-        final String msg = String.format("unrecognized exception occurred during deserialization for field '%s': %s : %s",
-                field, unmappedException.getClass().getName(), unmappedException.getMessage());
-        return new UnrecognizedExceptionOccurredException(
-                msg, unmappedException, valueOf(originalInput));
+        final String msg = String.format("Unrecognized exception deserializing field '%s': %s",
+                field, messageProvidingDebugInformation
+        );
+        return new UnrecognizedExceptionOccurredException(msg, unmappedException, valueOf(originalInput));
     }
 }

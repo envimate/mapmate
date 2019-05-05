@@ -63,7 +63,12 @@ public final class Defaults {
                 .thatAre().deserializedUsingTheStaticMethodWithSingleStringArgument()
                 .thatScansThePackage("com.envimate.mapmate.domain.valid")
                 .forDataTransferObjects()
-                .filteredBy(allBut(allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument()))
+                .filteredBy(and(
+                        allClassesThatHaveAStaticFactoryMethodWithNonStringArguments(),
+                        allBut(
+                                allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("internalValueForMapping")
+                        )
+                ))
                 .excluding(AComplexTypeWithMap.class)
                 .excluding(AComplexTypeWithCollections.class)
                 .thatAre().deserializedUsingTheSingleFactoryMethod()

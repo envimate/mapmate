@@ -21,24 +21,6 @@
 
 package com.envimate.mapmate.deserialization.methods;
 
-import com.envimate.mapmate.reflections.Reflections;
-
-import java.lang.reflect.Method;
-
-public final class NamedFactoryMethodDTODeserializationMethod implements DeserializationDTOMethodFactory {
-    private final String name;
-
-    private NamedFactoryMethodDTODeserializationMethod(final String name) {
-        this.name = name;
-    }
-
-    public static DeserializationDTOMethodFactory namedFactoryMethodDTODeserializationMethod(final String name) {
-        return new NamedFactoryMethodDTODeserializationMethod(name);
-    }
-
-    @Override
-    public DeserializationDTOMethod createFor(final Class<?> targetType) {
-        final Method method = Reflections.factoryMethodByName(targetType, this.name);
-        return DeserializationDTOMethodByReflectionMethod.usingMethod(method);
-    }
+public interface DeserializationDTOMethodFactory {
+    DeserializationDTOMethod createFor(Class<?> targetType);
 }

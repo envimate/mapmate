@@ -51,7 +51,7 @@ public final class ExceptionTracker {
     }
 
     @SuppressWarnings({"CastToConcreteClass", "ThrowableNotThrown"})
-    public void track(final Throwable e) {
+    public void track(final Throwable e, final String messageProvidingDebugInformation) {
         final Throwable resolvedThrowable;
         if(e instanceof InvocationTargetException) {
             resolvedThrowable = ((InvocationTargetException) e).getTargetException();
@@ -63,7 +63,9 @@ public final class ExceptionTracker {
             final List<ValidationError> mapped = exceptionMapping.map(resolvedThrowable, this.position);
             this.validationErrors.addAll(mapped);
         } else {
-            throw UnrecognizedExceptionOccurredException.fromException(this.position, resolvedThrowable, this.originalInput);
+            throw UnrecognizedExceptionOccurredException.fromException(
+                    messageProvidingDebugInformation, this.position, resolvedThrowable, this.originalInput
+            );
         }
     }
 

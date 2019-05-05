@@ -23,6 +23,7 @@ package com.envimate.mapmate.deserialization;
 
 import com.envimate.mapmate.Definition;
 import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
+import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethodFactory;
 import com.envimate.mapmate.deserialization.methods.DeserializationMethodNotCompatibleException;
 import com.envimate.mapmate.domain.invalid.AComplexTypeWithMultipleFactoryMethods;
 import com.envimate.mapmate.domain.invalid.AComplexTypeWithoutFactoryMethods;
@@ -113,7 +114,7 @@ public final class DeserializerBuilderTest {
     @Test
     public void givenDataTransferObjectWithAdapterMethod_whenBuildingWithDataTransferObject_thenReturnsCorrectDesererializer() {
         final Class<?> givenType = AComplexType.class;
-        final DeserializationDTOMethod given = new DeserializationDTOMethod() {
+        final DeserializationDTOMethodFactory given = targetType -> new DeserializationDTOMethod() {
             @Override
             public Object deserialize(Class<?> targetType, Map<String, Object> elements) throws Exception {
                 return null;
@@ -137,8 +138,8 @@ public final class DeserializerBuilderTest {
     @Test
     public void givenDataTransferObjectWithNullAdapterMethod_whenBuildingWithDataTransferObject_thenThrowsError() {
         final Class<?> givenType = AComplexType.class;
-        final DeserializationDTOMethod givenAdapter = null;
-        final String expectedMessage = "method must not be null";
+        final DeserializationDTOMethodFactory givenAdapter = null;
+        final String expectedMessage = "methodFactory must not be null";
         try {
             aDeserializer()
                     .withJsonUnmarshaller(new Gson()::fromJson)

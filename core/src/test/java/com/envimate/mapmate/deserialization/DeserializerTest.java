@@ -43,8 +43,7 @@ import static com.envimate.mapmate.domain.valid.AComplexType.aComplexType;
 import static com.envimate.mapmate.domain.valid.ANumber.fromInt;
 import static com.envimate.mapmate.domain.valid.AString.fromString;
 import static com.envimate.mapmate.domain.valid.AnException.anException;
-import static com.envimate.mapmate.filters.ClassFilters.allBut;
-import static com.envimate.mapmate.filters.ClassFilters.allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument;
+import static com.envimate.mapmate.filters.ClassFilters.*;
 import static junit.framework.TestCase.fail;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -194,7 +193,7 @@ public final class DeserializerTest {
         final Deserializer deserializer = aDeserializer()
                 .withJsonUnmarshaller(new Gson()::fromJson)
                 .withDataTransferObject(AComplexTypeWithCollections.class)
-                .deserializedUsing(new DeserializationDTOMethod() {
+                .deserializedUsing(targetType -> new DeserializationDTOMethod() {
                     @Override
                     public Object deserialize(final Class<?> targetType,
                                               final Map<String, Object> elements) {
@@ -230,7 +229,7 @@ public final class DeserializerTest {
                 .forDataTransferObjects()
                 .filteredBy(allBut(allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument()))
                 .excluding(AComplexTypeWithMap.class)
-                .thatAre().deserializedUsing(new DeserializationDTOMethod() {
+                .thatAre().deserializedUsing(targetType -> new DeserializationDTOMethod() {
                     @Override
                     public Object deserialize(final Class<?> targetType, final Map<String, Object> elements) throws Exception {
                         return aComplexType(
@@ -280,9 +279,14 @@ public final class DeserializerTest {
                 })
                 .thatScansThePackage("com.envimate.mapmate.domain.valid")
                 .forDataTransferObjects()
-                .filteredBy(allBut(allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument()))
-                .excluding(AComplexTypeWithMap.class)
-                .excluding(AComplexTypeWithCollections.class)
+                .filteredBy(
+                        and(
+                                allClassesThatHaveAStaticFactoryMethodWithNonStringArguments(),
+                                allBut(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed(
+                                        "internalValueForMapping"
+                                )),
+                                excluding(AComplexTypeWithMap.class, AComplexTypeWithCollections.class)
+                        ))
                 .thatAre().deserializedUsingTheSingleFactoryMethod()
                 .mappingExceptionUsing(AValidationException.class, (t, p) -> {
                     final AValidationException e = (AValidationException) t;
@@ -357,7 +361,15 @@ public final class DeserializerTest {
                 .thatAre().deserializedUsingTheMethodNamed("fromString")
                 .thatScansThePackage("com.envimate.mapmate.domain.valid")
                 .forDataTransferObjects()
-                .filteredBy(allBut(allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument()))
+                .filteredBy(
+                        and(
+                                allClassesThatHaveAStaticFactoryMethodWithNonStringArguments(),
+                                allBut(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed(
+                                        "internalValueForMapping"
+                                )),
+                                excluding(AComplexTypeWithMap.class, AComplexTypeWithCollections.class)
+                        )
+                )
                 .excluding(AComplexTypeWithMap.class)
                 .excluding(AComplexTypeWithCollections.class)
                 .thatAre().deserializedUsingTheSingleFactoryMethod()
@@ -396,7 +408,15 @@ public final class DeserializerTest {
                 .thatAre().deserializedUsingTheMethodNamed("fromString")
                 .thatScansThePackage("com.envimate.mapmate.domain.valid")
                 .forDataTransferObjects()
-                .filteredBy(allBut(allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument()))
+                .filteredBy(
+                        and(
+                                allClassesThatHaveAStaticFactoryMethodWithNonStringArguments(),
+                                allBut(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed(
+                                        "internalValueForMapping"
+                                )),
+                                excluding(AComplexTypeWithMap.class, AComplexTypeWithCollections.class)
+                        )
+                )
                 .excluding(AComplexType.class)
                 .excluding(AComplexTypeWithMap.class)
                 .excluding(AComplexTypeWithCollections.class)
@@ -406,7 +426,7 @@ public final class DeserializerTest {
                     return new ValidationError(e.getMessage(), e.getBlamedField());
                 })
                 .withDataTransferObject(AComplexType.class)
-                .deserializedUsing(new DeserializationDTOMethod() {
+                .deserializedUsing(targetType -> new DeserializationDTOMethod() {
                     @Override
                     public Object deserialize(Class<?> targetType, Map<String, Object> elements) throws Exception {
                         return AComplexType.aComplexType(

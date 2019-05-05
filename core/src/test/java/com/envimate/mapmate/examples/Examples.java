@@ -23,6 +23,7 @@ package com.envimate.mapmate.examples;
 
 import com.envimate.mapmate.deserialization.Deserializer;
 import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
+import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethodFactory;
 import com.envimate.mapmate.examples.domain.*;
 import com.envimate.mapmate.serialization.Serializer;
 import com.envimate.mapmate.validation.AggregatedValidationException;
@@ -112,7 +113,7 @@ public final class Examples {
 
     @Test
     public void example_complexPerson() {
-        final DeserializationDTOMethod deserializerAdapter = complexPersonAdapter();
+        final DeserializationDTOMethodFactory deserializerAdapter = complexPersonAdapter();
 
         final Deserializer deserializer = aDeserializer()
                 .withJsonUnmarshaller(new Gson()::fromJson)
@@ -156,8 +157,8 @@ public final class Examples {
         System.out.println(personWithComplexes);
     }
 
-    private DeserializationDTOMethod complexPersonAdapter() {
-        return new DeserializationDTOMethod() {
+    private DeserializationDTOMethodFactory complexPersonAdapter() {
+        return targetType -> new DeserializationDTOMethod() {
             @Override
             public Object deserialize(Class<?> targetType, Map<String, Object> elements) throws Exception {
                 final FirstName[] firstNames = (FirstName[]) elements.get("firstNames");

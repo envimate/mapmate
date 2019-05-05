@@ -21,67 +21,22 @@
 
 package com.envimate.mapmate.deserialization.methods;
 
-import com.envimate.mapmate.reflections.FactoryMethodNotFoundException;
-import com.envimate.mapmate.reflections.MultipleFactoryMethodsException;
+import com.envimate.mapmate.reflections.Reflections;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
-public final class SingleFactoryMethodDTODeserializationMethod implements DeserializationDTOMethod {
+public final class SingleFactoryMethodDTODeserializationMethod implements DeserializationDTOMethodFactory {
 
     private SingleFactoryMethodDTODeserializationMethod() {
     }
 
-    public static DeserializationDTOMethod singleFactoryMethodDTODeserializationDTOMethod() {
+    public static DeserializationDTOMethodFactory singleFactoryMethodDTODeserializationDTOMethod() {
         return new SingleFactoryMethodDTODeserializationMethod();
     }
 
     @Override
-    public Object deserialize(final Class<?> targetType,
-                              final Map<String, Object> elements) throws Exception {
-        final Method factoryMethod = findFactoryMethod(targetType);
-        final Parameter[] parameters = factoryMethod.getParameters();
-        final Object[] arguments = new Object[parameters.length];
-        for(int i = 0; i < parameters.length; ++i) {
-            final String name = parameters[i].getName();
-            final Object argument = elements.get(name);
-            arguments[i] = argument;
-        }
-        return factoryMethod.invoke(null, arguments);
-    }
-
-    @Override
-    public Map<String, Class<?>> elements(final Class<?> targetType) {
-        final Method factoryMethod = findFactoryMethod(targetType);
-        final Parameter[] parameters = factoryMethod.getParameters();
-        final Map<String, Class<?>> references = new HashMap<>();
-        for(final Parameter parameter : parameters) {
-            final String name = parameter.getName();
-            final Class<?> type = parameter.getType();
-            references.put(name, type);
-        }
-        return references;
-    }
-
-    private static Method findFactoryMethod(final Class<?> type) {
-        final Collection<Method> factoryMethods = new ArrayList<>(0);
-        for (final Method method : type.getMethods()) {
-            if (method.getReturnType() == type && (method.getModifiers() & Modifier.STATIC) != 0) {
-                factoryMethods.add(method);
-            }
-        }
-
-        if (factoryMethods.size() > 1) {
-            throw MultipleFactoryMethodsException.multipleFactoryMethodsFound(type);
-        }
-
-        return factoryMethods.stream()
-                .findFirst()
-                .orElseThrow(() -> FactoryMethodNotFoundException.factoryMethodNotFound(type));
+    public DeserializationDTOMethod createFor(final Class<?> targetType) {
+        final Method method = Reflections.findUniqueFactoryMethod(targetType);
+        return DeserializationDTOMethodByReflectionMethod.usingMethod(method);
     }
 }

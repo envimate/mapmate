@@ -54,7 +54,7 @@ public final class ScannablePackageBuilder {
     public FilterBuilderRequiredStep<DataTransferObjectDeserializationMethodBuilder> forDataTransferObjects() {
         return aFilterBuilder(
                 classFilters -> aDataTransferObjectDeserializationMethodBuilder(
-                        deserializationDTOMethod -> this.resultConsumer.apply(
-                                theDataTransferObjectPackageScanner(classFilters, deserializationDTOMethod))));
+                        deserializationDTOMethodFactory -> this.resultConsumer.apply(
+                                theDataTransferObjectPackageScanner(classFilters, deserializationDTOMethodFactory))));
     }
 }

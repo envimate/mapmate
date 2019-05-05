@@ -21,7 +21,12 @@
 
 package com.envimate.mapmate.filters;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import static com.envimate.mapmate.filters.FindCustomTypesByFactoryMethodClassFilter.findCustomTypesByFactoryMethodClassFilter;
+import static com.envimate.mapmate.filters.FindDtoByFactoryMethodClassFilter.findDtoByFactoryMethodClassFilter;
 import static com.envimate.mapmate.filters.PublicStringMethodWithZeroArguments.allClassesWithAPublicStringMethodWithZeroArgumentsNamed;
 
 public final class ClassFilters {
@@ -35,6 +40,23 @@ public final class ClassFilters {
 
     public static ClassFilter allBut(final ClassFilter inverted) {
         return type -> !inverted.include(type);
+    }
+
+    public static ClassFilter excluding(final Class<?>... excludes) {
+        final Set<Class<?>> excludesSet = Arrays.stream(excludes).collect(Collectors.toSet());
+        return type -> !excludesSet.contains(type);
+    }
+
+    public static ClassFilter and(final ClassFilter... filters) {
+        return type -> Arrays.stream(filters).allMatch(classFilter -> classFilter.include(type));
+    }
+
+    public static ClassFilter or(final ClassFilter... filters) {
+        return type -> Arrays.stream(filters).anyMatch(classFilter -> classFilter.include(type));
+    }
+
+    public static ClassFilter allClassesThatHaveAStaticFactoryMethodWithNonStringArguments() {
+        return findDtoByFactoryMethodClassFilter();
     }
 
     public static ClassFilter allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument() {

@@ -25,6 +25,7 @@ import com.envimate.mapmate.filters.paths.ResourcesPathThatWorksForFilesystemsAn
 import com.envimate.mapmate.reflections.PackageName;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -78,7 +79,7 @@ public final class ScanablePackage {
     }
 
     public List<Class<?>> getTypes() {
-        return this.types;
+        return Collections.unmodifiableList(this.types);
     }
 
     private static List<Class<?>> convertClassResourcePathToClass(final String classResourcePath) throws ClassNotFoundException {

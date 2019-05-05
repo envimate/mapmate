@@ -109,9 +109,9 @@ public final class DeserializerBuilder {
 
     public DataTransferObjectDeserializationMethodBuilder withDataTransferObject(final Class<?> type) {
         validateNotNull(type, "type");
-        return aDataTransferObjectDeserializationMethodBuilder(deserializationDTOMethod -> {
+        return aDataTransferObjectDeserializationMethodBuilder(deserializationDTOMethodFactory -> {
             final DeserializableDataTransferObject<?> dataTransferObject =
-                    deserializableDataTransferObject(type, deserializationDTOMethod);
+                    deserializableDataTransferObject(type, deserializationDTOMethodFactory.createFor(type));
             final DeserializableDefinitions definitions = withASingleDataTransferObject(dataTransferObject);
             this.definitions.add(definitions);
             return this;

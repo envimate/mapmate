@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.deserialization.builder;
 
-import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
+import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethodFactory;
 
 import java.util.function.Function;
 
@@ -31,15 +31,15 @@ import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
 public final class DataTransferObjectDeserializationMethodBuilder {
 
-    private final Function<DeserializationDTOMethod, DeserializerBuilder> resultConsumer;
+    private final Function<DeserializationDTOMethodFactory, DeserializerBuilder> resultConsumer;
 
-    private DataTransferObjectDeserializationMethodBuilder(final Function<DeserializationDTOMethod,
+    private DataTransferObjectDeserializationMethodBuilder(final Function<DeserializationDTOMethodFactory,
             DeserializerBuilder> resultConsumer) {
         this.resultConsumer = resultConsumer;
     }
 
     static DataTransferObjectDeserializationMethodBuilder aDataTransferObjectDeserializationMethodBuilder(
-            final Function<DeserializationDTOMethod, DeserializerBuilder> resultConsumer) {
+            final Function<DeserializationDTOMethodFactory, DeserializerBuilder> resultConsumer) {
         return new DataTransferObjectDeserializationMethodBuilder(resultConsumer);
     }
 
@@ -52,8 +52,8 @@ public final class DataTransferObjectDeserializationMethodBuilder {
         return deserializedUsing(namedFactoryMethodDTODeserializationMethod(methodName));
     }
 
-    public DeserializerBuilder deserializedUsing(final DeserializationDTOMethod method) {
-        validateNotNull(method, "method");
-        return this.resultConsumer.apply(method);
+    public DeserializerBuilder deserializedUsing(final DeserializationDTOMethodFactory methodFactory) {
+        validateNotNull(methodFactory, "methodFactory");
+        return this.resultConsumer.apply(methodFactory);
     }
 }

@@ -25,9 +25,11 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static com.envimate.mapmate.reflections.FactoryMethodNotFoundException.factoryMethodNotFound;
 import static java.lang.invoke.MethodHandles.publicLookup;
 
 public final class Reflections {
@@ -35,22 +37,43 @@ public final class Reflections {
     private Reflections() {
     }
 
-    public static Method findFactoryMethod(final Class<?> type) {
-        final Collection<Method> factoryMethods = new ArrayList<>(0);
-        for (final Method method : type.getMethods()) {
-            if (method.getReturnType() == type && (method.getModifiers() & Modifier.STATIC) != 0) {
-                factoryMethods.add(method);
-            }
-        }
+    public static Method findUniqueFactoryMethod(final Class<?> type) {
+        final List<Method> factoryMethods = factoryMethods(type)
+                .collect(Collectors.toList());
 
-        if (factoryMethods.size() > 1) {
+        final int factoryMethodsFound = factoryMethods.size();
+        if (factoryMethodsFound > 1) {
             throw MultipleFactoryMethodsException.multipleFactoryMethodsFound(type);
+        } else if (factoryMethodsFound == 0) {
+            throw factoryMethodNotFound(type);
+        } else {
+            return factoryMethods.get(0);
         }
+    }
 
-        return factoryMethods.stream()
-                .findFirst()
-                .orElseThrow(() -> FactoryMethodNotFoundException.factoryMethodNotFound(type));
+    public static Method factoryMethodByName(final Class<?> type, final String name) {
+        final List<Method> factoryMethodsByName = findFactoryMethodsByName(type, name);
+        final int factoryMethodsFound = factoryMethodsByName.size();
+        if (factoryMethodsFound > 1) {
+            throw MultipleFactoryMethodsException.multipleFactoryMethodsFound(type);
+        } else if (factoryMethodsFound == 0) {
+            throw factoryMethodNotFound(type);
+        } else {
+            return factoryMethodsByName.get(0);
+        }
+    }
 
+    public static List<Method> findFactoryMethodsByName(final Class<?> type, final String name) {
+        final List<Method> factoryMethods = factoryMethods(type)
+                .filter(method -> method.getName().equals(name))
+                .collect(Collectors.toList());
+        return factoryMethods;
+    }
+
+    private static Stream<Method> factoryMethods(final Class<?> type) {
+        return Arrays.stream(type.getMethods())
+                .filter(method -> Modifier.isStatic(method.getModifiers()))
+                .filter(method -> method.getReturnType() == type);
     }
 
     private static Method findFactoryMethodByName(final Class<?> type, final String methodName) {
@@ -69,7 +92,7 @@ public final class Reflections {
 
         return factoryMethods.stream()
                 .findFirst()
-                .orElseThrow(() -> FactoryMethodNotFoundException.factoryMethodNotFound(type, methodName));
+                .orElseThrow(() -> factoryMethodNotFound(type, methodName));
     }
 
     public static boolean hasPublicStringMethodWithZeroArgumentsNamed(final Class<?> type, final String methodName) {

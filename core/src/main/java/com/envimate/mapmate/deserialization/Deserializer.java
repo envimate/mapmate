@@ -113,7 +113,7 @@ public final class Deserializer {
     public <T> T deserialize(final String input,
                              final Class<T> targetType,
                              final MarshallingType marshallingType) {
-        return deserialize(input, targetType, marshallingType, injector -> injector);
+        return deserialize(input, targetType, marshallingType, InjectorLambda.noop());
     }
 
     public <T> T deserialize(final String input,
@@ -124,7 +124,8 @@ public final class Deserializer {
         validateNotNull(targetType, "targetType");
         validateNotNull(injectorProducer, "jsonInjector");
         final ExceptionTracker exceptionTracker = new ExceptionTracker(input, this.validationMappings);
-        final Injector injector = injectorProducer.inject(empty());
+        final Injector injector = empty();
+        injectorProducer.setupInjector(injector);
         final T deserialized = deserializeString(input, targetType, exceptionTracker, injector, marshallingType);
         final List<ValidationError> validationErrors = exceptionTracker.resolve();
         if (!validationErrors.isEmpty()) {
@@ -250,7 +251,11 @@ public final class Deserializer {
             try {
                 return (T) deserializationDTOMethod.deserialize(type, elements);
             } catch (final Exception e) {
-                exceptionTracker.track(e);
+                final String message = String.format(
+                        "Exception calling deserialize(type: %s, elements: %s) on deserializationMethod %s",
+                        type, elements, deserializationDTOMethod
+                );
+                exceptionTracker.track(e, message);
                 return null;
             }
         }
@@ -262,7 +267,11 @@ public final class Deserializer {
         try {
             return (T) definition.deserialize(input);
         } catch (final Exception e) {
-            exceptionTracker.track(e);
+            final String message = String.format(
+                    "Exception calling deserialize(input: %s) on definition %s",
+                    input, definition
+            );
+            exceptionTracker.track(e, message);
             return null;
         }
     }

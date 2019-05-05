@@ -29,6 +29,7 @@
     <suppress checks="VisibilityModifier" files=".*ValidationError.java" />
     <suppress checks="VisibilityModifier" files=".*Injector.java" />
     <suppress checks="IllegalCatchCheck" files="NamedMethodSerializationCPMethod.java" />
+    <suppress checks="IllegalCatchCheck" files="DataTransferObjectPackageScanner.java" />
     <suppress checks="IllegalCatchCheck" files="Deserializer|When" />
     <suppress checks="MethodLength" files="Deserializer.java" />
     <suppress checks="MagicNumber|MethodName|IllegalCatch|LineLength|MethodLength|FinalParameters|FileLength|InnerTypeLast" files="DeserializerBuilderTest|DeserializerTest|SerializerTest|SerializerBuilderTest|CircularReferenceDetectorTest|Examples" />

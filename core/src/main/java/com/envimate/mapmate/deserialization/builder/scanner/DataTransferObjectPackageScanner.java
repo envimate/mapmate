@@ -24,6 +24,7 @@ package com.envimate.mapmate.deserialization.builder.scanner;
 import com.envimate.mapmate.deserialization.DeserializableDataTransferObject;
 import com.envimate.mapmate.deserialization.DeserializableDefinitions;
 import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
+import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethodFactory;
 import com.envimate.mapmate.filters.ClassFilter;
 import com.envimate.mapmate.filters.ScanablePackage;
 import com.envimate.mapmate.reflections.PackageName;
@@ -38,17 +39,17 @@ import static java.util.stream.Collectors.toSet;
 
 public final class DataTransferObjectPackageScanner implements PackageScanner {
     private final List<ClassFilter> classFilters;
-    private final DeserializationDTOMethod deserializationDTOMethod;
+    private final DeserializationDTOMethodFactory deserializationDTOMethodFactory;
 
     private DataTransferObjectPackageScanner(final List<ClassFilter> classFilters,
-                                            final DeserializationDTOMethod deserializationDTOMethod) {
+                                            final DeserializationDTOMethodFactory deserializationDTOMethodFactory) {
         this.classFilters = classFilters;
-        this.deserializationDTOMethod = deserializationDTOMethod;
+        this.deserializationDTOMethodFactory = deserializationDTOMethodFactory;
     }
 
     public static PackageScanner theDataTransferObjectPackageScanner(final List<ClassFilter> classFilters,
-                                                                     final DeserializationDTOMethod deserializationDTOMethod) {
-        return new DataTransferObjectPackageScanner(classFilters, deserializationDTOMethod);
+                                                                     final DeserializationDTOMethodFactory factory) {
+        return new DataTransferObjectPackageScanner(classFilters, factory);
     }
 
     @Override
@@ -56,7 +57,20 @@ public final class DataTransferObjectPackageScanner implements PackageScanner {
         final ScanablePackage scanablePackage = scannablePackage(packageName, this.classFilters);
         final List<Class<?>> types = scanablePackage.getTypes();
         final Set<DeserializableDataTransferObject<?>> dataTransferObjects = types.stream()
-                .map(type -> deserializableDataTransferObject(type, this.deserializationDTOMethod))
+                .map(type -> {
+                    try {
+                        final DeserializationDTOMethod deserializer = this.deserializationDTOMethodFactory.createFor(type);
+                        return deserializableDataTransferObject(
+                                type,
+                                deserializer
+                        );
+                    } catch (Exception e) {
+                        throw new UnsupportedOperationException(String.format(
+                                "Could not create DeserializationDTOMethod for type %s using factory %s",
+                                type, this.deserializationDTOMethodFactory
+                        ), e);
+                    }
+                })
                 .collect(toSet());
         return withTheDataTransferObjects(dataTransferObjects);
     }
