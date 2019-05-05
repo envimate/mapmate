@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import static com.envimate.mapmate.filters.FindCustomTypesByFactoryMethodClassFilter.findCustomTypesByFactoryMethodClassFilter;
 import static com.envimate.mapmate.filters.FindDtoByFactoryMethodClassFilter.findDtoByFactoryMethodClassFilter;
+import static com.envimate.mapmate.filters.FindDtoByFactoryMethodClassFilter.findDtoByFactoryMethodNamedClassFilter;
 import static com.envimate.mapmate.filters.PublicStringMethodWithZeroArguments.allClassesWithAPublicStringMethodWithZeroArgumentsNamed;
 
 public final class ClassFilters {
@@ -57,6 +58,10 @@ public final class ClassFilters {
 
     public static ClassFilter allClassesThatHaveAStaticFactoryMethodWithNonStringArguments() {
         return findDtoByFactoryMethodClassFilter();
+    }
+
+    public static ClassFilter havingFactoryMethodNamed(final String name) {
+        return findDtoByFactoryMethodNamedClassFilter(name);
     }
 
     public static ClassFilter allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument() {

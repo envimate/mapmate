@@ -21,18 +21,29 @@
 
 package com.envimate.mapmate.filters;
 
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
 import java.lang.reflect.Method;
+import java.util.function.Predicate;
 
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.Arrays.stream;
 
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 final class FindDtoByFactoryMethodClassFilter implements ClassFilter {
-
-    private FindDtoByFactoryMethodClassFilter() {
-    }
+    private final Predicate<Method> additionalFilter;
 
     static ClassFilter findDtoByFactoryMethodClassFilter() {
-        return new FindDtoByFactoryMethodClassFilter();
+        return new FindDtoByFactoryMethodClassFilter(method -> true);
+    }
+
+    static ClassFilter findDtoByFactoryMethodNamedClassFilter(final String name) {
+        return new FindDtoByFactoryMethodClassFilter(method -> name.equals(method.getName()));
     }
 
     @Override
@@ -41,9 +52,10 @@ final class FindDtoByFactoryMethodClassFilter implements ClassFilter {
         return stream(methods)
                 .filter(method -> isStatic(method.getModifiers()))
                 .filter(method -> method.getReturnType().equals(type))
+                .filter(this.additionalFilter)
                 .anyMatch(method ->
                         stream(method.getParameterTypes())
-                        .anyMatch(aClass -> !aClass.equals(String.class))
+                                .anyMatch(aClass -> !aClass.equals(String.class))
                 );
     }
 }
