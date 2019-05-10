@@ -26,10 +26,7 @@ import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.serialization.builder.SerializerBuilder;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -60,6 +57,10 @@ public final class Serializer {
 
     public static SerializerBuilder aSerializer() {
         return aSerializerBuilder();
+    }
+
+    public Set<MarshallingType> supportedMarshallingTypes() {
+        return this.marshallers.supportedTypes();
     }
 
     public String serializeToJson(final Object object) {

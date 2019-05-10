@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.util.Map;
+import java.util.Set;
 
 import static com.envimate.mapmate.marshalling.UnsupportedMarshallingTypeException.unsupportedMarshallingTypeException;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
@@ -49,5 +50,9 @@ public final class MarshallerRegistry<T> {
             throw unsupportedMarshallingTypeException(type, this.map.keySet());
         }
         return entry;
+    }
+
+    public Set<MarshallingType> supportedTypes() {
+        return this.map.keySet();
     }
 }

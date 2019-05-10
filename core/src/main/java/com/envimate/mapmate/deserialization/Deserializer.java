@@ -35,10 +35,7 @@ import com.envimate.mapmate.validation.ValidationMappings;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
@@ -77,6 +74,10 @@ public final class Deserializer {
 
     public static DeserializerBuilder aDeserializer() {
         return aDeserializerBuilder();
+    }
+
+    public Set<MarshallingType> supportedMarshallingTypes() {
+        return this.unmarshallers.supportedTypes();
     }
 
     public <T> T deserializeFromMap(final Map<String, Object> input,
