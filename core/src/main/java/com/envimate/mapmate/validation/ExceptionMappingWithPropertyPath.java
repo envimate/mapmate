@@ -22,5 +22,5 @@
 package com.envimate.mapmate.validation;
 
 public interface ExceptionMappingWithPropertyPath {
-    ValidationError map(Throwable t, String propertyPath);
+    ValidationError map(Throwable exception, String propertyPath);
 }

@@ -25,6 +25,8 @@ import com.envimate.mapmate.deserialization.Deserializer;
 import com.envimate.mapmate.domain.valid.AComplexType;
 import com.envimate.mapmate.domain.valid.ANumber;
 import com.envimate.mapmate.domain.valid.AString;
+import com.envimate.mapmate.domain.valid.AnException;
+import com.envimate.mapmate.validation.ValidationError;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -46,6 +48,7 @@ public final class Given {
                 .deserializedUsingTheMethodNamed("fromString")
                 .withCustomPrimitive(ANumber.class)
                 .deserializedUsingTheMethodNamed("fromString")
+                .mappingExceptionUsing(AnException.class, ValidationError::fromExceptionMessageAndPropertyPath)
                 .build();
         return new Given(deserializer);
     }

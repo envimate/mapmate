@@ -26,6 +26,7 @@ import com.envimate.mapmate.domain.valid.ANumber;
 import com.envimate.mapmate.domain.valid.AString;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import org.hamcrest.core.StringContains;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -46,8 +47,8 @@ public final class Then {
         return this;
     }
 
-    public Then anExceptionIsThrownWithTheMessage(final String message) {
-        assertThat(this.exception.getMessage(), is(message));
+    public Then anExceptionIsThrownWithAMessageContaining(final String message) {
+        assertThat(this.exception.getMessage(), StringContains.containsString(message));
         return this;
     }
 }

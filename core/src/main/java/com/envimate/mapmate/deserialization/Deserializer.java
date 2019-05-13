@@ -90,7 +90,7 @@ public final class Deserializer {
         if (!definition.isDataTransferObject()) {
             throw new UnsupportedOperationException("Only DTOs can be deserialized from map but found: " + definition);
         }
-        final ExceptionTracker exceptionTracker = new ExceptionTracker("not av", this.validationMappings);
+        final ExceptionTracker exceptionTracker = new ExceptionTracker(input, this.validationMappings);
 
         return deserializeInternal(input, targetType, exceptionTracker, empty());
     }

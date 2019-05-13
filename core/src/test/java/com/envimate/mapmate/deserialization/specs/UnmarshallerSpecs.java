@@ -76,7 +76,7 @@ public final class UnmarshallerSpecs {
                 "  \"stringA\": \"asdf\",\n" +
                 "  \"stringB\": \"qwer\"\n" +
                 "}").as(marshallingType("unknown")).toTheExampleDto()
-                .anExceptionIsThrownWithTheMessage(
+                .anExceptionIsThrownWithAMessageContaining(
                         "Unsupported marshalling type 'unknown'," +
                                 " known marshalling types are: ['json', 'xml', 'yaml']");
     }
