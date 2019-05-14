@@ -26,7 +26,7 @@ import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
 import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethodFactory;
 import com.envimate.mapmate.examples.domain.*;
 import com.envimate.mapmate.serialization.Serializer;
-import com.envimate.mapmate.validation.AggregatedValidationException;
+import com.envimate.mapmate.deserialization.validation.AggregatedValidationException;
 import com.google.gson.Gson;
 import com.google.inject.Guice;
 import com.google.inject.Injector;

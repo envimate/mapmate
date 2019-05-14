@@ -24,8 +24,8 @@ package com.envimate.mapmate.deserialization;
 import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
 import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
 import com.envimate.mapmate.domain.valid.*;
-import com.envimate.mapmate.validation.AggregatedValidationException;
-import com.envimate.mapmate.validation.ValidationError;
+import com.envimate.mapmate.deserialization.validation.AggregatedValidationException;
+import com.envimate.mapmate.deserialization.validation.ValidationError;
 import com.envimate.mapmate.validators.CustomTypeValidationException;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -94,7 +94,7 @@ public final class DeserializerTest {
     public void givenComplexTypeWithInvalidArray_whenDeserializing_thenThrowCorrectException() {
         final String given = "{\"array\":[\"1\", \"51\", \"53\"]}";
         try {
-            final AComplexTypeWithArray result = theDefaultDeserializer().deserializeJson(given, AComplexTypeWithArray.class);
+            theDefaultDeserializer().deserializeJson(given, AComplexTypeWithArray.class);
             fail("should throw exception");
         } catch (final AggregatedValidationException e) {
             assertThat(e.getValidationErrors(), is(notNullValue()));
@@ -334,19 +334,17 @@ public final class DeserializerTest {
                 .withCustomPrimitive(ANumber.class)
                 .deserializedUsingTheMethodNamed("fromString")
                 .withCustomPrimitive(AString.class)
-                .deserializedUsingTheStaticMethod(DeserializerTest::aStaticProviderMethodThrowingException)
-                .mappingExceptionUsing(AnException.class, (t, p) -> new ValidationError(t.getMessage(), p))
+                .deserializedUsingTheStaticMethod(input -> {
+                    throw anException("an exception");
+                })
+                .mappingExceptionUsing(AnException.class, (e, path) -> new ValidationError(e.getMessage(), path))
                 .build();
         try {
-            final AComplexType result = deserializer.deserializeJson(given, AComplexType.class);
+            deserializer.deserializeJson(given, AComplexType.class);
             fail("should throw an exception");
         } catch (final AggregatedValidationException result) {
             assertThat(result.getValidationErrors().size(), is(equalTo(2)));
         }
-    }
-
-    private static AString aStaticProviderMethodThrowingException(final String input) {
-        throw anException("an exception");
     }
 
     @Test

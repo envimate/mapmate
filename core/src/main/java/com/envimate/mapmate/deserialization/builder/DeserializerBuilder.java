@@ -24,7 +24,7 @@ package com.envimate.mapmate.deserialization.builder;
 import com.envimate.mapmate.deserialization.*;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
-import com.envimate.mapmate.validation.*;
+import com.envimate.mapmate.deserialization.validation.*;
 
 import java.util.HashMap;
 import java.util.LinkedList;

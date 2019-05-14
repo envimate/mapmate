@@ -19,10 +19,34 @@
  * under the License.
  */
 
-package com.envimate.mapmate.validation;
+package com.envimate.mapmate.deserialization.validation;
 
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+import java.util.LinkedList;
 import java.util.List;
 
-public interface ExceptionMappingList {
-    List<ValidationError> map(Throwable t, String propertyPath);
+import static java.lang.String.join;
+
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor
+final class TrackingPosition {
+    private final List<String> positions;
+
+    static TrackingPosition empty() {
+        return new TrackingPosition(new LinkedList<>());
+    }
+
+    TrackingPosition next(final String name) {
+        final List<String> newPositions = new LinkedList<>(this.positions);
+        newPositions.add(name);
+        return new TrackingPosition(newPositions);
+    }
+
+    String render() {
+        return join(".", this.positions);
+    }
 }

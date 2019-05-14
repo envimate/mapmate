@@ -19,10 +19,16 @@
  * under the License.
  */
 
-package com.envimate.mapmate.validation;
+package com.envimate.mapmate.deserialization.validation;
 
-import java.util.List;
+public final class CustomPrimitiveValidationException extends RuntimeException {
+    private CustomPrimitiveValidationException(final String message) {
+        super(message);
+    }
 
-public interface ValidationErrorsMapping {
-    void map(List<ValidationError> validationErrors);
+    public static CustomPrimitiveValidationException customPrimitiveValidationException(
+            final String format,
+            final Object... args) {
+        return new CustomPrimitiveValidationException(String.format(format, args));
+    }
 }

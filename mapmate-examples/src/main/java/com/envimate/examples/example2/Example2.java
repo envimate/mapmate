@@ -4,8 +4,8 @@ import com.envimate.examples.example2.domain.register.RegisterUserRequest;
 import com.envimate.examples.example2.exceptions.InsecurePasswordException;
 import com.envimate.examples.example2.exceptions.InvalidEmailException;
 import com.envimate.mapmate.deserialization.Deserializer;
-import com.envimate.mapmate.validation.AggregatedValidationException;
-import com.envimate.mapmate.validation.ValidationError;
+import com.envimate.mapmate.deserialization.validation.AggregatedValidationException;
+import com.envimate.mapmate.deserialization.validation.ValidationError;
 import com.google.gson.Gson;
 
 import static com.envimate.mapmate.deserialization.Deserializer.aDeserializer;

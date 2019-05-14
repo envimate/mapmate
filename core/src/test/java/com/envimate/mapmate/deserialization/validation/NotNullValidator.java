@@ -19,24 +19,17 @@
  * under the License.
  */
 
-package com.envimate.mapmate.validation;
+package com.envimate.mapmate.deserialization.validation;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import static com.envimate.mapmate.deserialization.validation.CustomPrimitiveValidationException.customPrimitiveValidationException;
 
-import static com.envimate.mapmate.validation.CustomPrimitiveValidationException.customPrimitiveValidationException;
-
-public final class StringRegexValidator {
-    private StringRegexValidator() {
+public final class NotNullValidator {
+    private NotNullValidator() {
     }
 
-    public static String matchingRegexValue(final String value, final Pattern pattern, final String description) {
-        final String sanitized = SecurityValidator.sanitized(value, description);
-        final Matcher matcher = pattern.matcher(sanitized);
-        if (matcher.matches()) {
-            return sanitized;
-        } else {
-            throw customPrimitiveValidationException("%s does not match regex %s", value, pattern);
+    public static void validateNotNull(final Object value, final String name) {
+        if (value == null) {
+            throw customPrimitiveValidationException(name + " must not be null");
         }
     }
 }

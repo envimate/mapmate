@@ -23,6 +23,7 @@ package com.envimate.mapmate.injector;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 public final class Injector {
 
@@ -61,12 +62,12 @@ public final class Injector {
         return new Injector();
     }
 
-    public Object getInjectionForPropertyPath(final String position, final Class<?> targetType) {
+    public Optional<Object> getInjectionForPropertyPath(final String position, final Class<?> targetType) {
         return this.injections.stream()
                 .filter(Injection::containsPropertyName)
                 .filter(injection -> injection.propertyName.equals(position))
                 .map(Injection::getValue)
-                .findFirst().orElse(null);
+                .findFirst();
     }
 
     public Object getInjectionForPropertyNameOrInstance(final String propertyName, final Class<?> elementType) {

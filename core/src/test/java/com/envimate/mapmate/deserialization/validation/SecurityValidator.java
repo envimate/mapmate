@@ -19,12 +19,12 @@
  * under the License.
  */
 
-package com.envimate.mapmate.validation;
+package com.envimate.mapmate.deserialization.validation;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.envimate.mapmate.validation.CustomPrimitiveValidationException.customPrimitiveValidationException;
+import static com.envimate.mapmate.deserialization.validation.CustomPrimitiveValidationException.customPrimitiveValidationException;
 
 final class SecurityValidator {
     private static final int MAX_LENGTH = 1024;

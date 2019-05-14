@@ -4,8 +4,8 @@ import com.envimate.examples.example3.domain.register.RegisterUserRequest;
 import com.envimate.examples.example3.exceptions.CountryNotSupportedException;
 import com.envimate.examples.example3.exceptions.MissingParameterException;
 import com.envimate.mapmate.deserialization.Deserializer;
-import com.envimate.mapmate.validation.AggregatedValidationException;
-import com.envimate.mapmate.validation.ValidationError;
+import com.envimate.mapmate.deserialization.validation.AggregatedValidationException;
+import com.envimate.mapmate.deserialization.validation.ValidationError;
 import com.google.gson.Gson;
 
 import java.util.List;

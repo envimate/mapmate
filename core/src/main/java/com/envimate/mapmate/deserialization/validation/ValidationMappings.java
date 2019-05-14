@@ -19,10 +19,13 @@
  * under the License.
  */
 
-package com.envimate.mapmate.validation;
+package com.envimate.mapmate.deserialization.validation;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toSet;
 
 public final class ValidationMappings {
 
@@ -55,19 +58,19 @@ public final class ValidationMappings {
         return new ValidationMappings();
     }
 
-    public ExceptionMappingList get(final Class<? extends Throwable> throwable) {
+    public Optional<ExceptionMappingList> get(final Class<? extends Throwable> throwable) {
         final ExceptionMappingList mapping = this.validationMappings.get(throwable);
         if (mapping != null) {
-            return mapping;
+            return of(mapping);
         }
 
         final Set<Class<? extends Throwable>> assignableClasses = this.validationMappings.keySet().stream()
                 .filter(t -> t.isAssignableFrom(throwable))
-                .collect(Collectors.toSet());
+                .collect(toSet());
         final ThrowableRelativesLookup lookup = ThrowableRelativesLookup.fromThrowable(throwable);
         final Class<?> closestRelative = lookup.closestRelativeFrom(assignableClasses);
 
-        return this.validationMappings.get(closestRelative);
+        return ofNullable(this.validationMappings.get(closestRelative));
     }
 
 }

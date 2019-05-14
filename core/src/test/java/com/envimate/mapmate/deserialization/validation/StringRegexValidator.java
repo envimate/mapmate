@@ -19,13 +19,24 @@
  * under the License.
  */
 
-package com.envimate.mapmate.deserialization;
+package com.envimate.mapmate.deserialization.validation;
 
-import com.envimate.mapmate.deserialization.validation.ExceptionTracker;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import java.util.Map;
+import static com.envimate.mapmate.deserialization.validation.CustomPrimitiveValidationException.customPrimitiveValidationException;
 
-public interface DeserializerAdapter<T> {
+public final class StringRegexValidator {
+    private StringRegexValidator() {
+    }
 
-    T deserialize(Map<?, ?> input, Class<?> targetType, Deserializer deserializer, ExceptionTracker exceptionTracker);
+    public static String matchingRegexValue(final String value, final Pattern pattern, final String description) {
+        final String sanitized = SecurityValidator.sanitized(value, description);
+        final Matcher matcher = pattern.matcher(sanitized);
+        if (matcher.matches()) {
+            return sanitized;
+        } else {
+            throw customPrimitiveValidationException("%s does not match regex %s", value, pattern);
+        }
+    }
 }

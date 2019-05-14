@@ -19,13 +19,39 @@
  * under the License.
  */
 
-package com.envimate.mapmate.deserialization;
+package com.envimate.mapmate.deserialization.validation;
 
-import com.envimate.mapmate.deserialization.validation.ExceptionTracker;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
-import java.util.Map;
+@ToString
+@EqualsAndHashCode
+public final class ExceptionEntry {
+    private final String from;
+    private final String[] blamed;
+    private final Throwable exception;
 
-public interface DeserializerAdapter<T> {
+    ExceptionEntry(final String from, final String[] blamed, final Throwable e) {
+        this.from = from;
+        this.blamed = blamed.clone();
+        this.exception = e;
+    }
 
-    T deserialize(Map<?, ?> input, Class<?> targetType, Deserializer deserializer, ExceptionTracker exceptionTracker);
+    public ExceptionEntry(final String from, final String blamed, final Throwable e) {
+        this.from = from;
+        this.blamed = new String[]{blamed};
+        this.exception = e;
+    }
+
+    public String getFrom() {
+        return this.from;
+    }
+
+    public String[] getBlamed() {
+        return this.blamed.clone();
+    }
+
+    public Throwable getException() {
+        return this.exception;
+    }
 }

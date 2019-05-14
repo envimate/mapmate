@@ -56,4 +56,48 @@ public final class ExceptionTrackingSpecs {
                 .anExceptionIsThrownWithAMessageContaining("deserialization encountered validation errors." +
                         " Validation error at 'number2', value cannot be over 50; ");
     }
+
+    @Test
+    public void testUnmappedExceptionWithoutMarshalling() {
+        givenTheExampleMapMateDeserializer()
+                .when().theDeserializerDeserializesTheMap("" +
+                "{\n" +
+                "  \"number1\": \"x\",\n" +
+                "  \"number2\": \"5\",\n" +
+                "  \"stringA\": \"asdf\",\n" +
+                "  \"stringB\": \"qwer\"\n" +
+                "}").toTheExampleDto()
+                .anExceptionIsThrownWithAMessageContaining("Unrecognized exception deserializing field 'number1':" +
+                        " Exception calling deserialize(input: x) on definition " +
+                        "com.envimate.mapmate.deserialization.DeserializableCustomPrimitive");
+    }
+
+    @Test
+    public void testMappedExceptionWithoutMarshalling() {
+        givenTheExampleMapMateDeserializer()
+                .when().theDeserializerDeserializesTheMap("" +
+                "{\n" +
+                "  \"number1\": \"4\",\n" +
+                "  \"number2\": \"5000\",\n" +
+                "  \"stringA\": \"asdf\",\n" +
+                "  \"stringB\": \"qwer\"\n" +
+                "}").toTheExampleDto()
+                .anExceptionIsThrownWithAMessageContaining("deserialization encountered validation errors." +
+                        " Validation error at 'number2', value cannot be over 50; ");
+    }
+
+    @Test
+    public void testMultipleExceptionsCanBeMapped() {
+        givenTheExampleMapMateDeserializer()
+                .when().theDeserializerDeserializes("" +
+                "{\n" +
+                "  \"number1\": \"4000\",\n" +
+                "  \"number2\": \"5000\",\n" +
+                "  \"stringA\": \"asdf\",\n" +
+                "  \"stringB\": \"qwer\"\n" +
+                "}").as(json()).toTheExampleDto()
+                .anExceptionIsThrownWithAMessageContaining("deserialization encountered validation errors." +
+                        " Validation error at 'number1', value cannot be over 50;" +
+                        " Validation error at 'number2', value cannot be over 50; ");
+    }
 }

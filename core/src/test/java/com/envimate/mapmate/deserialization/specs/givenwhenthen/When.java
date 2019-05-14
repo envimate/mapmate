@@ -22,21 +22,36 @@
 package com.envimate.mapmate.deserialization.specs.givenwhenthen;
 
 import com.envimate.mapmate.deserialization.Deserializer;
+import com.google.gson.Gson;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Map;
+import java.util.function.Supplier;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public final class When {
     private final Deserializer deserializer;
 
     public AsStage theDeserializerDeserializes(final String input) {
-        return marshallingType -> type -> {
-            try {
-                final Object result = this.deserializer.deserialize(input, type, marshallingType);
-                return new Then(result, null);
-            } catch (final Exception e) {
-                return new Then(null, e);
-            }
+        return marshallingType -> type ->
+                doDeserialization(() -> this.deserializer.deserialize(input, type, marshallingType));
+    }
+
+    @SuppressWarnings("unchecked")
+    public ToStage theDeserializerDeserializesTheMap(final String jsonMap) {
+        return type -> {
+            final Map<String, Object> map = new Gson().fromJson(jsonMap, Map.class);
+            return doDeserialization(() -> this.deserializer.deserializeFromMap(map, type));
         };
+    }
+
+    private static Then doDeserialization(final Supplier<Object> deserializer) {
+        try {
+            final Object result = deserializer.get();
+            return new Then(result, null);
+        } catch (final Exception e) {
+            return new Then(null, e);
+        }
     }
 }

@@ -19,31 +19,32 @@
  * under the License.
  */
 
-package com.envimate.mapmate.validation;
+package com.envimate.mapmate.deserialization.validation;
 
-import java.util.Collections;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
 import java.util.List;
 
-public final class AggregatedValidationException extends RuntimeException {
+import static java.util.Collections.unmodifiableList;
+
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ValidationResult {
     private final List<ValidationError> validationErrors;
 
-    private AggregatedValidationException(final String msg, final List<ValidationError> validationErrors) {
-        super(msg);
-        this.validationErrors = validationErrors;
+    static ValidationResult validationResult(final List<ValidationError> validationErrors) {
+        return new ValidationResult(validationErrors);
     }
 
-    public static AggregatedValidationException fromList(final List<ValidationError> validationErrors) {
-        final StringBuilder sb = new StringBuilder("deserialization encountered validation errors. ");
-        for(final ValidationError entry: validationErrors) {
-            sb.append(String.format("Validation error at '%s', %s; ",
-                    entry.propertyPath,
-                    entry.message));
-        }
-
-        return new AggregatedValidationException(sb.toString(), validationErrors);
+    public boolean hasValidationErrors() {
+        return !this.validationErrors.isEmpty();
     }
 
-    public List<ValidationError> getValidationErrors() {
-        return Collections.unmodifiableList(this.validationErrors);
+    public List<ValidationError> validationErrors() {
+        return unmodifiableList(this.validationErrors);
     }
 }

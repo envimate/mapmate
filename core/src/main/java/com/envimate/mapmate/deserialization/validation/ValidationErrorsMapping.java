@@ -19,8 +19,10 @@
  * under the License.
  */
 
-package com.envimate.mapmate.validation;
+package com.envimate.mapmate.deserialization.validation;
 
-public interface ExceptionMappingWithPropertyPath {
-    ValidationError map(Throwable exception, String propertyPath);
+import java.util.List;
+
+public interface ValidationErrorsMapping {
+    void map(List<ValidationError> validationErrors);
 }

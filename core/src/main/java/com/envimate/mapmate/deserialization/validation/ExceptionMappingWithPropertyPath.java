@@ -19,26 +19,8 @@
  * under the License.
  */
 
-package com.envimate.mapmate.validation;
+package com.envimate.mapmate.deserialization.validation;
 
-public final class ValidationError {
-
-    public final String message;
-    public final String propertyPath;
-
-    public ValidationError(final String message, final String propertyPath) {
-        this.message = message;
-        this.propertyPath = propertyPath;
-    }
-
-    public static ValidationError fromExceptionMessageAndPropertyPath(
-            final Throwable throwable,
-            final String propertyPath) {
-        return new ValidationError(throwable.getMessage(), propertyPath);
-    }
-
-    public static ValidationError fromStringMessageAndPropertyPath(final String message, final String propertyPath) {
-        return new ValidationError(message, propertyPath);
-    }
-
+public interface ExceptionMappingWithPropertyPath {
+    ValidationError map(Throwable exception, String propertyPath);
 }

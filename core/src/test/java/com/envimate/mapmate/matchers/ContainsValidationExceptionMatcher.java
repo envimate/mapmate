@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.matchers;
 
-import com.envimate.mapmate.validation.ExceptionTracker;
+import com.envimate.mapmate.deserialization.validation.ExceptionEntry;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 
@@ -42,8 +42,8 @@ public final class ContainsValidationExceptionMatcher extends BaseMatcher<Set<?>
     public boolean matches(final Object o) {
         final Set<?> list = (Set) o;
         for (final Object obj : list) {
-            if (obj instanceof ExceptionTracker.ExceptionEntry) {
-                final ExceptionTracker.ExceptionEntry entry = (ExceptionTracker.ExceptionEntry) obj;
+            if (obj instanceof ExceptionEntry) {
+                final ExceptionEntry entry = (ExceptionEntry) obj;
                 if (entry.getFrom().equals(this.field) && entry.getException().getClass() == this.typ) {
                     return true;
                 } else {

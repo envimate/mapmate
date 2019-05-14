@@ -19,17 +19,26 @@
  * under the License.
  */
 
-package com.envimate.mapmate.validation;
+package com.envimate.mapmate.deserialization.validation;
 
-import static com.envimate.mapmate.validation.CustomPrimitiveValidationException.customPrimitiveValidationException;
+public final class ValidationError {
 
-public final class NotNullValidator {
-    private NotNullValidator() {
+    public final String message;
+    public final String propertyPath;
+
+    public ValidationError(final String message, final String propertyPath) {
+        this.message = message;
+        this.propertyPath = propertyPath;
     }
 
-    public static void validateNotNull(final Object value, final String name) {
-        if (value == null) {
-            throw customPrimitiveValidationException(name + " must not be null");
-        }
+    public static ValidationError fromExceptionMessageAndPropertyPath(
+            final Throwable throwable,
+            final String propertyPath) {
+        return new ValidationError(throwable.getMessage(), propertyPath);
     }
+
+    public static ValidationError fromStringMessageAndPropertyPath(final String message, final String propertyPath) {
+        return new ValidationError(message, propertyPath);
+    }
+
 }
