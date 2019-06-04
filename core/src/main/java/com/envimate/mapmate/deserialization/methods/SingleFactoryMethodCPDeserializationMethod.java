@@ -37,10 +37,20 @@ public final class SingleFactoryMethodCPDeserializationMethod implements Deseria
         return new SingleFactoryMethodCPDeserializationMethod();
     }
 
+    private static Optional<Method> findMethod(final Class<?> type) {
+        final Method[] methods = type.getMethods();
+        return stream(methods)
+                .filter(method -> isStatic(method.getModifiers()))
+                .filter(method -> method.getReturnType().equals(type))
+                .filter(method -> method.getParameterCount() == 1)
+                .filter(method -> method.getParameterTypes()[0].equals(String.class))
+                .findFirst();
+    }
+
     @Override
     public void verifyCompatibility(final Class<?> targetType) {
         final Optional<Method> method = findMethod(targetType);
-        if(!method.isPresent()) {
+        if (!method.isPresent()) {
             throw deserializationMethodNotCompatibleException("class '" + targetType.getName() + "' does not" +
                     " have a static method with a single String argument");
 
@@ -51,15 +61,5 @@ public final class SingleFactoryMethodCPDeserializationMethod implements Deseria
     public Object deserialize(final String input, final Class<?> targetType) throws Exception {
         final Method method = findMethod(targetType).get();
         return method.invoke(null, input);
-    }
-
-    private static Optional<Method> findMethod(final Class<?> type) {
-        final Method[] methods = type.getMethods();
-        return stream(methods)
-                .filter(method -> isStatic(method.getModifiers()))
-                .filter(method -> method.getReturnType().equals(type))
-                .filter(method -> method.getParameterCount() == 1)
-                .filter(method -> method.getParameterTypes()[0].equals(String.class))
-                .findFirst();
     }
 }

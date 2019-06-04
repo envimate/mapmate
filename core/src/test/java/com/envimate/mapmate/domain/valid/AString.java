@@ -34,7 +34,7 @@ public final class AString implements Serializable {
     }
 
     public static AString fromString(final String value) {
-        if(value.contains("~")) {
+        if (value.contains("~")) {
             throw AnException.anException("value must not contain '~'");
         }
         return new AString(value);

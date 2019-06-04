@@ -25,8 +25,8 @@ import com.envimate.mapmate.reflections.MethodName;
 
 import java.lang.reflect.Method;
 
-import static com.envimate.mapmate.reflections.MethodName.fromString;
 import static com.envimate.mapmate.deserialization.methods.DeserializationMethodNotCompatibleException.deserializationMethodNotCompatibleException;
+import static com.envimate.mapmate.reflections.MethodName.fromString;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
 public final class NamedFactoryMethodCPMethod implements DeserializationCPMethod {

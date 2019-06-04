@@ -22,9 +22,9 @@
 package com.envimate.mapmate.deserialization.builder;
 
 import com.envimate.mapmate.deserialization.*;
+import com.envimate.mapmate.deserialization.validation.*;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
-import com.envimate.mapmate.deserialization.validation.*;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -77,15 +77,15 @@ public final class DeserializerBuilder {
     }
 
     public DeserializerBuilder withJsonUnmarshaller(final Unmarshaller unmarshaller) {
-        return unmarshallingTheType(json()).using(unmarshaller);
+        return this.unmarshallingTheType(json()).using(unmarshaller);
     }
 
     public DeserializerBuilder withXmlUnmarshaller(final Unmarshaller unmarshaller) {
-        return unmarshallingTheType(xml()).using(unmarshaller);
+        return this.unmarshallingTheType(xml()).using(unmarshaller);
     }
 
     public DeserializerBuilder withYamlUnmarshaller(final Unmarshaller unmarshaller) {
-        return unmarshallingTheType(yaml()).using(unmarshaller);
+        return this.unmarshallingTheType(yaml()).using(unmarshaller);
     }
 
     public ScannablePackageBuilder thatScansThePackage(final String packageName) {

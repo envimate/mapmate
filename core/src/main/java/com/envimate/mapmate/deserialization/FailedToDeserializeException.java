@@ -29,15 +29,15 @@ public final class FailedToDeserializeException extends RuntimeException {
         this.targetCause = e;
     }
 
-    public Throwable getTargetCause() {
-        return this.targetCause;
-    }
-
     public static FailedToDeserializeException failedToDeserializeException(
             final Class<?> type,
             final String json,
             final Throwable e) {
         final String msg = String.format("failed to deserialize custom type '%s' from '%s'", type.getName(), json);
         return new FailedToDeserializeException(msg, e);
+    }
+
+    public Throwable getTargetCause() {
+        return this.targetCause;
     }
 }

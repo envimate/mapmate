@@ -26,8 +26,8 @@ import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import static com.envimate.mapmate.serialization.Serializer.aSerializer;
 import static com.envimate.mapmate.filters.ClassFilters.includingAll;
+import static com.envimate.mapmate.serialization.Serializer.aSerializer;
 
 class SerializerProvider implements Provider<Serializer> {
 

@@ -35,17 +35,17 @@ public final class Address {
 
     private final void validate() {
         final List<String> missingFields = new LinkedList<>();
-        if(this.country == null ) {
+        if (this.country == null) {
             missingFields.add("country");
         }
-        if(this.streetName == null) {
+        if (this.streetName == null) {
             missingFields.add("streetName");
         }
-        if(this.postalCode == null) {
+        if (this.postalCode == null) {
             missingFields.add("postalCode");
         }
 
-        if(!missingFields.isEmpty()) {
+        if (!missingFields.isEmpty()) {
             throw MissingParameterException.missingParameterException(missingFields);
         }
     }

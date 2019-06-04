@@ -40,7 +40,7 @@ public final class ANumber implements Serializable {
 
     public static ANumber fromString(final String value) {
         final Double number = Double.valueOf(value);
-        if(number > MAX_VALUE) {
+        if (number > MAX_VALUE) {
             throw AnException.anException("value cannot be over 50");
         }
         return new ANumber(number.intValue());

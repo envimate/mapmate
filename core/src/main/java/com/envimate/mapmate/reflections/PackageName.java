@@ -31,11 +31,11 @@ public final class PackageName {
         this.value = value;
     }
 
-    public String internalValueForMapping() {
-        return this.value;
-    }
-
     public static PackageName fromString(final String packageName) {
         return new PackageName(packageName);
+    }
+
+    public String internalValueForMapping() {
+        return this.value;
     }
 }

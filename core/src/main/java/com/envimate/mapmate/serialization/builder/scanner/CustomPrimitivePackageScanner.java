@@ -22,8 +22,8 @@
 package com.envimate.mapmate.serialization.builder.scanner;
 
 import com.envimate.mapmate.filters.ClassFilter;
-import com.envimate.mapmate.reflections.PackageName;
 import com.envimate.mapmate.filters.ScanablePackage;
+import com.envimate.mapmate.reflections.PackageName;
 import com.envimate.mapmate.serialization.SerializableCustomPrimitive;
 import com.envimate.mapmate.serialization.SerializableDefinitions;
 import com.envimate.mapmate.serialization.methods.SerializationCPMethod;

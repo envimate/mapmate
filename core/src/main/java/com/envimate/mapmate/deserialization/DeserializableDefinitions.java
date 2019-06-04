@@ -24,7 +24,9 @@ package com.envimate.mapmate.deserialization;
 import com.envimate.mapmate.Definition;
 import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 import static com.envimate.mapmate.deserialization.DeserializableCustomPrimitive.deserializableCustomPrimitive;
 import static com.envimate.mapmate.deserialization.UnknownReferenceException.fromType;
@@ -116,9 +118,9 @@ public final class DeserializableDefinitions {
     }
 
     public void validateNoUnsupportedOutgoingReferences() {
-        final Set<Class<?>> references = allReferences();
+        final Set<Class<?>> references = this.allReferences();
         for (final Class<?> reference : references) {
-            if (!getDefinitionForType(reference).isPresent()) {
+            if (!this.getDefinitionForType(reference).isPresent()) {
                 throw fromType(reference);
             }
         }

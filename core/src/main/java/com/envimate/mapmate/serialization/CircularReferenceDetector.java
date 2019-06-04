@@ -36,49 +36,6 @@ public final class CircularReferenceDetector {
     private static final int WRAPPER_COUNT = 10;
     private static final Set<Class<?>> WRAPPER_TYPES = getWrapperTypes();
 
-    /**
-     * Detect scans a given object for circular references in its publicly accessible fields recursively.
-     *
-     * @param subject to be scanned
-     * @throws CircularReferenceException if a circular reference is found.
-     */
-    void detect(final Object subject) {
-        if (Objects.isNull(subject)) {
-            return;
-        }
-        detect(subject, new ArrayList<>());
-    }
-
-    private void detect(final Object subject, final ArrayList<Object> references) {
-        final Class<?> type = subject.getClass();
-        final Field[] fields = type.getFields();
-        for (final Field field : fields) {
-            final Object value = readFieldValue(subject, field);
-            if (value != null) {
-                if (!isWrapperType(value.getClass())) {
-                    if (references.contains(value)) {
-                        final String message = String.format("a circular reference has been detected for objects of type %s",
-                                value.getClass().getName());
-                        throw new CircularReferenceException(message);
-                    } else {
-                        final ArrayList forkedReferences = (ArrayList) references.clone();
-                        forkedReferences.add(value);
-                        detect(value, forkedReferences);
-                    }
-                }
-            }
-        }
-    }
-
-    private Object readFieldValue(final Object subject, final Field field) {
-        try {
-            final Object value = field.get(subject);
-            return value;
-        } catch (final IllegalAccessException e) {
-            throw new UnsupportedOperationException("could not read field value", e);
-        }
-    }
-
     private static boolean isWrapperType(final Class<?> clazz) {
         return WRAPPER_TYPES.contains(clazz);
     }
@@ -96,5 +53,48 @@ public final class CircularReferenceDetector {
         ret.add(Void.class);
         ret.add(String.class);
         return ret;
+    }
+
+    /**
+     * Detect scans a given object for circular references in its publicly accessible fields recursively.
+     *
+     * @param subject to be scanned
+     * @throws CircularReferenceException if a circular reference is found.
+     */
+    void detect(final Object subject) {
+        if (Objects.isNull(subject)) {
+            return;
+        }
+        this.detect(subject, new ArrayList<>());
+    }
+
+    private void detect(final Object subject, final ArrayList<Object> references) {
+        final Class<?> type = subject.getClass();
+        final Field[] fields = type.getFields();
+        for (final Field field : fields) {
+            final Object value = this.readFieldValue(subject, field);
+            if (value != null) {
+                if (!isWrapperType(value.getClass())) {
+                    if (references.contains(value)) {
+                        final String message = String.format("a circular reference has been detected for objects of type %s",
+                                value.getClass().getName());
+                        throw new CircularReferenceException(message);
+                    } else {
+                        final ArrayList forkedReferences = (ArrayList) references.clone();
+                        forkedReferences.add(value);
+                        this.detect(value, forkedReferences);
+                    }
+                }
+            }
+        }
+    }
+
+    private Object readFieldValue(final Object subject, final Field field) {
+        try {
+            final Object value = field.get(subject);
+            return value;
+        } catch (final IllegalAccessException e) {
+            throw new UnsupportedOperationException("could not read field value", e);
+        }
     }
 }

@@ -32,8 +32,8 @@ import java.util.List;
 import java.util.Set;
 
 import static com.envimate.mapmate.deserialization.DeserializableCustomPrimitive.deserializableCustomPrimitive;
-import static com.envimate.mapmate.filters.ScanablePackage.scannablePackage;
 import static com.envimate.mapmate.deserialization.DeserializableDefinitions.withTheCustomPrimitives;
+import static com.envimate.mapmate.filters.ScanablePackage.scannablePackage;
 import static java.util.stream.Collectors.toSet;
 
 public final class CustomPrimitivePackageScanner implements PackageScanner {

@@ -55,6 +55,14 @@ public final class ExceptionTracker {
         return new ExceptionTracker(position, validationMappings, originalInput);
     }
 
+    private static Throwable resolveThrowable(final Throwable raw) {
+        if (raw instanceof InvocationTargetException) {
+            return ((InvocationTargetException) raw).getTargetException();
+        } else {
+            return raw;
+        }
+    }
+
     public void track(final Throwable e, final String messageProvidingDebugInformation) {
         final Throwable resolvedThrowable = resolveThrowable(e);
         final ExceptionMappingList exceptionMapping = this.validationMappings.get(resolvedThrowable.getClass())
@@ -72,11 +80,11 @@ public final class ExceptionTracker {
     }
 
     public ExceptionTracker stepIntoArray(final int index) {
-        return stepInto(format("[%d]", index));
+        return this.stepInto(format("[%d]", index));
     }
 
     public ValidationResult validationResult() {
-        return ValidationResult.validationResult(allValidationErrors());
+        return ValidationResult.validationResult(this.allValidationErrors());
     }
 
     private List<ValidationError> allValidationErrors() {
@@ -91,13 +99,5 @@ public final class ExceptionTracker {
 
     public String getWouldBePosition(final String elementName) {
         return this.position.next(elementName).render();
-    }
-
-    private static Throwable resolveThrowable(final Throwable raw) {
-        if (raw instanceof InvocationTargetException) {
-            return ((InvocationTargetException) raw).getTargetException();
-        } else {
-            return raw;
-        }
     }
 }

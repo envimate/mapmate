@@ -22,11 +22,11 @@
 package com.envimate.mapmate.deserialization.specs.givenwhenthen;
 
 import com.envimate.mapmate.deserialization.Deserializer;
+import com.envimate.mapmate.deserialization.validation.ValidationError;
 import com.envimate.mapmate.domain.valid.AComplexType;
 import com.envimate.mapmate.domain.valid.ANumber;
 import com.envimate.mapmate.domain.valid.AString;
 import com.envimate.mapmate.domain.valid.AnException;
-import com.envimate.mapmate.deserialization.validation.ValidationError;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 

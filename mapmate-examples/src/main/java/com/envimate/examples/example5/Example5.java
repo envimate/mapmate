@@ -27,7 +27,6 @@ import com.envimate.examples.example5.domain.auth.UserAuth;
 import com.envimate.examples.example5.domain.auth.UserName;
 import com.envimate.mapmate.deserialization.Deserializer;
 import com.envimate.mapmate.deserialization.Unmarshaller;
-import com.envimate.mapmate.serialization.Marshaller;
 import com.envimate.mapmate.serialization.Serializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;

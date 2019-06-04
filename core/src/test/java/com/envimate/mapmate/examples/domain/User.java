@@ -25,7 +25,8 @@ public final class User {
     public UserName userName;
     public EmailAddress emailAddress;
 
-    private User(final UserName userName, final EmailAddress emailAddress) {}
+    private User(final UserName userName, final EmailAddress emailAddress) {
+    }
 
     public static User from(final UserName userName, final EmailAddress emailAddress) {
         return new User(userName, emailAddress);

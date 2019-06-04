@@ -54,22 +54,22 @@ public final class Address {
             final CityName city,
             final Region region,
             final Country country) {
-        if(Objects.isNull(streetName)) {
+        if (Objects.isNull(streetName)) {
             throw new IllegalArgumentException("streetName must not be null");
         }
-        if(Objects.isNull(houseNumber)) {
+        if (Objects.isNull(houseNumber)) {
             throw new IllegalArgumentException("houseNumber must not be null");
         }
-        if(Objects.isNull(zipCode)) {
+        if (Objects.isNull(zipCode)) {
             throw new IllegalArgumentException("zipCode must not be null");
         }
-        if(Objects.isNull(city)) {
+        if (Objects.isNull(city)) {
             throw new IllegalArgumentException("city must not be null");
         }
-        if(Objects.isNull(region)) {
+        if (Objects.isNull(region)) {
             throw new IllegalArgumentException("region must not be null");
         }
-        if(Objects.isNull(country)) {
+        if (Objects.isNull(country)) {
             throw new IllegalArgumentException("country must not be null");
         }
         return new Address(streetName, houseNumber, zipCode, city, region, country);

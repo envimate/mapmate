@@ -31,22 +31,22 @@ import static org.junit.Assert.assertThat;
 @SuppressWarnings("deprecation")
 public final class MapmateTest {
 
-    @Test
-    public void ensureThatMethodParameterNamesAreAvailableThroughReflection() {
-        assertThat("javac command line option -parameters must be in use", isPresent(), is(true));
-    }
-
     private static boolean isPresent() {
         try {
             final Method m = MapmateTest.class.getMethod("isPresent0", Object.class);
             return isPresent0(null) & m.getParameters()[0].isNamePresent();
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }
 
     public static boolean isPresent0(final Object param1) {
         return true;
+    }
+
+    @Test
+    public void ensureThatMethodParameterNamesAreAvailableThroughReflection() {
+        assertThat("javac command line option -parameters must be in use", isPresent(), is(true));
     }
 
 }

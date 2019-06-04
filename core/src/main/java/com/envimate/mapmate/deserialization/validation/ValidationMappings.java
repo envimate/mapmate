@@ -35,12 +35,16 @@ public final class ValidationMappings {
         this.validationMappings = new HashMap<>(0);
     }
 
+    public static ValidationMappings empty() {
+        return new ValidationMappings();
+    }
+
     public void putOneToOne(final Class<? extends Throwable> exception, final ExceptionMappingWithPropertyPath m) {
-        putAll(exception, (t, p) -> List.of(m.map(t, p)));
+        this.putAll(exception, (t, p) -> List.of(m.map(t, p)));
     }
 
     public void putOneToMany(final Class<? extends Throwable> exception, final ExceptionMappingList m) {
-        putAll(exception, m);
+        this.putAll(exception, m);
     }
 
     private void putAll(final Class<? extends Throwable> exception, final ExceptionMappingList m) {
@@ -52,10 +56,6 @@ public final class ValidationMappings {
             map.addAll(map2);
             return map;
         });
-    }
-
-    public static ValidationMappings empty() {
-        return new ValidationMappings();
     }
 
     public Optional<ExceptionMappingList> get(final Class<? extends Throwable> throwable) {

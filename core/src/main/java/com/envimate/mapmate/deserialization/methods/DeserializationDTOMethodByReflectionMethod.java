@@ -44,10 +44,10 @@ public final class DeserializationDTOMethodByReflectionMethod implements Deseria
     private final Parameter[] parameters;
 
     public static DeserializationDTOMethodByReflectionMethod usingMethod(final Method factoryMethod) {
-        if(Objects.isNull(factoryMethod)) {
+        if (Objects.isNull(factoryMethod)) {
             throw new IllegalArgumentException("factoryMethod parameter is required");
         }
-        if(!Modifier.isStatic(factoryMethod.getModifiers())) {
+        if (!Modifier.isStatic(factoryMethod.getModifiers())) {
             throw new IllegalArgumentException(String.format(
                     "factoryMethod %s must be a static method",
                     factoryMethod

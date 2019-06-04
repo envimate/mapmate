@@ -53,7 +53,7 @@ public final class Address {
     }
 
     private final void validate() {
-        if(this.country == null) {
+        if (this.country == null) {
             throw RequiredParameterException.requiredParameterException("country");
         }
     }

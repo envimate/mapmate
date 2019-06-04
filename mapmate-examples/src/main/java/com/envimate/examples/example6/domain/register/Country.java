@@ -27,18 +27,18 @@ public final class Country {
 
     private final String value;
 
-    private Country(String value) {
+    private Country(final String value) {
         this.value = value;
     }
 
-    public static final Country fromString(String value) {
+    public static final Country fromString(final String value) {
         final Country country = new Country(value);
         country.validate();
         return country;
     }
 
     private void validate() {
-        if(this.value != "United Kingdom") {
+        if (this.value != "United Kingdom") {
             throw CountryNotSupportedException.countryNotSupportedException(this.value);
         }
     }

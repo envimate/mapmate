@@ -29,7 +29,7 @@ public final class AComplexValidatedType {
     }
 
     public static AComplexValidatedType aComplexValidatedType(final AValidatedString leaf) {
-        if(leaf == null) {
+        if (leaf == null) {
             throw AValidationException.aValidationException("leaf cannot be null", "leaf");
         }
         return new AComplexValidatedType(leaf);

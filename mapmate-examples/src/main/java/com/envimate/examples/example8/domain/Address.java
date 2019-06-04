@@ -27,9 +27,9 @@ import java.util.Optional;
 
 public class Address {
 
-    private final transient EventBus eventBus;
     public final Street street;
     public final City city;
+    private final transient EventBus eventBus;
 
     private Address(final EventBus eventBus, final Street street, final City city) {
         this.eventBus = eventBus;

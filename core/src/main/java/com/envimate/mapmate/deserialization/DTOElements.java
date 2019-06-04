@@ -42,7 +42,7 @@ public final class DTOElements {
         return this.elements.values()
                 .stream()
                 .map(type -> {
-                    if(type.isArray()) {
+                    if (type.isArray()) {
                         return type.getComponentType();
                     }
                     return type;

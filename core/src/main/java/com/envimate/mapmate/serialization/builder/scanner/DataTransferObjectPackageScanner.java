@@ -22,8 +22,8 @@
 package com.envimate.mapmate.serialization.builder.scanner;
 
 import com.envimate.mapmate.filters.ClassFilter;
-import com.envimate.mapmate.reflections.PackageName;
 import com.envimate.mapmate.filters.ScanablePackage;
+import com.envimate.mapmate.reflections.PackageName;
 import com.envimate.mapmate.serialization.SerializableDataTransferObject;
 import com.envimate.mapmate.serialization.SerializableDefinitions;
 import com.envimate.mapmate.serialization.methods.SerializationDTOMethod;
@@ -41,7 +41,7 @@ public final class DataTransferObjectPackageScanner implements PackageScanner {
     private final SerializationDTOMethod serializationDTOMethod;
 
     private DataTransferObjectPackageScanner(final List<ClassFilter> classFilters,
-                                            final SerializationDTOMethod serializationDTOMethod) {
+                                             final SerializationDTOMethod serializationDTOMethod) {
         this.classFilters = classFilters;
         this.serializationDTOMethod = serializationDTOMethod;
     }

@@ -93,7 +93,7 @@ public final class SerializerTest {
     @Test
     public void givenComplexDomainWithCollections_whenSerializing_thenReturnsJsonString() {
         final AComplexTypeWithCollections given = AComplexTypeWithCollections.aComplexTypeWithCollection(
-                Lists.of(new AString[] {
+                Lists.of(new AString[]{
                         AString.fromString("a"),
                         AString.fromString("b"),
                         AString.fromString("c")}),
@@ -226,10 +226,6 @@ public final class SerializerTest {
         assertThat(result, is(equalTo("{\"number1\":\"1\",\"stringA\":\"a\"}")));
     }
 
-    public static class ANonConfiguredDomain {
-
-    }
-
     @Test
     public void givenComplexDomainUsingCustomDTOMethod_whenSerializing_thenReturnsJsonString() {
         final Serializer serializer = aSerializer()
@@ -335,5 +331,9 @@ public final class SerializerTest {
             return input;
         });
         assertThat(result, is(equalTo("{\"number1\":\"1\",\"number2\":\"2\",\"stringA\":\"test\",\"stringB\":\"b\"}")));
+    }
+
+    public static class ANonConfiguredDomain {
+
     }
 }

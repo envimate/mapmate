@@ -34,7 +34,7 @@ public final class AScannableString implements Serializable {
     }
 
     public static AScannableString fromString(final String value) {
-        if(value.contains("~")) {
+        if (value.contains("~")) {
             throw AnException.anException("value must not contain '~'");
         }
         return new AScannableString(value);

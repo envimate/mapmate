@@ -25,15 +25,10 @@ import com.envimate.examples.example1.domain.auth.UserAuth;
 import com.envimate.examples.example6.domain.auth.UserAuthDTO;
 import com.envimate.examples.example6.domain.register.HouseNrAddition;
 import com.envimate.examples.example6.domain.user.*;
-import com.envimate.examples.utils.Utils;
 import com.envimate.mapmate.DefinitionNotFoundException;
 import com.envimate.mapmate.serialization.CircularReferenceException;
 import com.envimate.mapmate.serialization.Serializer;
-import com.envimate.mapmate.serialization.methods.SerializationCPMethod;
-import com.envimate.mapmate.serialization.methods.SerializationDTOMethod;
 import com.google.gson.Gson;
-
-import java.util.function.Function;
 
 import static com.envimate.mapmate.filters.ClassFilters.allBut;
 import static com.envimate.mapmate.filters.ClassFilters.allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed;
@@ -71,14 +66,14 @@ public final class Example6 {
         final Serializer serializer = aSerializer()
                 .withMarshaller(new Gson()::toJson)
                 .thatScansThePackage("com.envimate.examples.example6.domain")
-                    .forCustomPrimitives()
-                    .filteredBy(
-                            allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("getValue"))
-                    .thatAre().serializedUsingTheMethodNamed("getValue")
+                .forCustomPrimitives()
+                .filteredBy(
+                        allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("getValue"))
+                .thatAre().serializedUsingTheMethodNamed("getValue")
                 .thatScansThePackage("com.envimate.examples.example6.domain")
-                    .forDataTransferObjects()
-                    .identifiedByClassNameSuffix("DTO")
-                    .thatAre().serializedByItsPublicFields()
+                .forDataTransferObjects()
+                .identifiedByClassNameSuffix("DTO")
+                .thatAre().serializedByItsPublicFields()
                 .build();
 
         System.out.println(serializer.getDefinitions());
@@ -91,17 +86,17 @@ public final class Example6 {
         final Serializer serializer = aSerializer()
                 .withMarshaller(new Gson()::toJson)
                 .thatScansThePackage("com.envimate.examples.example6.domain")
-                    .forCustomPrimitives()
-                    .filteredBy(
-                            allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("getValue"))
-                    .excluding(HouseNrAddition.class)
-                    .thatAre().serializedUsingTheMethodNamed("getValue")
+                .forCustomPrimitives()
+                .filteredBy(
+                        allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("getValue"))
+                .excluding(HouseNrAddition.class)
+                .thatAre().serializedUsingTheMethodNamed("getValue")
                 .withCustomPrimitive(HouseNrAddition.class)
-                    .serializedUsingTheMethodNamed("getValue")
+                .serializedUsingTheMethodNamed("getValue")
                 .withDataTransferObject(UserAuthDTO.class)
-                    .serializedByItsPublicFields()
+                .serializedByItsPublicFields()
                 .withDataTransferObject(UserAuthDTO.class)
-                    .serializedByItsPublicFields()
+                .serializedByItsPublicFields()
                 .build();
 
         System.out.println(serializer.getDefinitions());
@@ -115,12 +110,12 @@ public final class Example6 {
         final Serializer serializer = aSerializer()
                 .withMarshaller(new Gson()::toJson)
                 .thatScansThePackage("com.envimate.examples.example6.domain")
-                    .forCustomPrimitives()
-                    .filteredBy(
-                            allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("getValue"))
-                    .thatAre().serializedUsingTheMethodNamed("getValue")
+                .forCustomPrimitives()
+                .filteredBy(
+                        allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("getValue"))
+                .thatAre().serializedUsingTheMethodNamed("getValue")
                 .withDataTransferObject(User.class)
-                    .serializedByItsPublicFields()
+                .serializedByItsPublicFields()
                 .build();
 
         final User user = User.user(
@@ -132,7 +127,7 @@ public final class Example6 {
 
         try {
             serializer.serialize(user);
-        } catch(final CircularReferenceException e) {
+        } catch (final CircularReferenceException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -145,16 +140,16 @@ public final class Example6 {
         final Serializer serializer = aSerializer()
                 .withMarshaller(new Gson()::toJson)
                 .thatScansThePackage("com.envimate.examples.example6.domain")
-                    .forCustomPrimitives()
-                    .filteredBy(
-                            allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("getValue"))
-                    .excluding(AccountId.class)
-                    .thatAre().serializedUsingTheMethodNamed("getValue")
+                .forCustomPrimitives()
+                .filteredBy(
+                        allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("getValue"))
+                .excluding(AccountId.class)
+                .thatAre().serializedUsingTheMethodNamed("getValue")
                 .thatScansThePackage("com.envimate.examples.example6.domain")
-                    .forDataTransferObjects()
-                    .filteredBy(
-                            allBut(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("getValue")))
-                    .thatAre().serializedByItsPublicFields()
+                .forDataTransferObjects()
+                .filteredBy(
+                        allBut(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("getValue")))
+                .thatAre().serializedByItsPublicFields()
                 .build();
 
         final UserAuthDTO userAuth = UserAuthDTO.userAuth(
@@ -163,7 +158,7 @@ public final class Example6 {
                 Password.fromString("mysecret123")
         );
 
-        try{
+        try {
             serializer.serialize(userAuth);
         } catch (final DefinitionNotFoundException e) {
             System.out.println(e.getMessage());
@@ -179,10 +174,10 @@ public final class Example6 {
         final Serializer serializer = aSerializer()
                 .withMarshaller(new Gson()::toJson)
                 .thatScansThePackage("com.envimate.examples.example6.domain")
-                      .forCustomPrimitives()
-                      .filteredBy(
-                            allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("getValue"))
-                      .thatAre().serializedUsingTheMethodNamed("getValue")
+                .forCustomPrimitives()
+                .filteredBy(
+                        allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("getValue"))
+                .thatAre().serializedUsingTheMethodNamed("getValue")
 //                    .thatAre().serializedUsingTheMethod(Utils::genericSerializer)
 //                    .thatAre().serializedUsing(new SerializationCPMethod() {
 //                        @Override
@@ -196,13 +191,13 @@ public final class Example6 {
 //                        }
 //                     })
                 .thatScansThePackage("com.envimate.examples.example6.domain")
-                      .forDataTransferObjects()
-                      .filteredBy(
-                            allBut(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("getValue")))
-                      .thatAre().serializedByItsPublicFields()
+                .forDataTransferObjects()
+                .filteredBy(
+                        allBut(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("getValue")))
+                .thatAre().serializedByItsPublicFields()
 //                    .thatAre().serializedUsing((object, serializerCallback) -> object.toString())
                 .withCustomPrimitive(AccountId.class)
-                      .serializedUsingTheMethodNamed("getValue")
+                .serializedUsingTheMethodNamed("getValue")
 //                    .serializedUsingTheMethod(Utils::genericSerializer)
 //                    .serializedUsing(new SerializationCPMethod() {
 //                        @Override
@@ -216,7 +211,7 @@ public final class Example6 {
 //                        }
 //                    })
                 .withDataTransferObject(UserAuth.class)
-                      .serializedByItsPublicFields()
+                .serializedByItsPublicFields()
 //                    .serializedUsing((o, serializerCallback) -> o.toString())
                 .build();
     }

@@ -29,7 +29,7 @@ public final class AComplexNestedValidatedType {
     }
 
     public static AComplexNestedValidatedType aComplexNestedValidatedType(final AComplexValidatedType node) {
-        if(node == null) {
+        if (node == null) {
             throw AValidationException.aValidationException("node cannot be null", "node");
         }
         return new AComplexNestedValidatedType(node);

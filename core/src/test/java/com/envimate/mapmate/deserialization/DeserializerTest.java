@@ -23,9 +23,9 @@ package com.envimate.mapmate.deserialization;
 
 import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
 import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
-import com.envimate.mapmate.domain.valid.*;
 import com.envimate.mapmate.deserialization.validation.AggregatedValidationException;
 import com.envimate.mapmate.deserialization.validation.ValidationError;
+import com.envimate.mapmate.domain.valid.*;
 import com.envimate.mapmate.validators.CustomTypeValidationException;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -53,6 +53,10 @@ import static org.hamcrest.core.IsNull.nullValue;
 
 @SuppressWarnings("CastToConcreteClass")
 public final class DeserializerTest {
+
+    private static AString aStaticProviderMethod(final String input) {
+        return fromString("test");
+    }
 
     @Test
     public void givenStringJson_whenDeserializing_thenReturnAStringObject() {
@@ -268,12 +272,12 @@ public final class DeserializerTest {
                 .filteredBy(allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument())
                 .thatAre().deserializedUsing(new DeserializationCPMethod() {
                     @Override
-                    public void verifyCompatibility(Class<?> targetType) {
+                    public void verifyCompatibility(final Class<?> targetType) {
                         return;
                     }
 
                     @Override
-                    public Object deserialize(String input, Class<?> targetType) throws Exception {
+                    public Object deserialize(final String input, final Class<?> targetType) throws Exception {
                         return null;
                     }
                 })
@@ -318,10 +322,6 @@ public final class DeserializerTest {
         final AComplexType result = deserializer.deserializeJson(given, AComplexType.class);
         assertThat(result.stringA.internalValueForMapping(), is(equalTo("test")));
         assertThat(result.stringB.internalValueForMapping(), is(equalTo("test")));
-    }
-
-    private static AString aStaticProviderMethod(final String input) {
-        return fromString("test");
     }
 
     @Test
@@ -378,12 +378,12 @@ public final class DeserializerTest {
                 .withCustomPrimitive(AString.class)
                 .deserializedUsing(new DeserializationCPMethod() {
                     @Override
-                    public void verifyCompatibility(Class<?> targetType) {
+                    public void verifyCompatibility(final Class<?> targetType) {
                         return;
                     }
 
                     @Override
-                    public Object deserialize(String input, Class<?> targetType) throws Exception {
+                    public Object deserialize(final String input, final Class<?> targetType) throws Exception {
                         return fromString("test");
                     }
                 })
@@ -426,7 +426,7 @@ public final class DeserializerTest {
                 .withDataTransferObject(AComplexType.class)
                 .deserializedUsing(targetType -> new DeserializationDTOMethod() {
                     @Override
-                    public Object deserialize(Class<?> targetType, Map<String, Object> elements) throws Exception {
+                    public Object deserialize(final Class<?> targetType, final Map<String, Object> elements) throws Exception {
                         return AComplexType.aComplexType(
                                 fromString("test"),
                                 fromString("test"),
@@ -435,7 +435,7 @@ public final class DeserializerTest {
                     }
 
                     @Override
-                    public Map<String, Class<?>> elements(Class<?> targetType) {
+                    public Map<String, Class<?>> elements(final Class<?> targetType) {
                         return new HashMap<>();
                     }
                 })

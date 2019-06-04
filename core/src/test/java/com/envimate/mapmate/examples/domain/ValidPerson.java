@@ -33,10 +33,10 @@ public final class ValidPerson {
     }
 
     public static ValidPerson person(final FullName fullName, final Address address) {
-        if(Objects.isNull(fullName)) {
+        if (Objects.isNull(fullName)) {
             throw new IllegalArgumentException("fullName must not be null");
         }
-        if(Objects.isNull(address)) {
+        if (Objects.isNull(address)) {
             throw new IllegalArgumentException("address must not be null");
         }
         return new ValidPerson(fullName, address);

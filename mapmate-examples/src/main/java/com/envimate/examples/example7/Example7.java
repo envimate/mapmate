@@ -26,13 +26,8 @@ import com.envimate.mapmate.deserialization.Deserializer;
 import com.envimate.mapmate.serialization.Serializer;
 import com.google.gson.Gson;
 
-import java.util.Map;
-import java.util.function.Function;
-
 import static com.envimate.mapmate.deserialization.Deserializer.aDeserializer;
-import static com.envimate.mapmate.filters.ClassFilters.allBut;
-import static com.envimate.mapmate.filters.ClassFilters.allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed;
-import static com.envimate.mapmate.filters.ClassFilters.allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument;
+import static com.envimate.mapmate.filters.ClassFilters.*;
 import static com.envimate.mapmate.serialization.Serializer.aSerializer;
 
 public final class Example7 {

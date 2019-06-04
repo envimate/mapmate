@@ -16,7 +16,7 @@ public final class UserEmail {
 
     public static final UserEmail fromString(String value) {
         final UserEmail userEmail = new UserEmail(value);
-        if(userEmail.isValid()) {
+        if (userEmail.isValid()) {
             return userEmail;
         } else {
             throw InvalidEmailException.invalidEmailException(value);
