@@ -272,12 +272,12 @@ public final class DeserializerTest {
                 .filteredBy(allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument())
                 .thatAre().deserializedUsing(new DeserializationCPMethod() {
                     @Override
-                    public void verifyCompatibility(Class<?> targetType) {
+                    public void verifyCompatibility(final Class<?> targetType) {
                         return;
                     }
 
                     @Override
-                    public Object deserialize(String input, Class<?> targetType) throws Exception {
+                    public Object deserialize(final String input, final Class<?> targetType) throws Exception {
                         return null;
                     }
                 })
@@ -378,12 +378,12 @@ public final class DeserializerTest {
                 .withCustomPrimitive(AString.class)
                 .deserializedUsing(new DeserializationCPMethod() {
                     @Override
-                    public void verifyCompatibility(Class<?> targetType) {
+                    public void verifyCompatibility(final Class<?> targetType) {
                         return;
                     }
 
                     @Override
-                    public Object deserialize(String input, Class<?> targetType) throws Exception {
+                    public Object deserialize(final String input, final Class<?> targetType) throws Exception {
                         return fromString("test");
                     }
                 })
@@ -426,7 +426,7 @@ public final class DeserializerTest {
                 .withDataTransferObject(AComplexType.class)
                 .deserializedUsing(targetType -> new DeserializationDTOMethod() {
                     @Override
-                    public Object deserialize(Class<?> targetType, Map<String, Object> elements) throws Exception {
+                    public Object deserialize(final Class<?> targetType, final Map<String, Object> elements) throws Exception {
                         return AComplexType.aComplexType(
                                 fromString("test"),
                                 fromString("test"),
@@ -435,7 +435,7 @@ public final class DeserializerTest {
                     }
 
                     @Override
-                    public Map<String, Class<?>> elements(Class<?> targetType) {
+                    public Map<String, Class<?>> elements(final Class<?> targetType) {
                         return new HashMap<>();
                     }
                 })

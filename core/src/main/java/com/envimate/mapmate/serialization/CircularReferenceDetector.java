@@ -65,14 +65,14 @@ public final class CircularReferenceDetector {
         if (Objects.isNull(subject)) {
             return;
         }
-        detect(subject, new ArrayList<>());
+        this.detect(subject, new ArrayList<>());
     }
 
     private void detect(final Object subject, final ArrayList<Object> references) {
         final Class<?> type = subject.getClass();
         final Field[] fields = type.getFields();
         for (final Field field : fields) {
-            final Object value = readFieldValue(subject, field);
+            final Object value = this.readFieldValue(subject, field);
             if (value != null) {
                 if (!isWrapperType(value.getClass())) {
                     if (references.contains(value)) {
@@ -82,7 +82,7 @@ public final class CircularReferenceDetector {
                     } else {
                         final ArrayList forkedReferences = (ArrayList) references.clone();
                         forkedReferences.add(value);
-                        detect(value, forkedReferences);
+                        this.detect(value, forkedReferences);
                     }
                 }
             }

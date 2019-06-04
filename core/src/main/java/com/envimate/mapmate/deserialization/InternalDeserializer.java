@@ -56,7 +56,7 @@ final class InternalDeserializer {
                       final Class<T> targetType,
                       final ExceptionTracker exceptionTracker,
                       final Injector injector) {
-        final T result = deserializeRecursive(input, targetType, exceptionTracker, injector);
+        final T result = this.deserializeRecursive(input, targetType, exceptionTracker, injector);
         final ValidationResult validationResult = exceptionTracker.validationResult();
         if (validationResult.hasValidationErrors()) {
             this.onValidationErrors.map(validationResult.validationErrors());
@@ -77,19 +77,19 @@ final class InternalDeserializer {
         }
 
         if (injected instanceof List) {
-            return deserializeArray((List) injected, targetType, exceptionTracker, injector);
+            return this.deserializeArray((List) injected, targetType, exceptionTracker, injector);
         }
         final Definition definition = this.definitions.getDefinitionForType(targetType)
                 .orElseThrow(() -> definitionNotFound(targetType));
         if (definition instanceof DeserializableDataTransferObject) {
-            return deserializeDataTransferObject(
+            return this.deserializeDataTransferObject(
                     (Map<String, Object>) injected,
                     (DeserializableDataTransferObject) definition,
                     exceptionTracker,
                     injector);
         }
         if (definition instanceof DeserializableCustomPrimitive) {
-            return deserializeCustomPrimitive(
+            return this.deserializeCustomPrimitive(
                     (String) injected,
                     (DeserializableCustomPrimitive) definition,
                     exceptionTracker);
@@ -116,7 +116,7 @@ final class InternalDeserializer {
             } else {
                 final Object elementInput = input.get(elementName);
                 if (elementInput != null) {
-                    final Object elementObject = deserializeRecursive(
+                    final Object elementObject = this.deserializeRecursive(
                             elementInput,
                             elementType,
                             exceptionTracker.stepInto(elementName),
@@ -164,7 +164,7 @@ final class InternalDeserializer {
         final Object[] output = (Object[]) newInstance(targetType.getComponentType(), input.size());
 
         for (int i = 0; i < input.size(); i++) {
-            output[i] = deserializeRecursive(
+            output[i] = this.deserializeRecursive(
                     input.get(i),
                     targetType.getComponentType(),
                     exceptionTracker.stepIntoArray(i),

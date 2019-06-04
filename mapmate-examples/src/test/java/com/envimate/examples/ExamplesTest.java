@@ -12,7 +12,7 @@ public final class ExamplesTest {
         try {
             final Method m = ExamplesTest.class.getMethod("isPresent0", Object.class);
             return isPresent0(null) & m.getParameters()[0].isNamePresent();
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }

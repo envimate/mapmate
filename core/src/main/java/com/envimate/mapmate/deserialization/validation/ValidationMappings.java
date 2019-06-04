@@ -40,11 +40,11 @@ public final class ValidationMappings {
     }
 
     public void putOneToOne(final Class<? extends Throwable> exception, final ExceptionMappingWithPropertyPath m) {
-        putAll(exception, (t, p) -> List.of(m.map(t, p)));
+        this.putAll(exception, (t, p) -> List.of(m.map(t, p)));
     }
 
     public void putOneToMany(final Class<? extends Throwable> exception, final ExceptionMappingList m) {
-        putAll(exception, m);
+        this.putAll(exception, m);
     }
 
     private void putAll(final Class<? extends Throwable> exception, final ExceptionMappingList m) {

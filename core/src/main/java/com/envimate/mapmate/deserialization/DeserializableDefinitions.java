@@ -118,9 +118,9 @@ public final class DeserializableDefinitions {
     }
 
     public void validateNoUnsupportedOutgoingReferences() {
-        final Set<Class<?>> references = allReferences();
+        final Set<Class<?>> references = this.allReferences();
         for (final Class<?> reference : references) {
-            if (!getDefinitionForType(reference).isPresent()) {
+            if (!this.getDefinitionForType(reference).isPresent()) {
                 throw fromType(reference);
             }
         }

@@ -80,11 +80,11 @@ public final class ExceptionTracker {
     }
 
     public ExceptionTracker stepIntoArray(final int index) {
-        return stepInto(format("[%d]", index));
+        return this.stepInto(format("[%d]", index));
     }
 
     public ValidationResult validationResult() {
-        return ValidationResult.validationResult(allValidationErrors());
+        return ValidationResult.validationResult(this.allValidationErrors());
     }
 
     private List<ValidationError> allValidationErrors() {

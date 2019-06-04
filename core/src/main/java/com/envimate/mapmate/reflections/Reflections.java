@@ -37,6 +37,7 @@ import static java.lang.reflect.Modifier.isStatic;
 import static java.util.Arrays.stream;
 
 public final class Reflections {
+
     private Reflections() {
     }
 

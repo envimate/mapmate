@@ -77,15 +77,15 @@ public final class DeserializerBuilder {
     }
 
     public DeserializerBuilder withJsonUnmarshaller(final Unmarshaller unmarshaller) {
-        return unmarshallingTheType(json()).using(unmarshaller);
+        return this.unmarshallingTheType(json()).using(unmarshaller);
     }
 
     public DeserializerBuilder withXmlUnmarshaller(final Unmarshaller unmarshaller) {
-        return unmarshallingTheType(xml()).using(unmarshaller);
+        return this.unmarshallingTheType(xml()).using(unmarshaller);
     }
 
     public DeserializerBuilder withYamlUnmarshaller(final Unmarshaller unmarshaller) {
-        return unmarshallingTheType(yaml()).using(unmarshaller);
+        return this.unmarshallingTheType(yaml()).using(unmarshaller);
     }
 
     public ScannablePackageBuilder thatScansThePackage(final String packageName) {

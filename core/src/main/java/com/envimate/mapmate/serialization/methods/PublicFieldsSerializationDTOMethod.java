@@ -49,7 +49,7 @@ public final class PublicFieldsSerializationDTOMethod implements SerializationDT
                     try {
                         final String name = field.getName();
                         final Object value = field.get(object);
-                        if (isNotTransient(field)) {
+                        if (this.isNotTransient(field)) {
                             final Object serializedValue = serializerCallback.apply(value);
                             normalizedChildren.put(name, serializedValue);
                         } else {
