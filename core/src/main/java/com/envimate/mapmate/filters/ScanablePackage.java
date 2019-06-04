@@ -21,20 +21,14 @@
 
 package com.envimate.mapmate.filters;
 
-import com.envimate.mapmate.filters.paths.ResourcesPathThatWorksForFilesystemsAndJars;
 import com.envimate.mapmate.reflections.PackageName;
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ScanResult;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-
-import static com.envimate.mapmate.filters.paths.ResourcesPathThatWorksForFilesystemsAndJars.getTransparently;
-import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
-import static java.lang.Class.forName;
-import static java.lang.Thread.currentThread;
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
 
 public final class ScanablePackage {
     private final List<Class<?>> types;
@@ -45,7 +39,7 @@ public final class ScanablePackage {
 
     public static ScanablePackage scannablePackage(final PackageName packageName,
                                                    final List<ClassFilter> filters) {
-        final Collection<Class<?>> classes = getClasses(packageName.internalValueForMapping());
+        final Collection<Class<?>> classes = findClasses(packageName.internalValueForMapping());
         final List<Class<?>> filteredClasses = new LinkedList<>();
         classes.forEach(c -> {
             for (final ClassFilter filter : filters) {
@@ -58,42 +52,13 @@ public final class ScanablePackage {
         return new ScanablePackage(filteredClasses);
     }
 
-    private static List<Class<?>> getClasses(final String packageName) {
-        try {
-            final ClassLoader classLoader = currentThread().getContextClassLoader();
-            validateNotNull(classLoader, "classLoader");
-            final String resourcesPath = packageNameToResourcesPath(packageName);
-            final ResourcesPathThatWorksForFilesystemsAndJars path = getTransparently(resourcesPath);
-            if (path.isDirectory()) {
-                return path.basenamesOfChildren().stream()
-                        .map(name -> getClasses(packageName + "." + name))
-                        .flatMap(Collection::stream)
-                        .collect(toList());
-            } else {
-                return convertClassResourcePathToClass(packageName);
-            }
-        } catch (final ClassNotFoundException e) {
-            final String message = String.format("Could not scan classpath for classes of package %s", packageName);
-            throw new UnsupportedOperationException(message, e);
+    private static List<Class<?>> findClasses(final String packageName) {
+        try (ScanResult scanResult = new ClassGraph()
+                .enableAllInfo()
+                .whitelistPackages(packageName)
+                .scan()) {
+            return scanResult.getAllClasses().loadClasses();
         }
-    }
-
-    private static List<Class<?>> convertClassResourcePathToClass(final String classResourcePath) throws ClassNotFoundException {
-        final String suffix = ".class";
-        if (classResourcePath.endsWith(suffix)) {
-            final int endIndex = classResourcePath.length() - suffix.length();
-            return singletonList(forName(classResourcePath.substring(0, endIndex)));
-        }
-        return new LinkedList<>();
-    }
-
-    private static String packageNameToResourcesPath(final String packageName) {
-        final boolean fix = packageName.endsWith(".class");
-        final String resourcesPath = packageName.replace('.', '/');
-        if (fix) {
-            return resourcesPath.replace("/class", ".class");
-        }
-        return resourcesPath;
     }
 
     public List<Class<?>> getTypes() {

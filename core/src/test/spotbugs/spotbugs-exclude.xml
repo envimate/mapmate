@@ -30,6 +30,11 @@
         <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE"/>
     </Match>
     <Match>
+        <Class name="com.envimate.mapmate.filters.ScanablePackage"/>
+        <Method name="findClasses"/>
+        <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE"/>
+    </Match>
+    <Match>
         <Class name="com.envimate.mapmate.MapmateTest"/>
         <Bug pattern="NS_DANGEROUS_NON_SHORT_CIRCUIT"/>
     </Match>
