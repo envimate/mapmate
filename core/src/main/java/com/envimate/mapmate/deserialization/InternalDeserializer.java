@@ -72,7 +72,7 @@ final class InternalDeserializer {
         if (injected != null && injected.getClass() == targetType) {
             return (T) injected;
         }
-        if(input == null) {
+        if (input == null) {
             return null;
         }
 

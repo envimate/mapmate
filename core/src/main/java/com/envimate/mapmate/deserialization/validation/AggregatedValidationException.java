@@ -34,7 +34,7 @@ public final class AggregatedValidationException extends RuntimeException {
 
     public static AggregatedValidationException fromList(final List<ValidationError> validationErrors) {
         final StringBuilder sb = new StringBuilder("deserialization encountered validation errors. ");
-        for(final ValidationError entry: validationErrors) {
+        for (final ValidationError entry : validationErrors) {
             sb.append(String.format("Validation error at '%s', %s; ",
                     entry.propertyPath,
                     entry.message));

@@ -22,20 +22,23 @@
 package com.envimate.mapmate.deserialization.methods;
 
 import com.envimate.mapmate.reflections.MethodName;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 import java.lang.reflect.Method;
 
-import static com.envimate.mapmate.reflections.MethodName.fromString;
 import static com.envimate.mapmate.deserialization.methods.DeserializationMethodNotCompatibleException.deserializationMethodNotCompatibleException;
+import static com.envimate.mapmate.reflections.MethodName.fromString;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class NamedFactoryMethodCPMethod implements DeserializationCPMethod {
 
     private final MethodName methodName;
-
-    private NamedFactoryMethodCPMethod(final MethodName methodName) {
-        this.methodName = methodName;
-    }
 
     public static DeserializationCPMethod theNamedFactoryMethodCPMethod(final String name) {
         final MethodName methodName = fromString(name);

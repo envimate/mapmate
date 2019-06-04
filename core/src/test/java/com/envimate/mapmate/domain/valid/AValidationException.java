@@ -30,11 +30,11 @@ public final class AValidationException extends RuntimeException {
         this.blamedField = blamedField;
     }
 
-    public String getBlamedField() {
-        return this.blamedField;
-    }
-
     public static AValidationException aValidationException(final String message, final String blamedField) {
         return new AValidationException(message, blamedField);
+    }
+
+    public String getBlamedField() {
+        return this.blamedField;
     }
 }

@@ -42,7 +42,7 @@ public final class DataTransferObjectPackageScanner implements PackageScanner {
     private final DeserializationDTOMethodFactory deserializationDTOMethodFactory;
 
     private DataTransferObjectPackageScanner(final List<ClassFilter> classFilters,
-                                            final DeserializationDTOMethodFactory deserializationDTOMethodFactory) {
+                                             final DeserializationDTOMethodFactory deserializationDTOMethodFactory) {
         this.classFilters = classFilters;
         this.deserializationDTOMethodFactory = deserializationDTOMethodFactory;
     }

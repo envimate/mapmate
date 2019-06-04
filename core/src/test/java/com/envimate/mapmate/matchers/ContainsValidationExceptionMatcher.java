@@ -38,6 +38,10 @@ public final class ContainsValidationExceptionMatcher extends BaseMatcher<Set<?>
         this.typ = typ;
     }
 
+    public static ContainsValidationExceptionMatcher containsValidationException(final String field, final Class<?> typ) {
+        return new ContainsValidationExceptionMatcher(field, typ);
+    }
+
     @Override
     public boolean matches(final Object o) {
         final Set<?> list = (Set) o;
@@ -60,9 +64,5 @@ public final class ContainsValidationExceptionMatcher extends BaseMatcher<Set<?>
                 .appendValue(this.field)
                 .appendValue(" of type ")
                 .appendValue(this.typ);
-    }
-
-    public static ContainsValidationExceptionMatcher containsValidationException(final String field, final Class<?> typ) {
-        return new ContainsValidationExceptionMatcher(field, typ);
     }
 }

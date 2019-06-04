@@ -43,7 +43,7 @@ public final class Example2 {
 
         try {
             final RegisterUserRequest registerUserRequest = deserializer.deserialize(json, RegisterUserRequest.class);
-        } catch(final AggregatedValidationException e) {
+        } catch (final AggregatedValidationException e) {
             e.getValidationErrors().forEach(error -> {
                 System.out.println(String.format("Message: '%s', for field '%s'",
                         error.message,

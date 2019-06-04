@@ -22,11 +22,11 @@
 package com.envimate.mapmate.injector;
 
 public interface InjectorLambda {
-    void setupInjector(Injector injector);
-
     static InjectorLambda noop() {
         return injector -> {
 
         };
     }
+
+    void setupInjector(Injector injector);
 }

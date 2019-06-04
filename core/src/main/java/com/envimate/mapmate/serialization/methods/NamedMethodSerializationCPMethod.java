@@ -49,22 +49,22 @@ public final class NamedMethodSerializationCPMethod implements SerializationCPMe
     public void verifyCompatibility(final Class<?> targetType) {
         try {
             final Method method = targetType.getMethod(this.methodName.internalValueForMapping());
-            if(method.getParameterCount() != 0) {
+            if (method.getParameterCount() != 0) {
                 throw serializationMethodNotCompatibleException("class '" + targetType.getName() + "' " +
                         "does not have a zero argument String method" +
                         " named '" + this.methodName.internalValueForMapping() + "'");
             }
-            if(method.getReturnType() != String.class) {
+            if (method.getReturnType() != String.class) {
                 throw serializationMethodNotCompatibleException("class '" + targetType.getName() + "' " +
                         "does not have a zero argument String method" +
                         " named '" + this.methodName.internalValueForMapping() + "'");
             }
-            if(!isPublic(method.getModifiers())) {
+            if (!isPublic(method.getModifiers())) {
                 throw serializationMethodNotCompatibleException("class '" + targetType.getName() + "'" +
                         " does not have a zero argument String method" +
                         " named '" + this.methodName.internalValueForMapping() + "'");
             }
-            if(isStatic(method.getModifiers())) {
+            if (isStatic(method.getModifiers())) {
                 throw serializationMethodNotCompatibleException("class '" + targetType.getName() + "'" +
                         " does not have a zero argument String method" +
                         " named '" + this.methodName.internalValueForMapping() + "'");

@@ -40,7 +40,7 @@ public final class AScannableNumber implements Serializable {
 
     public static AScannableNumber fromString(final String value) {
         final Integer integer = Integer.valueOf(value);
-        if(integer > MAX_VALUE) {
+        if (integer > MAX_VALUE) {
             throw AnException.anException("value cannot be over 50");
         }
         return new AScannableNumber(integer);

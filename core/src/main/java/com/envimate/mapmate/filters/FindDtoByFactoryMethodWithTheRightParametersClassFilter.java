@@ -19,27 +19,33 @@
  * under the License.
  */
 
-package com.envimate.mapmate.reflections;
+package com.envimate.mapmate.filters;
 
+import com.envimate.mapmate.reflections.FactoryMethodNotFoundException;
+import com.envimate.mapmate.reflections.MultipleFactoryMethodsException;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import static com.envimate.mapmate.validators.RequiredStringValidator.validateNotNullNorEmpty;
+import static com.envimate.mapmate.reflections.Reflections.findFactoryMethodWithClassFieldsAsParameters;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class MethodName {
-    private final String value;
+final class FindDtoByFactoryMethodWithTheRightParametersClassFilter implements ClassFilter {
 
-    public static MethodName fromString(final String methodName) {
-        validateNotNullNorEmpty(methodName, "methodName");
-        return new MethodName(methodName);
+    static ClassFilter findDtoByFactoryMethodWithTheRightParametersClassFilter() {
+        return new FindDtoByFactoryMethodWithTheRightParametersClassFilter();
     }
 
-    public String internalValueForMapping() {
-        return this.value;
+    @Override
+    public boolean include(final Class<?> type) {
+        try {
+            findFactoryMethodWithClassFieldsAsParameters(type);
+            return true;
+        } catch (final FactoryMethodNotFoundException | MultipleFactoryMethodsException e) {
+            return false;
+        }
     }
 }

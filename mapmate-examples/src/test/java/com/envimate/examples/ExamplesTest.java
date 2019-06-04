@@ -8,11 +8,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 public final class ExamplesTest {
-    @Test
-    public void ensureThatMethodParameterNamesAreAvailableThroughReflection() {
-        assertThat("javac command line option -parameters must be in use", isPresent(), is(true));
-    }
-
     private static boolean isPresent() {
         try {
             final Method m = ExamplesTest.class.getMethod("isPresent0", Object.class);
@@ -24,5 +19,10 @@ public final class ExamplesTest {
 
     public static boolean isPresent0(final Object param1) {
         return true;
+    }
+
+    @Test
+    public void ensureThatMethodParameterNamesAreAvailableThroughReflection() {
+        assertThat("javac command line option -parameters must be in use", isPresent(), is(true));
     }
 }

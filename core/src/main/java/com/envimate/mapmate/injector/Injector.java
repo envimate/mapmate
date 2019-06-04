@@ -33,6 +33,10 @@ public final class Injector {
         this.injections = new ArrayList<>(0);
     }
 
+    public static Injector empty() {
+        return new Injector();
+    }
+
     public Injector put(final String propertyName, final String value) {
         this.injections.add(Injection.fromPropertyNameAndValue(propertyName, value));
         return this;
@@ -56,10 +60,6 @@ public final class Injector {
     public Injector put(final Class<?> type, final Object instance) {
         this.injections.add(Injection.fromInstance(instance, type));
         return this;
-    }
-
-    public static Injector empty() {
-        return new Injector();
     }
 
     public Optional<Object> getInjectionForPropertyPath(final String position, final Class<?> targetType) {
@@ -107,6 +107,18 @@ public final class Injector {
             this.recursive = false;
         }
 
+        static Injection fromPropertyNameAndValue(final String propertyName, final String value) {
+            return new Injection(propertyName, value, null, null);
+        }
+
+        static Injection fromPropertyNameAndInstance(final String propertyName, final Object instance, final Class<?> type) {
+            return new Injection(propertyName, null, instance, type);
+        }
+
+        static Injection fromInstance(final Object instance, final Class<?> type) {
+            return new Injection(null, null, instance, type);
+        }
+
         boolean containsPropertyName() {
             return this.propertyName != null;
         }
@@ -121,18 +133,6 @@ public final class Injector {
 
         public boolean isRecursive() {
             return this.recursive;
-        }
-
-        static Injection fromPropertyNameAndValue(final String propertyName, final String value) {
-            return new Injection(propertyName, value, null, null);
-        }
-
-        static Injection fromPropertyNameAndInstance(final String propertyName, final Object instance, final Class<?> type) {
-            return new Injection(propertyName, null, instance, type);
-        }
-
-        static Injection fromInstance(final Object instance, final Class<?> type) {
-            return new Injection(null, null, instance, type);
         }
     }
 }

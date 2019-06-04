@@ -22,12 +22,12 @@
 package com.envimate.mapmate;
 
 import com.envimate.mapmate.deserialization.Deserializer;
+import com.envimate.mapmate.deserialization.validation.ValidationError;
 import com.envimate.mapmate.domain.valid.AComplexTypeWithCollections;
 import com.envimate.mapmate.domain.valid.AComplexTypeWithMap;
 import com.envimate.mapmate.domain.valid.AValidationException;
 import com.envimate.mapmate.domain.valid.AnException;
 import com.envimate.mapmate.serialization.Serializer;
-import com.envimate.mapmate.deserialization.validation.ValidationError;
 import com.google.gson.Gson;
 
 import static com.envimate.mapmate.deserialization.Deserializer.aDeserializer;

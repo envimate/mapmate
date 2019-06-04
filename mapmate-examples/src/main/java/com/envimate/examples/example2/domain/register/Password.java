@@ -16,7 +16,7 @@ public final class Password {
 
     public static final Password fromString(String value) {
         final Password password = new Password(value);
-        if(password.isSecure()) {
+        if (password.isSecure()) {
             return password;
         } else {
             throw InsecurePasswordException.insecurePasswordException(value);

@@ -23,17 +23,20 @@ package com.envimate.mapmate.reflections;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.envimate.mapmate.reflections.FactoryMethodNotFoundException.factoryMethodNotFound;
 import static java.lang.invoke.MethodHandles.publicLookup;
+import static java.lang.reflect.Modifier.isStatic;
+import static java.util.Arrays.stream;
 
 public final class Reflections {
-
     private Reflections() {
     }
 
@@ -76,31 +79,12 @@ public final class Reflections {
                 .filter(method -> method.getReturnType() == type);
     }
 
-    private static Method findFactoryMethodByName(final Class<?> type, final String methodName) {
-        final Collection<Method> factoryMethods = new ArrayList<>(0);
-        for (final Method method : type.getMethods()) {
-            if (method.getReturnType() == type &&
-                    (method.getModifiers() & Modifier.STATIC) != 0 &&
-                    method.getName().equals(methodName)) {
-                factoryMethods.add(method);
-            }
-        }
-
-        if (factoryMethods.size() > 1) {
-            throw MultipleFactoryMethodsException.multipleFactoryMethodsFound(type, methodName);
-        }
-
-        return factoryMethods.stream()
-                .findFirst()
-                .orElseThrow(() -> factoryMethodNotFound(type, methodName));
-    }
-
     public static boolean hasPublicStringMethodWithZeroArgumentsNamed(final Class<?> type, final String methodName) {
         final MethodType methodType = MethodType.methodType(String.class);
         try {
             publicLookup().findVirtual(type, methodName, methodType);
             return true;
-        } catch (NoSuchMethodException | IllegalAccessException e) {
+        } catch (final NoSuchMethodException | IllegalAccessException e) {
             return false;
         }
     }
@@ -111,11 +95,48 @@ public final class Reflections {
             final MethodHandle methodHandle = publicLookup()
                     .findVirtual(type, methodName, methodType);
             return methodHandle;
-        } catch (NoSuchMethodException | IllegalAccessException e) {
+        } catch (final NoSuchMethodException | IllegalAccessException e) {
             final String msg = String.format("a public method named '%s' could not be found on class '%s'",
                     methodName,
                     type.getName());
             throw new IllegalArgumentException(msg, e);
+        }
+    }
+
+    public static Method findFactoryMethodWithClassFieldsAsParameters(final Class<?> type) {
+        final Field[] declaredFields = type.getDeclaredFields();
+        final Method[] methods = type.getMethods();
+        final List<Method> factoryMethods = stream(methods)
+                .filter(method -> isStatic(method.getModifiers()))
+                .filter(method -> method.getReturnType().equals(type))
+                .filter(method -> {
+                    final Class<?>[] parameterTypes = method.getParameterTypes();
+                    if (parameterTypes.length == declaredFields.length) {
+                        for (Class<?> parameterType : parameterTypes) {
+                            if (parameterType.equals(String.class)) {
+                                return false;
+                            }
+                            final boolean contains = stream(declaredFields)
+                                    .anyMatch(
+                                            field -> field.getType().equals(parameterType)
+                                    );
+                            if (!contains) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }).collect(Collectors.toList());
+
+        final int factoryMethodsFound = factoryMethods.size();
+        if (factoryMethodsFound > 1) {
+            throw MultipleFactoryMethodsException.multipleFactoryMethodsFound(type);
+        } else if (factoryMethodsFound == 0) {
+            throw factoryMethodNotFound(type);
+        } else {
+            return factoryMethods.get(0);
         }
     }
 }

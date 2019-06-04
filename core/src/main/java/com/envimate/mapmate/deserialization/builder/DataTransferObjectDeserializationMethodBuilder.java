@@ -27,6 +27,7 @@ import java.util.function.Function;
 
 import static com.envimate.mapmate.deserialization.methods.NamedFactoryMethodDTODeserializationMethod.namedFactoryMethodDTODeserializationMethod;
 import static com.envimate.mapmate.deserialization.methods.SingleFactoryMethodDTODeserializationMethod.singleFactoryMethodDTODeserializationDTOMethod;
+import static com.envimate.mapmate.deserialization.methods.TheRightFactoryMethodDTODeserializationMethod.theRightFactoryMethodDTODeserializationDTOMethod;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
 public final class DataTransferObjectDeserializationMethodBuilder {
@@ -55,5 +56,9 @@ public final class DataTransferObjectDeserializationMethodBuilder {
     public DeserializerBuilder deserializedUsing(final DeserializationDTOMethodFactory methodFactory) {
         validateNotNull(methodFactory, "methodFactory");
         return this.resultConsumer.apply(methodFactory);
+    }
+
+    public DeserializerBuilder deserializedUsingTheFactoryMethodWithTheRightParameters() {
+        return deserializedUsing(theRightFactoryMethodDTODeserializationDTOMethod());
     }
 }

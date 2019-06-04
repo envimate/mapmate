@@ -78,10 +78,6 @@ public final class ScanablePackage {
         }
     }
 
-    public List<Class<?>> getTypes() {
-        return Collections.unmodifiableList(this.types);
-    }
-
     private static List<Class<?>> convertClassResourcePathToClass(final String classResourcePath) throws ClassNotFoundException {
         final String suffix = ".class";
         if (classResourcePath.endsWith(suffix)) {
@@ -98,5 +94,9 @@ public final class ScanablePackage {
             return resourcesPath.replace("/class", ".class");
         }
         return resourcesPath;
+    }
+
+    public List<Class<?>> getTypes() {
+        return Collections.unmodifiableList(this.types);
     }
 }

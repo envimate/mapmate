@@ -60,4 +60,8 @@ public final class CustomPrimitiveSerializationMethodBuilder<T> {
         validateNotNull(method, "method");
         return this.resultConsumer.apply(method);
     }
+
+    public SerializerBuilder serializedUsingTheSingleStringMethodWithZeroArguments() {
+        return null;
+    }
 }

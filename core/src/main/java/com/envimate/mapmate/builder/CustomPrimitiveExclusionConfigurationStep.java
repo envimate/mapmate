@@ -19,20 +19,19 @@
  * under the License.
  */
 
-package com.envimate.mapmate.examples.domain;
+package com.envimate.mapmate.builder;
 
-public final class EmailAddress {
-    private final String value;
+import com.envimate.mapmate.deserialization.Unmarshaller;
+import com.envimate.mapmate.serialization.Marshaller;
 
-    private EmailAddress(final String value) {
-        this.value = value;
-    }
+public interface CustomPrimitiveExclusionConfigurationStep {
+    CustomPrimitiveExclusionConfigurationStep serializedUsingMethodNamed(String methodName);
 
-    public static EmailAddress fromString(final String value) {
-        return new EmailAddress(value);
-    }
+    CustomPrimitiveExclusionConfigurationStep excludingPackages(String... packageNames);
 
-    public String internalValue() {
-        return this.value;
-    }
+    CustomPrimitiveExclusionConfigurationStep excludingClasses(String... classNames);
+
+    ExceptionConfigurationStep usingMarshallers(Marshaller marshaller, Unmarshaller unmarshaller);
+
+    DtoExclusionConfigurationStep withDtos();
 }

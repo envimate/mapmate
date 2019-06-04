@@ -36,6 +36,25 @@ public final class CircularReferenceDetector {
     private static final int WRAPPER_COUNT = 10;
     private static final Set<Class<?>> WRAPPER_TYPES = getWrapperTypes();
 
+    private static boolean isWrapperType(final Class<?> clazz) {
+        return WRAPPER_TYPES.contains(clazz);
+    }
+
+    private static Set<Class<?>> getWrapperTypes() {
+        final Set<Class<?>> ret = new HashSet<>(WRAPPER_COUNT);
+        ret.add(Boolean.class);
+        ret.add(Character.class);
+        ret.add(Byte.class);
+        ret.add(Short.class);
+        ret.add(Integer.class);
+        ret.add(Long.class);
+        ret.add(Float.class);
+        ret.add(Double.class);
+        ret.add(Void.class);
+        ret.add(String.class);
+        return ret;
+    }
+
     /**
      * Detect scans a given object for circular references in its publicly accessible fields recursively.
      *
@@ -77,24 +96,5 @@ public final class CircularReferenceDetector {
         } catch (final IllegalAccessException e) {
             throw new UnsupportedOperationException("could not read field value", e);
         }
-    }
-
-    private static boolean isWrapperType(final Class<?> clazz) {
-        return WRAPPER_TYPES.contains(clazz);
-    }
-
-    private static Set<Class<?>> getWrapperTypes() {
-        final Set<Class<?>> ret = new HashSet<>(WRAPPER_COUNT);
-        ret.add(Boolean.class);
-        ret.add(Character.class);
-        ret.add(Byte.class);
-        ret.add(Short.class);
-        ret.add(Integer.class);
-        ret.add(Long.class);
-        ret.add(Float.class);
-        ret.add(Double.class);
-        ret.add(Void.class);
-        ret.add(String.class);
-        return ret;
     }
 }

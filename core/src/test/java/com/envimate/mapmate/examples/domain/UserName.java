@@ -28,11 +28,11 @@ public final class UserName {
         this.value = value;
     }
 
-    public String internalValue() {
-        return this.value;
-    }
-
     public static UserName fromString(final String value) {
         return new UserName(value);
+    }
+
+    public String internalValue() {
+        return this.value;
     }
 }

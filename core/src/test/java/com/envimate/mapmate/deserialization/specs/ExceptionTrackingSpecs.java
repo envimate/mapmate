@@ -38,9 +38,10 @@ public final class ExceptionTrackingSpecs {
                 "  \"stringA\": \"asdf\",\n" +
                 "  \"stringB\": \"qwer\"\n" +
                 "}").as(json()).toTheExampleDto()
-                .anExceptionIsThrownWithAMessageContaining("Unrecognized exception deserializing field 'number1':" +
-                        " Exception calling deserialize(input: x) on definition " +
-                        "com.envimate.mapmate.deserialization.DeserializableCustomPrimitive");
+                .anExceptionIsThrownWithAMessageContaining("Unrecognized exception deserializing field 'number1': " +
+                        "Exception calling deserialize(input: x) on definition DeserializableCustomPrimitive(type=class " +
+                        "com.envimate.mapmate.domain.valid.ANumber, deserializationMethod=NamedFactoryMethodCPMethod(" +
+                        "methodName=MethodName(value=fromString)))");
     }
 
     @Test
@@ -67,9 +68,10 @@ public final class ExceptionTrackingSpecs {
                 "  \"stringA\": \"asdf\",\n" +
                 "  \"stringB\": \"qwer\"\n" +
                 "}").toTheExampleDto()
-                .anExceptionIsThrownWithAMessageContaining("Unrecognized exception deserializing field 'number1':" +
-                        " Exception calling deserialize(input: x) on definition " +
-                        "com.envimate.mapmate.deserialization.DeserializableCustomPrimitive");
+                .anExceptionIsThrownWithAMessageContaining("Unrecognized exception deserializing field 'number1': " +
+                        "Exception calling deserialize(input: x) on definition " +
+                        "DeserializableCustomPrimitive(type=class com.envimate.mapmate.domain.valid.ANumber, " +
+                        "deserializationMethod=NamedFactoryMethodCPMethod(methodName=MethodName(value=fromString)))");
     }
 
     @Test

@@ -23,15 +23,17 @@ package com.envimate.mapmate.deserialization;
 
 import com.envimate.mapmate.Definition;
 import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DeserializableCustomPrimitive<T> implements Definition {
     private final Class<T> type;
     private final DeserializationCPMethod deserializationMethod;
-
-    private DeserializableCustomPrimitive(final Class<T> type, final DeserializationCPMethod deserializationMethod) {
-        this.type = type;
-        this.deserializationMethod = deserializationMethod;
-    }
 
     public static <T> DeserializableCustomPrimitive<T> deserializableCustomPrimitive(
             final Class<T> type, final DeserializationCPMethod deserializationMethod) {

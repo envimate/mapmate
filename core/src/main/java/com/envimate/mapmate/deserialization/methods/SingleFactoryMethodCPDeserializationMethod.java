@@ -21,6 +21,11 @@
 
 package com.envimate.mapmate.deserialization.methods;
 
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
 import java.lang.reflect.Method;
 import java.util.Optional;
 
@@ -28,29 +33,12 @@ import static com.envimate.mapmate.deserialization.methods.DeserializationMethod
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.Arrays.stream;
 
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SingleFactoryMethodCPDeserializationMethod implements DeserializationCPMethod {
-
-    private SingleFactoryMethodCPDeserializationMethod() {
-    }
-
     public static DeserializationCPMethod theSingleFactoryMethodCPDeserializationMethod() {
         return new SingleFactoryMethodCPDeserializationMethod();
-    }
-
-    @Override
-    public void verifyCompatibility(final Class<?> targetType) {
-        final Optional<Method> method = findMethod(targetType);
-        if(!method.isPresent()) {
-            throw deserializationMethodNotCompatibleException("class '" + targetType.getName() + "' does not" +
-                    " have a static method with a single String argument");
-
-        }
-    }
-
-    @Override
-    public Object deserialize(final String input, final Class<?> targetType) throws Exception {
-        final Method method = findMethod(targetType).get();
-        return method.invoke(null, input);
     }
 
     private static Optional<Method> findMethod(final Class<?> type) {
@@ -61,5 +49,21 @@ public final class SingleFactoryMethodCPDeserializationMethod implements Deseria
                 .filter(method -> method.getParameterCount() == 1)
                 .filter(method -> method.getParameterTypes()[0].equals(String.class))
                 .findFirst();
+    }
+
+    @Override
+    public void verifyCompatibility(final Class<?> targetType) {
+        final Optional<Method> method = findMethod(targetType);
+        if (!method.isPresent()) {
+            throw deserializationMethodNotCompatibleException("class '" + targetType.getName() + "' does not" +
+                    " have a static method with a single String argument");
+
+        }
+    }
+
+    @Override
+    public Object deserialize(final String input, final Class<?> targetType) throws Exception {
+        final Method method = findMethod(targetType).get();
+        return method.invoke(null, input);
     }
 }

@@ -33,6 +33,15 @@ import java.util.function.Supplier;
 public final class When {
     private final Deserializer deserializer;
 
+    private static Then doDeserialization(final Supplier<Object> deserializer) {
+        try {
+            final Object result = deserializer.get();
+            return new Then(result, null);
+        } catch (final Exception e) {
+            return new Then(null, e);
+        }
+    }
+
     public AsStage theDeserializerDeserializes(final String input) {
         return marshallingType -> type ->
                 doDeserialization(() -> this.deserializer.deserialize(input, type, marshallingType));
@@ -44,14 +53,5 @@ public final class When {
             final Map<String, Object> map = new Gson().fromJson(jsonMap, Map.class);
             return doDeserialization(() -> this.deserializer.deserializeFromMap(map, type));
         };
-    }
-
-    private static Then doDeserialization(final Supplier<Object> deserializer) {
-        try {
-            final Object result = deserializer.get();
-            return new Then(result, null);
-        } catch (final Exception e) {
-            return new Then(null, e);
-        }
     }
 }

@@ -19,20 +19,36 @@
  * under the License.
  */
 
-package com.envimate.mapmate.examples.domain;
+package com.envimate.mapmate.builder;
 
-public final class EmailAddress {
-    private final String value;
+import com.envimate.mapmate.deserialization.Deserializer;
+import com.envimate.mapmate.serialization.Serializer;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-    private EmailAddress(final String value) {
-        this.value = value;
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public class MapMate {
+
+    private final Serializer serializer;
+    private final Deserializer deserializer;
+
+    public static MapMate mapMate(final Serializer serializer, final Deserializer deserializer) {
+        return new MapMate(serializer, deserializer);
     }
 
-    public static EmailAddress fromString(final String value) {
-        return new EmailAddress(value);
+    public static MapMateBuilderPublic aMapMate() {
+        return MapMateBuilder.mapMateBuilder();
     }
 
-    public String internalValue() {
-        return this.value;
+    public Serializer serializer() {
+        return this.serializer;
+    }
+
+    public Deserializer deserializer() {
+        return this.deserializer;
     }
 }

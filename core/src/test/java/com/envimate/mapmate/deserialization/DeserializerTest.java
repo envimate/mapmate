@@ -23,9 +23,9 @@ package com.envimate.mapmate.deserialization;
 
 import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
 import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
-import com.envimate.mapmate.domain.valid.*;
 import com.envimate.mapmate.deserialization.validation.AggregatedValidationException;
 import com.envimate.mapmate.deserialization.validation.ValidationError;
+import com.envimate.mapmate.domain.valid.*;
 import com.envimate.mapmate.validators.CustomTypeValidationException;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -53,6 +53,10 @@ import static org.hamcrest.core.IsNull.nullValue;
 
 @SuppressWarnings("CastToConcreteClass")
 public final class DeserializerTest {
+
+    private static AString aStaticProviderMethod(final String input) {
+        return fromString("test");
+    }
 
     @Test
     public void givenStringJson_whenDeserializing_thenReturnAStringObject() {
@@ -318,10 +322,6 @@ public final class DeserializerTest {
         final AComplexType result = deserializer.deserializeJson(given, AComplexType.class);
         assertThat(result.stringA.internalValueForMapping(), is(equalTo("test")));
         assertThat(result.stringB.internalValueForMapping(), is(equalTo("test")));
-    }
-
-    private static AString aStaticProviderMethod(final String input) {
-        return fromString("test");
     }
 
     @Test

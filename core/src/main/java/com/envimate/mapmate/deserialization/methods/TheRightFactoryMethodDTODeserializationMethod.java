@@ -19,20 +19,24 @@
  * under the License.
  */
 
-package com.envimate.mapmate.examples.domain;
+package com.envimate.mapmate.deserialization.methods;
 
-public final class EmailAddress {
-    private final String value;
+import com.envimate.mapmate.reflections.Reflections;
 
-    private EmailAddress(final String value) {
-        this.value = value;
+import java.lang.reflect.Method;
+
+public final class TheRightFactoryMethodDTODeserializationMethod implements DeserializationDTOMethodFactory {
+
+    private TheRightFactoryMethodDTODeserializationMethod() {
     }
 
-    public static EmailAddress fromString(final String value) {
-        return new EmailAddress(value);
+    public static DeserializationDTOMethodFactory theRightFactoryMethodDTODeserializationDTOMethod() {
+        return new TheRightFactoryMethodDTODeserializationMethod();
     }
 
-    public String internalValue() {
-        return this.value;
+    @Override
+    public DeserializationDTOMethod createFor(final Class<?> targetType) {
+        final Method method = Reflections.findFactoryMethodWithClassFieldsAsParameters(targetType);
+        return DeserializationDTOMethodByReflectionMethod.usingMethod(method);
     }
 }

@@ -48,19 +48,19 @@ public final class FullName {
             final LastName lastName,
             final LastNamePrefix lastNamePrefix,
             final MiddleName[] middleNames) {
-        if(Objects.isNull(firstName)) {
+        if (Objects.isNull(firstName)) {
             throw new IllegalArgumentException("firstName must not be null");
         }
-        if(Objects.isNull(lastName)) {
+        if (Objects.isNull(lastName)) {
             throw new IllegalArgumentException("lastName must not be null");
         }
 
         MiddleName[] names = middleNames;
         LastNamePrefix prefix = lastNamePrefix;
-        if(names == null) {
+        if (names == null) {
             names = new MiddleName[]{};
         }
-        if(prefix == null) {
+        if (prefix == null) {
             prefix = LastNamePrefix.fromString("");
         }
 

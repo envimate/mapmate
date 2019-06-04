@@ -19,20 +19,8 @@
  * under the License.
  */
 
-package com.envimate.mapmate.examples.domain;
+package com.envimate.mapmate.builder;
 
-public final class EmailAddress {
-    private final String value;
-
-    private EmailAddress(final String value) {
-        this.value = value;
-    }
-
-    public static EmailAddress fromString(final String value) {
-        return new EmailAddress(value);
-    }
-
-    public String internalValue() {
-        return this.value;
-    }
+public interface MapMateBuilderPublic {
+    FirstStep forPackage(String packageName);
 }

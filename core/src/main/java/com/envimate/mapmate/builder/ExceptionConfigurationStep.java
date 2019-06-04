@@ -19,20 +19,15 @@
  * under the License.
  */
 
-package com.envimate.mapmate.examples.domain;
+package com.envimate.mapmate.builder;
 
-public final class EmailAddress {
-    private final String value;
+import com.envimate.mapmate.deserialization.validation.ExceptionMappingWithPropertyPath;
 
-    private EmailAddress(final String value) {
-        this.value = value;
-    }
+public interface ExceptionConfigurationStep {
+    LastStep withExceptionIndicatingValidationError(Class<? extends Throwable> exceptionIndicatingValidationError);
 
-    public static EmailAddress fromString(final String value) {
-        return new EmailAddress(value);
-    }
+    LastStep withExceptionIndicatingValidationError(Class<? extends Throwable> exceptionIndicatingValidationError,
+                                                    ExceptionMappingWithPropertyPath exceptionMapping);
 
-    public String internalValue() {
-        return this.value;
-    }
+    MapMate build();
 }

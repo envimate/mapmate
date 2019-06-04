@@ -45,7 +45,7 @@ public final class AComplexTypeWithValidations {
             final AString stringB,
             final ANumber number1,
             final ANumber number2) {
-        if(number1.isLowerThen(MINIMUM_VALUE)) {
+        if (number1.isLowerThen(MINIMUM_VALUE)) {
             throw AnException.anException("number1 must not be lower then 20");
         }
         return new AComplexTypeWithValidations(stringA, stringB, number1, number2);

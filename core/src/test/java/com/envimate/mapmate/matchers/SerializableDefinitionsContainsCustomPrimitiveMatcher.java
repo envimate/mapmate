@@ -45,7 +45,7 @@ public final class SerializableDefinitionsContainsCustomPrimitiveMatcher extends
         final SerializableDefinitions definitions = (SerializableDefinitions) o;
         final Definition definition = definitions.getDefinitionForType(this.typ);
 
-        if(definition == null) {
+        if (definition == null) {
             return false;
         }
 

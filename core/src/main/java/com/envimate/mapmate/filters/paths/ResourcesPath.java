@@ -55,6 +55,13 @@ final class ResourcesPath implements ResourcesPathThatWorksForFilesystemsAndJars
         }
     }
 
+    private static String cleanBasename(final String dirtyBasename) {
+        if (dirtyBasename.endsWith("/")) {
+            return dirtyBasename.substring(0, dirtyBasename.length() - 1);
+        }
+        return dirtyBasename;
+    }
+
     @Override
     public boolean isDirectory() {
         return Files.isDirectory(this.path);
@@ -83,12 +90,5 @@ final class ResourcesPath implements ResourcesPathThatWorksForFilesystemsAndJars
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static String cleanBasename(final String dirtyBasename) {
-        if (dirtyBasename.endsWith("/")) {
-            return dirtyBasename.substring(0, dirtyBasename.length() - 1);
-        }
-        return dirtyBasename;
     }
 }

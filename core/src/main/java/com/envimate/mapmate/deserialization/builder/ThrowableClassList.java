@@ -35,6 +35,10 @@ public final class ThrowableClassList {
         this.exceptions = new ArrayList<>(0);
     }
 
+    public static ThrowableClassList empty() {
+        return new ThrowableClassList();
+    }
+
     public void add(final Class<? extends Throwable> exception) {
         this.exceptions.add(exception);
     }
@@ -48,9 +52,5 @@ public final class ThrowableClassList {
         return this.exceptions.stream()
                 .filter(e -> Collections.frequency(this.exceptions, e) > 1)
                 .collect(Collectors.toSet());
-    }
-
-    public static ThrowableClassList empty() {
-        return new ThrowableClassList();
     }
 }

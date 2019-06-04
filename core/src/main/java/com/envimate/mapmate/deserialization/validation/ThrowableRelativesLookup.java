@@ -21,7 +21,10 @@
 
 package com.envimate.mapmate.deserialization.validation;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 final class ThrowableRelativesLookup {
 
@@ -34,8 +37,12 @@ final class ThrowableRelativesLookup {
         this.traverseRelatives(clazz);
     }
 
+    static ThrowableRelativesLookup fromThrowable(final Class<? extends Throwable> clazz) {
+        return new ThrowableRelativesLookup(clazz);
+    }
+
     Class<? extends Throwable> closestRelativeFrom(final Collection<Class<? extends Throwable>> assignableClasses) {
-        for(final Class<? extends Throwable> relative : this.relatives) {
+        for (final Class<? extends Throwable> relative : this.relatives) {
             if (assignableClasses.stream()
                     .anyMatch(relative::equals)) {
                 return relative;
@@ -46,20 +53,16 @@ final class ThrowableRelativesLookup {
 
     @SuppressWarnings("unchecked")
     private void traverseRelatives(final Class<?> clazz) {
-        if(Throwable.class.isAssignableFrom(clazz)) {
+        if (Throwable.class.isAssignableFrom(clazz)) {
             this.relatives.add((Class<? extends Throwable>) clazz);
             final Class<?> superclass = clazz.getSuperclass();
             final Class<?>[] interfaces = clazz.getInterfaces();
 
             Arrays.stream(interfaces).forEach(this::traverseRelatives);
 
-            if(superclass != null) {
+            if (superclass != null) {
                 traverseRelatives(superclass);
             }
         }
-    }
-
-    static ThrowableRelativesLookup fromThrowable(final Class<? extends Throwable> clazz) {
-        return new ThrowableRelativesLookup(clazz);
     }
 }

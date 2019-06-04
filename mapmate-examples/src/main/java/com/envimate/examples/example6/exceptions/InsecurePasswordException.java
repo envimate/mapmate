@@ -21,7 +21,7 @@
 
 package com.envimate.examples.example6.exceptions;
 
-public final class InsecurePasswordException extends RuntimeException{
+public final class InsecurePasswordException extends RuntimeException {
 
     private final String value;
 

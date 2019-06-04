@@ -27,11 +27,10 @@ import java.util.Optional;
 
 public class User {
 
-    private final transient EventBus eventBus;
-
     public final AccountId accountId;
     public final UserName userName;
     public final Address address;
+    private final transient EventBus eventBus;
 
     private User(final EventBus eventBus, final AccountId accountId, final UserName userName, final Address address) {
         this.eventBus = eventBus;

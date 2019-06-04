@@ -17,7 +17,7 @@ public final class Country {
     }
 
     private void validate() {
-        if(!this.value.equals("United Kingdom")) {
+        if (!this.value.equals("United Kingdom")) {
             throw CountryNotSupportedException.countryNotSupportedException(this.value);
         }
     }

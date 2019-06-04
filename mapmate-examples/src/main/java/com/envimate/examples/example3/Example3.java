@@ -8,7 +8,6 @@ import com.envimate.mapmate.deserialization.validation.AggregatedValidationExcep
 import com.envimate.mapmate.deserialization.validation.ValidationError;
 import com.google.gson.Gson;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.envimate.mapmate.deserialization.Deserializer.aDeserializer;
@@ -37,8 +36,8 @@ public final class Example3 {
                 .thatAre().deserializedUsingTheStaticMethodWithSingleStringArgument()
                 .thatScansThePackage("com.envimate.examples.example3.domain")
                 .forDataTransferObjects()
-                    .filteredBy(allBut(allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument()))
-                    .thatAre().deserializedUsingTheSingleFactoryMethod()
+                .filteredBy(allBut(allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument()))
+                .thatAre().deserializedUsingTheSingleFactoryMethod()
                 .mappingExceptionUsing(CountryNotSupportedException.class, ValidationError::fromExceptionMessageAndPropertyPath)
                 .mappingExceptionUsing(MissingParameterException.class, ValidationError::fromExceptionMessageAndPropertyPath)
                 .onValidationErrors(validationErrors -> {

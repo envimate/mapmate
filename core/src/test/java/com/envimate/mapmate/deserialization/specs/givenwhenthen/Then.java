@@ -29,26 +29,23 @@ import lombok.RequiredArgsConstructor;
 import org.hamcrest.core.StringContains;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-@SuppressWarnings("deprecation")
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public final class Then {
     private final Object deserializationResult;
     private final Exception exception;
 
-    public Then theDeserializedObjectIsTheFullyInitializedExampleDto() {
+    public void theDeserializedObjectIsTheFullyInitializedExampleDto() {
         final AComplexType expected = AComplexType.aComplexType(
                 AString.fromString("asdf"),
                 AString.fromString("qwer"),
                 ANumber.fromInt(1),
                 ANumber.fromInt(5));
         assertThat(this.deserializationResult, is(expected));
-        return this;
     }
 
-    public Then anExceptionIsThrownWithAMessageContaining(final String message) {
+    public void anExceptionIsThrownWithAMessageContaining(final String message) {
         assertThat(this.exception.getMessage(), StringContains.containsString(message));
-        return this;
     }
 }

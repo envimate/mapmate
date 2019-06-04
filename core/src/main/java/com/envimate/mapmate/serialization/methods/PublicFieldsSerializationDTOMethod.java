@@ -46,20 +46,20 @@ public final class PublicFieldsSerializationDTOMethod implements SerializationDT
 
         stream(fields)
                 .forEach(field -> {
-            try {
-                final String name = field.getName();
-                final Object value = field.get(object);
-                if(isNotTransient(field)) {
-                    final Object serializedValue = serializerCallback.apply(value);
-                    normalizedChildren.put(name, serializedValue);
-                } else {
-                    normalizedChildren.put(name, null);
-                }
+                    try {
+                        final String name = field.getName();
+                        final Object value = field.get(object);
+                        if (isNotTransient(field)) {
+                            final Object serializedValue = serializerCallback.apply(value);
+                            normalizedChildren.put(name, serializedValue);
+                        } else {
+                            normalizedChildren.put(name, null);
+                        }
 
-            } catch (final IllegalAccessException e) {
-                throw fromException(e);
-            }
-        });
+                    } catch (final IllegalAccessException e) {
+                        throw fromException(e);
+                    }
+                });
 
         return normalizedChildren;
     }
