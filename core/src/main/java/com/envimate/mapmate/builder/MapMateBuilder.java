@@ -51,6 +51,8 @@ public final class MapMateBuilder implements FirstStep,
         LastStep {
 
     private static final String DEFAULT_CUSTOM_PRIMITIVE_SERIALIZATION_METHOD_NAME = "stringValue";
+    private static final String DEFAULT_CUSTOM_PRIMITIVE_DESERIALIZATION_METHOD_NAME = "fromString";
+    private String customPrimitiveDeserializationMethodName = DEFAULT_CUSTOM_PRIMITIVE_DESERIALIZATION_METHOD_NAME;
     private String packageName;
     private String customPrimitiveSerializationMethodName = DEFAULT_CUSTOM_PRIMITIVE_SERIALIZATION_METHOD_NAME;
     private List<String> customPrimitiveExclusionPackages = new LinkedList<>();
@@ -81,6 +83,12 @@ public final class MapMateBuilder implements FirstStep,
     @Override
     public CustomPrimitiveExclusionConfigurationStep serializedUsingMethodNamed(final String methodName) {
         this.customPrimitiveSerializationMethodName = methodName;
+        return this;
+    }
+
+    @Override
+    public CustomPrimitiveExclusionConfigurationStep deserializedUsingMethodNamed(final String methodName) {
+        this.customPrimitiveDeserializationMethodName = methodName;
         return this;
     }
 
@@ -156,7 +164,7 @@ public final class MapMateBuilder implements FirstStep,
                 .filteredBy(type -> !this.customPrimitiveExclusionPackages.contains(type.getPackageName()) &&
                         !this.customPrimitiveExclusionClasses.contains(type))
                 .thatAre()
-                .deserializedUsingTheStaticMethodWithSingleStringArgument()
+                .deserializedUsingTheMethodNamed(this.customPrimitiveDeserializationMethodName)
                 .withJsonUnmarshaller(this.unmarshaller)
                 .thatScansThePackage(this.packageName)
                 .forDataTransferObjects()

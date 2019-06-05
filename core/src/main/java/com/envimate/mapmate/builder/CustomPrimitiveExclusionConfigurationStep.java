@@ -27,6 +27,8 @@ import com.envimate.mapmate.serialization.Marshaller;
 public interface CustomPrimitiveExclusionConfigurationStep {
     CustomPrimitiveExclusionConfigurationStep serializedUsingMethodNamed(String methodName);
 
+    CustomPrimitiveExclusionConfigurationStep deserializedUsingMethodNamed(String methodName);
+
     CustomPrimitiveExclusionConfigurationStep excludingPackages(String... packageNames);
 
     CustomPrimitiveExclusionConfigurationStep excludingClasses(String... classNames);
