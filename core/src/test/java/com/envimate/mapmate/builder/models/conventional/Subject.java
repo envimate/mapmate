@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.builder.models.conventional;
 
+import com.envimate.mapmate.builder.validation.LengthValidator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +34,8 @@ public final class Subject {
     private final String value;
 
     public static Subject fromStringValue(final String value) {
-//        final String validated = LengthValidator.ensureLength(value, 1, 256, "subject");
-        return new Subject(value);
+        final String validated = LengthValidator.ensureLength(value, 1, 256, "subject");
+        return new Subject(validated);
     }
 
     public String stringValue() {

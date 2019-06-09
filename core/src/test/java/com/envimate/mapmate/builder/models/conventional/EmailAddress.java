@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.builder.models.conventional;
 
+import com.envimate.mapmate.builder.validation.EmailAddressValidator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +34,8 @@ public final class EmailAddress {
     private final String value;
 
     public static EmailAddress fromStringValue(final String value) {
-//        final String validated = EmailAddressValidator.ensureEmailAddress(value, "emailAddress");
-        return new EmailAddress(value);
+        final String validated = EmailAddressValidator.ensureEmailAddress(value, "emailAddress");
+        return new EmailAddress(validated);
     }
 
     public String stringValue() {

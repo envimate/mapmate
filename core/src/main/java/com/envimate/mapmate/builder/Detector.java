@@ -27,7 +27,7 @@ import com.envimate.mapmate.builder.definitions.SerializedObjectDefinition;
 import java.util.List;
 
 public interface Detector {
-    List<CustomPrimitiveDefinition> customPrimitives(final List<Class<?>> classes);
+    List<CustomPrimitiveDefinition> customPrimitives(List<Class<?>> classes);
 
-    List<SerializedObjectDefinition> serializedObjects(final List<Class<?>> classes);
+    List<SerializedObjectDefinition> serializedObjects(List<Class<?>> classes);
 }

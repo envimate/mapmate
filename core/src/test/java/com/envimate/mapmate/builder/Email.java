@@ -19,8 +19,11 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.models.conventional;
+package com.envimate.mapmate.builder;
 
+import com.envimate.mapmate.builder.models.customconvention.Body;
+import com.envimate.mapmate.builder.models.customconvention.EmailAddress;
+import com.envimate.mapmate.builder.models.customconvention.Subject;
 import com.envimate.mapmate.builder.validation.RequiredParameterValidator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -31,15 +34,15 @@ import lombok.ToString;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Email {
-    public final EmailAddress sender;
-    public final EmailAddress receiver;
-    public final Subject subject;
-    public final Body body;
+    public final com.envimate.mapmate.builder.models.customconvention.EmailAddress sender;
+    public final com.envimate.mapmate.builder.models.customconvention.EmailAddress receiver;
+    public final com.envimate.mapmate.builder.models.customconvention.Subject subject;
+    public final com.envimate.mapmate.builder.models.customconvention.Body body;
 
-    public static Email deserialize(final EmailAddress sender,
-                                    final EmailAddress receiver,
-                                    final Subject subject,
-                                    final Body body) {
+    public static Email restore(final com.envimate.mapmate.builder.models.customconvention.EmailAddress sender,
+                                final EmailAddress receiver,
+                                final Subject subject,
+                                final Body body) {
         RequiredParameterValidator.ensureNotNull(sender, "sender");
         RequiredParameterValidator.ensureNotNull(receiver, "receiver");
         RequiredParameterValidator.ensureNotNull(body, "body");

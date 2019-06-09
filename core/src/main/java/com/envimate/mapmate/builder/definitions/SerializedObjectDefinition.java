@@ -60,7 +60,6 @@ public final class SerializedObjectDefinition {
         return new SerializedObjectDefinition(type, serializer, deserializer);
     }
 
-
     public static SerializedObjectDefinition serializedObjectDefinition(final Class<?> type,
                                                                         final Field[] serializedFields,
                                                                         final Method deserializationMethod) {
@@ -79,73 +78,61 @@ public final class SerializedObjectDefinition {
     private static DeserializationDTOMethod createDeserializer(final Class<?> type,
                                                                final Field[] serializedFields,
                                                                final Method deserializationMethod) {
-        final int deserializationMethodModifiers = deserializationMethod.getModifiers();
-        if (!Modifier.isPublic(deserializationMethodModifiers)) {
-            throw incompatibleserializedObjectException(
-                    "The deserialization method %s configured for the SerializedObject of type %s must be public",
-                    deserializationMethod,
-                    type
-            );
-        }
-        if (!Modifier.isStatic(deserializationMethodModifiers)) {
-            throw incompatibleserializedObjectException(
-                    "The deserialization method %s configured for the SerializedObject of type %s must be static",
-                    deserializationMethod,
-                    type
-            );
-        }
-        if (Modifier.isAbstract(deserializationMethodModifiers)) {
-            throw incompatibleserializedObjectException(
-                    "The deserialization method %s configured for the SerializedObject of type %s must not be abstract",
-                    deserializationMethod,
-                    type
-            );
-        }
-        if (deserializationMethod.getReturnType() != type) {
-            throw incompatibleserializedObjectException(
-                    "The serialization method %s configured for the SerializedObject of type %s must return the DTO",
-                    deserializationMethod,
-                    type
-            );
-        }
-
+        validateDeserializaerModifiers(type, deserializationMethod);
         final Class<?>[] parameterTypes = deserializationMethod.getParameterTypes();
         if (serializedFields.length != parameterTypes.length) {
-            final String fieldsAsString;
-            if (serializedFields.length == 0) {
-                fieldsAsString = "[]";
-            } else {
+            String fieldsAsString = "[]";
+            if (serializedFields.length != 0) {
                 fieldsAsString = stream(serializedFields)
-                        .map(field -> Modifier.toString(field.getModifiers()) + " " + field.getType() + " " + field.getName())
+                        .map(field -> String.format(
+                                "%s %s %s",
+                                Modifier.toString(field.getModifiers()), field.getType(), field.getName()))
                         .collect(Collectors.joining(", "));
             }
             throw incompatibleserializedObjectException(
-                    "Number of parameters(%s) in the deserialization method(%s) provided for the SerializedObject(%s) differs " +
-                            "from the number of serializedFields(%s)",
-                    parameterTypes.length,
-                    deserializationMethod,
-                    type,
-                    fieldsAsString
-            );
+                    "Number of parameters(%s) in the deserialization method(%s) provided for the SerializedObject(%s) " +
+                            "differs from the number of serializedFields(%s)", parameterTypes.length,
+                    deserializationMethod, type, fieldsAsString);
         }
 
         for (final Field serializedField : serializedFields) {
             final boolean present = stream(parameterTypes).anyMatch(aClass -> serializedField.getType().equals(aClass));
             if (!present) {
                 throw incompatibleserializedObjectException(
-                        "The deserialization method(%s) configured for the SerializedObject(%s) does not contain the field(%s), but it's" +
-                                "registered for serialization.",
-                        deserializationMethod,
-                        type,
-                        serializedField
-                );
+                        "The deserialization method(%s) configured for the SerializedObject(%s) does not contain the " +
+                                "field(%s), but it's registered for serialization.",
+                        deserializationMethod, type, serializedField);
             }
         }
 
         final Map<String, Class<?>> elements = stream(serializedFields)
                 .collect(Collectors.toMap(Field::getName, Field::getType));
         return verifiedDeserializationDTOMethod(deserializationMethod, elements);
+    }
 
+    private static void validateDeserializaerModifiers(final Class<?> type, final Method deserializationMethod) {
+        final int deserializationMethodModifiers = deserializationMethod.getModifiers();
+
+        if (!Modifier.isPublic(deserializationMethodModifiers)) {
+            throw incompatibleserializedObjectException(
+                    "The deserialization method %s configured for the SerializedObject of type %s must be public",
+                    deserializationMethod, type);
+        }
+        if (!Modifier.isStatic(deserializationMethodModifiers)) {
+            throw incompatibleserializedObjectException(
+                    "The deserialization method %s configured for the SerializedObject of type %s must be static",
+                    deserializationMethod, type);
+        }
+        if (Modifier.isAbstract(deserializationMethodModifiers)) {
+            throw incompatibleserializedObjectException(
+                    "The deserialization method %s configured for the SerializedObject of type %s must not be abstract",
+                    deserializationMethod, type);
+        }
+        if (deserializationMethod.getReturnType() != type) {
+            throw incompatibleserializedObjectException(
+                    "The serialization method %s configured for the SerializedObject of type %s must return the DTO",
+                    deserializationMethod, type);
+        }
     }
 
     private static SerializationDTOMethod createSerializer(final Class<?> type, final Field[] serializedFields) {
@@ -156,32 +143,7 @@ public final class SerializedObjectDefinition {
             );
         }
 
-        for (final Field field : serializedFields) {
-            final int fieldModifiers = field.getModifiers();
-
-            if (!Modifier.isPublic(fieldModifiers)) {
-                throw incompatibleserializedObjectException(
-                        "The field %s for the SerializedObject of type %s must be public",
-                        field,
-                        type
-                );
-            }
-            if (Modifier.isStatic(fieldModifiers)) {
-                throw incompatibleserializedObjectException(
-                        "The field %s for the SerializedObject of type %s must not be static",
-                        field,
-                        type
-                );
-            }
-            if (Modifier.isTransient(fieldModifiers)) {
-                throw incompatibleserializedObjectException(
-                        "The field %s for the SerializedObject of type %s must not be transient",
-                        field,
-                        type
-                );
-            }
-        }
-
+        stream(serializedFields).forEach(field -> validateFieldModifiers(type, field));
 
         return (object, serializerCallback) -> {
             final Map<String, Object> normalizedChildren = new HashMap<>(serializedFields.length);
@@ -205,6 +167,26 @@ public final class SerializedObjectDefinition {
 
             return normalizedChildren;
         };
+    }
+
+    private static void validateFieldModifiers(final Class<?> type, final Field field) {
+        final int fieldModifiers = field.getModifiers();
+
+        if (!Modifier.isPublic(fieldModifiers)) {
+            throw incompatibleserializedObjectException(
+                    "The field %s for the SerializedObject of type %s must be public",
+                    field, type);
+        }
+        if (Modifier.isStatic(fieldModifiers)) {
+            throw incompatibleserializedObjectException(
+                    "The field %s for the SerializedObject of type %s must not be static",
+                    field, type);
+        }
+        if (Modifier.isTransient(fieldModifiers)) {
+            throw incompatibleserializedObjectException(
+                    "The field %s for the SerializedObject of type %s must not be transient",
+                    field, type);
+        }
     }
 
 }

@@ -37,4 +37,7 @@
             files="DeserializerBuilderTest|DeserializerTest|SerializerTest|SerializerBuilderTest|CircularReferenceDetectorTest|Examples"/>
     <suppress checks="VisibilityModifier" files="AComplexValidatedType|ACyclicType|User"/>
     <suppress checks="MethodName|Regex" files="Examples"/>
+    <suppress checks="ClassFanOutComplexityCheck" files="MapMateBuilder.java"/>
+    <suppress checks="RedundantModifier" files="DefaultPackageScanner.java"/>
+
 </suppressions>

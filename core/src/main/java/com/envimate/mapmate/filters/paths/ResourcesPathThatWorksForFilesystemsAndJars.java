@@ -21,7 +21,6 @@
 
 package com.envimate.mapmate.filters.paths;
 
-
 import com.envimate.mapmate.filters.ScanablePackage;
 
 import java.net.URI;
@@ -33,7 +32,6 @@ import static com.envimate.mapmate.filters.paths.FilesystemPath.filesystemPath;
 import static com.envimate.mapmate.filters.paths.ResourcesPath.resourcesPath;
 
 public interface ResourcesPathThatWorksForFilesystemsAndJars {
-
     static ResourcesPathThatWorksForFilesystemsAndJars getTransparently(final String resourcesPath) {
         final ClassLoader classLoader = ScanablePackage.class.getClassLoader();
         try {

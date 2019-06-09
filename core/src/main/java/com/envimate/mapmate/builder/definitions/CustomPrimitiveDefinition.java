@@ -107,23 +107,17 @@ public final class CustomPrimitiveDefinition {
         if (!Modifier.isPublic(deserializationMethodModifiers)) {
             throw incompatibleCustomPrimitiveException(
                     "The deserialization method %s configured for the custom primitive of type %s must be public",
-                    deserializationMethod,
-                    type
-            );
+                    deserializationMethod, type);
         }
         if (!Modifier.isStatic(deserializationMethodModifiers)) {
             throw incompatibleCustomPrimitiveException(
                     "The deserialization method %s configured for the custom primitive of type %s must be static",
-                    deserializationMethod,
-                    type
-            );
+                    deserializationMethod, type);
         }
         if (Modifier.isAbstract(deserializationMethodModifiers)) {
             throw incompatibleCustomPrimitiveException(
                     "The deserialization method %s configured for the custom primitive of type %s must not be abstract",
-                    deserializationMethod,
-                    type
-            );
+                    deserializationMethod, type);
         }
         final Class<?>[] deserializationMethodParameterTypes = deserializationMethod.getParameterTypes();
         if (deserializationMethodParameterTypes.length != 1 ||
@@ -131,17 +125,12 @@ public final class CustomPrimitiveDefinition {
             throw incompatibleCustomPrimitiveException(
                     "The serialization method %s configured for the custom primitive of type %s must " +
                             "accept only one parameter of type String",
-                    deserializationMethod,
-                    type
-            );
+                    deserializationMethod, type);
         }
         if (deserializationMethod.getReturnType() != type) {
             throw incompatibleCustomPrimitiveException(
                     "The serialization method %s configured for the custom primitive of type %s must return " +
-                            "the custom primitive",
-                    deserializationMethod,
-                    type
-            );
+                            "the custom primitive", deserializationMethod, type);
         }
 
         return verifiedCustomPrimitiveDeserializationMethod(deserializationMethod);

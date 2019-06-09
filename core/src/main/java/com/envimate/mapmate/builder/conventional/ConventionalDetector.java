@@ -65,18 +65,6 @@ public final class ConventionalDetector implements Detector {
         );
     }
 
-    public static ConventionalDetector conventionalDetectorWithAnnotations() {
-        return conventionalDetectorWithAnnotations("stringValue",
-                "fromStringValue",
-                "deserialize",
-                ".*DTO",
-                ".*Dto",
-                ".*Request",
-                ".*Response",
-                ".*State"
-        );
-    }
-
     public static ConventionalDetector conventionalDetector(final String customPrimitiveSerializationMethodName,
                                                             final String customPrimitiveDeserializationMethodName,
                                                             final String serializedObjectDeserializationMethodName,
@@ -104,6 +92,26 @@ public final class ConventionalDetector implements Detector {
         return conventionalDetector(customPrimitiveDefinitionFactories, serializedObjectDefinitionFactories);
     }
 
+    public static ConventionalDetector conventionalDetector(
+            final List<CustomPrimitiveDefinitionFactory> customPrimitiveDefinitionFactories,
+            final List<SerializedObjectDefinitionFactory> serializedObjectDefinitionFactories
+    ) {
+        validateNotNull(customPrimitiveDefinitionFactories, "customPrimitiveDefinitionFactories");
+        validateNotNull(serializedObjectDefinitionFactories, "serializedObjectDefinitionFactories");
+        return new ConventionalDetector(customPrimitiveDefinitionFactories, serializedObjectDefinitionFactories);
+    }
+
+    public static ConventionalDetector conventionalDetectorWithAnnotations() {
+        return conventionalDetectorWithAnnotations("stringValue",
+                "fromStringValue",
+                "deserialize",
+                ".*DTO",
+                ".*Dto",
+                ".*Request",
+                ".*Response",
+                ".*State"
+        );
+    }
 
     public static ConventionalDetector conventionalDetectorWithAnnotations(
             final String customPrimitiveSerializationMethodName,
@@ -115,7 +123,6 @@ public final class ConventionalDetector implements Detector {
         validateNotNull(customPrimitiveDeserializationMethodName, "customPrimitiveDeserializationMethodName");
         validateNotNull(serializedObjectDeserializationMethodName, "serializedObjectDeserializationMethodName");
         validateNotNull(serializedObjectNameDetectionPatterns, "serializedObjectNameDetectionPatterns");
-
 
         final List<CustomPrimitiveDefinitionFactory> customPrimitiveDefinitionFactories = List.of(
                 customPrimitiveClassAnnotationFactory(),
@@ -135,15 +142,6 @@ public final class ConventionalDetector implements Detector {
                         patterns,
                         serializedObjectDeserializationMethodName));
         return conventionalDetector(customPrimitiveDefinitionFactories, serializedObjectDefinitionFactories);
-    }
-
-    public static ConventionalDetector conventionalDetector(
-            final List<CustomPrimitiveDefinitionFactory> customPrimitiveDefinitionFactories,
-            final List<SerializedObjectDefinitionFactory> serializedObjectDefinitionFactories
-    ) {
-        validateNotNull(customPrimitiveDefinitionFactories, "customPrimitiveDefinitionFactories");
-        validateNotNull(serializedObjectDefinitionFactories, "serializedObjectDefinitionFactories");
-        return new ConventionalDetector(customPrimitiveDefinitionFactories, serializedObjectDefinitionFactories);
     }
 
     @Override

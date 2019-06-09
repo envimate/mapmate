@@ -49,6 +49,7 @@ public final class DeserializableDefinitions {
 
         return new DeserializableDefinitions(customPrimitives, dataTransferObjects);
     }
+
     public static DeserializableDefinitions empty() {
         return new DeserializableDefinitions(new HashSet<>(0), new HashSet<>(0));
     }

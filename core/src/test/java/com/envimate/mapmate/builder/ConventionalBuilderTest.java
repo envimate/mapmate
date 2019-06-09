@@ -30,7 +30,6 @@ import com.google.gson.Gson;
 import org.junit.Assert;
 import org.junit.Test;
 
-
 public final class ConventionalBuilderTest {
 
     public static final String EMAIL_JSON = "{" +

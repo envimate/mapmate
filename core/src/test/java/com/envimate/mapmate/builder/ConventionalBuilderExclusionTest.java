@@ -32,7 +32,6 @@ import org.junit.Test;
 
 import java.util.List;
 
-
 public final class ConventionalBuilderExclusionTest {
 
     public static final String EMAIL_JSON = "{" +
