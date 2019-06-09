@@ -43,6 +43,12 @@ public final class DeserializableDefinitions {
         this.dataTransferObjects = dataTransferObjects;
     }
 
+    public static DeserializableDefinitions deserializableDefinitions(
+            final Set<DeserializableCustomPrimitive<?>> customPrimitives,
+            final Set<DeserializableDataTransferObject<?>> dataTransferObjects) {
+
+        return new DeserializableDefinitions(customPrimitives, dataTransferObjects);
+    }
     public static DeserializableDefinitions empty() {
         return new DeserializableDefinitions(new HashSet<>(0), new HashSet<>(0));
     }

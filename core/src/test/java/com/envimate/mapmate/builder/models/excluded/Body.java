@@ -19,17 +19,26 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder;
+package com.envimate.mapmate.builder.models.excluded;
 
-import com.envimate.mapmate.deserialization.Unmarshaller;
-import com.envimate.mapmate.serialization.Marshaller;
+import com.envimate.mapmate.builder.validation.LengthValidator;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-public interface DtoExclusionConfigurationStep {
-    DtoExclusionConfigurationStep excludingPackages(String... packageNames);
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class Body {
+    private final String value;
 
-    DtoExclusionConfigurationStep excludingClasses(String... classNames);
+    public static Body fromStringValue(final String value) {
+        final String emailAddress = LengthValidator.ensureLength(value, 1, 1000, "body");
+        return new Body(emailAddress);
+    }
 
-    ExceptionConfigurationStep usingMarshallers(Marshaller marshaller, Unmarshaller unmarshaller);
-
-    CustomPrimitiveExclusionConfigurationStep withCustomPrimitives();
+    public String stringValue() {
+        return this.value;
+    }
 }

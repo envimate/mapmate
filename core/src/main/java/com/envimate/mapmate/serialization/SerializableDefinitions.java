@@ -39,6 +39,11 @@ public final class SerializableDefinitions {
         this.dataTransferObjects = dataTransferObjects;
     }
 
+    public static SerializableDefinitions serializableDefinitions(final Set<SerializableCustomPrimitive> customPrimitives,
+                                                                  final Set<SerializableDataTransferObject> dataTransferObjects) {
+        return new SerializableDefinitions(customPrimitives, dataTransferObjects);
+    }
+
     public static SerializableDefinitions empty() {
         return new SerializableDefinitions(new HashSet<>(0), new HashSet<>(0));
     }
@@ -78,7 +83,7 @@ public final class SerializableDefinitions {
 
     public Definition getDefinitionForObject(final Object object) {
         final Class<?> targetType = object.getClass();
-        return getDefinitionForType(targetType);
+        return this.getDefinitionForType(targetType);
     }
 
     public Definition getDefinitionForType(final Class<?> targetType) {

@@ -19,10 +19,10 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder;
+package com.envimate.mapmate.builder.models.annotated;
 
-import com.envimate.mapmate.deserialization.Deserializer;
-import com.envimate.mapmate.serialization.Serializer;
+import com.envimate.mapmate.builder.conventional.customprimitives.classannotation.MapMatePrimitive;
+import com.envimate.mapmate.builder.validation.LengthValidator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -31,28 +31,16 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class MapMate {
+@MapMatePrimitive(deserializationMethodName = "subject", serializationMethodName = "value")
+public final class Subject {
+    private final String value;
 
-    private final Serializer serializer;
-    private final Deserializer deserializer;
-
-    public static MapMate mapMate(final Serializer serializer, final Deserializer deserializer) {
-        return new MapMate(serializer, deserializer);
+    public static Subject subject(final String value) {
+        final String validated = LengthValidator.ensureLength(value, 1, 256, "subject");
+        return new Subject(validated);
     }
 
-    public static MapMateBuilder aMapMate(final String... packageNames) {
-        return MapMateBuilder.mapMateBuilder(packageNames);
-    }
-
-    public static MapMateBuilder aMapMate(final PackageScanner packageScanner) {
-        return MapMateBuilder.mapMateBuilder(packageScanner);
-    }
-
-    public Serializer serializer() {
-        return this.serializer;
-    }
-
-    public Deserializer deserializer() {
-        return this.deserializer;
+    public String value() {
+        return this.value;
     }
 }

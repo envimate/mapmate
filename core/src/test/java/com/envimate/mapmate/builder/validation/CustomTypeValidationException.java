@@ -19,20 +19,22 @@
  * under the License.
  */
 
-package com.envimate.mapmate.validators;
+package com.envimate.mapmate.builder.validation;
 
-public final class CustomTypeValidationException extends IllegalArgumentException {
-    private static final long serialVersionUID = -5137712128096384694L;
+public final class CustomTypeValidationException extends RuntimeException {
+    private static final long serialVersionUID = -8385820586772764981L;
 
-    private CustomTypeValidationException(final String s) {
-        super(s);
+    private CustomTypeValidationException(final String message) {
+        super(message);
     }
 
-    public static CustomTypeValidationException customTypeValidationException(final String message) {
-        return new CustomTypeValidationException(message);
+    public static CustomTypeValidationException customTypeValidationException(
+            final String format, final Object... args) {
+        return new CustomTypeValidationException(String.format(format, args));
     }
 
-    public static CustomTypeValidationException customTypeValidationException(final String messageFormat, final Object... args) {
-        return new CustomTypeValidationException(String.format(messageFormat, args));
+    public static CustomTypeValidationException customTypeValidationException(
+            final Exception cause, final String format, final Object... args) {
+        return new CustomTypeValidationException(String.format(format, args));
     }
 }

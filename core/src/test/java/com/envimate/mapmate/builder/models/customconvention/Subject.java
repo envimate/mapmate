@@ -19,21 +19,26 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder;
+package com.envimate.mapmate.builder.models.customconvention;
 
-import com.envimate.mapmate.deserialization.Unmarshaller;
-import com.envimate.mapmate.serialization.Marshaller;
+import com.envimate.mapmate.builder.validation.LengthValidator;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-public interface CustomPrimitiveExclusionConfigurationStep {
-    CustomPrimitiveExclusionConfigurationStep serializedUsingMethodNamed(String methodName);
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class Subject {
+    private final String value;
 
-    CustomPrimitiveExclusionConfigurationStep deserializedUsingMethodNamed(String methodName);
+    public static Subject deserialize(final String value) {
+        final String validated = LengthValidator.ensureLength(value, 1, 256, "subject");
+        return new Subject(validated);
+    }
 
-    CustomPrimitiveExclusionConfigurationStep excludingPackages(String... packageNames);
-
-    CustomPrimitiveExclusionConfigurationStep excludingClasses(String... classNames);
-
-    ExceptionConfigurationStep usingMarshallers(Marshaller marshaller, Unmarshaller unmarshaller);
-
-    DtoExclusionConfigurationStep withDtos();
+    public String serialize() {
+        return this.value;
+    }
 }

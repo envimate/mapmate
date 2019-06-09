@@ -140,4 +140,19 @@ public final class Reflections {
             return factoryMethods.get(0);
         }
     }
+
+    public static boolean isMethodCompatibleWithFields(final Method method, final Field[] fields) {
+        final Class<?>[] parameterTypes = method.getParameterTypes();
+        if (fields.length != parameterTypes.length) {
+            return false;
+        }
+
+        for (final Field serializedField : fields) {
+            final boolean present = stream(parameterTypes).anyMatch(aClass -> serializedField.getType().equals(aClass));
+            if (!present) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

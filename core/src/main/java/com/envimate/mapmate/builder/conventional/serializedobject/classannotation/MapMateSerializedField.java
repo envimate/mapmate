@@ -19,20 +19,15 @@
  * under the License.
  */
 
-package com.envimate.mapmate.validators;
+package com.envimate.mapmate.builder.conventional.serializedobject.classannotation;
 
-public final class CustomTypeValidationException extends IllegalArgumentException {
-    private static final long serialVersionUID = -5137712128096384694L;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    private CustomTypeValidationException(final String s) {
-        super(s);
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface MapMateSerializedField {
 
-    public static CustomTypeValidationException customTypeValidationException(final String message) {
-        return new CustomTypeValidationException(message);
-    }
-
-    public static CustomTypeValidationException customTypeValidationException(final String messageFormat, final Object... args) {
-        return new CustomTypeValidationException(String.format(messageFormat, args));
-    }
 }

@@ -21,103 +21,124 @@
 
 package com.envimate.mapmate.builder;
 
-import com.envimate.mapmate.deserialization.Deserializer;
-import com.envimate.mapmate.deserialization.Unmarshaller;
-import com.envimate.mapmate.deserialization.builder.DeserializerBuilder;
-import com.envimate.mapmate.deserialization.validation.ExceptionMappingWithPropertyPath;
-import com.envimate.mapmate.deserialization.validation.ValidationError;
-import com.envimate.mapmate.serialization.Marshaller;
+import com.envimate.mapmate.builder.conventional.ConventionalDetector;
+import com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition;
+import com.envimate.mapmate.builder.definitions.SerializedObjectDefinition;
+import com.envimate.mapmate.deserialization.*;
+import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
+import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
+import com.envimate.mapmate.deserialization.validation.*;
+import com.envimate.mapmate.marshalling.MarshallerRegistry;
+import com.envimate.mapmate.marshalling.MarshallingType;
+import com.envimate.mapmate.serialization.*;
+import com.envimate.mapmate.serialization.methods.SerializationCPMethod;
+import com.envimate.mapmate.serialization.methods.SerializationDTOMethod;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import static com.envimate.mapmate.deserialization.Deserializer.aDeserializer;
-import static com.envimate.mapmate.filters.ClassFilters.allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed;
-import static com.envimate.mapmate.filters.ClassFilters.havingFactoryMethodWithTheRightParameters;
-import static com.envimate.mapmate.serialization.Serializer.aSerializer;
+import static com.envimate.mapmate.builder.DefaultPackageScanner.defaultPackageScanner;
+import static com.envimate.mapmate.deserialization.DeserializableCustomPrimitive.deserializableCustomPrimitive;
+import static com.envimate.mapmate.deserialization.DeserializableDataTransferObject.deserializableDataTransferObject;
+import static com.envimate.mapmate.deserialization.DeserializableDefinitions.deserializableDefinitions;
+import static com.envimate.mapmate.deserialization.Deserializer.theDeserializer;
+import static com.envimate.mapmate.marshalling.MarshallerRegistry.marshallerRegistry;
+import static com.envimate.mapmate.serialization.SerializableCustomPrimitive.serializableCustomPrimitive;
+import static com.envimate.mapmate.serialization.SerializableDataTransferObject.serializableDataTransferObject;
+import static com.envimate.mapmate.serialization.SerializableDefinitions.serializableDefinitions;
+import static com.envimate.mapmate.serialization.Serializer.theSerializer;
+import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class MapMateBuilder implements FirstStep,
-        CustomPrimitiveExclusionConfigurationStep,
-        ExceptionConfigurationStep,
-        MapMateBuilderPublic,
-        LastStep {
-
-    private static final String DEFAULT_CUSTOM_PRIMITIVE_SERIALIZATION_METHOD_NAME = "stringValue";
-    private static final String DEFAULT_CUSTOM_PRIMITIVE_DESERIALIZATION_METHOD_NAME = "fromString";
-    private String customPrimitiveDeserializationMethodName = DEFAULT_CUSTOM_PRIMITIVE_DESERIALIZATION_METHOD_NAME;
-    private String packageName;
-    private String customPrimitiveSerializationMethodName = DEFAULT_CUSTOM_PRIMITIVE_SERIALIZATION_METHOD_NAME;
-    private List<String> customPrimitiveExclusionPackages = new LinkedList<>();
-    private List<String> customPrimitiveExclusionClasses = new LinkedList<>();
-    private List<String> dtoExclusionPackages = new LinkedList<>();
-    private List<String> dtoExclusionClasses = new LinkedList<>();
-    private Marshaller marshaller;
-    private Unmarshaller unmarshaller;
+public final class MapMateBuilder {
+    Map<MarshallingType, Marshaller> marshallerMap = new HashMap<>(1);
+    Map<MarshallingType, Unmarshaller> unmarshallerMap = new HashMap<>(1);
     private Class<? extends Throwable> exceptionIndicatingValidationError;
     private ExceptionMappingWithPropertyPath exceptionMapping = (exception, propertyPath) ->
             new ValidationError(exception.getMessage(), propertyPath);
+    private Detector detector = ConventionalDetector.conventionalDetectorWithAnnotations();
+    private PackageScanner packageScanner;
 
-    public static MapMateBuilderPublic mapMateBuilder() {
-        return new MapMateBuilder();
+    private final ValidationErrorsMapping validationErrorsMapping = validationErrors -> {
+        throw AggregatedValidationException.fromList(validationErrors);
+    };
+
+    private final Map<Class<?>, CustomPrimitiveDefinition> manuallyAddedCustomPrimitives = new HashMap<>(1);
+    private final Map<Class<?>, SerializedObjectDefinition> manuallyAddedSerializedObjects = new HashMap<>(1);
+
+    public MapMateBuilder(final PackageScanner packageScanner) {
+        this.packageScanner = packageScanner;
     }
 
-    @Override
-    public FirstStep forPackage(final String packageName) {
-        this.packageName = packageName;
+    // TODO introduce events/callbacks to be more informative which packages have been scanned/callses identified.
+
+
+    public static MapMateBuilder mapMateBuilder(final String... packageNames) {
+        final List<String> packageNameList = Optional.ofNullable(packageNames)
+                .map(Arrays::asList)
+                .orElse(new LinkedList<>());
+        final PackageScanner packageScanner = defaultPackageScanner(packageNameList);
+
+        return new MapMateBuilder(packageScanner);
+    }
+
+    public static MapMateBuilder mapMateBuilder(final PackageScanner packageScanner) {
+        validateNotNull(packageScanner, "packageScanner");
+        return new MapMateBuilder(packageScanner);
+    }
+
+    public MapMateBuilder withDetector(final Detector detector) {
+        this.detector = detector;
         return this;
     }
 
-    @Override
-    public CustomPrimitiveExclusionConfigurationStep withCustomPrimitives() {
+    public MapMateBuilder usingJsonMarshallers(final Marshaller marshaller, final Unmarshaller unmarshaller) {
+        validateNotNull(marshaller, "jsonMarshaller");
+        validateNotNull(unmarshaller, "jsonUnmarshaller");
+        this.marshallerMap.put(MarshallingType.json(), marshaller);
+        this.unmarshallerMap.put(MarshallingType.json(), unmarshaller);
         return this;
     }
 
-    @Override
-    public CustomPrimitiveExclusionConfigurationStep serializedUsingMethodNamed(final String methodName) {
-        this.customPrimitiveSerializationMethodName = methodName;
+    public MapMateBuilder usingYamlMarshallers(final Marshaller marshaller, final Unmarshaller unmarshaller) {
+        validateNotNull(marshaller, "yamlMarshaller");
+        validateNotNull(unmarshaller, "yamlUnmarshaller");
+        this.marshallerMap.put(MarshallingType.yaml(), marshaller);
+        this.unmarshallerMap.put(MarshallingType.yaml(), unmarshaller);
         return this;
     }
 
-    @Override
-    public CustomPrimitiveExclusionConfigurationStep deserializedUsingMethodNamed(final String methodName) {
-        this.customPrimitiveDeserializationMethodName = methodName;
+    public MapMateBuilder usingXmlMarshallers(final Marshaller marshaller, final Unmarshaller unmarshaller) {
+        validateNotNull(marshaller, "xmlMarshaller");
+        validateNotNull(unmarshaller, "xmlUnmarshaller");
+        this.marshallerMap.put(MarshallingType.xml(), marshaller);
+        this.unmarshallerMap.put(MarshallingType.xml(), unmarshaller);
         return this;
     }
 
-    @Override
-    public CustomPrimitiveExclusionConfigurationStep excludingPackages(final String... packageNames) {
-        this.customPrimitiveExclusionPackages = Arrays.asList(packageNames);
+    public MapMateBuilder usingMarshaller(final MarshallingType marshallingType, final Marshaller marshaller, final Unmarshaller unmarshaller) {
+        validateNotNull(marshaller, "marshaller");
+        validateNotNull(unmarshaller, "unmarshaller");
+        validateNotNull(marshallingType, "marshallingType");
+        this.marshallerMap.put(marshallingType, marshaller);
+        this.unmarshallerMap.put(marshallingType, unmarshaller);
         return this;
     }
 
-    @Override
-    public CustomPrimitiveExclusionConfigurationStep excludingClasses(final String... classNames) {
-        this.customPrimitiveExclusionClasses = Arrays.asList(classNames);
+    public MapMateBuilder usingMarshallers(final Map<MarshallingType, Marshaller> marshallerMap,
+                                           final Map<MarshallingType, Unmarshaller> unmarshallerMap) {
+        this.marshallerMap = marshallerMap;
+        this.unmarshallerMap = unmarshallerMap;
         return this;
     }
 
-    @Override
-    public ExceptionConfigurationStep usingMarshallers(final Marshaller marshaller, final Unmarshaller unmarshaller) {
-        MapMateBuilder.this.marshaller = marshaller;
-        MapMateBuilder.this.unmarshaller = unmarshaller;
-        return MapMateBuilder.this;
-    }
-
-    @Override
-    public DtoExclusionConfigurationStep withDtos() {
-        return new DtoExclusionConfigurationStepImplementation();
-    }
-
-    @Override
-    public LastStep withExceptionIndicatingValidationError(
+    public MapMateBuilder withExceptionIndicatingValidationError(
             final Class<? extends Throwable> exceptionIndicatingValidationError) {
         return this.withExceptionIndicatingValidationError(
                 exceptionIndicatingValidationError,
@@ -125,8 +146,7 @@ public final class MapMateBuilder implements FirstStep,
         );
     }
 
-    @Override
-    public LastStep withExceptionIndicatingValidationError(
+    public MapMateBuilder withExceptionIndicatingValidationError(
             final Class<? extends Throwable> exceptionIndicatingValidationError,
             final ExceptionMappingWithPropertyPath exceptionMapping) {
         this.exceptionIndicatingValidationError = exceptionIndicatingValidationError;
@@ -134,76 +154,101 @@ public final class MapMateBuilder implements FirstStep,
         return this;
     }
 
-    @Override
+    public MapMateBuilder withCustomPrimitive(final CustomPrimitiveDefinition customPrimitive) {
+        final CustomPrimitiveDefinition alreadyAdded = this.manuallyAddedCustomPrimitives.put(customPrimitive.type, customPrimitive);
+        if (alreadyAdded != null) {
+            throw new UnsupportedOperationException(String.format(
+                    "The customPrimitive %s has already been added for type %s and is %s",
+                    customPrimitive,
+                    customPrimitive.type,
+                    alreadyAdded));
+        }
+
+        return this;
+    }
+
+    public MapMateBuilder withSerializedObject(final SerializedObjectDefinition serializedObject) {
+        final SerializedObjectDefinition alreadyAdded = this.manuallyAddedSerializedObjects.put(serializedObject.type,
+                serializedObject);
+        if (alreadyAdded != null) {
+            throw new UnsupportedOperationException(String.format(
+                    "The serializedObject %s has already been added for type %s and is %s",
+                    serializedObject,
+                    serializedObject.type,
+                    alreadyAdded));
+        }
+        return this;
+    }
+
     public MapMate build() {
-        return MapMate.mapMate(aSerializer().thatScansThePackage(this.packageName)
-                        .forCustomPrimitives()
-                        .filteredBy(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed(
-                                this.customPrimitiveSerializationMethodName)
-                        )
-                        .filteredBy(type -> !this.customPrimitiveExclusionPackages
-                                .contains(type.getPackageName()) && !this.customPrimitiveExclusionClasses.contains(type)
-                        )
-                        .thatAre().serializedUsingTheMethodNamed(this.customPrimitiveSerializationMethodName)
-                        .withJsonMarshaller(this.marshaller).thatScansThePackage(this.packageName)
-                        .forDataTransferObjects().filteredBy(havingFactoryMethodWithTheRightParameters())
-                        .filteredBy(type -> !this.dtoExclusionPackages.contains(type.getPackageName()) &&
-                                !this.dtoExclusionClasses.contains(type))
-                        .thatAre().serializedByItsPublicFields().withJsonMarshaller(this.marshaller)
-                        .build(),
-                this.buildDeserializer()
+        final MarshallerRegistry<Marshaller> marshallerRegistry = marshallerRegistry(this.marshallerMap);
+        final MarshallerRegistry<Unmarshaller> unmarshallerRegistry = marshallerRegistry(this.unmarshallerMap);
+
+        final List<Class<?>> scannedClasses = this.packageScanner.scan();
+        final List<Class<?>> withoutManualClasses = scannedClasses.stream()
+                .filter(aClass -> !this.manuallyAddedCustomPrimitives.containsKey(aClass) &&
+                        !this.manuallyAddedSerializedObjects.containsKey(aClass))
+                .collect(Collectors.toList());
+
+        final List<CustomPrimitiveDefinition> customPrimitiveDefinitions = this.detector.customPrimitives(withoutManualClasses);
+        final List<Class<?>> withoutCustomPrimitives = withoutManualClasses.stream()
+                .filter(aClass -> customPrimitiveDefinitions.stream().noneMatch(d -> d.type == aClass))
+                .collect(Collectors.toList());
+
+        final List<SerializedObjectDefinition> serializedObjectDefinitions = this.detector.serializedObjects(withoutCustomPrimitives);
+
+        final Set<DeserializableCustomPrimitive<?>> deserializableCustomPrimitives = new HashSet<>(customPrimitiveDefinitions.size());
+        final Set<SerializableCustomPrimitive> serializableCustomPrimitives = new HashSet<>(customPrimitiveDefinitions.size());
+        final Set<DeserializableDataTransferObject<?>> deserializableDataTransferObjects = new HashSet<>(serializedObjectDefinitions.size());
+        final Set<SerializableDataTransferObject> serializableDataTransferObjects = new HashSet<>(serializedObjectDefinitions.size());
+
+        for (final CustomPrimitiveDefinition customPrimitiveDefinition : customPrimitiveDefinitions) {
+            final Class<?> type = customPrimitiveDefinition.type;
+            final DeserializationCPMethod deserializer = customPrimitiveDefinition.deserializer;
+            final SerializationCPMethod serializer = customPrimitiveDefinition.serializer;
+
+            final DeserializableCustomPrimitive<?> deserializableCustomPrimitive = deserializableCustomPrimitive(type, deserializer);
+            deserializableCustomPrimitives.add(deserializableCustomPrimitive);
+
+            final SerializableCustomPrimitive serializableCustomPrimitive = serializableCustomPrimitive(type, serializer);
+            serializableCustomPrimitives.add(serializableCustomPrimitive);
+        }
+
+        for (final SerializedObjectDefinition serializedObjectDefinition : serializedObjectDefinitions) {
+            final DeserializationDTOMethod deserializer = serializedObjectDefinition.deserializer;
+            final SerializationDTOMethod serializer = serializedObjectDefinition.serializer;
+            final Class<?> type = serializedObjectDefinition.type;
+
+            if (deserializer != null) {
+                final DeserializableDataTransferObject<?> deserializableDataTransferObject = deserializableDataTransferObject(type, deserializer);
+                deserializableDataTransferObjects.add(deserializableDataTransferObject);
+            }
+            if (serializer != null) {
+                final SerializableDataTransferObject serializableDataTransferObject = serializableDataTransferObject(type, serializer);
+                serializableDataTransferObjects.add(serializableDataTransferObject);
+            }
+        }
+
+        final SerializableDefinitions serializableDefinitions = serializableDefinitions(
+                serializableCustomPrimitives,
+                serializableDataTransferObjects
         );
-    }
+        final DeserializableDefinitions deserializableDefinitions = deserializableDefinitions(
+                deserializableCustomPrimitives,
+                deserializableDataTransferObjects
+        );
 
-    private Deserializer buildDeserializer() {
-        final DeserializerBuilder deserializerBuilder = aDeserializer()
-                .thatScansThePackage(this.packageName)
-                .forCustomPrimitives()
-                .filteredBy(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed(
-                        this.customPrimitiveSerializationMethodName))
-                .filteredBy(type -> !this.customPrimitiveExclusionPackages.contains(type.getPackageName()) &&
-                        !this.customPrimitiveExclusionClasses.contains(type))
-                .thatAre()
-                .deserializedUsingTheMethodNamed(this.customPrimitiveDeserializationMethodName)
-                .withJsonUnmarshaller(this.unmarshaller)
-                .thatScansThePackage(this.packageName)
-                .forDataTransferObjects()
-                .filteredBy(havingFactoryMethodWithTheRightParameters())
-                .filteredBy(type -> !this.dtoExclusionPackages.contains(type.getPackageName()) &&
-                        !this.dtoExclusionClasses.contains(type))
-                .thatAre()
-                .deserializedUsingTheFactoryMethodWithTheRightParameters()
+        final Serializer serializer = theSerializer(marshallerRegistry, serializableDefinitions);
 
-                .withJsonUnmarshaller(this.unmarshaller);
+        final ValidationMappings validationMappings = ValidationMappings.empty();
         if (this.exceptionIndicatingValidationError != null) {
-            deserializerBuilder.mappingExceptionUsing(this.exceptionIndicatingValidationError, this.exceptionMapping);
-        }
-        return deserializerBuilder.build();
-    }
-
-    private class DtoExclusionConfigurationStepImplementation implements DtoExclusionConfigurationStep {
-        @Override
-        public DtoExclusionConfigurationStep excludingPackages(final String... packageNames) {
-            MapMateBuilder.this.dtoExclusionPackages = Arrays.asList(packageNames);
-            return this;
+            validationMappings.putOneToOne(this.exceptionIndicatingValidationError, this.exceptionMapping);
         }
 
-        @Override
-        public DtoExclusionConfigurationStep excludingClasses(final String... classNames) {
-            MapMateBuilder.this.dtoExclusionClasses = Arrays.asList(classNames);
-            return this;
-        }
+        final Deserializer deserializer = theDeserializer(unmarshallerRegistry, deserializableDefinitions,
+                validationMappings, this.validationErrorsMapping, false);
 
-        @Override
-        public ExceptionConfigurationStep usingMarshallers(final Marshaller marshaller, final Unmarshaller unmarshaller) {
-            MapMateBuilder.this.usingMarshallers(marshaller, unmarshaller);
-            return MapMateBuilder.this;
-        }
-
-        @Override
-        public CustomPrimitiveExclusionConfigurationStep withCustomPrimitives() {
-            return MapMateBuilder.this.withCustomPrimitives();
-        }
+        return MapMate.mapMate(serializer, deserializer);
     }
 }
 

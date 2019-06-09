@@ -49,6 +49,19 @@ public final class ClassFilters {
         return type -> !excludesSet.contains(type);
     }
 
+    public static ClassFilter excludingPackages(final String... excludes) {
+        final Set<String> excludesSet = Arrays.stream(excludes).collect(Collectors.toSet());
+        return type -> {
+            final String classPackageName = type.getPackageName();
+            for (final String excludedPackage : excludesSet) {
+                if (classPackageName.startsWith(excludedPackage)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+    }
+
     public static ClassFilter and(final ClassFilter... filters) {
         return type -> Arrays.stream(filters).allMatch(classFilter -> classFilter.include(type));
     }

@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.filters.paths;
 
+
 import com.envimate.mapmate.filters.ScanablePackage;
 
 import java.net.URI;

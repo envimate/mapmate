@@ -19,20 +19,26 @@
  * under the License.
  */
 
-package com.envimate.mapmate.validators;
+package com.envimate.mapmate.builder.validation;
 
-public final class CustomTypeValidationException extends IllegalArgumentException {
-    private static final long serialVersionUID = -5137712128096384694L;
+import static com.envimate.mapmate.builder.validation.CustomTypeValidationException.customTypeValidationException;
 
-    private CustomTypeValidationException(final String s) {
-        super(s);
+public final class RequiredParameterValidator {
+    private RequiredParameterValidator() {
     }
 
-    public static CustomTypeValidationException customTypeValidationException(final String message) {
-        return new CustomTypeValidationException(message);
+    public static void ensureNotNull(final Object value, final String description) {
+        if (value == null) {
+            throw customTypeValidationException("%s is required.", description);
+        }
     }
 
-    public static CustomTypeValidationException customTypeValidationException(final String messageFormat, final Object... args) {
-        return new CustomTypeValidationException(String.format(messageFormat, args));
+    public static void ensureArrayNotEmpty(final Object[] value, final String description) {
+        if (value == null) {
+            throw customTypeValidationException("%s is required.", description);
+        }
+        if (value.length < 1) {
+            throw customTypeValidationException("%s must not be empty.", description);
+        }
     }
 }

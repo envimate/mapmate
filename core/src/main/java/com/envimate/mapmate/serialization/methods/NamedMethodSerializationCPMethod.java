@@ -97,6 +97,5 @@ public final class NamedMethodSerializationCPMethod implements SerializationCPMe
                     methodHandle,
                     object);
         }
-
     }
 }

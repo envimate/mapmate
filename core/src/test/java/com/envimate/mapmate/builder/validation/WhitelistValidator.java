@@ -19,26 +19,28 @@
  * under the License.
  */
 
-package com.envimate.mapmate.validators;
+package com.envimate.mapmate.builder.validation;
 
 import java.util.Collection;
 
-import static com.envimate.mapmate.validators.CustomTypeValidationException.customTypeValidationException;
+import static com.envimate.mapmate.builder.validation.CustomTypeValidationException.customTypeValidationException;
+import static java.util.stream.Collectors.joining;
 
-public final class NotNullValidator {
-    private NotNullValidator() {
+public final class WhitelistValidator {
+    private WhitelistValidator() {
     }
 
-    public static void validateNotNull(final Object value, final String name) {
-        if (value == null) {
-            throw customTypeValidationException(name + " must not be null");
+    public static String ensureOneOf(final String value, final Collection<String> whitelist, final String description) {
+        final String sanitized = SanityValidator.sanitized(value, description);
+        final String lowerCase = sanitized.toLowerCase();
+        for (final String s : whitelist) {
+            if (s.toLowerCase().equals(lowerCase)) {
+                return s;
+            }
         }
-    }
-
-    public static void validateNotNullOrEmpty(final Collection<?> value, final String name) {
-        validateNotNull(value, name);
-        if (value.isEmpty()) {
-            throw customTypeValidationException(name + " must not be empty");
-        }
+        final String whitelistAsString = whitelist.stream()
+                .map(String::valueOf)
+                .collect(joining(", "));
+        throw customTypeValidationException("%s must be one of the %s", description, whitelistAsString);
     }
 }

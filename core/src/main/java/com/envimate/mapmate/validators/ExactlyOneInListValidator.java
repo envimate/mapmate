@@ -21,18 +21,23 @@
 
 package com.envimate.mapmate.validators;
 
-public final class CustomTypeValidationException extends IllegalArgumentException {
-    private static final long serialVersionUID = -5137712128096384694L;
+import java.util.Collection;
 
-    private CustomTypeValidationException(final String s) {
-        super(s);
+import static com.envimate.mapmate.validators.CustomTypeValidationException.customTypeValidationException;
+
+public final class ExactlyOneInListValidator {
+    private ExactlyOneInListValidator() {
     }
 
-    public static CustomTypeValidationException customTypeValidationException(final String message) {
-        return new CustomTypeValidationException(message);
-    }
-
-    public static CustomTypeValidationException customTypeValidationException(final String messageFormat, final Object... args) {
-        return new CustomTypeValidationException(String.format(messageFormat, args));
+    public static void validateExactlyOne(final Collection<?> value, final String description) {
+        if (value == null) {
+            throw customTypeValidationException(description + " must not be null");
+        }
+        if (value.size() > 1) {
+            throw customTypeValidationException("%s contains more than one element: %s", description, value);
+        }
+        if (value.size() == 0) {
+            throw customTypeValidationException("%s does not contain any elements", description);
+        }
     }
 }

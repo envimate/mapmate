@@ -19,10 +19,9 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder;
+package com.envimate.mapmate.builder.models.excluded;
 
-import com.envimate.mapmate.deserialization.Deserializer;
-import com.envimate.mapmate.serialization.Serializer;
+import com.envimate.mapmate.builder.validation.RequiredParameterValidator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -31,28 +30,19 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class MapMate {
+public final class Email {
+    public final EmailAddress sender;
+    public final EmailAddress receiver;
+    public final Subject subject;
+    public final Body body;
 
-    private final Serializer serializer;
-    private final Deserializer deserializer;
-
-    public static MapMate mapMate(final Serializer serializer, final Deserializer deserializer) {
-        return new MapMate(serializer, deserializer);
-    }
-
-    public static MapMateBuilder aMapMate(final String... packageNames) {
-        return MapMateBuilder.mapMateBuilder(packageNames);
-    }
-
-    public static MapMateBuilder aMapMate(final PackageScanner packageScanner) {
-        return MapMateBuilder.mapMateBuilder(packageScanner);
-    }
-
-    public Serializer serializer() {
-        return this.serializer;
-    }
-
-    public Deserializer deserializer() {
-        return this.deserializer;
+    public static Email deserialize(final EmailAddress sender,
+                                    final EmailAddress receiver,
+                                    final Subject subject,
+                                    final Body body) {
+        RequiredParameterValidator.ensureNotNull(sender, "sender");
+        RequiredParameterValidator.ensureNotNull(receiver, "receiver");
+        RequiredParameterValidator.ensureNotNull(body, "body");
+        return new Email(sender, receiver, subject, body);
     }
 }

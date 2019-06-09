@@ -21,13 +21,8 @@
 
 package com.envimate.mapmate.builder;
 
-import com.envimate.mapmate.deserialization.validation.ExceptionMappingWithPropertyPath;
+import java.util.List;
 
-public interface ExceptionConfigurationStep {
-    LastStep withExceptionIndicatingValidationError(Class<? extends Throwable> exceptionIndicatingValidationError);
-
-    LastStep withExceptionIndicatingValidationError(Class<? extends Throwable> exceptionIndicatingValidationError,
-                                                    ExceptionMappingWithPropertyPath exceptionMapping);
-
-    MapMate build();
+public interface PackageScanner {
+    List<Class<?>> scan();
 }

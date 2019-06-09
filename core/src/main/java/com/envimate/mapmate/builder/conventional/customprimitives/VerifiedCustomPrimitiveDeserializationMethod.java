@@ -19,40 +19,33 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder;
+package com.envimate.mapmate.builder.conventional.customprimitives;
 
-import com.envimate.mapmate.deserialization.Deserializer;
-import com.envimate.mapmate.serialization.Serializer;
+import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.lang.reflect.Method;
+
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class MapMate {
+public final class VerifiedCustomPrimitiveDeserializationMethod implements DeserializationCPMethod {
+    private final Method deserializationMethod;
 
-    private final Serializer serializer;
-    private final Deserializer deserializer;
-
-    public static MapMate mapMate(final Serializer serializer, final Deserializer deserializer) {
-        return new MapMate(serializer, deserializer);
+    public static DeserializationCPMethod verifiedCustomPrimitiveDeserializationMethod(final Method deserializationMethod) {
+        return new VerifiedCustomPrimitiveDeserializationMethod(deserializationMethod);
     }
 
-    public static MapMateBuilder aMapMate(final String... packageNames) {
-        return MapMateBuilder.mapMateBuilder(packageNames);
+    @Override
+    public void verifyCompatibility(final Class<?> targetType) {
+        //already verified.
     }
 
-    public static MapMateBuilder aMapMate(final PackageScanner packageScanner) {
-        return MapMateBuilder.mapMateBuilder(packageScanner);
-    }
-
-    public Serializer serializer() {
-        return this.serializer;
-    }
-
-    public Deserializer deserializer() {
-        return this.deserializer;
+    @Override
+    public Object deserialize(final String input, final Class<?> targetType) throws Exception {
+        return this.deserializationMethod.invoke(null, input);
     }
 }

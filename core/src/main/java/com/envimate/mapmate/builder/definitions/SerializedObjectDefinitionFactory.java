@@ -19,15 +19,10 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder;
+package com.envimate.mapmate.builder.definitions;
 
-import com.envimate.mapmate.deserialization.Unmarshaller;
-import com.envimate.mapmate.serialization.Marshaller;
+import java.util.Optional;
 
-public interface FirstStep {
-    CustomPrimitiveExclusionConfigurationStep withCustomPrimitives();
-
-    ExceptionConfigurationStep usingMarshallers(Marshaller marshaller, Unmarshaller unmarshaller);
-
-    DtoExclusionConfigurationStep withDtos();
+public interface SerializedObjectDefinitionFactory {
+    Optional<SerializedObjectDefinition> analyze(Class<?> type);
 }

@@ -19,8 +19,14 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder;
+package com.envimate.mapmate.builder.conventional.customprimitives.methodannotation;
 
-public interface MapMateBuilderPublic {
-    FirstStep forPackage(String packageName);
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface MapMatePrimitiveDeserializer {
 }

@@ -19,8 +19,25 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder;
+package com.envimate.mapmate.builder.models.conventional;
 
-public interface LastStep {
-    MapMate build();
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class Subject {
+    private final String value;
+
+    public static Subject fromStringValue(final String value) {
+//        final String validated = LengthValidator.ensureLength(value, 1, 256, "subject");
+        return new Subject(value);
+    }
+
+    public String stringValue() {
+        return this.value;
+    }
 }
