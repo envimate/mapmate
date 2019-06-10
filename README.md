@@ -158,7 +158,7 @@ or the name of the class matches one of these patterns
 was used to determine the class being a Serialized Object([customize this](#overriding-detector))
 * On exception, by default, no aggregation happens and you will receive an instance of "UnrecognizedExceptionOccurredException" ([customize this](#validation-exceptions))
 
-Example of usage of the _Conventional_ MapMate can be found in `com.envimate.mapmate.builder.ConventionalBuilderTest` 
+Example of usage of the _Conventional_ MapMate can be found in [`com.envimate.mapmate.builder.ConventionalBuilderTest`](https://github.com/envimate/mapmate/blob/master/core/src/test/java/com/envimate/mapmate/builder/ConventionalBuilderTest.java)
 
 ### Overriding Defaults
 
@@ -168,7 +168,7 @@ By default MapMate scans the given package recursively. To exclude or include mo
 builder that accepts an instance of `PackageScanner`. 
 
 The `DefaultPackageScanner` is there for convenience, accepting a list of whitelist packages and classes and a list of
- blacklist packages and classes.  For example `com.envimate.mapmate.builder.ConventionalBuilderExclusionTest` uses:
+ blacklist packages and classes.  For example [`com.envimate.mapmate.builder.ConventionalBuilderExclusionTest`](https://github.com/envimate/mapmate/blob/master/core/src/test/java/com/envimate/mapmate/builder/ConventionalBuilderExclusionTest.java) uses:
 
 ```java
         MapMate.aMapMate(DefaultPackageScanner.defaultPackageScanner(
@@ -343,7 +343,7 @@ Serialized Object deserialization method name, and additional class name pattern
     }
 ``` 
 
-Also take a look at `com.envimate.mapmate.builder.CustomConventionalBuilderTest` for some running examples.
+Also take a look at [`com.envimate.mapmate.builder.CustomConventionalBuilderTest`](https://github.com/envimate/mapmate/blob/master/core/src/test/java/com/envimate/mapmate/builder/CustomConventionalBuilderTest.java) for some running examples.
 
 ### Advanced Configuration
 
@@ -409,4 +409,4 @@ MapMateSerializedField - indicates that the field should be included in the seri
 MapMateDeserializationMethod - method level
 ```
  
-For examples on Annotation-based mapmate please check the `com.envimate.mapmate.builder.AnnotationBuilderTest`.
+For examples on Annotation-based mapmate please check the [`com.envimate.mapmate.builder.AnnotationBuilderTest`](https://github.com/envimate/mapmate/blob/master/core/src/test/java/com/envimate/mapmate/builder/AnnotationBuilderTest.java).
