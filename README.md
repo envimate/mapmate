@@ -398,7 +398,7 @@ to get rid of. This includes annotations. However, we understand, that there mig
  the following annotations to indicate the custom primitive (de)serialization method, Serialized Object fields and
  deserialization method.
  
- ```java
+ ```
 // Custom Primitives
 MapMatePrimitive - class level, takes the (de)serialization method names as configuration
 MapMatePrimitiveSerializer - method level
