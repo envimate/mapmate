@@ -1,4 +1,5 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.envimate.mapmate/core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.envimate.mapmate/core)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2894/badge)](https://bestpractices.coreinfrastructure.org/projects/2894)
 
 <img src="mapmate_logo.png" align="left"/>
 
