@@ -21,10 +21,9 @@
 
 package com.envimate.mapmate.deserialization;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import static java.util.stream.Collectors.toSet;
+import java.util.stream.Collectors;
 
 public final class DTOElements {
 
@@ -38,7 +37,7 @@ public final class DTOElements {
         return new DTOElements(elements);
     }
 
-    public Set<Class<?>> referencedTypes() {
+    public List<Class<?>> referencedTypes() {
         return this.elements.values()
                 .stream()
                 .map(type -> {
@@ -47,6 +46,7 @@ public final class DTOElements {
                     }
                     return type;
                 })
-                .collect(toSet());
+                .distinct()
+                .collect(Collectors.toList());
     }
 }

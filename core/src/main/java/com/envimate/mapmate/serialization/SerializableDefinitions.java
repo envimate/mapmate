@@ -23,59 +23,65 @@ package com.envimate.mapmate.serialization;
 
 import com.envimate.mapmate.Definition;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
 
 import static com.envimate.mapmate.DefinitionNotFoundException.definitionNotFound;
 
 public final class SerializableDefinitions {
 
-    private final Set<SerializableCustomPrimitive> customPrimitives;
-    private final Set<SerializableDataTransferObject> dataTransferObjects;
+    private final List<SerializableCustomPrimitive> customPrimitives;
+    private final List<SerializableDataTransferObject> dataTransferObjects;
 
-    private SerializableDefinitions(final Set<SerializableCustomPrimitive> customPrimitives,
-                                    final Set<SerializableDataTransferObject> dataTransferObjects) {
+    private SerializableDefinitions(final List<SerializableCustomPrimitive> customPrimitives,
+                                    final List<SerializableDataTransferObject> dataTransferObjects) {
         this.customPrimitives = customPrimitives;
         this.dataTransferObjects = dataTransferObjects;
     }
 
-    public static SerializableDefinitions serializableDefinitions(final Set<SerializableCustomPrimitive> customPrimitives,
-                                                                  final Set<SerializableDataTransferObject> dataTransferObjects) {
+    public static SerializableDefinitions serializableDefinitions(
+            final List<SerializableCustomPrimitive> customPrimitives,
+            final List<SerializableDataTransferObject> dataTransferObjects
+    ) {
         return new SerializableDefinitions(customPrimitives, dataTransferObjects);
     }
 
     public static SerializableDefinitions empty() {
-        return new SerializableDefinitions(new HashSet<>(0), new HashSet<>(0));
+        return new SerializableDefinitions(new LinkedList<>(), new LinkedList<>());
     }
 
     public static SerializableDefinitions withTheCustomPrimitives(
-            final Set<SerializableCustomPrimitive> customPrimitives) {
-        return new SerializableDefinitions(customPrimitives, new HashSet<>(0));
+            final List<SerializableCustomPrimitive> customPrimitives) {
+        return new SerializableDefinitions(customPrimitives, new LinkedList<>());
     }
 
     public static SerializableDefinitions withTheDataTransferObjects(
-            final Set<SerializableDataTransferObject> dataTransferObjects) {
-        return new SerializableDefinitions(new HashSet<>(0), dataTransferObjects);
+            final List<SerializableDataTransferObject> dataTransferObjects) {
+        return new SerializableDefinitions(new LinkedList<>(), dataTransferObjects);
     }
 
-    public static SerializableDefinitions withASingleCustomPrimitive(final SerializableCustomPrimitive customPrimitive) {
-        final Set<SerializableCustomPrimitive> customPrimitives = new HashSet<>(1);
+    public static SerializableDefinitions withASingleCustomPrimitive(
+            final SerializableCustomPrimitive customPrimitive
+    ) {
+        final List<SerializableCustomPrimitive> customPrimitives = new LinkedList<>();
         customPrimitives.add(customPrimitive);
         return withTheCustomPrimitives(customPrimitives);
     }
 
-    public static SerializableDefinitions withASingleDataTransferObject(final SerializableDataTransferObject dataTransferObject) {
-        final Set<SerializableDataTransferObject> dataTransferObjects = new HashSet<>(1);
+    public static SerializableDefinitions withASingleDataTransferObject(
+            final SerializableDataTransferObject dataTransferObject
+    ) {
+        final List<SerializableDataTransferObject> dataTransferObjects = new LinkedList<>();
         dataTransferObjects.add(dataTransferObject);
         return withTheDataTransferObjects(dataTransferObjects);
     }
 
     public static SerializableDefinitions merge(final SerializableDefinitions a,
                                                 final SerializableDefinitions b) {
-        final Set<SerializableCustomPrimitive> customPrimitives = new HashSet<>();
+        final List<SerializableCustomPrimitive> customPrimitives = new LinkedList<>();
         customPrimitives.addAll(a.customPrimitives);
         customPrimitives.addAll(b.customPrimitives);
-        final Set<SerializableDataTransferObject> dataTransferObjects = new HashSet<>();
+        final List<SerializableDataTransferObject> dataTransferObjects = new LinkedList<>();
         dataTransferObjects.addAll(a.dataTransferObjects);
         dataTransferObjects.addAll(b.dataTransferObjects);
         return new SerializableDefinitions(customPrimitives, dataTransferObjects);
@@ -87,7 +93,7 @@ public final class SerializableDefinitions {
     }
 
     public Definition getDefinitionForType(final Class<?> targetType) {
-        final Set<Definition> allDefinitions = new HashSet<>();
+        final List<Definition> allDefinitions = new LinkedList<>();
         allDefinitions.addAll(this.customPrimitives);
         allDefinitions.addAll(this.dataTransferObjects);
         return allDefinitions.stream()

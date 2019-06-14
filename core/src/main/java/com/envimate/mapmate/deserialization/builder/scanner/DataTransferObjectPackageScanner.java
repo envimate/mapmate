@@ -30,12 +30,11 @@ import com.envimate.mapmate.filters.ScanablePackage;
 import com.envimate.mapmate.reflections.PackageName;
 
 import java.util.List;
-import java.util.Set;
 
 import static com.envimate.mapmate.deserialization.DeserializableDataTransferObject.deserializableDataTransferObject;
 import static com.envimate.mapmate.deserialization.DeserializableDefinitions.withTheDataTransferObjects;
 import static com.envimate.mapmate.filters.ScanablePackage.scannablePackage;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.toList;
 
 public final class DataTransferObjectPackageScanner implements PackageScanner {
     private final List<ClassFilter> classFilters;
@@ -56,7 +55,7 @@ public final class DataTransferObjectPackageScanner implements PackageScanner {
     public DeserializableDefinitions scan(final PackageName packageName) {
         final ScanablePackage scanablePackage = scannablePackage(packageName, this.classFilters);
         final List<Class<?>> types = scanablePackage.getTypes();
-        final Set<DeserializableDataTransferObject<?>> dataTransferObjects = types.stream()
+        final List<DeserializableDataTransferObject<?>> dataTransferObjects = types.stream()
                 .map(type -> {
                     try {
                         final DeserializationDTOMethod deserializer = this.deserializationDTOMethodFactory.createFor(type);
@@ -71,7 +70,7 @@ public final class DataTransferObjectPackageScanner implements PackageScanner {
                         ), e);
                     }
                 })
-                .collect(toSet());
+                .collect(toList());
         return withTheDataTransferObjects(dataTransferObjects);
     }
 }

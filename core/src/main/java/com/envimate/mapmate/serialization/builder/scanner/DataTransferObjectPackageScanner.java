@@ -29,12 +29,11 @@ import com.envimate.mapmate.serialization.SerializableDefinitions;
 import com.envimate.mapmate.serialization.methods.SerializationDTOMethod;
 
 import java.util.List;
-import java.util.Set;
 
 import static com.envimate.mapmate.filters.ScanablePackage.scannablePackage;
 import static com.envimate.mapmate.serialization.SerializableDataTransferObject.serializableDataTransferObject;
 import static com.envimate.mapmate.serialization.SerializableDefinitions.withTheDataTransferObjects;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.toList;
 
 public final class DataTransferObjectPackageScanner implements PackageScanner {
     private final List<ClassFilter> classFilters;
@@ -55,9 +54,9 @@ public final class DataTransferObjectPackageScanner implements PackageScanner {
     public SerializableDefinitions scan(final PackageName packageName) {
         final ScanablePackage scanablePackage = scannablePackage(packageName, this.classFilters);
         final List<Class<?>> types = scanablePackage.getTypes();
-        final Set<SerializableDataTransferObject> dataTransferObjects = types.stream()
+        final List<SerializableDataTransferObject> dataTransferObjects = types.stream()
                 .map(type -> serializableDataTransferObject(type, this.serializationDTOMethod))
-                .collect(toSet());
+                .collect(toList());
         return withTheDataTransferObjects(dataTransferObjects);
     }
 }

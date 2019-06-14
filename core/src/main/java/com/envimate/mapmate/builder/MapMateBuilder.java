@@ -34,11 +34,15 @@ import com.envimate.mapmate.serialization.*;
 import com.envimate.mapmate.serialization.methods.SerializationCPMethod;
 import com.envimate.mapmate.serialization.methods.SerializationDTOMethod;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.envimate.mapmate.builder.DefaultPackageScanner.defaultPackageScanner;
 import static com.envimate.mapmate.builder.MapMate.mapMate;
+import static com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition.customPrimitiveDefinition;
+import static com.envimate.mapmate.builder.definitions.SerializedObjectDefinition.serializedObjectDefinition;
 import static com.envimate.mapmate.deserialization.DeserializableCustomPrimitive.deserializableCustomPrimitive;
 import static com.envimate.mapmate.deserialization.DeserializableDataTransferObject.deserializableDataTransferObject;
 import static com.envimate.mapmate.deserialization.DeserializableDefinitions.deserializableDefinitions;
@@ -63,6 +67,13 @@ public final class MapMateBuilder {
             new ValidationError(exception.getMessage(), propertyPath);
     private Detector detector = ConventionalDetector.conventionalDetectorWithAnnotations();
     private final PackageScanner packageScanner;
+    private final List<Class<?>> manuallyAddedSerializedObjectTypes = new LinkedList<>();
+    private final List<Class<?>> manuallyAddedCustomPrimitiveTypes = new LinkedList<>();
+
+    private final List<DeserializableCustomPrimitive<?>> deserializableCPs = new LinkedList<>();
+    private final List<SerializableCustomPrimitive> serializableCPs = new LinkedList<>();
+    private final List<DeserializableDataTransferObject<?>> deserializableDTOs = new LinkedList<>();
+    private final List<SerializableDataTransferObject> serializableDTOs = new LinkedList<>();
 
     public MapMateBuilder(final PackageScanner packageScanner) {
         this.packageScanner = packageScanner;
@@ -72,9 +83,13 @@ public final class MapMateBuilder {
         final List<String> packageNameList = Optional.ofNullable(packageNames)
                 .map(Arrays::asList)
                 .orElse(new LinkedList<>());
-        final PackageScanner packageScanner = defaultPackageScanner(packageNameList);
 
-        return mapMateBuilder(packageScanner);
+        if (packageNameList.isEmpty()) {
+            return mapMateBuilder(List::of);
+        } else {
+            final PackageScanner packageScanner = defaultPackageScanner(packageNameList);
+            return mapMateBuilder(packageScanner);
+        }
     }
 
     public static MapMateBuilder mapMateBuilder(final PackageScanner packageScanner) {
@@ -160,6 +175,12 @@ public final class MapMateBuilder {
         return this;
     }
 
+    public MapMateBuilder withCustomPrimitive(final Class<?> type,
+                                              final Method serializationMethod,
+                                              final Method deserializationMethod) {
+        return this.withCustomPrimitive(customPrimitiveDefinition(type, serializationMethod, deserializationMethod));
+    }
+
     public MapMateBuilder withSerializedObject(final SerializedObjectDefinition serializedObject) {
         final SerializedObjectDefinition alreadyAdded = this.manuallyAddedSerializedObjects.put(serializedObject.type,
                 serializedObject);
@@ -173,31 +194,37 @@ public final class MapMateBuilder {
         return this;
     }
 
+    public MapMateBuilder withSerializedObject(final Class<?> type,
+                                               final Field[] serializedFields,
+                                               final Method deserializationMethod) {
+        return this.withSerializedObject(serializedObjectDefinition(type, serializedFields, deserializationMethod));
+    }
+
     public MapMate build() {
         final List<Class<?>> scannedClasses = this.packageScanner.scan();
         final List<Class<?>> withoutManualClasses = scannedClasses.stream()
                 .filter(aClass -> !this.manuallyAddedCustomPrimitives.containsKey(aClass) &&
                         !this.manuallyAddedSerializedObjects.containsKey(aClass))
                 .collect(Collectors.toList());
-
         final List<CustomPrimitiveDefinition> cpDefinitions = this.detector.customPrimitives(withoutManualClasses);
         final List<Class<?>> withoutCP = withoutManualClasses.stream()
                 .filter(aClass -> cpDefinitions.stream().noneMatch(d -> d.type == aClass))
                 .collect(Collectors.toList());
-
         final List<SerializedObjectDefinition> serializedDTOs = this.detector.serializedObjects(withoutCP);
-
-        final Set<DeserializableCustomPrimitive<?>> deserializableCPs = new HashSet<>(cpDefinitions.size());
-        final Set<SerializableCustomPrimitive> serializableCPs = new HashSet<>(cpDefinitions.size());
-        final Set<DeserializableDataTransferObject<?>> deserializableDTOs = new HashSet<>(serializedDTOs.size());
-        final Set<SerializableDataTransferObject> serializableDTOs = new HashSet<>(serializedDTOs.size());
-        this.addCustomPrimitives(deserializableCPs, serializableCPs, cpDefinitions);
-        this.addCustomPrimitives(deserializableCPs, serializableCPs, this.manuallyAddedCustomPrimitives.values());
-        this.addSerializedObjects(deserializableDTOs, serializableDTOs, serializedDTOs);
-        this.addSerializedObjects(deserializableDTOs, serializableDTOs, this.manuallyAddedSerializedObjects.values());
-        final SerializableDefinitions serializables = serializableDefinitions(serializableCPs, serializableDTOs);
-        final DeserializableDefinitions deserializables = deserializableDefinitions(deserializableCPs, deserializableDTOs);
-
+        this.addCustomPrimitives(cpDefinitions);
+        this.addCustomPrimitives(this.manuallyAddedCustomPrimitives.values());
+        this.addCustomPrimitives(this.detector.customPrimitives(this.manuallyAddedCustomPrimitiveTypes));
+        this.addSerializedObjects(serializedDTOs);
+        this.addSerializedObjects(this.manuallyAddedSerializedObjects.values());
+        this.addSerializedObjects(this.detector.serializedObjects(this.manuallyAddedSerializedObjectTypes));
+        final SerializableDefinitions serializables = serializableDefinitions(
+                this.serializableCPs,
+                this.serializableDTOs
+        );
+        final DeserializableDefinitions deserializables = deserializableDefinitions(
+                this.deserializableCPs,
+                this.deserializableDTOs
+        );
         final MarshallerRegistry<Marshaller> marshallerRegistry = marshallerRegistry(this.marshallerMap);
         final MarshallerRegistry<Unmarshaller> unmarshallerRegistry = marshallerRegistry(this.unmarshallerMap);
 
@@ -206,17 +233,12 @@ public final class MapMateBuilder {
         if (this.exceptionIndicatingValidationError != null) {
             validationMappings.putOneToOne(this.exceptionIndicatingValidationError, this.exceptionMapping);
         }
-
         final Deserializer deserializer = theDeserializer(unmarshallerRegistry, deserializables, validationMappings,
                 this.validationErrorsMapping, false);
-
         return mapMate(serializer, deserializer);
     }
 
-    private void addSerializedObjects(
-            final Collection<DeserializableDataTransferObject<?>> deserializableDataTransferObjects,
-            final Collection<SerializableDataTransferObject> serializableDataTransferObjects,
-            final Iterable<SerializedObjectDefinition> values
+    private void addSerializedObjects(final Iterable<SerializedObjectDefinition> values
     ) {
         for (final SerializedObjectDefinition serializedObjectDefinition : values) {
             final DeserializationDTOMethod deserializer = serializedObjectDefinition.deserializer;
@@ -228,31 +250,37 @@ public final class MapMateBuilder {
                         type,
                         deserializer
                 );
-                deserializableDataTransferObjects.add(deserializableDTO);
+                this.deserializableDTOs.add(deserializableDTO);
             }
             if (serializer != null) {
                 final SerializableDataTransferObject serializableDTO = serializableDataTransferObject(type, serializer);
-                serializableDataTransferObjects.add(serializableDTO);
+                this.serializableDTOs.add(serializableDTO);
             }
         }
     }
 
-    private void addCustomPrimitives(
-            final Collection<DeserializableCustomPrimitive<?>> deserializableCustomPrimitives,
-            final Collection<SerializableCustomPrimitive> serializableCustomPrimitives,
-            final Iterable<CustomPrimitiveDefinition> customPrimitiveDefinitions
-    ) {
+    private void addCustomPrimitives(final Iterable<CustomPrimitiveDefinition> customPrimitiveDefinitions) {
         for (final CustomPrimitiveDefinition customPrimitiveDefinition : customPrimitiveDefinitions) {
             final Class<?> type = customPrimitiveDefinition.type;
             final DeserializationCPMethod deserializer = customPrimitiveDefinition.deserializer;
             final SerializationCPMethod serializer = customPrimitiveDefinition.serializer;
 
             final DeserializableCustomPrimitive<?> deserializableCP = deserializableCustomPrimitive(type, deserializer);
-            deserializableCustomPrimitives.add(deserializableCP);
+            this.deserializableCPs.add(deserializableCP);
 
             final SerializableCustomPrimitive serializableCP = serializableCustomPrimitive(type, serializer);
-            serializableCustomPrimitives.add(serializableCP);
+            this.serializableCPs.add(serializableCP);
         }
+    }
+
+    public MapMateBuilder withSerializedObjects(final Class<?>... serializedObjectTypes) {
+        this.manuallyAddedSerializedObjectTypes.addAll(Arrays.asList(serializedObjectTypes));
+        return this;
+    }
+
+    public MapMateBuilder withCustomPrimitives(final Class<?>... customPrimitiveTypes) {
+        this.manuallyAddedCustomPrimitiveTypes.addAll(Arrays.asList(customPrimitiveTypes));
+        return this;
     }
 }
 

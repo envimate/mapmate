@@ -24,9 +24,9 @@ package com.envimate.mapmate.deserialization;
 import com.envimate.mapmate.Definition;
 import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
 
-import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static com.envimate.mapmate.deserialization.DeserializableCustomPrimitive.deserializableCustomPrimitive;
 import static com.envimate.mapmate.deserialization.UnknownReferenceException.fromType;
@@ -34,52 +34,52 @@ import static com.envimate.mapmate.deserialization.methods.DeserializationMethod
 
 public final class DeserializableDefinitions {
 
-    private final Set<DeserializableCustomPrimitive<?>> customPrimitives;
-    private final Set<DeserializableDataTransferObject<?>> dataTransferObjects;
+    private final List<DeserializableCustomPrimitive<?>> customPrimitives;
+    private final List<DeserializableDataTransferObject<?>> dataTransferObjects;
 
-    private DeserializableDefinitions(final Set<DeserializableCustomPrimitive<?>> customPrimitives,
-                                      final Set<DeserializableDataTransferObject<?>> dataTransferObjects) {
+    private DeserializableDefinitions(final List<DeserializableCustomPrimitive<?>> customPrimitives,
+                                      final List<DeserializableDataTransferObject<?>> dataTransferObjects) {
         this.customPrimitives = customPrimitives;
         this.dataTransferObjects = dataTransferObjects;
     }
 
     public static DeserializableDefinitions deserializableDefinitions(
-            final Set<DeserializableCustomPrimitive<?>> customPrimitives,
-            final Set<DeserializableDataTransferObject<?>> dataTransferObjects) {
+            final List<DeserializableCustomPrimitive<?>> customPrimitives,
+            final List<DeserializableDataTransferObject<?>> dataTransferObjects) {
 
         return new DeserializableDefinitions(customPrimitives, dataTransferObjects);
     }
 
     public static DeserializableDefinitions empty() {
-        return new DeserializableDefinitions(new HashSet<>(0), new HashSet<>(0));
+        return new DeserializableDefinitions(new LinkedList<>(), new LinkedList<>());
     }
 
     public static DeserializableDefinitions withTheCustomPrimitives(
-            final Set<DeserializableCustomPrimitive<?>> customPrimitives) {
-        return new DeserializableDefinitions(customPrimitives, new HashSet<>(0));
+            final List<DeserializableCustomPrimitive<?>> customPrimitives) {
+        return new DeserializableDefinitions(customPrimitives, new LinkedList<>());
     }
 
     public static DeserializableDefinitions withTheDataTransferObjects(
-            final Set<DeserializableDataTransferObject<?>> dataTransferObjects) {
-        return new DeserializableDefinitions(new HashSet<>(0), dataTransferObjects);
+            final List<DeserializableDataTransferObject<?>> dataTransferObjects) {
+        return new DeserializableDefinitions(new LinkedList<>(), dataTransferObjects);
     }
 
     public static DeserializableDefinitions withASingleCustomPrimitive(
             final DeserializableCustomPrimitive<?> customPrimitive) {
-        final Set<DeserializableCustomPrimitive<?>> customPrimitives = new HashSet<>(1);
+        final List<DeserializableCustomPrimitive<?>> customPrimitives = new LinkedList<>();
         customPrimitives.add(customPrimitive);
         return withTheCustomPrimitives(customPrimitives);
     }
 
     public static DeserializableDefinitions withASingleDataTransferObject(
             final DeserializableDataTransferObject<?> dataTransferObject) {
-        final Set<DeserializableDataTransferObject<?>> dataTransferObjects = new HashSet<>(1);
+        final List<DeserializableDataTransferObject<?>> dataTransferObjects = new LinkedList<>();
         dataTransferObjects.add(dataTransferObject);
         return withTheDataTransferObjects(dataTransferObjects);
     }
 
     public static DeserializableDefinitions theSpeciallyTreatedCustomPrimitives() {
-        final Set<DeserializableCustomPrimitive<?>> speciallyTreatedCustomPrimitives = new HashSet<>(1);
+        final List<DeserializableCustomPrimitive<?>> speciallyTreatedCustomPrimitives = new LinkedList<>();
         speciallyTreatedCustomPrimitives.add(deserializableCustomPrimitive(String.class, new DeserializationCPMethod() {
             @Override
             public void verifyCompatibility(final Class<?> targetType) {
@@ -93,15 +93,15 @@ public final class DeserializableDefinitions {
                 return input;
             }
         }));
-        return new DeserializableDefinitions(speciallyTreatedCustomPrimitives, new HashSet<>(0));
+        return new DeserializableDefinitions(speciallyTreatedCustomPrimitives, new LinkedList<>());
     }
 
     public static DeserializableDefinitions merge(final DeserializableDefinitions a,
                                                   final DeserializableDefinitions b) {
-        final Set<DeserializableCustomPrimitive<?>> customPrimitives = new HashSet<>();
+        final List<DeserializableCustomPrimitive<?>> customPrimitives = new LinkedList<>();
         customPrimitives.addAll(a.customPrimitives);
         customPrimitives.addAll(b.customPrimitives);
-        final Set<DeserializableDataTransferObject<?>> dataTransferObjects = new HashSet<>();
+        final List<DeserializableDataTransferObject<?>> dataTransferObjects = new LinkedList<>();
         dataTransferObjects.addAll(a.dataTransferObjects);
         dataTransferObjects.addAll(b.dataTransferObjects);
         return new DeserializableDefinitions(customPrimitives, dataTransferObjects);
@@ -116,7 +116,7 @@ public final class DeserializableDefinitions {
     }
 
     public Optional<Definition> getDefinitionForType(final Class<?> targetType) {
-        final Set<Definition> allDefinitions = new HashSet<>();
+        final List<Definition> allDefinitions = new LinkedList<>();
         allDefinitions.addAll(this.customPrimitives);
         allDefinitions.addAll(this.dataTransferObjects);
         return allDefinitions.stream()
@@ -125,18 +125,18 @@ public final class DeserializableDefinitions {
     }
 
     public void validateNoUnsupportedOutgoingReferences() {
-        final Set<Class<?>> references = this.allReferences();
+        final List<Class<?>> references = this.allReferences();
         for (final Class<?> reference : references) {
-            if (!this.getDefinitionForType(reference).isPresent()) {
+            if (this.getDefinitionForType(reference).isEmpty()) {
                 throw fromType(reference);
             }
         }
     }
 
-    private Set<Class<?>> allReferences() {
-        final Set<Class<?>> allReferences = new HashSet<>();
+    private List<Class<?>> allReferences() {
+        final List<Class<?>> allReferences = new LinkedList<>();
         for (final DeserializableDataTransferObject<?> dataTransferObject : this.dataTransferObjects) {
-            final Set<Class<?>> references = dataTransferObject.elements().referencedTypes();
+            final List<Class<?>> references = dataTransferObject.elements().referencedTypes();
             allReferences.addAll(references);
         }
         return allReferences;

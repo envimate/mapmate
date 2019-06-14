@@ -22,6 +22,7 @@
 package com.envimate.mapmate.builder;
 
 import com.envimate.mapmate.builder.models.customconvention.Body;
+import com.envimate.mapmate.builder.models.customconvention.Email;
 import com.envimate.mapmate.builder.models.customconvention.EmailAddress;
 import com.envimate.mapmate.builder.models.customconvention.Subject;
 import com.envimate.mapmate.builder.validation.CustomTypeValidationException;
@@ -30,7 +31,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static com.envimate.mapmate.builder.conventional.ConventionalDetector.conventionalDetector;
-import static com.envimate.mapmate.builder.definitions.SerializedObjectDefinition.serializedObjectDefinition;
 
 public final class CustomConventionalBuilderTest {
 
@@ -50,27 +50,15 @@ public final class CustomConventionalBuilderTest {
     public static MapMate theCustomConventionalMapMateInstance() {
         final Gson gson = new Gson();
 
-        try {
-            return MapMate.aMapMate("com.envimate.mapmate.builder.models")
-                    .withDetector(conventionalDetector("serialize",
-                            "deserialize",
-                            "restore",
-                            ".*"
-                    ))
-                    .usingJsonMarshallers(gson::toJson, gson::fromJson)
-                    .withExceptionIndicatingValidationError(CustomTypeValidationException.class)
-                    .withSerializedObject(serializedObjectDefinition(Email.class, Email.class.getFields(),
-                            Email.class.getMethod("restore",
-                                    EmailAddress.class,
-                                    EmailAddress.class,
-                                    Subject.class,
-                                    Body.class)
-                            )
-                    )
-                    .build();
-        } catch (final NoSuchMethodException e) {
-            throw new UnsupportedOperationException();
-        }
+        return MapMate.aMapMate("com.envimate.mapmate.builder.models")
+                .withDetector(conventionalDetector("serialize",
+                        "deserialize",
+                        "restore",
+                        ".*"
+                ))
+                .usingJsonMarshallers(gson::toJson, gson::fromJson)
+                .withExceptionIndicatingValidationError(CustomTypeValidationException.class)
+                .build();
     }
 
     @Test

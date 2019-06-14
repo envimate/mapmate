@@ -29,12 +29,11 @@ import com.envimate.mapmate.serialization.SerializableDefinitions;
 import com.envimate.mapmate.serialization.methods.SerializationCPMethod;
 
 import java.util.List;
-import java.util.Set;
 
 import static com.envimate.mapmate.filters.ScanablePackage.scannablePackage;
 import static com.envimate.mapmate.serialization.SerializableCustomPrimitive.serializableCustomPrimitive;
 import static com.envimate.mapmate.serialization.SerializableDefinitions.withTheCustomPrimitives;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.toList;
 
 public final class CustomPrimitivePackageScanner implements PackageScanner {
 
@@ -56,9 +55,9 @@ public final class CustomPrimitivePackageScanner implements PackageScanner {
     public SerializableDefinitions scan(final PackageName packageName) {
         final ScanablePackage scanablePackage = scannablePackage(packageName, this.classFilters);
         final List<Class<?>> types = scanablePackage.getTypes();
-        final Set<SerializableCustomPrimitive> customPrimitives = types.stream()
+        final List<SerializableCustomPrimitive> customPrimitives = types.stream()
                 .map(type -> serializableCustomPrimitive(type, this.serializationCPMethod))
-                .collect(toSet());
+                .collect(toList());
         return withTheCustomPrimitives(customPrimitives);
     }
 }
