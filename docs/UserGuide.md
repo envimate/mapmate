@@ -45,9 +45,9 @@ library.
 ### Default Conventions Explained
 
 * MapMate respects the access modifiers and does not use any non-public field or method. Ever.
-* MapMate scans the given package, visiting every class to identify whether it is a Custom Primitive or a Serialized Object. ([customize this](#packages-and-classes-to-scan))
+* MapMate scans the given package, visiting every class to identify whether it is a Custom Primitive or a Serialized Object. ([customize this](Recipes.md#packages-and-classes-to-scan))
 * A class is considered to be a Custom Primitive if it has a serialization method named "stringValue" and a static
- deserialization method named "fromStringValue".([customize this](#overriding-detector))
+ deserialization method named "fromStringValue".([customize this](Recipes.md#overriding-detector))
 * A class is considered to be a Serizlied Object if it has a public static factory method name "deserialize" 
 or the name of the class matches one of these patterns
 ```
@@ -57,9 +57,9 @@ or the name of the class matches one of these patterns
 .*Response
 .*State
 ```
-([customize this](#overriding-detector))
+([customize this](Recipes.md#overriding-detector))
 * Serialized Objects are serialized using the public fields(key:value) and deserialized using the same public factory method that 
-was used to determine the class being a Serialized Object([customize this](#overriding-detector))
-* On exception, by default, no aggregation happens and you will receive an instance of "UnrecognizedExceptionOccurredException" ([customize this](#validation-exceptions))
+was used to determine the class being a Serialized Object([customize this](Recipes.md#overriding-detector))
+* On exception, by default, no aggregation happens and you will receive an instance of "UnrecognizedExceptionOccurredException" ([customize this](Recipes.md#validation-exceptions))
 
 Example of usage of the _Conventional_ MapMate can be found in [`com.envimate.mapmate.builder.ConventionalBuilderTest`](https://github.com/envimate/mapmate/blob/master/core/src/test/java/com/envimate/mapmate/builder/ConventionalBuilderTest.java)
