@@ -59,7 +59,17 @@ final class Unmarshallers {
                                        final MarshallingType marshallingType) {
         validateNotNull(input, "input");
         validateNotNull(marshallingType, "marshallingType");
-        return this.unmarshallers.getForType(marshallingType).unmarshal(input, Map.class);
+        final Unmarshaller unmarshaller = this.unmarshallers.getForType(marshallingType);
+        try {
+            return unmarshaller.unmarshal(input, Map.class);
+        } catch (final Exception e) {
+            throw new UnsupportedOperationException(
+                    String.format(
+                            "Could not unmarshal map from input %s",
+                            input),
+                    e
+            );
+        }
     }
 
     Object unmarshal(final String input,
@@ -75,9 +85,27 @@ final class Unmarshallers {
 
         final String trimmedInput = input.trim();
         if (targetType.isArray() || Collection.class.isAssignableFrom(targetType)) {
-            return unmarshaller.unmarshal(trimmedInput, List.class);
+            try {
+                return unmarshaller.unmarshal(trimmedInput, List.class);
+            } catch (final Exception e) {
+                throw new UnsupportedOperationException(
+                        String.format(
+                                "Could not unmarshal list from input %s",
+                                input),
+                        e
+                );
+            }
         } else if (definition.isDataTransferObject()) {
-            return unmarshaller.unmarshal(trimmedInput, Map.class);
+            try {
+                return unmarshaller.unmarshal(trimmedInput, Map.class);
+            } catch (final Exception e) {
+                throw new UnsupportedOperationException(
+                        String.format(
+                                "Could not unmarshal map from input %s",
+                                input),
+                        e
+                );
+            }
         } else if (definition.isCustomPrimitive()) {
             return PATTERN.matcher(trimmedInput).replaceAll("");
         } else {

@@ -19,8 +19,10 @@
  * under the License.
  */
 
-package com.envimate.mapmate.deserialization;
+package com.envimate.mapmate.builder.recipes;
 
-public interface Unmarshaller {
-    <T> T unmarshal(String input, Class<T> type) throws Exception;
+import com.envimate.mapmate.builder.MapMateBuilder;
+
+public interface Recipe {
+    void cook(MapMateBuilder mapMateBuilder);
 }

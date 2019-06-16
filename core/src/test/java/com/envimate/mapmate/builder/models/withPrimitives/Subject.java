@@ -19,8 +19,26 @@
  * under the License.
  */
 
-package com.envimate.mapmate.deserialization;
+package com.envimate.mapmate.builder.models.withPrimitives;
 
-public interface Unmarshaller {
-    <T> T unmarshal(String input, Class<T> type) throws Exception;
+import com.envimate.mapmate.builder.validation.LengthValidator;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class Subject {
+    private final String value;
+
+    public static Subject fromStringValue(final String value) {
+        final String validated = LengthValidator.ensureLength(value, 1, 256, "subject");
+        return new Subject(validated);
+    }
+
+    public String stringValue() {
+        return this.value;
+    }
 }

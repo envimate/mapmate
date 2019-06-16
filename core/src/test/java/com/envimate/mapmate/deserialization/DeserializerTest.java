@@ -28,7 +28,6 @@ import com.envimate.mapmate.deserialization.validation.ValidationError;
 import com.envimate.mapmate.domain.valid.*;
 import com.envimate.mapmate.validators.CustomTypeValidationException;
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import org.junit.Test;
 
 import java.io.Serializable;
@@ -150,13 +149,18 @@ public final class DeserializerTest {
     @Test
     public void givenInvalidJson_whenDeserializing_thenThrowsError() {
         final String given = "{\"number1\";\"1\",\"number2\":\"2\",\"stringA\"=\"a\",\"stringB\":\"b\"}";
-        final String expectedMessage = "com.google.gson.stream.MalformedJsonException: Expected ':' " +
-                "at line 1 column 12 path $.";
+        final String expectedMessage = "Could not unmarshal map from input {" +
+                "\"number1\";\"1\"," +
+                "\"number2\":\"2\"," +
+                "\"stringA\"=\"a\"," +
+                "\"stringB\":\"b\"}";
         try {
             theDefaultDeserializer().deserializeJson(given, AComplexType.class);
             fail("should throw JsonSyntaxException");
-        } catch (final JsonSyntaxException result) {
+        } catch (final UnsupportedOperationException result) {
             assertThat(result.getMessage(), is(equalTo(expectedMessage)));
+            assertThat(result.getCause(), is(not(nullValue())));
+            assertThat(result.getCause(), is(not(equalTo(result))));
         }
     }
 

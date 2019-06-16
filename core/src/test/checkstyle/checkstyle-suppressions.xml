@@ -30,6 +30,9 @@
     <suppress checks="VisibilityModifier" files=".*Injector.java"/>
     <suppress checks="IllegalCatchCheck" files="NamedMethodSerializationCPMethod.java"/>
     <suppress checks="IllegalCatchCheck" files="DataTransferObjectPackageScanner.java"/>
+    <suppress checks="ParameterNumber" files="SerializedObjectWithPrimitives.java"/>
+    <suppress checks="IllegalCatchCheck" files="Unmarshallers.java"/>
+    <suppress checks="IllegalCatchCheck" files="Serializer.java"/>
     <suppress checks="IllegalCatchCheck" files="Deserializer|When"/>
     <suppress checks="MethodLength" files="Deserializer.java"/>
     <suppress

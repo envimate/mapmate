@@ -24,6 +24,7 @@ package com.envimate.mapmate.builder;
 import com.envimate.mapmate.builder.conventional.ConventionalDetector;
 import com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition;
 import com.envimate.mapmate.builder.definitions.SerializedObjectDefinition;
+import com.envimate.mapmate.builder.recipes.Recipe;
 import com.envimate.mapmate.deserialization.*;
 import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
 import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
@@ -144,6 +145,11 @@ public final class MapMateBuilder {
         return this;
     }
 
+    public MapMateBuilder usingRecipe(final Recipe recipe) {
+        recipe.cook(this);
+        return this;
+    }
+
     public MapMateBuilder withExceptionIndicatingValidationError(
             final Class<? extends Throwable> exceptionIndicatingValidationError) {
         return this.withExceptionIndicatingValidationError(
@@ -200,6 +206,16 @@ public final class MapMateBuilder {
         return this.withSerializedObject(serializedObjectDefinition(type, serializedFields, deserializationMethod));
     }
 
+    public MapMateBuilder withSerializedObjects(final Class<?>... serializedObjectTypes) {
+        this.manuallyAddedSerializedObjectTypes.addAll(Arrays.asList(serializedObjectTypes));
+        return this;
+    }
+
+    public MapMateBuilder withCustomPrimitives(final Class<?>... customPrimitiveTypes) {
+        this.manuallyAddedCustomPrimitiveTypes.addAll(Arrays.asList(customPrimitiveTypes));
+        return this;
+    }
+
     public MapMate build() {
         final List<Class<?>> scannedClasses = this.packageScanner.scan();
         final List<Class<?>> withoutManualClasses = scannedClasses.stream()
@@ -238,8 +254,21 @@ public final class MapMateBuilder {
         return mapMate(serializer, deserializer);
     }
 
-    private void addSerializedObjects(final Iterable<SerializedObjectDefinition> values
-    ) {
+    private void addCustomPrimitives(final Iterable<CustomPrimitiveDefinition> customPrimitiveDefinitions) {
+        for (final CustomPrimitiveDefinition customPrimitiveDefinition : customPrimitiveDefinitions) {
+            final Class<?> type = customPrimitiveDefinition.type;
+            final DeserializationCPMethod deserializer = customPrimitiveDefinition.deserializer;
+            final SerializationCPMethod serializer = customPrimitiveDefinition.serializer;
+
+            final DeserializableCustomPrimitive<?> deserializableCP = deserializableCustomPrimitive(type, deserializer);
+            this.deserializableCPs.add(deserializableCP);
+
+            final SerializableCustomPrimitive serializableCP = serializableCustomPrimitive(type, serializer);
+            this.serializableCPs.add(serializableCP);
+        }
+    }
+
+    private void addSerializedObjects(final Iterable<SerializedObjectDefinition> values) {
         for (final SerializedObjectDefinition serializedObjectDefinition : values) {
             final DeserializationDTOMethod deserializer = serializedObjectDefinition.deserializer;
             final SerializationDTOMethod serializer = serializedObjectDefinition.serializer;
@@ -257,30 +286,6 @@ public final class MapMateBuilder {
                 this.serializableDTOs.add(serializableDTO);
             }
         }
-    }
-
-    private void addCustomPrimitives(final Iterable<CustomPrimitiveDefinition> customPrimitiveDefinitions) {
-        for (final CustomPrimitiveDefinition customPrimitiveDefinition : customPrimitiveDefinitions) {
-            final Class<?> type = customPrimitiveDefinition.type;
-            final DeserializationCPMethod deserializer = customPrimitiveDefinition.deserializer;
-            final SerializationCPMethod serializer = customPrimitiveDefinition.serializer;
-
-            final DeserializableCustomPrimitive<?> deserializableCP = deserializableCustomPrimitive(type, deserializer);
-            this.deserializableCPs.add(deserializableCP);
-
-            final SerializableCustomPrimitive serializableCP = serializableCustomPrimitive(type, serializer);
-            this.serializableCPs.add(serializableCP);
-        }
-    }
-
-    public MapMateBuilder withSerializedObjects(final Class<?>... serializedObjectTypes) {
-        this.manuallyAddedSerializedObjectTypes.addAll(Arrays.asList(serializedObjectTypes));
-        return this;
-    }
-
-    public MapMateBuilder withCustomPrimitives(final Class<?>... customPrimitiveTypes) {
-        this.manuallyAddedCustomPrimitiveTypes.addAll(Arrays.asList(customPrimitiveTypes));
-        return this;
     }
 }
 

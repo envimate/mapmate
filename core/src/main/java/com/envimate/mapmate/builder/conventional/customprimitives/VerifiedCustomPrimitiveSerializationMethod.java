@@ -49,19 +49,18 @@ public final class VerifiedCustomPrimitiveSerializationMethod implements Seriali
 
     @Override
     public String serialize(final Object object) {
-        final Class<?> type = object.getClass();
         try {
             return (String) this.serializationMethod.invoke(object);
         } catch (final IllegalAccessException e) {
             throw customPrimitiveSerializationMethodCallException(String.format(
                     "This should never happen. Called serialization method %s for custom type %s on instance %s",
                     this.serializationMethod,
-                    type,
+                    object.getClass(),
                     object), e);
         } catch (final InvocationTargetException e) {
             throw customPrimitiveSerializationMethodCallException(String.format(
                     "Got exception calling serialization method %s for custom type %s on instance %s",
-                    this.serializationMethod, type, object),
+                    this.serializationMethod, object.getClass(), object),
                     e);
         }
     }

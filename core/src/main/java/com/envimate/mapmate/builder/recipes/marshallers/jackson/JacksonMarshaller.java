@@ -19,10 +19,12 @@
  * under the License.
  */
 
-package com.envimate.mapmate.deserialization;
+package com.envimate.mapmate.builder.recipes.marshallers.jackson;
 
-import com.envimate.mapmate.Definition;
-import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
+import com.envimate.mapmate.builder.MapMateBuilder;
+import com.envimate.mapmate.builder.recipes.Recipe;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -31,34 +33,18 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class DeserializableCustomPrimitive<T> implements Definition {
-    private final Class<T> type;
-    private final DeserializationCPMethod deserializationMethod;
+public final class JacksonMarshaller implements Recipe {
+    private final ObjectMapper objectMapper;
 
-    public static <T> DeserializableCustomPrimitive<T> deserializableCustomPrimitive(
-            final Class<T> type, final DeserializationCPMethod deserializationMethod) {
-        deserializationMethod.verifyCompatibility(type);
-        return new DeserializableCustomPrimitive<>(type, deserializationMethod);
-    }
-
-    @SuppressWarnings("unchecked")
-    public T deserialize(final String input) throws Exception {
-        final Object deserialized = this.deserializationMethod.deserialize(input, this.type);
-        return (T) deserialized;
+    public static JacksonMarshaller jacksonMarshallerJson(final ObjectMapper objectMapper) {
+        return new JacksonMarshaller(objectMapper);
     }
 
     @Override
-    public boolean isCustomPrimitive() {
-        return true;
-    }
-
-    @Override
-    public boolean isDataTransferObject() {
-        return false;
-    }
-
-    @Override
-    public Class<?> getType() {
-        return this.type;
+    public void cook(final MapMateBuilder mapMateBuilder) {
+        final SimpleModule simpleModule = new SimpleModule();
+        simpleModule.setDeserializerModifier(new AlwaysStringValueJacksonDeserializerModifier());
+        this.objectMapper.registerModule(simpleModule);
+        mapMateBuilder.usingJsonMarshallers(this.objectMapper::writeValueAsString, this.objectMapper::readValue);
     }
 }

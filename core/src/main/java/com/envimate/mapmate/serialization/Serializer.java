@@ -81,14 +81,33 @@ public final class Serializer {
         if (normalized instanceof Map) {
             normalized = jsonInjector.apply((Map<String, Object>) normalized);
         }
-        return this.marshallers
-                .getForType(marshallingType)
-                .marshal(normalized);
+        final Marshaller marshaller = this.marshallers
+                .getForType(marshallingType);
+        try {
+            return marshaller.marshal(normalized);
+        } catch (final Exception e) {
+            throw new UnsupportedOperationException(
+                    String.format(
+                            "Could not marshal normalization %s",
+                            normalized),
+                    e
+            );
+        }
     }
 
     public String serializeFromMap(final Map<String, Object> map,
                                    final MarshallingType marshallingType) {
-        return this.marshallers.getForType(marshallingType).marshal(map);
+        final Marshaller marshaller = this.marshallers.getForType(marshallingType);
+        try {
+            return marshaller.marshal(map);
+        } catch (final Exception e) {
+            throw new UnsupportedOperationException(
+                    String.format(
+                            "Could not marshal from map %s",
+                            map),
+                    e
+            );
+        }
     }
 
     @SuppressWarnings("unchecked")

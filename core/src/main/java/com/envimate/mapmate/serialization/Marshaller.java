@@ -22,5 +22,5 @@
 package com.envimate.mapmate.serialization;
 
 public interface Marshaller {
-    String marshal(Object o);
+    String marshal(Object o) throws Exception;
 }

@@ -19,46 +19,31 @@
  * under the License.
  */
 
-package com.envimate.mapmate.deserialization;
+package com.envimate.mapmate.builder.recipes.primitives;
 
-import com.envimate.mapmate.Definition;
-import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
+import com.envimate.mapmate.builder.MapMateBuilder;
+import com.envimate.mapmate.builder.recipes.Recipe;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import static com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition.customPrimitiveDefinition;
+
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class DeserializableCustomPrimitive<T> implements Definition {
-    private final Class<T> type;
-    private final DeserializationCPMethod deserializationMethod;
-
-    public static <T> DeserializableCustomPrimitive<T> deserializableCustomPrimitive(
-            final Class<T> type, final DeserializationCPMethod deserializationMethod) {
-        deserializationMethod.verifyCompatibility(type);
-        return new DeserializableCustomPrimitive<>(type, deserializationMethod);
-    }
-
-    @SuppressWarnings("unchecked")
-    public T deserialize(final String input) throws Exception {
-        final Object deserialized = this.deserializationMethod.deserialize(input, this.type);
-        return (T) deserialized;
+public final class BuiltInPrimitveSerializedAsStringSupport implements Recipe {
+    public static BuiltInPrimitveSerializedAsStringSupport builtInPrimitveSerializedAsStringSupport() {
+        return new BuiltInPrimitveSerializedAsStringSupport();
     }
 
     @Override
-    public boolean isCustomPrimitive() {
-        return true;
-    }
-
-    @Override
-    public boolean isDataTransferObject() {
-        return false;
-    }
-
-    @Override
-    public Class<?> getType() {
-        return this.type;
+    public void cook(final MapMateBuilder mapMateBuilder) {
+        BuiltInPrimitiveAdapter.forEach((aClass, builtInPrimitiveAdapter) -> {
+            mapMateBuilder.withCustomPrimitive(customPrimitiveDefinition(
+                    aClass, builtInPrimitiveAdapter, builtInPrimitiveAdapter
+            ));
+        });
     }
 }
