@@ -68,14 +68,14 @@ Some features MapMate offers:
 Checkout these resources, and let us know if you don't find the information you are looking for, 
 we'll be happy to address that.
 
-* [User Guide](docs/UserGuide.md)
-* [Recipes](docs/Recipes.md)
-* [Introduction Blogpost](https://github.com/envimate/mapmate)
-* [Concepts](docs/Concepts.md) 
+* [QuickStart](docs/QuickStart.md) - Minimal configuration and example usage of MapMate
+* [User Guide](docs/UserGuide.md) - Detailed description of MapMate functionality, walkthrough features and configuration possibilities
+* [Introduction Blogpost](https://github.com/envimate/mapmate) - Example application, rationale behind MapMate
+* [Concepts](docs/Concepts.md) - Terminology we use explained. Check this document out to understand what we call [Custom Primitive](docs/Concepts.md#custom-primitives) and [Serialized Object](docs/Concepts.md#serialized-objects) and why we choose [String as the representation method](docs/Concepts.md#string-representation).
 
 Also checkout related articles to get an idea of why we created MapMate in the first place:
 
-* [Data Driven Security](docs/articles/DomainDrivenSecurity.md)
+* [Domain Driven Security](docs/articles/DomainDrivenSecurity.md)
 
 ## Contributing
 

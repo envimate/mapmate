@@ -55,4 +55,12 @@ public class MapMate {
     public Deserializer deserializer() {
         return this.deserializer;
     }
+
+    public String serializeToJson(final Object object) {
+        return this.serializer.serializeToJson(object);
+    }
+
+    public <T> T deserializeJson(final String json, final Class<T> targetType) {
+        return this.deserializer.deserializeJson(json, targetType);
+    }
 }
