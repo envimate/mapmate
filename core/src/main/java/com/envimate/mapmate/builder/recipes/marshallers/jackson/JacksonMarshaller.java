@@ -23,12 +23,14 @@ package com.envimate.mapmate.builder.recipes.marshallers.jackson;
 
 import com.envimate.mapmate.builder.MapMateBuilder;
 import com.envimate.mapmate.builder.recipes.Recipe;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 @ToString
 @EqualsAndHashCode
@@ -44,6 +46,7 @@ public final class JacksonMarshaller implements Recipe {
     public void cook(final MapMateBuilder mapMateBuilder) {
         final SimpleModule simpleModule = new SimpleModule();
         simpleModule.setDeserializerModifier(new AlwaysStringValueJacksonDeserializerModifier());
+        this.objectMapper.setSerializationInclusion(NON_NULL);
         this.objectMapper.registerModule(simpleModule);
         mapMateBuilder.usingJsonMarshallers(this.objectMapper::writeValueAsString, this.objectMapper::readValue);
     }
