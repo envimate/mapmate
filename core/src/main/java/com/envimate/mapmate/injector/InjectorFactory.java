@@ -19,35 +19,35 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.recipes.marshallers.jackson;
+package com.envimate.mapmate.injector;
 
-import com.envimate.mapmate.builder.MapMateBuilder;
-import com.envimate.mapmate.builder.recipes.Recipe;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static com.envimate.mapmate.injector.Injector.empty;
+import static com.envimate.mapmate.injector.InjectorLambda.noop;
+import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class JacksonMarshaller implements Recipe {
-    private final ObjectMapper objectMapper;
+public final class InjectorFactory {
+    private final InjectorLambda initializer;
 
-    public static JacksonMarshaller jacksonMarshallerJson(final ObjectMapper objectMapper) {
-        return new JacksonMarshaller(objectMapper);
+    public static InjectorFactory emptyInjectorFactory() {
+        return new InjectorFactory(noop());
     }
 
-    @Override
-    public void cook(final MapMateBuilder mapMateBuilder) {
-        final SimpleModule simpleModule = new SimpleModule();
-        simpleModule.setDeserializerModifier(new AlwaysStringValueJacksonDeserializerModifier());
-        this.objectMapper.setSerializationInclusion(NON_NULL);
-        this.objectMapper.registerModule(simpleModule);
-        mapMateBuilder.usingJsonMarshallers(this.objectMapper::writeValueAsString, this.objectMapper::readValue);
+    public static InjectorFactory injectorFactory(final InjectorLambda initializer) {
+        validateNotNull(initializer, "initializer");
+        return new InjectorFactory(initializer);
+    }
+
+    public Injector create() {
+        final Injector injector = empty();
+        this.initializer.setupInjector(injector);
+        return injector;
     }
 }

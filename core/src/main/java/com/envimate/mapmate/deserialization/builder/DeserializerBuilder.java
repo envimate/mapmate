@@ -23,6 +23,8 @@ package com.envimate.mapmate.deserialization.builder;
 
 import com.envimate.mapmate.deserialization.*;
 import com.envimate.mapmate.deserialization.validation.*;
+import com.envimate.mapmate.injector.InjectorFactory;
+import com.envimate.mapmate.injector.InjectorLambda;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
 
@@ -38,6 +40,8 @@ import static com.envimate.mapmate.deserialization.Deserializer.theDeserializer;
 import static com.envimate.mapmate.deserialization.builder.CustomPrimitiveDeserializationMethodBuilder.aCustomPrimitiveDeserializationMethodBuilder;
 import static com.envimate.mapmate.deserialization.builder.DataTransferObjectDeserializationMethodBuilder.aDataTransferObjectDeserializationMethodBuilder;
 import static com.envimate.mapmate.deserialization.builder.ScannablePackageBuilder.aScannablePackageBuilder;
+import static com.envimate.mapmate.injector.InjectorFactory.emptyInjectorFactory;
+import static com.envimate.mapmate.injector.InjectorFactory.injectorFactory;
 import static com.envimate.mapmate.marshalling.MarshallerRegistry.marshallerRegistry;
 import static com.envimate.mapmate.marshalling.MarshallingType.*;
 import static com.envimate.mapmate.reflections.PackageName.fromString;
@@ -51,6 +55,7 @@ public final class DeserializerBuilder {
     private final ThrowableClassList mappedExceptions;
     private ValidationErrorsMapping onValidationErrors;
     private boolean validateNoUnsupportedOutgoingReferences;
+    private InjectorFactory injectorFactory;
 
     private DeserializerBuilder() {
         this.unmarshallers = new HashMap<>();
@@ -61,6 +66,7 @@ public final class DeserializerBuilder {
             throw AggregatedValidationException.fromList(validationErrors);
         };
         this.validateNoUnsupportedOutgoingReferences = false;
+        this.injectorFactory = emptyInjectorFactory();
     }
 
     public static DeserializerBuilder aDeserializerBuilder() {
@@ -86,6 +92,11 @@ public final class DeserializerBuilder {
 
     public DeserializerBuilder withYamlUnmarshaller(final Unmarshaller unmarshaller) {
         return this.unmarshallingTheType(yaml()).using(unmarshaller);
+    }
+
+    public DeserializerBuilder withInjectorFactory(final InjectorLambda factory) {
+        this.injectorFactory = injectorFactory(factory);
+        return this;
     }
 
     public ScannablePackageBuilder thatScansThePackage(final String packageName) {
@@ -118,20 +129,22 @@ public final class DeserializerBuilder {
         });
     }
 
-    public DeserializerBuilder mappingExceptionUsing(final Class<? extends Throwable> exceptionType,
-                                                     final ExceptionMappingWithPropertyPath mapping) {
+    @SuppressWarnings("unchecked")
+    public <T extends Throwable> DeserializerBuilder mappingExceptionUsing(final Class<T> exceptionType,
+                                                                           final ExceptionMappingWithPropertyPath<T> mapping) {
         validateNotNull(exceptionType, "exceptionType");
         validateNotNull(mapping, "mapping");
-        this.validationMappings.putOneToOne(exceptionType, mapping);
+        this.validationMappings.putOneToOne(exceptionType, (ExceptionMappingWithPropertyPath<Throwable>) mapping);
         this.mappedExceptions.add(exceptionType);
         return this;
     }
 
-    public DeserializerBuilder mappingExceptionUsingList(final Class<? extends Throwable> exceptionType,
-                                                         final ExceptionMappingList mapping) {
+    @SuppressWarnings("unchecked")
+    public <T extends Throwable> DeserializerBuilder mappingExceptionUsingList(final Class<T> exceptionType,
+                                                                               final ExceptionMappingList<T> mapping) {
         validateNotNull(exceptionType, "exceptionType");
         validateNotNull(mapping, "mapping");
-        this.validationMappings.putOneToMany(exceptionType, mapping);
+        this.validationMappings.putOneToMany(exceptionType, (ExceptionMappingList<Throwable>) mapping);
         this.mappedExceptions.add(exceptionType);
         return this;
     }
@@ -168,6 +181,7 @@ public final class DeserializerBuilder {
                 allDefinitions,
                 this.validationMappings,
                 this.onValidationErrors,
-                this.validateNoUnsupportedOutgoingReferences);
+                this.validateNoUnsupportedOutgoingReferences,
+                this.injectorFactory);
     }
 }

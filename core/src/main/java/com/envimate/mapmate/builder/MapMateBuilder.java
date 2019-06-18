@@ -29,6 +29,8 @@ import com.envimate.mapmate.deserialization.*;
 import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
 import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
 import com.envimate.mapmate.deserialization.validation.*;
+import com.envimate.mapmate.injector.InjectorFactory;
+import com.envimate.mapmate.injector.InjectorLambda;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.serialization.*;
@@ -48,6 +50,7 @@ import static com.envimate.mapmate.deserialization.DeserializableCustomPrimitive
 import static com.envimate.mapmate.deserialization.DeserializableDataTransferObject.deserializableDataTransferObject;
 import static com.envimate.mapmate.deserialization.DeserializableDefinitions.deserializableDefinitions;
 import static com.envimate.mapmate.deserialization.Deserializer.theDeserializer;
+import static com.envimate.mapmate.injector.InjectorFactory.injectorFactory;
 import static com.envimate.mapmate.marshalling.MarshallerRegistry.marshallerRegistry;
 import static com.envimate.mapmate.serialization.SerializableCustomPrimitive.serializableCustomPrimitive;
 import static com.envimate.mapmate.serialization.SerializableDataTransferObject.serializableDataTransferObject;
@@ -63,9 +66,7 @@ public final class MapMateBuilder {
     private final Map<Class<?>, SerializedObjectDefinition> manuallyAddedSerializedObjects = new HashMap<>(1);
     private Map<MarshallingType, Marshaller> marshallerMap = new HashMap<>(1);
     private Map<MarshallingType, Unmarshaller> unmarshallerMap = new HashMap<>(1);
-    private Class<? extends Throwable> exceptionIndicatingValidationError;
-    private ExceptionMappingWithPropertyPath exceptionMapping = (exception, propertyPath) ->
-            new ValidationError(exception.getMessage(), propertyPath);
+    private final ValidationMappings validationMappings = ValidationMappings.empty();
     private Detector detector = ConventionalDetector.conventionalDetectorWithAnnotations();
     private final PackageScanner packageScanner;
     private final List<Class<?>> manuallyAddedSerializedObjectTypes = new LinkedList<>();
@@ -75,6 +76,7 @@ public final class MapMateBuilder {
     private final List<SerializableCustomPrimitive> serializableCPs = new LinkedList<>();
     private final List<DeserializableDataTransferObject<?>> deserializableDTOs = new LinkedList<>();
     private final List<SerializableDataTransferObject> serializableDTOs = new LinkedList<>();
+    private InjectorFactory injectorFactory = InjectorFactory.emptyInjectorFactory();
 
     public MapMateBuilder(final PackageScanner packageScanner) {
         this.packageScanner = packageScanner;
@@ -145,24 +147,40 @@ public final class MapMateBuilder {
         return this;
     }
 
+    public MapMateBuilder usingInjectorFactory(final InjectorLambda factory) {
+        this.injectorFactory = injectorFactory(factory);
+        return this;
+    }
+
     public MapMateBuilder usingRecipe(final Recipe recipe) {
         recipe.cook(this);
         return this;
     }
 
-    public MapMateBuilder withExceptionIndicatingValidationError(
-            final Class<? extends Throwable> exceptionIndicatingValidationError) {
+    @SuppressWarnings("unchecked")
+    public <T extends Throwable> MapMateBuilder withExceptionIndicatingValidationError(
+            final Class<T> exceptionIndicatingValidationError) {
         return this.withExceptionIndicatingValidationError(
                 exceptionIndicatingValidationError,
-                this.exceptionMapping
-        );
+                (exception, propertyPath) -> new ValidationError(exception.getMessage(), propertyPath));
     }
 
-    public MapMateBuilder withExceptionIndicatingValidationError(
-            final Class<? extends Throwable> exceptionIndicatingValidationError,
-            final ExceptionMappingWithPropertyPath exceptionMapping) {
-        this.exceptionIndicatingValidationError = exceptionIndicatingValidationError;
-        this.exceptionMapping = exceptionMapping;
+    @SuppressWarnings("unchecked")
+    public <T extends Throwable> MapMateBuilder withExceptionIndicatingValidationError(
+            final Class<T> exceptionIndicatingValidationError,
+            final ExceptionMappingWithPropertyPath<T> exceptionMapping) {
+        this.validationMappings.putOneToOne(exceptionIndicatingValidationError,
+                (ExceptionMappingWithPropertyPath<Throwable>) exceptionMapping);
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Throwable> MapMateBuilder withExceptionIndicatingMultipleValidationErrors(
+            final Class<T> exceptionType,
+            final ExceptionMappingList<T> mapping) {
+        validateNotNull(exceptionType, "exceptionType");
+        validateNotNull(mapping, "mapping");
+        this.validationMappings.putOneToMany(exceptionType, (ExceptionMappingList<Throwable>) mapping);
         return this;
     }
 
@@ -245,12 +263,8 @@ public final class MapMateBuilder {
         final MarshallerRegistry<Unmarshaller> unmarshallerRegistry = marshallerRegistry(this.unmarshallerMap);
 
         final Serializer serializer = theSerializer(marshallerRegistry, serializables);
-        final ValidationMappings validationMappings = ValidationMappings.empty();
-        if (this.exceptionIndicatingValidationError != null) {
-            validationMappings.putOneToOne(this.exceptionIndicatingValidationError, this.exceptionMapping);
-        }
-        final Deserializer deserializer = theDeserializer(unmarshallerRegistry, deserializables, validationMappings,
-                this.validationErrorsMapping, false);
+        final Deserializer deserializer = theDeserializer(unmarshallerRegistry, deserializables, this.validationMappings,
+                this.validationErrorsMapping, false, this.injectorFactory);
         return mapMate(serializer, deserializer);
     }
 

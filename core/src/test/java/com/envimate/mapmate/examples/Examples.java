@@ -134,11 +134,11 @@ public final class Examples {
                 "  \"firstNames\": [\"Patrick\", \"Richard\", \"Nune\"],\n" +
                 "  \"addresses\": [\n" +
                 "    {\n" +
-                "      \"streetName\": \"KieholzStraße\",\n" +
-                "      \"houseNumber\": \"403a\",\n" +
+                "      \"streetName\": \"Strasse\",\n" +
+                "      \"houseNumber\": \"123\",\n" +
                 "      \"zipCode\": \"12345\",\n" +
                 "      \"city\": \"Berlin\",\n" +
-                "      \"region\": \"Berlin-north\",\n" +
+                "      \"region\": \"Berlin-west\",\n" +
                 "      \"country\": \"Berlinnia\"\n" +
                 "    },\n" +
                 "    {\n" +

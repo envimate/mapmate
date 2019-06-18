@@ -73,7 +73,7 @@ public final class Defaults {
                 .excluding(AComplexTypeWithCollections.class)
                 .thatAre().deserializedUsingTheSingleFactoryMethod()
                 .mappingExceptionUsing(AValidationException.class, (t, propertyPath) -> {
-                    final AValidationException e = (AValidationException) t;
+                    final AValidationException e = t;
                     return new ValidationError(e.getMessage(), e.getBlamedField());
                 })
                 .mappingExceptionUsing(AnException.class, (t, p) -> {

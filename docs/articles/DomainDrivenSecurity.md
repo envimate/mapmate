@@ -34,7 +34,7 @@ public final class OrderAmount {
         final int valid = IntegerValidator.ensureIntBetween(1, 100, value, "Invalid order amount");
         return new OrderAmount(valid);
     }
-    ...
+    //...
 }
 ```
 

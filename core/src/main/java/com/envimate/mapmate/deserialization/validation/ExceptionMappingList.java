@@ -23,6 +23,6 @@ package com.envimate.mapmate.deserialization.validation;
 
 import java.util.List;
 
-public interface ExceptionMappingList {
-    List<ValidationError> map(Throwable t, String propertyPath);
+public interface ExceptionMappingList<T extends Throwable> {
+    List<ValidationError> map(T exception, String propertyPath);
 }

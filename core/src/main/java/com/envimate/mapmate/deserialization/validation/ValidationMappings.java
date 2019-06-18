@@ -29,7 +29,7 @@ import static java.util.stream.Collectors.toSet;
 
 public final class ValidationMappings {
 
-    private final Map<Class<? extends Throwable>, ExceptionMappingList> validationMappings;
+    private final Map<Class<? extends Throwable>, ExceptionMappingList<Throwable>> validationMappings;
 
     private ValidationMappings() {
         this.validationMappings = new HashMap<>(0);
@@ -39,15 +39,15 @@ public final class ValidationMappings {
         return new ValidationMappings();
     }
 
-    public void putOneToOne(final Class<? extends Throwable> exception, final ExceptionMappingWithPropertyPath m) {
+    public void putOneToOne(final Class<? extends Throwable> exception, final ExceptionMappingWithPropertyPath<Throwable> m) {
         this.putAll(exception, (t, p) -> List.of(m.map(t, p)));
     }
 
-    public void putOneToMany(final Class<? extends Throwable> exception, final ExceptionMappingList m) {
+    public void putOneToMany(final Class<? extends Throwable> exception, final ExceptionMappingList<Throwable> m) {
         this.putAll(exception, m);
     }
 
-    private void putAll(final Class<? extends Throwable> exception, final ExceptionMappingList m) {
+    private void putAll(final Class<? extends Throwable> exception, final ExceptionMappingList<Throwable> m) {
         this.validationMappings.merge(exception, m, (a, b) -> (t, propertyPath) -> {
             final List<ValidationError> map1 = a.map(t, propertyPath);
             final List<ValidationError> map2 = b.map(t, propertyPath);
@@ -58,8 +58,8 @@ public final class ValidationMappings {
         });
     }
 
-    public Optional<ExceptionMappingList> get(final Class<? extends Throwable> throwable) {
-        final ExceptionMappingList mapping = this.validationMappings.get(throwable);
+    public Optional<ExceptionMappingList<Throwable>> get(final Class<? extends Throwable> throwable) {
+        final ExceptionMappingList<Throwable> mapping = this.validationMappings.get(throwable);
         if (mapping != null) {
             return of(mapping);
         }

@@ -19,8 +19,28 @@
  * under the License.
  */
 
-package com.envimate.mapmate.deserialization.validation;
+package com.envimate.mapmate.domain.scannablewithlist;
 
-public interface ExceptionMappingWithPropertyPath<T extends Throwable> {
-    ValidationError map(T exception, String propertyPath);
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+import java.util.List;
+
+import static java.util.Arrays.asList;
+
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class DtoWithList {
+    private final List<Integer> list;
+
+    public static DtoWithList dtoWithList(final Integer[] list) {
+        return new DtoWithList(asList(list));
+    }
+
+    public List<Integer> getList() {
+        return this.list;
+    }
 }
