@@ -28,6 +28,7 @@ import com.envimate.mapmate.builder.recipes.Recipe;
 import com.envimate.mapmate.deserialization.*;
 import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
 import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
+import com.envimate.mapmate.deserialization.methods.StaticMethodCPMethod;
 import com.envimate.mapmate.deserialization.validation.*;
 import com.envimate.mapmate.injector.InjectorFactory;
 import com.envimate.mapmate.injector.InjectorLambda;
@@ -40,6 +41,7 @@ import com.envimate.mapmate.serialization.methods.SerializationDTOMethod;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.envimate.mapmate.builder.DefaultPackageScanner.defaultPackageScanner;
@@ -56,6 +58,7 @@ import static com.envimate.mapmate.serialization.SerializableCustomPrimitive.ser
 import static com.envimate.mapmate.serialization.SerializableDataTransferObject.serializableDataTransferObject;
 import static com.envimate.mapmate.serialization.SerializableDefinitions.serializableDefinitions;
 import static com.envimate.mapmate.serialization.Serializer.theSerializer;
+import static com.envimate.mapmate.serialization.methods.ProvidedMethodSerializationCPMethod.providedMethodSerializationCPMethod;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
 public final class MapMateBuilder {
@@ -197,6 +200,16 @@ public final class MapMateBuilder {
         }
 
         return this;
+    }
+
+    public <T> MapMateBuilder withCustomPrimitive(final Class<T> type,
+                                                  final Function<T, String> serializationMethod,
+                                                  final Function<String, T> deserializationMethod) {
+        return this.withCustomPrimitive(customPrimitiveDefinition(
+                type,
+                providedMethodSerializationCPMethod(type, serializationMethod),
+                StaticMethodCPMethod.theStaticMethodCPMethod(deserializationMethod)
+        ));
     }
 
     public MapMateBuilder withCustomPrimitive(final Class<?> type,
