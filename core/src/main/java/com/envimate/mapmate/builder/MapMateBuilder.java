@@ -66,9 +66,7 @@ public final class MapMateBuilder {
     private final Map<Class<?>, SerializedObjectDefinition> manuallyAddedSerializedObjects = new HashMap<>(1);
     private Map<MarshallingType, Marshaller> marshallerMap = new HashMap<>(1);
     private Map<MarshallingType, Unmarshaller> unmarshallerMap = new HashMap<>(1);
-    private Class<? extends Throwable> exceptionIndicatingValidationError;
-    private ExceptionMappingWithPropertyPath<Throwable> exceptionMapping = (exception, propertyPath) ->
-            new ValidationError(exception.getMessage(), propertyPath);
+    private final ValidationMappings validationMappings = ValidationMappings.empty();
     private Detector detector = ConventionalDetector.conventionalDetectorWithAnnotations();
     private final PackageScanner packageScanner;
     private final List<Class<?>> manuallyAddedSerializedObjectTypes = new LinkedList<>();
@@ -164,16 +162,25 @@ public final class MapMateBuilder {
             final Class<T> exceptionIndicatingValidationError) {
         return this.withExceptionIndicatingValidationError(
                 exceptionIndicatingValidationError,
-                (ExceptionMappingWithPropertyPath<T>) this.exceptionMapping
-        );
+                (exception, propertyPath) -> new ValidationError(exception.getMessage(), propertyPath));
     }
 
     @SuppressWarnings("unchecked")
     public <T extends Throwable> MapMateBuilder withExceptionIndicatingValidationError(
             final Class<T> exceptionIndicatingValidationError,
             final ExceptionMappingWithPropertyPath<T> exceptionMapping) {
-        this.exceptionIndicatingValidationError = exceptionIndicatingValidationError;
-        this.exceptionMapping = (ExceptionMappingWithPropertyPath<Throwable>) exceptionMapping;
+        this.validationMappings.putOneToOne(exceptionIndicatingValidationError,
+                (ExceptionMappingWithPropertyPath<Throwable>) exceptionMapping);
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Throwable> MapMateBuilder withExceptionIndicatingMultipleValidationErrors(
+            final Class<T> exceptionType,
+            final ExceptionMappingList<T> mapping) {
+        validateNotNull(exceptionType, "exceptionType");
+        validateNotNull(mapping, "mapping");
+        this.validationMappings.putOneToMany(exceptionType, (ExceptionMappingList<Throwable>) mapping);
         return this;
     }
 
@@ -256,12 +263,8 @@ public final class MapMateBuilder {
         final MarshallerRegistry<Unmarshaller> unmarshallerRegistry = marshallerRegistry(this.unmarshallerMap);
 
         final Serializer serializer = theSerializer(marshallerRegistry, serializables);
-        final ValidationMappings validationMappings = ValidationMappings.empty();
-        if (this.exceptionIndicatingValidationError != null) {
-            validationMappings.putOneToOne(this.exceptionIndicatingValidationError, this.exceptionMapping);
-        }
-        final Deserializer deserializer = theDeserializer(unmarshallerRegistry, deserializables, validationMappings,
-                this.validationErrorsMapping, false, injectorFactory);
+        final Deserializer deserializer = theDeserializer(unmarshallerRegistry, deserializables, this.validationMappings,
+                this.validationErrorsMapping, false, this.injectorFactory);
         return mapMate(serializer, deserializer);
     }
 
