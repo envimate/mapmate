@@ -29,72 +29,94 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition.customPrimitiveDefinition;
-import static com.envimate.mapmate.builder.definitions.IncompatibleCustomPrimitiveException.incompatibleCustomPrimitiveException;
+import static java.lang.reflect.Modifier.*;
+import static java.util.Arrays.stream;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MethodNameBasedCustomPrimitiveDefinitionFactory implements CustomPrimitiveDefinitionFactory {
-    private final String serializationMethodName;
-    private final String deserializationMethodName;
+    private final Pattern serializationMethodName;
+    private final Pattern deserializationMethodName;
 
     public static MethodNameBasedCustomPrimitiveDefinitionFactory nameBasedCustomPrimitiveDefinitionFactory(
             final String serializationMethodName,
             final String deserializationMethodName
     ) {
-        return new MethodNameBasedCustomPrimitiveDefinitionFactory(serializationMethodName, deserializationMethodName);
+        return new MethodNameBasedCustomPrimitiveDefinitionFactory(
+                Pattern.compile(serializationMethodName),
+                Pattern.compile(deserializationMethodName)
+        );
     }
 
     @Override
     public Optional<CustomPrimitiveDefinition> analyze(final Class<?> type) {
-        final Optional<Method> serializationMethod = this.findSerializerMethod(type, this.serializationMethodName);
-        final Optional<Method> deserializationMethod = this.findDeserializerMethod(type, this.deserializationMethodName);
+        final Method[] methods = type.getMethods();
+        final Optional<Method> serializationMethod = this.findSerializerMethod(
+                methods, this.serializationMethodName
+        );
+        final Optional<Method> deserializationMethod = this.findDeserializerMethod(
+                type, methods, this.deserializationMethodName
+        );
 
         if (serializationMethod.isPresent() || deserializationMethod.isPresent()) {
-            if (serializationMethod.isEmpty() || deserializationMethod.isEmpty()) {
-                throw incompatibleCustomPrimitiveException(
-                        "Both serialization and deserialization methods need to be present. Found %s serializer and %s " +
-                                "deserializer on type %s. If this class is not supposed to be handled by MapMate, add" +
-                                "it to the blacklist.",
-                        serializationMethod.orElse(null),
-                        deserializationMethod.orElse(null),
-                        type
+            if (serializationMethod.isPresent() && deserializationMethod.isPresent()) {
+                return Optional.of(
+                        customPrimitiveDefinition(type, serializationMethod.get(), deserializationMethod.get())
                 );
             }
-            return Optional.of(customPrimitiveDefinition(type, serializationMethod.get(), deserializationMethod.get()));
+
         }
         return Optional.empty();
     }
 
-    private Optional<Method> findSerializerMethod(final Class<?> type, final String methodName) {
-        try {
-            final Method method = type.getMethod(methodName);
-            final int modifiers = method.getModifiers();
-            final Class<?> returnType = method.getReturnType();
-            if (Modifier.isPublic(modifiers) && !Modifier.isStatic(modifiers) && returnType.equals(String.class)) {
-                return Optional.of(method);
-            }
-            return Optional.empty();
-        } catch (final NoSuchMethodException e) {
-            return Optional.empty();
+    private Optional<Method> findSerializerMethod(final Method[] methods,
+                                                  final Pattern methodNamePattern) {
+        final List<Method> serializerMethodCandidates = stream(methods)
+                .filter(method -> !isStatic(method.getModifiers()))
+                .filter(method -> !isAbstract(method.getModifiers()))
+                .filter(method -> isPublic(method.getModifiers()))
+                .filter(method -> method.getReturnType().equals(String.class))
+                .filter(method -> method.getParameterCount() == 0)
+                .collect(Collectors.toList());
+        final List<Method> methodsMatchingName = serializerMethodCandidates.stream()
+                .filter(method -> methodNamePattern.matcher(method.getName()).matches())
+                .collect(Collectors.toList());
+        if (methodsMatchingName.size() > 0) {
+            return Optional.of(methodsMatchingName.get(0));
         }
+        return Optional.empty();
+
     }
 
-    private Optional<Method> findDeserializerMethod(final Class<?> type, final String methodName) {
-        try {
-            final Method method = type.getMethod(methodName, String.class);
-            final int modifiers = method.getModifiers();
-            final Class<?> returnType = method.getReturnType();
-            if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && returnType.equals(type)) {
-                return Optional.of(method);
-            }
-            return Optional.empty();
-        } catch (final NoSuchMethodException e) {
-            return Optional.empty();
+    private Optional<Method> findDeserializerMethod(final Class<?> type, final Method[] methods,
+                                                    final Pattern methodNamePattern) {
+        final List<Method> deserializerMethodCandidates = stream(methods)
+                .filter(method -> isStatic(method.getModifiers()))
+                .filter(method -> isPublic(method.getModifiers()))
+                .filter(method -> method.getReturnType().equals(type))
+                .filter(method -> method.getParameterCount() == 1)
+                .filter(method -> method.getParameterTypes()[0].equals(String.class))
+                .collect(Collectors.toList());
+        final List<Method> methodsMatchingName = deserializerMethodCandidates.stream()
+                .filter(method -> methodNamePattern.matcher(method.getName()).matches())
+                .collect(Collectors.toList());
+        if (methodsMatchingName.size() > 0) {
+            return Optional.of(methodsMatchingName.get(0));
         }
+
+        final List<Method> methodsMatchingClassName = deserializerMethodCandidates.stream()
+                .filter(method -> method.getName().toLowerCase().contains(type.getSimpleName().toLowerCase()))
+                .collect(Collectors.toList());
+        if (methodsMatchingClassName.size() > 0) {
+            return Optional.of(methodsMatchingClassName.get(0));
+        }
+        return Optional.empty();
     }
 }

@@ -59,31 +59,33 @@ public final class DeserializerMethodNameBasedSerializedObjectFactory implements
                 .filter(method -> isPublic(method.getModifiers()))
                 .filter(method -> method.getReturnType().equals(type))
                 .collect(Collectors.toList());
-        final Field[] serializedFields = stream(type.getFields())
-                .filter(field -> isPublic(field.getModifiers()))
-                .filter(field -> !isStatic(field.getModifiers()))
-                .filter(field -> !isTransient(field.getModifiers()))
-                .toArray(Field[]::new);
+        if (!deserializerMethods.isEmpty()) {
+            final Field[] serializedFields = stream(type.getFields())
+                    .filter(field -> isPublic(field.getModifiers()))
+                    .filter(field -> !isStatic(field.getModifiers()))
+                    .filter(field -> !isTransient(field.getModifiers()))
+                    .toArray(Field[]::new);
 
-        final int deserializerMethodsFound = deserializerMethods.size();
-        Method deserializationMethod = null;
-        if (deserializerMethodsFound == 1) {
-            deserializationMethod = deserializerMethods.get(0);
-        } else if (deserializerMethodsFound > 1 && serializedFields.length > 0) {
-            final Optional<Method> firstCompatibleDeserializerMethod = deserializerMethods.stream()
-                    .filter(method -> Reflections.isMethodCompatibleWithFields(method, serializedFields))
-                    .findFirst();
-            if (firstCompatibleDeserializerMethod.isPresent()) {
-                deserializationMethod = firstCompatibleDeserializerMethod.get();
+            final int deserializerMethodsFound = deserializerMethods.size();
+            Method deserializationMethod = null;
+            if (deserializerMethodsFound == 1) {
+                deserializationMethod = deserializerMethods.get(0);
+            } else if (serializedFields.length > 0) {
+                final Optional<Method> firstCompatibleDeserializerMethod = deserializerMethods.stream()
+                        .filter(method -> Reflections.isMethodCompatibleWithFields(method, serializedFields))
+                        .findFirst();
+                if (firstCompatibleDeserializerMethod.isPresent()) {
+                    deserializationMethod = firstCompatibleDeserializerMethod.get();
+                }
             }
-        }
 
-        if (serializedFields.length > 0 || deserializationMethod != null) {
-            final boolean isMostLikelyACustomPrimitive = serializedFields.length == 0 &&
-                    deserializationMethod.getParameterCount() == 1 &&
-                    deserializationMethod.getParameterTypes()[0] == String.class;
-            if (!isMostLikelyACustomPrimitive) {
-                return Optional.of(serializedObjectDefinition(type, serializedFields, deserializationMethod));
+            if (serializedFields.length > 0 || deserializationMethod != null) {
+                final boolean isMostLikelyACustomPrimitive = serializedFields.length == 0 &&
+                        deserializationMethod.getParameterCount() == 1 &&
+                        deserializationMethod.getParameterTypes()[0] == String.class;
+                if (!isMostLikelyACustomPrimitive) {
+                    return Optional.of(serializedObjectDefinition(type, serializedFields, deserializationMethod));
+                }
             }
         }
         return Optional.empty();

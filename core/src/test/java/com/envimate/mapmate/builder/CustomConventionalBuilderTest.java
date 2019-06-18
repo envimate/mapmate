@@ -53,8 +53,7 @@ public final class CustomConventionalBuilderTest {
         return MapMate.aMapMate("com.envimate.mapmate.builder.models")
                 .withDetector(conventionalDetector("serialize",
                         "deserialize",
-                        "restore",
-                        ".*"
+                        "restore"
                 ))
                 .usingJsonMarshallers(gson::toJson, gson::fromJson)
                 .withExceptionIndicatingValidationError(CustomTypeValidationException.class)

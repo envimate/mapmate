@@ -31,6 +31,7 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -137,10 +138,11 @@ public final class ConventionalDetector implements Detector {
                 .collect(Collectors.toList());
         final List<SerializedObjectDefinitionFactory> serializedObjectDefinitionFactories = List.of(
                 serializedObjectClassAnnotationFactory(),
-                deserializerMethodNameBasedSerializedObjectFactory(serializedObjectDeserializationMethodName),
                 nameBasedSerializedObjectFactory(
                         patterns,
-                        serializedObjectDeserializationMethodName));
+                        serializedObjectDeserializationMethodName),
+                deserializerMethodNameBasedSerializedObjectFactory(serializedObjectDeserializationMethodName)
+        );
         return conventionalDetector(customPrimitiveDefinitionFactories, serializedObjectDefinitionFactories);
     }
 
@@ -149,11 +151,13 @@ public final class ConventionalDetector implements Detector {
         final List<CustomPrimitiveDefinition> foundCustomPrimitives = new LinkedList<>();
 
         for (final Class<?> scannedClass : classes) {
-            for (final CustomPrimitiveDefinitionFactory factory : this.customPrimitiveDefinitionFactories) {
-                final Optional<CustomPrimitiveDefinition> analyzedClass = factory.analyze(scannedClass);
-                if (analyzedClass.isPresent()) {
-                    foundCustomPrimitives.add(analyzedClass.get());
-                    break;
+            if (!Modifier.isAbstract(scannedClass.getModifiers())) {
+                for (final CustomPrimitiveDefinitionFactory factory : this.customPrimitiveDefinitionFactories) {
+                    final Optional<CustomPrimitiveDefinition> analyzedClass = factory.analyze(scannedClass);
+                    if (analyzedClass.isPresent()) {
+                        foundCustomPrimitives.add(analyzedClass.get());
+                        break;
+                    }
                 }
             }
         }
@@ -163,12 +167,15 @@ public final class ConventionalDetector implements Detector {
     @Override
     public List<SerializedObjectDefinition> serializedObjects(final List<Class<?>> classes) {
         final List<SerializedObjectDefinition> foundSerializedObjects = new LinkedList<>();
+
         for (final Class<?> scannedClass : classes) {
-            for (final SerializedObjectDefinitionFactory factory : this.serializedObjectDefinitionFactories) {
-                final Optional<SerializedObjectDefinition> analyzedClass = factory.analyze(scannedClass);
-                if (analyzedClass.isPresent()) {
-                    foundSerializedObjects.add(analyzedClass.get());
-                    break;
+            if (!Modifier.isAbstract(scannedClass.getModifiers())) {
+                for (final SerializedObjectDefinitionFactory factory : this.serializedObjectDefinitionFactories) {
+                    final Optional<SerializedObjectDefinition> analyzedClass = factory.analyze(scannedClass);
+                    if (analyzedClass.isPresent()) {
+                        foundSerializedObjects.add(analyzedClass.get());
+                        break;
+                    }
                 }
             }
         }

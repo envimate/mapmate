@@ -25,10 +25,16 @@ import com.envimate.mapmate.builder.models.conventional.Body;
 import com.envimate.mapmate.builder.models.conventional.Email;
 import com.envimate.mapmate.builder.models.conventional.EmailAddress;
 import com.envimate.mapmate.builder.models.conventional.Subject;
+import com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.EmailDto;
 import com.envimate.mapmate.builder.validation.CustomTypeValidationException;
 import com.google.gson.Gson;
 import org.junit.Assert;
 import org.junit.Test;
+
+import static com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.Body.body;
+import static com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.EmailDto.email;
+import static com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.EmailAddress.anEmailAddress;
+import static com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.Subject.aSubject;
 
 public final class ConventionalBuilderTest {
 
@@ -45,9 +51,15 @@ public final class ConventionalBuilderTest {
             Body.fromStringValue("Hello World!!!")
     );
 
+    public static final EmailDto EMAIL_DTO = email(
+            anEmailAddress("sender@example.com"),
+            anEmailAddress("receiver@example.com"),
+            aSubject("Hello"),
+            body("Hello World!!!")
+    );
+
     public static MapMate theConventionalMapMateInstance() {
         final Gson gson = new Gson();
-
         return MapMate.aMapMate("com.envimate.mapmate.builder.models")
                 .usingJsonMarshallers(gson::toJson, gson::fromJson)
                 .withExceptionIndicatingValidationError(CustomTypeValidationException.class)
@@ -64,5 +76,19 @@ public final class ConventionalBuilderTest {
     public void testEmailDeserialization() {
         final Email result = theConventionalMapMateInstance().deserializer().deserializeJson(EMAIL_JSON, Email.class);
         Assert.assertEquals(EMAIL, result);
+    }
+
+    @Test
+    public void testEmailSerializationClassNameFactories() {
+        final String result = theConventionalMapMateInstance().serializer().serializeToJson(EMAIL_DTO);
+        Assert.assertEquals(EMAIL_JSON, result);
+    }
+
+    @Test
+    public void testEmailDeserializationClassNameFactories() {
+        final EmailDto result = theConventionalMapMateInstance().deserializer().deserializeJson(
+                EMAIL_JSON, EmailDto.class
+        );
+        Assert.assertEquals(EMAIL_DTO, result);
     }
 }

@@ -45,12 +45,12 @@ import static java.util.Arrays.stream;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class NameBasedSerializedObjectFactory implements SerializedObjectDefinitionFactory {
     private final List<Pattern> patterns;
-    private final String deserializationMethodName;
+    private final Pattern deserializationMethodNamePattern;
 
     public static NameBasedSerializedObjectFactory nameBasedSerializedObjectFactory(
             final List<Pattern> patterns,
             final String deserializationMethodName) {
-        return new NameBasedSerializedObjectFactory(patterns, deserializationMethodName);
+        return new NameBasedSerializedObjectFactory(patterns, Pattern.compile(deserializationMethodName));
     }
 
     @Override
@@ -58,37 +58,47 @@ public final class NameBasedSerializedObjectFactory implements SerializedObjectD
         final String typeName = type.getName();
         final boolean anyMatch = this.patterns.stream().anyMatch(pattern -> pattern.matcher(typeName).matches());
         if (anyMatch) {
-            final Field[] serializedFields = stream(type.getFields())
-                    .filter(field -> isPublic(field.getModifiers()))
-                    .filter(field -> !isStatic(field.getModifiers()))
-                    .filter(field -> !isTransient(field.getModifiers()))
-                    .toArray(Field[]::new);
-
+            final Field[] serializedFields = detectFields(type);
             final Method[] methods = type.getMethods();
 
             final List<Method> deserializerMethods = stream(methods)
                     .filter(method -> isStatic(method.getModifiers()))
                     .filter(method -> isPublic(method.getModifiers()))
                     .filter(method -> method.getReturnType().equals(type))
-                    .filter(method -> method.getName().equals(this.deserializationMethodName))
+                    .filter(method -> method.getParameterCount() > 0)
                     .collect(Collectors.toList());
 
             Method deserializerMethod = null;
             if (deserializerMethods.size() == 1) {
                 deserializerMethod = deserializerMethods.get(0);
             } else if (deserializerMethods.size() > 1) {
-                final Optional<Method> optionalDeserializerMethod = deserializerMethods.stream()
-                        .filter(method -> Reflections.isMethodCompatibleWithFields(method, serializedFields))
-                        .findFirst();
-                if (optionalDeserializerMethod.isPresent()) {
-                    deserializerMethod = optionalDeserializerMethod.get();
+                final List<Method> withMatchingName = deserializerMethods.stream()
+                        .filter(method -> this.deserializationMethodNamePattern.matcher(method.getName()).matches())
+                        .collect(Collectors.toList());
+                if (withMatchingName.size() == 1) {
+                    deserializerMethod = deserializerMethods.get(0);
+                } else if (withMatchingName.size() > 1) {
+                    final Optional<Method> optionalDeserializerMethodCompatibleWithFields = deserializerMethods.stream()
+                            .filter(method -> Reflections.isMethodCompatibleWithFields(method, serializedFields))
+                            .findFirst();
+                    if (optionalDeserializerMethodCompatibleWithFields.isPresent()) {
+                        deserializerMethod = optionalDeserializerMethodCompatibleWithFields.get();
+                    }
                 }
-            }
 
+            }
             if (serializedFields.length > 0 || deserializerMethod != null) {
                 return Optional.of(serializedObjectDefinition(type, serializedFields, deserializerMethod));
             }
         }
         return Optional.empty();
+    }
+
+    private Field[] detectFields(final Class<?> type) {
+        return stream(type.getFields())
+                        .filter(field -> isPublic(field.getModifiers()))
+                        .filter(field -> !isStatic(field.getModifiers()))
+                        .filter(field -> !isTransient(field.getModifiers()))
+                        .toArray(Field[]::new);
     }
 }
