@@ -27,6 +27,7 @@ import com.envimate.mapmate.deserialization.validation.ExceptionTracker;
 import com.envimate.mapmate.deserialization.validation.ValidationErrorsMapping;
 import com.envimate.mapmate.deserialization.validation.ValidationMappings;
 import com.envimate.mapmate.injector.Injector;
+import com.envimate.mapmate.injector.InjectorFactory;
 import com.envimate.mapmate.injector.InjectorLambda;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
@@ -43,7 +44,6 @@ import static com.envimate.mapmate.deserialization.InternalDeserializer.internal
 import static com.envimate.mapmate.deserialization.Unmarshallers.unmarshallers;
 import static com.envimate.mapmate.deserialization.builder.DeserializerBuilder.aDeserializerBuilder;
 import static com.envimate.mapmate.deserialization.validation.ExceptionTracker.emptyTracker;
-import static com.envimate.mapmate.injector.Injector.empty;
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
@@ -55,16 +55,19 @@ public final class Deserializer {
     private final ValidationMappings validationMappings;
     private final Unmarshallers unmarshallers;
     private final InternalDeserializer internalDeserializer;
+    private final InjectorFactory injectorFactory;
 
     public static Deserializer theDeserializer(final MarshallerRegistry<Unmarshaller> unmarshallerRegistry,
                                                final DeserializableDefinitions definitions,
                                                final ValidationMappings exceptionMapping,
                                                final ValidationErrorsMapping onValidationErrors,
-                                               final boolean validateNoUnsupportedOutgoingReferences) {
+                                               final boolean validateNoUnsupportedOutgoingReferences,
+                                               final InjectorFactory injectorFactory) {
         validateNotNull(unmarshallerRegistry, "unmarshallerRegistry");
         validateNotNull(definitions, "definitions");
         validateNotNull(exceptionMapping, "validationMappings");
         validateNotNull(onValidationErrors, "onValidationErrors");
+        validateNotNull(injectorFactory, "injectorFactory");
 
         if (validateNoUnsupportedOutgoingReferences) {
             definitions.validateNoUnsupportedOutgoingReferences();
@@ -72,7 +75,7 @@ public final class Deserializer {
 
         final Unmarshallers unmarshalles = unmarshallers(unmarshallerRegistry, definitions);
         final InternalDeserializer internalDeserializer = internalDeserializer(definitions, onValidationErrors);
-        return new Deserializer(definitions, exceptionMapping, unmarshalles, internalDeserializer);
+        return new Deserializer(definitions, exceptionMapping, unmarshalles, internalDeserializer, injectorFactory);
     }
 
     public static DeserializerBuilder aDeserializer() {
@@ -90,7 +93,8 @@ public final class Deserializer {
             throw new UnsupportedOperationException("Only DTOs can be deserialized from map but found: " + definition);
         }
         final ExceptionTracker exceptionTracker = emptyTracker(input, this.validationMappings);
-        return this.internalDeserializer.deserialize(input, targetType, exceptionTracker, empty());
+        final Injector injector = this.injectorFactory.create();
+        return this.internalDeserializer.deserialize(input, targetType, exceptionTracker, injector);
     }
 
     public Map<String, Object> deserializeToMap(final String input,
@@ -123,7 +127,7 @@ public final class Deserializer {
         validateNotNull(targetType, "targetType");
         validateNotNull(injectorProducer, "jsonInjector");
         final ExceptionTracker exceptionTracker = emptyTracker(input, this.validationMappings);
-        final Injector injector = empty();
+        final Injector injector = this.injectorFactory.create();
         injectorProducer.setupInjector(injector);
         final Object unmarshalled = this.unmarshallers.unmarshal(input, targetType, marshallingType);
         return this.internalDeserializer.deserialize(unmarshalled, targetType, exceptionTracker, injector);

@@ -33,7 +33,7 @@ public final class Injector {
         this.injections = new ArrayList<>(0);
     }
 
-    public static Injector empty() {
+    static Injector empty() {
         return new Injector();
     }
 

@@ -29,6 +29,8 @@ import com.envimate.mapmate.deserialization.*;
 import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
 import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
 import com.envimate.mapmate.deserialization.validation.*;
+import com.envimate.mapmate.injector.InjectorFactory;
+import com.envimate.mapmate.injector.InjectorLambda;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.serialization.*;
@@ -48,6 +50,7 @@ import static com.envimate.mapmate.deserialization.DeserializableCustomPrimitive
 import static com.envimate.mapmate.deserialization.DeserializableDataTransferObject.deserializableDataTransferObject;
 import static com.envimate.mapmate.deserialization.DeserializableDefinitions.deserializableDefinitions;
 import static com.envimate.mapmate.deserialization.Deserializer.theDeserializer;
+import static com.envimate.mapmate.injector.InjectorFactory.injectorFactory;
 import static com.envimate.mapmate.marshalling.MarshallerRegistry.marshallerRegistry;
 import static com.envimate.mapmate.serialization.SerializableCustomPrimitive.serializableCustomPrimitive;
 import static com.envimate.mapmate.serialization.SerializableDataTransferObject.serializableDataTransferObject;
@@ -75,6 +78,7 @@ public final class MapMateBuilder {
     private final List<SerializableCustomPrimitive> serializableCPs = new LinkedList<>();
     private final List<DeserializableDataTransferObject<?>> deserializableDTOs = new LinkedList<>();
     private final List<SerializableDataTransferObject> serializableDTOs = new LinkedList<>();
+    private InjectorFactory injectorFactory = InjectorFactory.emptyInjectorFactory();
 
     public MapMateBuilder(final PackageScanner packageScanner) {
         this.packageScanner = packageScanner;
@@ -142,6 +146,11 @@ public final class MapMateBuilder {
                                            final Map<MarshallingType, Unmarshaller> unmarshallerMap) {
         this.marshallerMap = marshallerMap;
         this.unmarshallerMap = unmarshallerMap;
+        return this;
+    }
+
+    public MapMateBuilder usingInjectorFactory(final InjectorLambda factory) {
+        this.injectorFactory = injectorFactory(factory);
         return this;
     }
 
@@ -252,7 +261,7 @@ public final class MapMateBuilder {
             validationMappings.putOneToOne(this.exceptionIndicatingValidationError, this.exceptionMapping);
         }
         final Deserializer deserializer = theDeserializer(unmarshallerRegistry, deserializables, validationMappings,
-                this.validationErrorsMapping, false);
+                this.validationErrorsMapping, false, injectorFactory);
         return mapMate(serializer, deserializer);
     }
 
