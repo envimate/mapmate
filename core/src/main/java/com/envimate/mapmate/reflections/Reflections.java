@@ -26,15 +26,18 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.envimate.mapmate.reflections.FactoryMethodNotFoundException.factoryMethodNotFound;
 import static java.lang.invoke.MethodHandles.publicLookup;
 import static java.lang.reflect.Modifier.isStatic;
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
 
 public final class Reflections {
 
@@ -43,7 +46,7 @@ public final class Reflections {
 
     public static Method findUniqueFactoryMethod(final Class<?> type) {
         final List<Method> factoryMethods = factoryMethods(type)
-                .collect(Collectors.toList());
+                .collect(toList());
 
         final int factoryMethodsFound = factoryMethods.size();
         if (factoryMethodsFound > 1) {
@@ -70,7 +73,7 @@ public final class Reflections {
     public static List<Method> findFactoryMethodsByName(final Class<?> type, final String name) {
         final List<Method> factoryMethods = factoryMethods(type)
                 .filter(method -> method.getName().equals(name))
-                .collect(Collectors.toList());
+                .collect(toList());
         return factoryMethods;
     }
 
@@ -111,25 +114,21 @@ public final class Reflections {
                 .filter(method -> isStatic(method.getModifiers()))
                 .filter(method -> method.getReturnType().equals(type))
                 .filter(method -> {
-                    final Class<?>[] parameterTypes = method.getParameterTypes();
-                    if (parameterTypes.length == declaredFields.length) {
-                        for (Class<?> parameterType : parameterTypes) {
-                            if (parameterType.equals(String.class)) {
-                                return false;
-                            }
-                            final boolean contains = stream(declaredFields)
-                                    .anyMatch(
-                                            field -> field.getType().equals(parameterType)
-                                    );
-                            if (!contains) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    } else {
+                    final List<Class<?>> parameterTypes = asList(method.getParameterTypes());
+                    if (parameterTypes.size() != declaredFields.length) {
                         return false;
                     }
-                }).collect(Collectors.toList());
+                    if (parameterTypes.contains(String.class)) {
+                        return false;
+                    }
+
+                    for (final Class<?> parameterType : parameterTypes) {
+                        if(!containsRightType(parameterType, declaredFields)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }).collect(toList());
 
         final int factoryMethodsFound = factoryMethods.size();
         if (factoryMethodsFound > 1) {
@@ -139,6 +138,34 @@ public final class Reflections {
         } else {
             return factoryMethods.get(0);
         }
+    }
+
+    private static boolean containsRightType(final Class<?> parameterType, final Field[] fields) {
+        for (final Field candidate : fields) {
+            if (isRightType(candidate, parameterType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isRightType(final Field field, final Class<?> parameter) {
+        if (isCollection(field)) {
+            if (!parameter.isArray()) {
+                return false;
+            }
+            final Class<?> arrayType = parameter.getComponentType();
+
+            final ParameterizedType listParameterizedType = (ParameterizedType) field.getGenericType();
+            final Class<?> listType = (Class<?>) listParameterizedType.getActualTypeArguments()[0];
+
+            return arrayType.equals(listType);
+        }
+        return field.getClass().equals(parameter);
+    }
+
+    private static boolean isCollection(final Field field) {
+        return Collection.class.isAssignableFrom(field.getType());
     }
 
     public static boolean isMethodCompatibleWithFields(final Method method, final Field[] fields) {

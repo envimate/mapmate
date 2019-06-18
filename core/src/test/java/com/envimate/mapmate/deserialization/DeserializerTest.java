@@ -25,16 +25,14 @@ import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
 import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
 import com.envimate.mapmate.deserialization.validation.AggregatedValidationException;
 import com.envimate.mapmate.deserialization.validation.ValidationError;
+import com.envimate.mapmate.domain.scannablewithlist.DtoWithList;
 import com.envimate.mapmate.domain.valid.*;
 import com.envimate.mapmate.validators.CustomTypeValidationException;
 import com.google.gson.Gson;
 import org.junit.Test;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static com.envimate.mapmate.Defaults.theDefaultDeserializer;
 import static com.envimate.mapmate.deserialization.Deserializer.aDeserializer;
@@ -43,6 +41,8 @@ import static com.envimate.mapmate.domain.valid.ANumber.fromInt;
 import static com.envimate.mapmate.domain.valid.AString.fromString;
 import static com.envimate.mapmate.domain.valid.AnException.anException;
 import static com.envimate.mapmate.filters.ClassFilters.*;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static junit.framework.TestCase.fail;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -88,9 +88,9 @@ public final class DeserializerTest {
         assertThat(result, is(notNullValue()));
         assertThat(result.array, is(notNullValue()));
         assertThat(result.array.length, is(equalTo(3)));
-        assertThat(Arrays.asList(result.array), hasItem(ANumber.fromString("1")));
-        assertThat(Arrays.asList(result.array), hasItem(ANumber.fromString("2")));
-        assertThat(Arrays.asList(result.array), hasItem(ANumber.fromString("3")));
+        assertThat(asList(result.array), hasItem(ANumber.fromString("1")));
+        assertThat(asList(result.array), hasItem(ANumber.fromString("2")));
+        assertThat(asList(result.array), hasItem(ANumber.fromString("3")));
     }
 
     @Test
@@ -574,5 +574,18 @@ public final class DeserializerTest {
         assertThat(result.complexType2.stringB, is(nullValue()));
         assertThat(result.complexType2.number1.internalValueForMapping(), is(equalTo("3")));
         assertThat(result.complexType2.number2.internalValueForMapping(), is(equalTo("4")));
+    }
+
+    @Test
+    public void deserializerCanFindFactoryMethodsWithArrays() {
+        final Deserializer deserializer = aDeserializer()
+                .thatScansThePackage("com.envimate.mapmate.domain.scannablewithlist")
+                .forDataTransferObjects().filteredBy(havingFactoryMethodWithTheRightParameters())
+                .thatAre().deserializedUsingTheFactoryMethodWithTheRightParameters()
+                .withCustomPrimitive(Integer.class).deserializedUsingTheMethodNamed("parseInt")
+                .withJsonUnmarshaller(new Gson()::fromJson)
+                .build();
+        final DtoWithList dtoWithList = deserializer.deserializeJson("{list: [\"1\"]}", DtoWithList.class);
+        assertThat(dtoWithList.getList(), is(singletonList(1)));
     }
 }
