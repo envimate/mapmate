@@ -118,20 +118,22 @@ public final class DeserializerBuilder {
         });
     }
 
-    public DeserializerBuilder mappingExceptionUsing(final Class<? extends Throwable> exceptionType,
-                                                     final ExceptionMappingWithPropertyPath mapping) {
+    @SuppressWarnings("unchecked")
+    public <T extends Throwable> DeserializerBuilder mappingExceptionUsing(final Class<T> exceptionType,
+                                                                           final ExceptionMappingWithPropertyPath<T> mapping) {
         validateNotNull(exceptionType, "exceptionType");
         validateNotNull(mapping, "mapping");
-        this.validationMappings.putOneToOne(exceptionType, mapping);
+        this.validationMappings.putOneToOne(exceptionType, (ExceptionMappingWithPropertyPath<Throwable>) mapping);
         this.mappedExceptions.add(exceptionType);
         return this;
     }
 
-    public DeserializerBuilder mappingExceptionUsingList(final Class<? extends Throwable> exceptionType,
-                                                         final ExceptionMappingList mapping) {
+    @SuppressWarnings("unchecked")
+    public <T extends Throwable> DeserializerBuilder mappingExceptionUsingList(final Class<T> exceptionType,
+                                                                               final ExceptionMappingList<T> mapping) {
         validateNotNull(exceptionType, "exceptionType");
         validateNotNull(mapping, "mapping");
-        this.validationMappings.putOneToMany(exceptionType, mapping);
+        this.validationMappings.putOneToMany(exceptionType, (ExceptionMappingList<Throwable>) mapping);
         this.mappedExceptions.add(exceptionType);
         return this;
     }

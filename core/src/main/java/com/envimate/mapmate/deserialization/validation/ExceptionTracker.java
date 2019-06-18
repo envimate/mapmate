@@ -65,7 +65,7 @@ public final class ExceptionTracker {
 
     public void track(final Throwable e, final String messageProvidingDebugInformation) {
         final Throwable resolvedThrowable = resolveThrowable(e);
-        final ExceptionMappingList exceptionMapping = this.validationMappings.get(resolvedThrowable.getClass())
+        final ExceptionMappingList<Throwable> exceptionMapping = this.validationMappings.get(resolvedThrowable.getClass())
                 .orElseThrow(() -> fromException(
                         messageProvidingDebugInformation, this.position, resolvedThrowable, this.originalInput));
         final List<ValidationError> mapped = exceptionMapping.map(resolvedThrowable, this.position.render());

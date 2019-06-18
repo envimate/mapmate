@@ -21,6 +21,6 @@
 
 package com.envimate.mapmate.deserialization.validation;
 
-public interface ExceptionMappingWithPropertyPath {
-    ValidationError map(Throwable exception, String propertyPath);
+public interface ExceptionMappingWithPropertyPath<T extends Throwable> {
+    ValidationError map(T exception, String propertyPath);
 }

@@ -64,7 +64,7 @@ public final class MapMateBuilder {
     private Map<MarshallingType, Marshaller> marshallerMap = new HashMap<>(1);
     private Map<MarshallingType, Unmarshaller> unmarshallerMap = new HashMap<>(1);
     private Class<? extends Throwable> exceptionIndicatingValidationError;
-    private ExceptionMappingWithPropertyPath exceptionMapping = (exception, propertyPath) ->
+    private ExceptionMappingWithPropertyPath<Throwable> exceptionMapping = (exception, propertyPath) ->
             new ValidationError(exception.getMessage(), propertyPath);
     private Detector detector = ConventionalDetector.conventionalDetectorWithAnnotations();
     private final PackageScanner packageScanner;
@@ -150,19 +150,21 @@ public final class MapMateBuilder {
         return this;
     }
 
-    public MapMateBuilder withExceptionIndicatingValidationError(
-            final Class<? extends Throwable> exceptionIndicatingValidationError) {
+    @SuppressWarnings("unchecked")
+    public <T extends Throwable> MapMateBuilder withExceptionIndicatingValidationError(
+            final Class<T> exceptionIndicatingValidationError) {
         return this.withExceptionIndicatingValidationError(
                 exceptionIndicatingValidationError,
-                this.exceptionMapping
+                (ExceptionMappingWithPropertyPath<T>) this.exceptionMapping
         );
     }
 
-    public MapMateBuilder withExceptionIndicatingValidationError(
-            final Class<? extends Throwable> exceptionIndicatingValidationError,
-            final ExceptionMappingWithPropertyPath exceptionMapping) {
+    @SuppressWarnings("unchecked")
+    public <T extends Throwable> MapMateBuilder withExceptionIndicatingValidationError(
+            final Class<T> exceptionIndicatingValidationError,
+            final ExceptionMappingWithPropertyPath<T> exceptionMapping) {
         this.exceptionIndicatingValidationError = exceptionIndicatingValidationError;
-        this.exceptionMapping = exceptionMapping;
+        this.exceptionMapping = (ExceptionMappingWithPropertyPath<Throwable>) exceptionMapping;
         return this;
     }
 

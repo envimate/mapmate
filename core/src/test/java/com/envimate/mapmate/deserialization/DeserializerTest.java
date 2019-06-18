@@ -258,7 +258,7 @@ public final class DeserializerTest {
                     }
                 })
                 .mappingExceptionUsing(AValidationException.class, (t, p) -> {
-                    final AValidationException e = (AValidationException) t;
+                    final AValidationException e = t;
                     return new ValidationError(e.getMessage(), e.getBlamedField());
                 })
                 .build();
@@ -297,7 +297,7 @@ public final class DeserializerTest {
                         ))
                 .thatAre().deserializedUsingTheSingleFactoryMethod()
                 .mappingExceptionUsing(AValidationException.class, (t, p) -> {
-                    final AValidationException e = (AValidationException) t;
+                    final AValidationException e = t;
                     return new ValidationError(e.getMessage(), e.getBlamedField());
                 })
                 .build();
@@ -376,7 +376,7 @@ public final class DeserializerTest {
                 .excluding(AComplexTypeWithCollections.class)
                 .thatAre().deserializedUsingTheSingleFactoryMethod()
                 .mappingExceptionUsing(AValidationException.class, (t, p) -> {
-                    final AValidationException e = (AValidationException) t;
+                    final AValidationException e = t;
                     return new ValidationError(e.getMessage(), e.getBlamedField());
                 })
                 .withCustomPrimitive(AString.class)
@@ -424,7 +424,7 @@ public final class DeserializerTest {
                 .excluding(AComplexTypeWithCollections.class)
                 .thatAre().deserializedUsingTheSingleFactoryMethod()
                 .mappingExceptionUsing(AValidationException.class, (t, p) -> {
-                    final AValidationException e = (AValidationException) t;
+                    final AValidationException e = t;
                     return new ValidationError(e.getMessage(), e.getBlamedField());
                 })
                 .withDataTransferObject(AComplexType.class)
