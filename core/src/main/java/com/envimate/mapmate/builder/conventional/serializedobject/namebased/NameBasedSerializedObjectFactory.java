@@ -49,8 +49,8 @@ public final class NameBasedSerializedObjectFactory implements SerializedObjectD
 
     public static NameBasedSerializedObjectFactory nameBasedSerializedObjectFactory(
             final List<Pattern> patterns,
-            final String deserializationMethodName) {
-        return new NameBasedSerializedObjectFactory(patterns, Pattern.compile(deserializationMethodName));
+            final String deserializationMethodNamePattern) {
+        return new NameBasedSerializedObjectFactory(patterns, Pattern.compile(deserializationMethodNamePattern));
     }
 
     @Override
@@ -58,34 +58,25 @@ public final class NameBasedSerializedObjectFactory implements SerializedObjectD
         final String typeName = type.getName();
         final boolean anyMatch = this.patterns.stream().anyMatch(pattern -> pattern.matcher(typeName).matches());
         if (anyMatch) {
-            final Field[] serializedFields = detectFields(type);
-            final Method[] methods = type.getMethods();
-
-            final List<Method> deserializerMethods = stream(methods)
-                    .filter(method -> isStatic(method.getModifiers()))
-                    .filter(method -> isPublic(method.getModifiers()))
-                    .filter(method -> method.getReturnType().equals(type))
-                    .filter(method -> method.getParameterCount() > 0)
-                    .collect(Collectors.toList());
+            final Field[] serializedFields = this.detectFields(type);
+            final List<Method> deserializerCandidates = this.detectDeserializerMethods(type);
 
             Method deserializerMethod = null;
-            if (deserializerMethods.size() == 1) {
-                deserializerMethod = deserializerMethods.get(0);
-            } else if (deserializerMethods.size() > 1) {
-                final List<Method> withMatchingName = deserializerMethods.stream()
-                        .filter(method -> this.deserializationMethodNamePattern.matcher(method.getName()).matches())
-                        .collect(Collectors.toList());
-                if (withMatchingName.size() == 1) {
-                    deserializerMethod = deserializerMethods.get(0);
-                } else if (withMatchingName.size() > 1) {
-                    final Optional<Method> optionalDeserializerMethodCompatibleWithFields = deserializerMethods.stream()
-                            .filter(method -> Reflections.isMethodCompatibleWithFields(method, serializedFields))
+            if (deserializerCandidates.size() == 1) {
+                deserializerMethod = deserializerCandidates.get(0);
+            } else if (deserializerCandidates.size() > 1) {
+                final Optional<Method> byNamePattern = this.detectByNamePattern(deserializerCandidates, serializedFields);
+                if (byNamePattern.isPresent()) {
+                    deserializerMethod = byNamePattern.get();
+                } else {
+                    final String typeSimpleNameLowerCased = type.getSimpleName().toLowerCase();
+                    final Optional<Method> byTypeName = deserializerCandidates.stream()
+                            .filter(method -> method.getName().toLowerCase().contains(typeSimpleNameLowerCased))
                             .findFirst();
-                    if (optionalDeserializerMethodCompatibleWithFields.isPresent()) {
-                        deserializerMethod = optionalDeserializerMethodCompatibleWithFields.get();
+                    if (byTypeName.isPresent()) {
+                        deserializerMethod = byTypeName.get();
                     }
                 }
-
             }
             if (serializedFields.length > 0 || deserializerMethod != null) {
                 return Optional.of(serializedObjectDefinition(type, serializedFields, deserializerMethod));
@@ -94,11 +85,36 @@ public final class NameBasedSerializedObjectFactory implements SerializedObjectD
         return Optional.empty();
     }
 
+    private Optional<Method> detectByNamePattern(final List<Method> deserializerCandidates,
+                                                 final Field[] serializedFields) {
+        final List<Method> withMatchingName = deserializerCandidates.stream()
+                .filter(method -> this.deserializationMethodNamePattern.matcher(method.getName()).matches())
+                .collect(Collectors.toList());
+        if (withMatchingName.size() == 1) {
+            return Optional.of(deserializerCandidates.get(0));
+        } else if (withMatchingName.size() > 1) {
+            return deserializerCandidates.stream()
+                    .filter(method -> Reflections.isMethodCompatibleWithFields(method, serializedFields))
+                    .findFirst();
+        }
+        return Optional.empty();
+    }
+
+    private List<Method> detectDeserializerMethods(final Class<?> type) {
+        final Method[] methods = type.getMethods();
+        return stream(methods)
+                .filter(method -> isStatic(method.getModifiers()))
+                .filter(method -> isPublic(method.getModifiers()))
+                .filter(method -> method.getReturnType().equals(type))
+                .filter(method -> method.getParameterCount() > 0)
+                .collect(Collectors.toList());
+    }
+
     private Field[] detectFields(final Class<?> type) {
         return stream(type.getFields())
-                        .filter(field -> isPublic(field.getModifiers()))
-                        .filter(field -> !isStatic(field.getModifiers()))
-                        .filter(field -> !isTransient(field.getModifiers()))
-                        .toArray(Field[]::new);
+                .filter(field -> isPublic(field.getModifiers()))
+                .filter(field -> !isStatic(field.getModifiers()))
+                .filter(field -> !isTransient(field.getModifiers()))
+                .toArray(Field[]::new);
     }
 }

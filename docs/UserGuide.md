@@ -136,26 +136,19 @@ MapMate.aMapMate()
 
 This configuration attempts to use the [Default Conventions](#default-conventions-explained) to register the `Email.class` as a Serialized Object and the `EmailAddress`, `Subject` and `Body` as Custom Primitives and does not scan any other class. 
 
-If your method names differ from the defaults, you can also register the methods and fields that should be used for (de)serialization of the objects. Note, however, that the handling of the "method not found" would be on you
+If your method names differ from the defaults, you can also register the methods and fields that should be used for (de)serialization of the objects, using a functional interface for Custom Primitives and a name for Serialized Objects. 
 
 ```java
-
 MapMate.aMapMate()
         .withSerializedObject(
               Email.class, 
-              Email.class.getFields(),
-              Email.class.getMethod(
-                            "restore", 
-                            EmailAddress.class, 
-                            EmailAddress.class, 
-                            Subject.class, 
-                            Body.class
-              )
+              Email.class.getFields(), // the fields to use for serialization of Email.class
+              "restore" // the name of the deserialization method to use for Email.class
         )
         .withCustomPrimitive(
                 EmailAddress.class,
-                EmailAddress.class.getMethod("serialize"),
-                EmailAddress.class.getMethod("deserialize", String.class)
+                EmailAddress::serialize, // Function<EmailAddress, String>
+                EmailAddress::deserialize //Function<String, EmailAddress>
         )
         // ...    
 ```
@@ -170,9 +163,29 @@ Checkout [IndividuallyAddedModelsBuilderTest](../core/src/test/java/com/envimate
 * MapMate respects the access modifiers and does not use any non-public field or method. Ever.
 * MapMate scans the given package(s), visiting every class to identify whether it is a Custom Primitive or a Serialized Object. 
 * A class is considered to be a Custom Primitive if it has a serialization method named "stringValue" and a static
- deserialization method named "fromStringValue".
-* A class is considered to be a Serialized Object if it has a public static factory method name "deserialize" 
-or the name of the class matches one of these patterns
+ deserialization method named either "fromStringValue" or whose name contains the class name.
+ 
+ Example:
+ 
+ ```java
+public final class EmailAddress {
+    private final String value;
+
+    public static EmailAddress anEmailAddress(final String value) {
+        final String validated = EmailAddressValidator.ensureEmailAddress(value, "emailAddress");
+        return new EmailAddress(validated);
+    }
+
+    public String stringValue() {
+        return this.value;
+    }
+}
+```
+ 
+The method "anEmailAddress" is a valid deserialization method, since it's name contains the className. other valid names would be "deserialize", "theEmailAddressWithValue", etc.
+ 
+* A class is considered to be a Serialized Object if it has a public static factory method name "deserialize". It is also
+considered as such of the name of the class matches one of these patterns
 ```
 .*DTO
 .*Dto
@@ -180,6 +193,42 @@ or the name of the class matches one of these patterns
 .*Response
 .*State
 ```
+and MapMate can find a "conventional deserialization method", which follows the algorithm:
+1. If the class has a single factory method -> that's the one
+2. alternatively, if there are multiple factory methods, the one called "deserialize" wins
+3. if, for some reason, you have multiple factory methods named "deserialize", the one that has all the fields as parameters wins
+4. alternatively, if there is no factory method called "deserialize", the factory methods named after the class are inspected with the same logic as point 3.
+
+Example of the last point:
+
+```java
+public final class EmailDto {
+    public final transient String saltInMySoup;
+    public final EmailAddress sender;
+    public final EmailAddress receiver;
+    public final Subject subject;
+    public final Body body;
+
+    public static EmailDto emptyBodied(final EmailAddress sender,
+                                       final EmailAddress receiver,
+                                       final Subject subject) {
+        return emailDto(sender, receiver, subject, Body.empty());
+    }
+
+    public static EmailDto emailDto(final EmailAddress sender,
+                                    final EmailAddress receiver,
+                                    final Subject subject,
+                                    final Body body) {
+        RequiredParameterValidator.ensureNotNull(sender, "sender");
+        RequiredParameterValidator.ensureNotNull(receiver, "receiver");
+        RequiredParameterValidator.ensureNotNull(body, "body");
+        return new EmailDto("There it is", sender, receiver, subject, body);
+    }
+}
+```
+
+Here, the last method wins, since it is called `emailDto`. If we were to add another factory method called deserialize here, that one would be picked.
+
 * Serialized Objects are serialized using the public fields(key:value) and deserialized using the same public factory method that 
 was used to determine the class being a Serialized Object
 
@@ -388,9 +437,9 @@ To enable reporting of aggregated messages, MapMate needs to be made aware of th
 
 ```java
 MapMate.aMapMate(YOUR_DOMAIN_PACKAGE)
-            .usingJsonMarshallers(MARSHALLER, UNMARSHALLER)
-            .withExceptionIndicatingValidationError(ValidationException.class)
-            .build();
+        .usingJsonMarshallers(MARSHALLER, UNMARSHALLER)
+        .withExceptionIndicatingValidationError(ValidationException.class)
+        .build();
 ```
 
 Given the Custom Primitive
@@ -455,6 +504,36 @@ com.envimate.mapmate.deserialization.validation.AggregatedValidationException: d
 ```
 
 Web(service) frameworks usually offer a way to register global exception handlers that map an exception into a response. This is the place where you register a mapper that generates a response using the instance of [AggregatedValidationException](../core/src/main/java/com/envimate/mapmate/deserialization/validation/AggregatedValidationException.java).
+
+## Recipes
+
+Recipes are extension points to the conventional MapMate implementation. These are little MapMate plugins we wrote for some common usecases such as (de)serialization of numeric data types.
+These are also a great opportunity to contribute to MapMate. The [Recipe interface](../core/src/main/java/com/envimate/mapmate/builder/recipes/Recipe.java) is quite simple:
+
+```java
+public interface Recipe {
+    void cook(MapMateBuilder mapMateBuilder);
+}
+```
+
+As you can see, you get an instance of MapMateBuilder and can modify it to fit your usecase. Then in the builder:
+
+```java
+MapMate.aMapMate()
+    .usingRecipe(myCustomizationOfMapMate())
+    .build();
+```   
+
+We'll be happy to receive your requests for new Recipes and contributions!
+
+### JSON Numeric Data Types
+
+As explained in the [Concepts](Concepts.md#string-representation) we are operating based on Strings. In case you have full control over the data format, and you agree with this approach, we encourage you to use String as your data representation. 
+For the other cases, we have provided Recipes to [Serialize Numeric Data Types to Strings](Recipes.md#serialization) and [Deserialize Numeric Types into Strings without Parsing](Recipes.md#deserialization)
+
+## Injector
+
+
 
 ## FAQ
 

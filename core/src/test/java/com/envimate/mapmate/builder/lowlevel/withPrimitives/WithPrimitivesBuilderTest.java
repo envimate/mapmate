@@ -107,5 +107,4 @@ public final class WithPrimitivesBuilderTest {
                 .deserializeJson(JSON_WITH_SERIALIZED_PRIMITIVES, SerializedObjectWithPrimitives.class);
         Assert.assertEquals(SERIALIZED_OBJECT, result);
     }
-
 }

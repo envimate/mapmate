@@ -35,10 +35,10 @@ example application and explain the usage of Custom Primitives and Data Transfer
 Some features MapMate offers:
 
  -  **No Magic** - MapMate is using your Objects the same way you would use them, which means:
-    - MapMate can not touch
-        - private fields
-        - final fields 
-        - private methods
+    - MapMate will not 
+        - read nor write private fields
+        - write values into final fields 
+        - invoke private methods
     - MapMate will not generate dynamic proxies
     - MapMate does not favor the use of annotations
         
@@ -61,7 +61,6 @@ Some features MapMate offers:
         - detection mechanism of Custom Primitives and Serialized Objects
         - manual definition of Custom Primitives and Serialized Objects
         - customizing the Validation Errors
-    - An all of this is can be achieved through a powerful builder
 
 ## Resources
 

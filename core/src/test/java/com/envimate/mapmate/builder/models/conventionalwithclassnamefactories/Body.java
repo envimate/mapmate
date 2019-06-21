@@ -33,6 +33,10 @@ import lombok.ToString;
 public final class Body {
     private final String value;
 
+    public static Body empty() {
+        return body(" ");
+    }
+
     public static Body body(final String value) {
         final String emailAddress = LengthValidator.ensureLength(value, 1, 1000, "body");
         return new Body(emailAddress);

@@ -32,7 +32,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.Body.body;
-import static com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.EmailDto.email;
+import static com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.EmailDto.emailDto;
 import static com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.EmailAddress.anEmailAddress;
 import static com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.Subject.aSubject;
 
@@ -51,7 +51,7 @@ public final class ConventionalBuilderTest {
             Body.fromStringValue("Hello World!!!")
     );
 
-    public static final EmailDto EMAIL_DTO = email(
+    public static final EmailDto EMAIL_DTO = emailDto(
             anEmailAddress("sender@example.com"),
             anEmailAddress("receiver@example.com"),
             aSubject("Hello"),

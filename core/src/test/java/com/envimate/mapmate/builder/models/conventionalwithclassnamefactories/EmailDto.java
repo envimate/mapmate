@@ -37,10 +37,16 @@ public final class EmailDto {
     public final Subject subject;
     public final Body body;
 
-    public static EmailDto email(final EmailAddress sender,
-                                 final EmailAddress receiver,
-                                 final Subject subject,
-                                 final Body body) {
+    public static EmailDto emptyBodied(final EmailAddress sender,
+                                       final EmailAddress receiver,
+                                       final Subject subject) {
+        return emailDto(sender, receiver, subject, Body.empty());
+    }
+
+    public static EmailDto emailDto(final EmailAddress sender,
+                                    final EmailAddress receiver,
+                                    final Subject subject,
+                                    final Body body) {
         RequiredParameterValidator.ensureNotNull(sender, "sender");
         RequiredParameterValidator.ensureNotNull(receiver, "receiver");
         RequiredParameterValidator.ensureNotNull(body, "body");

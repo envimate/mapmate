@@ -233,8 +233,8 @@ public final class MapMateBuilder {
 
     public MapMateBuilder withSerializedObject(final Class<?> type,
                                                final Field[] serializedFields,
-                                               final Method deserializationMethod) {
-        return this.withSerializedObject(serializedObjectDefinition(type, serializedFields, deserializationMethod));
+                                               final String deserializationMethodName) {
+        return this.withSerializedObject(serializedObjectDefinition(type, serializedFields, deserializationMethodName));
     }
 
     public MapMateBuilder withSerializedObjects(final Class<?>... serializedObjectTypes) {

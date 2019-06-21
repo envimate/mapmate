@@ -32,6 +32,7 @@ import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @ToString
 @EqualsAndHashCode
@@ -42,11 +43,15 @@ public final class VerifiedDeserializationDTOMethod implements DeserializationDT
     private final String[] parameterNames;
 
     public static VerifiedDeserializationDTOMethod verifiedDeserializationDTOMethod(
-            final Method factoryMethod,
-            final Map<String, Class<?>> serializedFieldMap) {
+            final Method factoryMethod) {
         final Parameter[] parameters = factoryMethod.getParameters();
         final String[] parameterNames = Arrays.stream(parameters).map(Parameter::getName).toArray(String[]::new);
-        return new VerifiedDeserializationDTOMethod(serializedFieldMap, factoryMethod, parameterNames);
+        final Map<String, Class<?>> parameterFields = Arrays.stream(parameters)
+                .collect(Collectors.toMap(
+                        Parameter::getName,
+                        Parameter::getType
+                ));
+        return new VerifiedDeserializationDTOMethod(parameterFields, factoryMethod, parameterNames);
     }
 
     @Override

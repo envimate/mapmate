@@ -69,48 +69,35 @@ public final class SerializedObjectDefinition {
             serializer = createSerializer(type, serializedFields);
         }
         if (deserializationMethod != null) {
-            deserializer = createDeserializer(type, serializedFields, deserializationMethod);
+            deserializer = createDeserializer(type, deserializationMethod);
         }
 
         return serializedObjectDefinition(type, serializer, deserializer);
     }
 
-    private static DeserializationDTOMethod createDeserializer(final Class<?> type,
-                                                               final Field[] serializedFields,
-                                                               final Method deserializationMethod) {
-        validateDeserializaerModifiers(type, deserializationMethod);
-        final Class<?>[] parameterTypes = deserializationMethod.getParameterTypes();
-        if (serializedFields.length != parameterTypes.length) {
-            String fieldsAsString = "[]";
-            if (serializedFields.length != 0) {
-                fieldsAsString = stream(serializedFields)
-                        .map(field -> String.format(
-                                "%s %s %s",
-                                Modifier.toString(field.getModifiers()), field.getType(), field.getName()))
-                        .collect(Collectors.joining(", "));
-            }
+    public static SerializedObjectDefinition serializedObjectDefinition(final Class<?> type,
+                                                                        final Field[] serializedFields,
+                                                                        final String deserializationMethodName) {
+        final Class<?>[] parameterTypes = stream(serializedFields).map(Field::getType).toArray(Class<?>[]::new);
+        try {
+            return serializedObjectDefinition(type,
+                    serializedFields,
+                    type.getMethod(deserializationMethodName, parameterTypes)
+            );
+        } catch (final NoSuchMethodException e) {
             throw incompatibleserializedObjectException(
-                    "Number of parameters(%s) in the deserialization method(%s) provided for the SerializedObject(%s) " +
-                            "differs from the number of serializedFields(%s)", parameterTypes.length,
-                    deserializationMethod, type, fieldsAsString);
+                    "Could not find method %s with parameters of types %s", deserializationMethodName,
+                    stream(parameterTypes).map(Class::getName).collect(Collectors.joining(",")), e);
         }
-
-        for (final Field serializedField : serializedFields) {
-            final boolean present = stream(parameterTypes).anyMatch(aClass -> serializedField.getType().equals(aClass));
-            if (!present) {
-                throw incompatibleserializedObjectException(
-                        "The deserialization method(%s) configured for the SerializedObject(%s) does not contain the " +
-                                "field(%s), but it's registered for serialization.",
-                        deserializationMethod, type, serializedField);
-            }
-        }
-
-        final Map<String, Class<?>> elements = stream(serializedFields)
-                .collect(Collectors.toMap(Field::getName, Field::getType));
-        return verifiedDeserializationDTOMethod(deserializationMethod, elements);
     }
 
-    private static void validateDeserializaerModifiers(final Class<?> type, final Method deserializationMethod) {
+    private static DeserializationDTOMethod createDeserializer(final Class<?> type,
+                                                               final Method deserializationMethod) {
+        validateDeserializerModifiers(type, deserializationMethod);
+        return verifiedDeserializationDTOMethod(deserializationMethod);
+    }
+
+    private static void validateDeserializerModifiers(final Class<?> type, final Method deserializationMethod) {
         final int deserializationMethodModifiers = deserializationMethod.getModifiers();
 
         if (!Modifier.isPublic(deserializationMethodModifiers)) {

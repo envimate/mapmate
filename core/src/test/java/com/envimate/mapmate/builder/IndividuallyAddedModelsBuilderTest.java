@@ -21,10 +21,10 @@
 
 package com.envimate.mapmate.builder;
 
-import com.envimate.mapmate.builder.models.conventional.Body;
-import com.envimate.mapmate.builder.models.conventional.Email;
-import com.envimate.mapmate.builder.models.conventional.EmailAddress;
-import com.envimate.mapmate.builder.models.conventional.Subject;
+import com.envimate.mapmate.builder.models.customconvention.Body;
+import com.envimate.mapmate.builder.models.customconvention.Email;
+import com.envimate.mapmate.builder.models.customconvention.EmailAddress;
+import com.envimate.mapmate.builder.models.customconvention.Subject;
 import com.envimate.mapmate.builder.validation.CustomTypeValidationException;
 import com.envimate.mapmate.deserialization.Deserializer;
 import com.google.gson.Gson;
@@ -54,82 +54,78 @@ public final class IndividuallyAddedModelsBuilderTest {
             "\"subject\":\"Hello\"" +
             "}";
 
-    public static final Email CONVENTIONAL_EMAIL = Email.deserialize(
-            EmailAddress.fromStringValue("sender@example.com"),
-            EmailAddress.fromStringValue("receiver@example.com"),
-            Subject.fromStringValue("Hello"),
-            Body.fromStringValue("Hello World!!!")
+    public static final com.envimate.mapmate.builder.models.conventional.Email CONVENTIONAL_EMAIL =
+            com.envimate.mapmate.builder.models.conventional.Email.deserialize(
+                    com.envimate.mapmate.builder.models.conventional.EmailAddress.fromStringValue("sender@example.com"),
+                    com.envimate.mapmate.builder.models.conventional.EmailAddress.fromStringValue("receiver@example.com"),
+                    com.envimate.mapmate.builder.models.conventional.Subject.fromStringValue("Hello"),
+                    com.envimate.mapmate.builder.models.conventional.Body.fromStringValue("Hello World!!!")
     );
 
-    public static final com.envimate.mapmate.builder.models.customconvention.Email EMAIL =
-            com.envimate.mapmate.builder.models.customconvention.Email.restore(
-                    com.envimate.mapmate.builder.models.customconvention.EmailAddress.deserialize("sender@example.com"),
-                    com.envimate.mapmate.builder.models.customconvention.EmailAddress.deserialize("receiver@example.com"),
-                    com.envimate.mapmate.builder.models.customconvention.Subject.deserialize("Hello"),
-                    com.envimate.mapmate.builder.models.customconvention.Body.deserialize("Hello World!!!")
+    public static final Email EMAIL =
+            Email.restore(
+                    EmailAddress.deserialize("sender@example.com"),
+                    EmailAddress.deserialize("receiver@example.com"),
+                    Subject.deserialize("Hello"),
+                    Body.deserialize("Hello World!!!")
             );
 
     private static final Gson GSON = new Gson();
 
     public static MapMate theIndividuallyAddedTypesMapMateConventional() {
         return MapMate.aMapMate()
-                .withSerializedObjects(Email.class)
-                .withCustomPrimitives(EmailAddress.class, Subject.class, Body.class)
+                .withSerializedObjects(com.envimate.mapmate.builder.models.conventional.Email.class)
+                .withCustomPrimitives(
+                        com.envimate.mapmate.builder.models.conventional.EmailAddress.class,
+                        com.envimate.mapmate.builder.models.conventional.Subject.class,
+                        com.envimate.mapmate.builder.models.conventional.Body.class
+                )
                 .usingJsonMarshallers(GSON::toJson, GSON::fromJson)
                 .withExceptionIndicatingValidationError(CustomTypeValidationException.class)
                 .build();
     }
 
     public static MapMate theIndividuallyAddedTypesMapMate() {
-        try {
-            final Class<com.envimate.mapmate.builder.models.customconvention.EmailAddress>
-                    customConventionEmail = com.envimate.mapmate.builder.models.customconvention.EmailAddress.class;
-            final Class<com.envimate.mapmate.builder.models.customconvention.Subject>
-                    customConventionSubject = com.envimate.mapmate.builder.models.customconvention.Subject.class;
-            final Class<com.envimate.mapmate.builder.models.customconvention.Body>
-                    customConventionBody = com.envimate.mapmate.builder.models.customconvention.Body.class;
+        final Class<EmailAddress>
+                customConventionEmail = EmailAddress.class;
+        final Class<Subject>
+                customConventionSubject = Subject.class;
+        final Class<Body>
+                customConventionBody = Body.class;
             return MapMate.aMapMate()
-                    .withSerializedObject(com.envimate.mapmate.builder.models.customconvention.Email.class,
-                            com.envimate.mapmate.builder.models.customconvention.Email.class.getFields(),
-                            com.envimate.mapmate.builder.models.customconvention.Email.class.getMethod(
-                                    "restore",
-                                    customConventionEmail,
-                                    customConventionEmail,
-                                    customConventionSubject,
-                                    customConventionBody)
+                    .withSerializedObject(Email.class,
+                            Email.class.getFields(),
+                            "restore"
                     )
                     .withCustomPrimitive(
                             customConventionEmail,
-                            customConventionEmail.getMethod("serialize"),
-                            customConventionEmail.getMethod("deserialize", String.class)
+                            EmailAddress::serialize,
+                            EmailAddress::deserialize
                     )
                     .withCustomPrimitive(
                             customConventionSubject,
-                            customConventionSubject.getMethod("serialize"),
-                            customConventionSubject.getMethod("deserialize", String.class)
+                            Subject::serialize,
+                            Subject::deserialize
                     )
                     .withCustomPrimitive(
                             customConventionBody,
-                            customConventionBody.getMethod("serialize"),
-                            customConventionBody.getMethod("deserialize", String.class)
+                            Body::serialize,
+                            Body::deserialize
                     )
                     .usingJsonMarshallers(GSON::toJson, GSON::fromJson)
                     .withExceptionIndicatingValidationError(CustomTypeValidationException.class)
                     .build();
-        } catch (final NoSuchMethodException e) {
-            throw new UnsupportedOperationException("Could not find method", e);
-        }
     }
 
     public static MapMate theIndividuallyAddedTypesMapMate1() {
         final Gson gson = new Gson();
 
         return MapMate.aMapMate()
-                .withSerializedObjects(com.envimate.mapmate.builder.models.customconvention.Email.class)
+                .withSerializedObjects(Email.class)
                 .withCustomPrimitives(
-                        com.envimate.mapmate.builder.models.customconvention.EmailAddress.class,
-                        com.envimate.mapmate.builder.models.customconvention.Subject.class,
-                        com.envimate.mapmate.builder.models.customconvention.Body.class
+                        EmailAddress.class,
+                        Subject.class,
+                        Body.class
                 )
                 .withDetector(conventionalDetector(
                         "serialize", "" +
@@ -152,9 +148,9 @@ public final class IndividuallyAddedModelsBuilderTest {
 
     @Test
     public void testEmailDeserializationConventional() {
-        final Email result = theIndividuallyAddedTypesMapMateConventional()
+        final com.envimate.mapmate.builder.models.conventional.Email result = theIndividuallyAddedTypesMapMateConventional()
                 .deserializer()
-                .deserializeJson(EMAIL_JSON, Email.class);
+                .deserializeJson(EMAIL_JSON, com.envimate.mapmate.builder.models.conventional.Email.class);
         Assert.assertEquals(CONVENTIONAL_EMAIL, result);
     }
 
@@ -167,8 +163,8 @@ public final class IndividuallyAddedModelsBuilderTest {
     @Test
     public void testEmailDeserialization() {
         final Deserializer deserializer = theIndividuallyAddedTypesMapMate().deserializer();
-        final com.envimate.mapmate.builder.models.customconvention.Email result = deserializer
-                .deserializeJson(EMAIL_JSON, com.envimate.mapmate.builder.models.customconvention.Email.class);
+        final Email result = deserializer
+                .deserializeJson(EMAIL_JSON, Email.class);
         Assert.assertEquals(EMAIL, result);
     }
 
@@ -181,8 +177,8 @@ public final class IndividuallyAddedModelsBuilderTest {
     @Test
     public void testEmailDeserialization1() {
         final Deserializer deserializer = theIndividuallyAddedTypesMapMate1().deserializer();
-        final com.envimate.mapmate.builder.models.customconvention.Email result = deserializer
-                .deserializeJson(EMAIL_JSON, com.envimate.mapmate.builder.models.customconvention.Email.class);
+        final Email result = deserializer
+                .deserializeJson(EMAIL_JSON, Email.class);
         Assert.assertEquals(EMAIL, result);
     }
 }
