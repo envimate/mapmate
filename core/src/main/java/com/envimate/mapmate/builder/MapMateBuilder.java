@@ -51,19 +51,18 @@ import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
 public final class MapMateBuilder {
     private static final int INITIAL_CAPACITY = 10000;
-    private final PackageScanner packageScanner;
     public Detector detector = ConventionalDetector.conventionalDetectorWithAnnotations();
+    private final PackageScanner packageScanner;
     private final List<Recipe> recipes = new LinkedList<>();
-    private Map<MarshallingType, Marshaller> marshallerMap = new HashMap<>(1);
-    private Map<MarshallingType, Unmarshaller> unmarshallerMap = new HashMap<>(1);
     private final ValidationMappings validationMappings = ValidationMappings.empty();
     private final ValidationErrorsMapping validationErrorsMapping = validationErrors -> {
         throw AggregatedValidationException.fromList(validationErrors);
     };
+    private Map<MarshallingType, Marshaller> marshallerMap = new HashMap<>(1);
+    private Map<MarshallingType, Unmarshaller> unmarshallerMap = new HashMap<>(1);
     private InjectorFactory injectorFactory = InjectorFactory.emptyInjectorFactory();
 
-
-    public MapMateBuilder(final PackageScanner packageScanner) {
+    private MapMateBuilder(final PackageScanner packageScanner) {
         this.packageScanner = packageScanner;
     }
 

@@ -48,7 +48,6 @@ import static com.envimate.mapmate.serialization.SerializableCustomPrimitive.ser
 import static com.envimate.mapmate.serialization.SerializableDataTransferObject.serializableDataTransferObject;
 import static com.envimate.mapmate.serialization.SerializableDefinitions.serializableDefinitions;
 
-
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -82,7 +81,6 @@ public final class DefinitionsFactory {
         }
 
         return serializableDefinitions(serializableCPs, serializableDTOs);
-
     }
 
     public DeserializableDefinitions toDeserializableDefinitions() {
@@ -111,5 +109,4 @@ public final class DefinitionsFactory {
 
         return deserializableDefinitions(deserializableCPs, deserializableDTOs);
     }
-
 }

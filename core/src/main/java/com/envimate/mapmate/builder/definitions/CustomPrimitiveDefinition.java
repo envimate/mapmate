@@ -58,7 +58,6 @@ public final class CustomPrimitiveDefinition {
         return untypedCustomPrimitiveDefinition(type, serializer, deserializer);
     }
 
-
     private static CustomPrimitiveDefinition untypedCustomPrimitiveDefinition(
             final Class<?> type,
             final CustomPrimitiveSerializer<?> serializer,
@@ -146,5 +145,4 @@ public final class CustomPrimitiveDefinition {
 
         return customPrimitiveByMethodDeserializer(deserializationMethod);
     }
-
 }

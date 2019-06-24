@@ -25,7 +25,6 @@ import com.envimate.mapmate.builder.models.customconvention.Body;
 import com.envimate.mapmate.builder.models.customconvention.Email;
 import com.envimate.mapmate.builder.models.customconvention.EmailAddress;
 import com.envimate.mapmate.builder.models.customconvention.Subject;
-import com.envimate.mapmate.builder.recipes.manualregistry.ManualRegistry;
 import com.envimate.mapmate.builder.validation.CustomTypeValidationException;
 import com.envimate.mapmate.deserialization.Deserializer;
 import com.google.gson.Gson;

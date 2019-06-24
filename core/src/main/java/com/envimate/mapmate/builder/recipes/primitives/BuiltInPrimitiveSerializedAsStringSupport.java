@@ -66,12 +66,14 @@ public final class BuiltInPrimitiveSerializedAsStringSupport implements Recipe {
         );
     }
 
-
     private static <T> CustomPrimitiveDefinition toCustomPrimitiveDefinition(final Class<T> type,
                                                                              final Function<String, T> deserializer) {
         final CustomPrimitiveSerializer<T> customPrimitiveSerializer = obj -> {
-            if (obj != null) return String.valueOf(obj);
-            else return null;
+            if (obj != null) {
+                return String.valueOf(obj);
+            } else {
+                return null;
+            }
         };
         return customPrimitiveDefinition(type, customPrimitiveSerializer, deserializer::apply);
     }

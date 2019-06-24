@@ -35,6 +35,8 @@
     <suppress checks="IllegalCatchCheck" files="Serializer.java"/>
     <suppress checks="IllegalCatchCheck" files="Deserializer|When"/>
     <suppress checks="MethodLength" files="Deserializer.java"/>
+    <suppress checks="MethodLength" files="MapMateBuilder.java"/>
+    <suppress checks="VisibilityModifier" files="MapMateBuilder.java"/>
     <suppress
             checks="MagicNumber|MethodName|IllegalCatch|LineLength|MethodLength|FinalParameters|FileLength|InnerTypeLast"
             files="DeserializerBuilderTest|DeserializerTest|SerializerTest|SerializerBuilderTest|CircularReferenceDetectorTest|Examples"/>
