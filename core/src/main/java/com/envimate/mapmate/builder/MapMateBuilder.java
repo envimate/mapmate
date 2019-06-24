@@ -21,65 +21,47 @@
 
 package com.envimate.mapmate.builder;
 
+import com.envimate.mapmate.builder.anticorruption.DefinitionsFactory;
 import com.envimate.mapmate.builder.conventional.ConventionalDetector;
 import com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition;
 import com.envimate.mapmate.builder.definitions.SerializedObjectDefinition;
 import com.envimate.mapmate.builder.recipes.Recipe;
-import com.envimate.mapmate.deserialization.*;
-import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
-import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
-import com.envimate.mapmate.deserialization.methods.StaticMethodCPMethod;
+import com.envimate.mapmate.deserialization.Deserializer;
+import com.envimate.mapmate.deserialization.Unmarshaller;
 import com.envimate.mapmate.deserialization.validation.*;
 import com.envimate.mapmate.injector.InjectorFactory;
 import com.envimate.mapmate.injector.InjectorLambda;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
-import com.envimate.mapmate.serialization.*;
-import com.envimate.mapmate.serialization.methods.SerializationCPMethod;
-import com.envimate.mapmate.serialization.methods.SerializationDTOMethod;
+import com.envimate.mapmate.serialization.Marshaller;
+import com.envimate.mapmate.serialization.Serializer;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.envimate.mapmate.builder.DefaultPackageScanner.defaultPackageScanner;
 import static com.envimate.mapmate.builder.MapMate.mapMate;
-import static com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition.customPrimitiveDefinition;
-import static com.envimate.mapmate.builder.definitions.SerializedObjectDefinition.serializedObjectDefinition;
-import static com.envimate.mapmate.deserialization.DeserializableCustomPrimitive.deserializableCustomPrimitive;
-import static com.envimate.mapmate.deserialization.DeserializableDataTransferObject.deserializableDataTransferObject;
-import static com.envimate.mapmate.deserialization.DeserializableDefinitions.deserializableDefinitions;
+import static com.envimate.mapmate.builder.anticorruption.DefinitionsFactory.definitionsFactory;
 import static com.envimate.mapmate.deserialization.Deserializer.theDeserializer;
 import static com.envimate.mapmate.injector.InjectorFactory.injectorFactory;
 import static com.envimate.mapmate.marshalling.MarshallerRegistry.marshallerRegistry;
-import static com.envimate.mapmate.serialization.SerializableCustomPrimitive.serializableCustomPrimitive;
-import static com.envimate.mapmate.serialization.SerializableDataTransferObject.serializableDataTransferObject;
-import static com.envimate.mapmate.serialization.SerializableDefinitions.serializableDefinitions;
 import static com.envimate.mapmate.serialization.Serializer.theSerializer;
-import static com.envimate.mapmate.serialization.methods.ProvidedMethodSerializationCPMethod.providedMethodSerializationCPMethod;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
 public final class MapMateBuilder {
-    private final ValidationErrorsMapping validationErrorsMapping = validationErrors -> {
-        throw AggregatedValidationException.fromList(validationErrors);
-    };
-    private final Map<Class<?>, CustomPrimitiveDefinition> manuallyAddedCustomPrimitives = new HashMap<>(1);
-    private final Map<Class<?>, SerializedObjectDefinition> manuallyAddedSerializedObjects = new HashMap<>(1);
+    private static final int INITIAL_CAPACITY = 10000;
+    private final PackageScanner packageScanner;
+    public Detector detector = ConventionalDetector.conventionalDetectorWithAnnotations();
+    private final List<Recipe> recipes = new LinkedList<>();
     private Map<MarshallingType, Marshaller> marshallerMap = new HashMap<>(1);
     private Map<MarshallingType, Unmarshaller> unmarshallerMap = new HashMap<>(1);
     private final ValidationMappings validationMappings = ValidationMappings.empty();
-    private Detector detector = ConventionalDetector.conventionalDetectorWithAnnotations();
-    private final PackageScanner packageScanner;
-    private final List<Class<?>> manuallyAddedSerializedObjectTypes = new LinkedList<>();
-    private final List<Class<?>> manuallyAddedCustomPrimitiveTypes = new LinkedList<>();
-
-    private final List<DeserializableCustomPrimitive<?>> deserializableCPs = new LinkedList<>();
-    private final List<SerializableCustomPrimitive> serializableCPs = new LinkedList<>();
-    private final List<DeserializableDataTransferObject<?>> deserializableDTOs = new LinkedList<>();
-    private final List<SerializableDataTransferObject> serializableDTOs = new LinkedList<>();
+    private final ValidationErrorsMapping validationErrorsMapping = validationErrors -> {
+        throw AggregatedValidationException.fromList(validationErrors);
+    };
     private InjectorFactory injectorFactory = InjectorFactory.emptyInjectorFactory();
+
 
     public MapMateBuilder(final PackageScanner packageScanner) {
         this.packageScanner = packageScanner;
@@ -108,7 +90,7 @@ public final class MapMateBuilder {
         return this;
     }
 
-    public MapMateBuilder usingJsonMarshallers(final Marshaller marshaller, final Unmarshaller unmarshaller) {
+    public MapMateBuilder usingJsonMarshaller(final Marshaller marshaller, final Unmarshaller unmarshaller) {
         validateNotNull(marshaller, "jsonMarshaller");
         validateNotNull(unmarshaller, "jsonUnmarshaller");
         this.marshallerMap.put(MarshallingType.json(), marshaller);
@@ -116,7 +98,7 @@ public final class MapMateBuilder {
         return this;
     }
 
-    public MapMateBuilder usingYamlMarshallers(final Marshaller marshaller, final Unmarshaller unmarshaller) {
+    public MapMateBuilder usingYamlMarshaller(final Marshaller marshaller, final Unmarshaller unmarshaller) {
         validateNotNull(marshaller, "yamlMarshaller");
         validateNotNull(unmarshaller, "yamlUnmarshaller");
         this.marshallerMap.put(MarshallingType.yaml(), marshaller);
@@ -124,7 +106,7 @@ public final class MapMateBuilder {
         return this;
     }
 
-    public MapMateBuilder usingXmlMarshallers(final Marshaller marshaller, final Unmarshaller unmarshaller) {
+    public MapMateBuilder usingXmlMarshaller(final Marshaller marshaller, final Unmarshaller unmarshaller) {
         validateNotNull(marshaller, "xmlMarshaller");
         validateNotNull(unmarshaller, "xmlUnmarshaller");
         this.marshallerMap.put(MarshallingType.xml(), marshaller);
@@ -143,8 +125,8 @@ public final class MapMateBuilder {
         return this;
     }
 
-    public MapMateBuilder usingMarshallers(final Map<MarshallingType, Marshaller> marshallerMap,
-                                           final Map<MarshallingType, Unmarshaller> unmarshallerMap) {
+    public MapMateBuilder usingMarshaller(final Map<MarshallingType, Marshaller> marshallerMap,
+                                          final Map<MarshallingType, Unmarshaller> unmarshallerMap) {
         this.marshallerMap = marshallerMap;
         this.unmarshallerMap = unmarshallerMap;
         return this;
@@ -156,7 +138,7 @@ public final class MapMateBuilder {
     }
 
     public MapMateBuilder usingRecipe(final Recipe recipe) {
-        recipe.cook(this);
+        this.recipes.add(recipe);
         return this;
     }
 
@@ -187,132 +169,56 @@ public final class MapMateBuilder {
         return this;
     }
 
-    public MapMateBuilder withCustomPrimitive(final CustomPrimitiveDefinition customPrimitive) {
-        final CustomPrimitiveDefinition alreadyAdded = this.manuallyAddedCustomPrimitives.put(
-                customPrimitive.type,
-                customPrimitive);
-        if (alreadyAdded != null) {
-            throw new UnsupportedOperationException(String.format(
-                    "The customPrimitive %s has already been added for type %s and is %s",
-                    customPrimitive,
-                    customPrimitive.type,
-                    alreadyAdded));
-        }
-
-        return this;
-    }
-
-    public <T> MapMateBuilder withCustomPrimitive(final Class<T> type,
-                                                  final Function<T, String> serializationMethod,
-                                                  final Function<String, T> deserializationMethod) {
-        return this.withCustomPrimitive(customPrimitiveDefinition(
-                type,
-                providedMethodSerializationCPMethod(type, serializationMethod),
-                StaticMethodCPMethod.theStaticMethodCPMethod(deserializationMethod)
-        ));
-    }
-
-    public MapMateBuilder withCustomPrimitive(final Class<?> type,
-                                              final Method serializationMethod,
-                                              final Method deserializationMethod) {
-        return this.withCustomPrimitive(customPrimitiveDefinition(type, serializationMethod, deserializationMethod));
-    }
-
-    public MapMateBuilder withSerializedObject(final SerializedObjectDefinition serializedObject) {
-        final SerializedObjectDefinition alreadyAdded = this.manuallyAddedSerializedObjects.put(serializedObject.type,
-                serializedObject);
-        if (alreadyAdded != null) {
-            throw new UnsupportedOperationException(String.format(
-                    "The serializedObject %s has already been added for type %s and is %s",
-                    serializedObject,
-                    serializedObject.type,
-                    alreadyAdded));
-        }
-        return this;
-    }
-
-    public MapMateBuilder withSerializedObject(final Class<?> type,
-                                               final Field[] serializedFields,
-                                               final String deserializationMethodName) {
-        return this.withSerializedObject(serializedObjectDefinition(type, serializedFields, deserializationMethodName));
-    }
-
-    public MapMateBuilder withSerializedObjects(final Class<?>... serializedObjectTypes) {
-        this.manuallyAddedSerializedObjectTypes.addAll(Arrays.asList(serializedObjectTypes));
-        return this;
-    }
-
-    public MapMateBuilder withCustomPrimitives(final Class<?>... customPrimitiveTypes) {
-        this.manuallyAddedCustomPrimitiveTypes.addAll(Arrays.asList(customPrimitiveTypes));
-        return this;
-    }
-
     public MapMate build() {
+        this.recipes.forEach(recipe -> recipe.cook(this));
+
+        final Map<Class<?>, CustomPrimitiveDefinition> customPrimitives = new HashMap<>(INITIAL_CAPACITY);
+        this.recipes.stream()
+                .map(Recipe::customPrimitiveDefinitions)
+                .forEach(customPrimitives::putAll);
+        final Map<Class<?>, SerializedObjectDefinition> serializedObjects = new HashMap<>(INITIAL_CAPACITY);
+        this.recipes.stream()
+                .map(Recipe::serializedObjectDefinitions)
+                .forEach(serializedObjects::putAll);
         final List<Class<?>> scannedClasses = this.packageScanner.scan();
-        final List<Class<?>> withoutManualClasses = scannedClasses.stream()
-                .filter(aClass -> !this.manuallyAddedCustomPrimitives.containsKey(aClass) &&
-                        !this.manuallyAddedSerializedObjects.containsKey(aClass))
+        final List<Class<?>> customPrimitiveDetectionCandidates = scannedClasses.stream()
+                .filter(detectionCandidate ->
+                        !customPrimitives.containsKey(detectionCandidate) &&
+                                !serializedObjects.containsKey(detectionCandidate)
+                )
                 .collect(Collectors.toList());
-        final List<CustomPrimitiveDefinition> cpDefinitions = this.detector.customPrimitives(withoutManualClasses);
-        final List<Class<?>> withoutCP = withoutManualClasses.stream()
-                .filter(aClass -> cpDefinitions.stream().noneMatch(d -> d.type == aClass))
+        final Map<Class<?>, CustomPrimitiveDefinition> detectedCustomPrimitives = this.detector
+                .customPrimitives(customPrimitiveDetectionCandidates)
+                .stream()
+                .collect(Collectors.toMap(o -> o.type, Function.identity()));
+        customPrimitives.putAll(detectedCustomPrimitives);
+
+        final List<Class<?>> serializedObjectDetectionCandidates = customPrimitiveDetectionCandidates.stream()
+                .filter(detectionCandidate -> !detectedCustomPrimitives.containsKey(detectionCandidate))
                 .collect(Collectors.toList());
-        final List<SerializedObjectDefinition> serializedDTOs = this.detector.serializedObjects(withoutCP);
-        this.addCustomPrimitives(cpDefinitions);
-        this.addCustomPrimitives(this.manuallyAddedCustomPrimitives.values());
-        this.addCustomPrimitives(this.detector.customPrimitives(this.manuallyAddedCustomPrimitiveTypes));
-        this.addSerializedObjects(serializedDTOs);
-        this.addSerializedObjects(this.manuallyAddedSerializedObjects.values());
-        this.addSerializedObjects(this.detector.serializedObjects(this.manuallyAddedSerializedObjectTypes));
-        final SerializableDefinitions serializables = serializableDefinitions(
-                this.serializableCPs,
-                this.serializableDTOs
-        );
-        final DeserializableDefinitions deserializables = deserializableDefinitions(
-                this.deserializableCPs,
-                this.deserializableDTOs
-        );
+        final Map<Class<?>, SerializedObjectDefinition> detectedSerializedObjects = this.detector
+                .serializedObjects(serializedObjectDetectionCandidates)
+                .stream()
+                .collect(Collectors.toMap(o -> o.type, Function.identity()));
+        serializedObjects.putAll(detectedSerializedObjects);
+
         final MarshallerRegistry<Marshaller> marshallerRegistry = marshallerRegistry(this.marshallerMap);
+        final DefinitionsFactory definitionsFactory = definitionsFactory(
+                customPrimitives.values(),
+                serializedObjects.values()
+        );
+        final Serializer serializer = theSerializer(marshallerRegistry, definitionsFactory.toSerializableDefinitions());
+
         final MarshallerRegistry<Unmarshaller> unmarshallerRegistry = marshallerRegistry(this.unmarshallerMap);
-
-        final Serializer serializer = theSerializer(marshallerRegistry, serializables);
-        final Deserializer deserializer = theDeserializer(unmarshallerRegistry, deserializables, this.validationMappings,
-                this.validationErrorsMapping, false, this.injectorFactory);
+        final Deserializer deserializer = theDeserializer(
+                unmarshallerRegistry,
+                definitionsFactory.toDeserializableDefinitions(),
+                this.validationMappings,
+                this.validationErrorsMapping,
+                false,
+                this.injectorFactory
+        );
         return mapMate(serializer, deserializer);
-    }
-
-    private void addCustomPrimitives(final Iterable<CustomPrimitiveDefinition> customPrimitiveDefinitions) {
-        for (final CustomPrimitiveDefinition customPrimitiveDefinition : customPrimitiveDefinitions) {
-            final Class<?> type = customPrimitiveDefinition.type;
-            final DeserializationCPMethod deserializer = customPrimitiveDefinition.deserializer;
-            final SerializationCPMethod serializer = customPrimitiveDefinition.serializer;
-
-            final DeserializableCustomPrimitive<?> deserializableCP = deserializableCustomPrimitive(type, deserializer);
-            this.deserializableCPs.add(deserializableCP);
-
-            final SerializableCustomPrimitive serializableCP = serializableCustomPrimitive(type, serializer);
-            this.serializableCPs.add(serializableCP);
-        }
-    }
-
-    private void addSerializedObjects(final Iterable<SerializedObjectDefinition> values) {
-        for (final SerializedObjectDefinition serializedObjectDefinition : values) {
-            final DeserializationDTOMethod deserializer = serializedObjectDefinition.deserializer;
-            final SerializationDTOMethod serializer = serializedObjectDefinition.serializer;
-            final Class<?> type = serializedObjectDefinition.type;
-
-            if (deserializer != null) {
-                final DeserializableDataTransferObject<?> deserializableDTO = deserializableDataTransferObject(
-                        type,
-                        deserializer
-                );
-                this.deserializableDTOs.add(deserializableDTO);
-            }
-            if (serializer != null) {
-                final SerializableDataTransferObject serializableDTO = serializableDataTransferObject(type, serializer);
-                this.serializableDTOs.add(serializableDTO);
-            }
-        }
     }
 }
 

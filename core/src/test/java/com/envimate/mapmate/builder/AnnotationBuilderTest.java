@@ -52,7 +52,7 @@ public final class AnnotationBuilderTest {
 
         return MapMate.aMapMate("com.envimate.mapmate.builder.models")
                 .withDetector(ConventionalDetector.conventionalDetectorWithAnnotations())
-                .usingJsonMarshallers(gson::toJson, gson::fromJson)
+                .usingJsonMarshaller(gson::toJson, gson::fromJson)
                 .withExceptionIndicatingValidationError(CustomTypeValidationException.class)
                 .build();
     }

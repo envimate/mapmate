@@ -19,33 +19,34 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.conventional.customprimitives;
+package com.envimate.mapmate.builder.anticorruption;
 
-import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
+import com.envimate.mapmate.builder.definitions.CustomPrimitiveSerializer;
+import com.envimate.mapmate.serialization.methods.SerializationCPMethod;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.lang.reflect.Method;
-
+@SuppressWarnings({"unchecked", "rawtypes"})
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class VerifiedCustomPrimitiveDeserializationMethod implements DeserializationCPMethod {
-    private final Method deserializationMethod;
+public final class SerializationCPMethodAdapter implements SerializationCPMethod {
+    private final CustomPrimitiveSerializer serializer;
 
-    public static DeserializationCPMethod verifiedCustomPrimitiveDeserializationMethod(final Method deserializationMethod) {
-        return new VerifiedCustomPrimitiveDeserializationMethod(deserializationMethod);
+    public static SerializationCPMethodAdapter serializationCPMethodAdapter(
+            final CustomPrimitiveSerializer serializer) {
+        return new SerializationCPMethodAdapter(serializer);
     }
 
     @Override
     public void verifyCompatibility(final Class<?> targetType) {
-        //already verified.
+        //nothing to do here, everything is pre-validated using the new builder
     }
 
     @Override
-    public Object deserialize(final String input, final Class<?> targetType) throws Exception {
-        return this.deserializationMethod.invoke(null, input);
+    public String serialize(final Object object) {
+        return this.serializer.serialize(object);
     }
 }

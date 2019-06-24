@@ -56,7 +56,7 @@ public final class ConventionalBuilderExclusionTest {
                 List.of("com.envimate.mapmate.builder.models.excluded"),
                 List.of())
         )
-                .usingJsonMarshallers(gson::toJson, gson::fromJson)
+                .usingJsonMarshaller(gson::toJson, gson::fromJson)
                 .withExceptionIndicatingValidationError(CustomTypeValidationException.class)
                 .build();
     }

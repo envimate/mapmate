@@ -55,7 +55,7 @@ public final class CustomConventionalBuilderTest {
                         "deserialize",
                         "restore"
                 ))
-                .usingJsonMarshallers(gson::toJson, gson::fromJson)
+                .usingJsonMarshaller(gson::toJson, gson::fromJson)
                 .withExceptionIndicatingValidationError(CustomTypeValidationException.class)
                 .build();
     }

@@ -49,7 +49,7 @@ public final class ObjectMapperConventionalBuilderTest {
         final ObjectMapper objectMapper = new ObjectMapper();
 
         return MapMate.aMapMate("com.envimate.mapmate.builder.models")
-                .usingJsonMarshallers(objectMapper::writeValueAsString, objectMapper::readValue)
+                .usingJsonMarshaller(objectMapper::writeValueAsString, objectMapper::readValue)
                 .withExceptionIndicatingValidationError(CustomTypeValidationException.class)
                 .build();
     }

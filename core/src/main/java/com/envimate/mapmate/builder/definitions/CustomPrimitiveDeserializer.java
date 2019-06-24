@@ -19,23 +19,8 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.recipes;
+package com.envimate.mapmate.builder.definitions;
 
-import com.envimate.mapmate.builder.MapMateBuilder;
-import com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition;
-import com.envimate.mapmate.builder.definitions.SerializedObjectDefinition;
-
-import java.util.Map;
-
-public interface Recipe {
-    default void cook(final MapMateBuilder mapMateBuilder) {
-    }
-
-    default Map<Class<?>, CustomPrimitiveDefinition> customPrimitiveDefinitions() {
-        return Map.of();
-    }
-
-    default Map<Class<?>, SerializedObjectDefinition> serializedObjectDefinitions() {
-        return Map.of();
-    }
+public interface CustomPrimitiveDeserializer<T> {
+    T deserialize(String value) throws Exception;
 }

@@ -75,11 +75,11 @@ public final class Serializer {
     @SuppressWarnings("unchecked")
     public String serialize(final Object object,
                             final MarshallingType marshallingType,
-                            final Function<Map<String, Object>, Map<String, Object>> jsonInjector) {
+                            final Function<Map<String, Object>, Map<String, Object>> serializedPropertyInjector) {
         validateNotNull(object, "object");
         Object normalized = normalize(object);
         if (normalized instanceof Map) {
-            normalized = jsonInjector.apply((Map<String, Object>) normalized);
+            normalized = serializedPropertyInjector.apply((Map<String, Object>) normalized);
         }
         final Marshaller marshaller = this.marshallers
                 .getForType(marshallingType);

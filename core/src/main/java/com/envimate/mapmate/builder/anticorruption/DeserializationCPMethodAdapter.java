@@ -19,31 +19,34 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.recipes.primitives;
+package com.envimate.mapmate.builder.anticorruption;
 
-import com.envimate.mapmate.builder.MapMateBuilder;
-import com.envimate.mapmate.builder.recipes.Recipe;
+import com.envimate.mapmate.builder.definitions.CustomPrimitiveDeserializer;
+import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import static com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition.customPrimitiveDefinition;
-
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class BuiltInPrimitveSerializedAsStringSupport implements Recipe {
-    public static BuiltInPrimitveSerializedAsStringSupport builtInPrimitveSerializedAsStringSupport() {
-        return new BuiltInPrimitveSerializedAsStringSupport();
+public final class DeserializationCPMethodAdapter implements DeserializationCPMethod {
+    private final CustomPrimitiveDeserializer<?> deserializer;
+
+    public static DeserializationCPMethodAdapter deserializationCPMethodAdapter(
+            final CustomPrimitiveDeserializer<?> deserializer
+    ) {
+        return new DeserializationCPMethodAdapter(deserializer);
     }
 
     @Override
-    public void cook(final MapMateBuilder mapMateBuilder) {
-        BuiltInPrimitiveAdapter.forEach((aClass, builtInPrimitiveAdapter) -> {
-            mapMateBuilder.withCustomPrimitive(customPrimitiveDefinition(
-                    aClass, builtInPrimitiveAdapter, builtInPrimitiveAdapter
-            ));
-        });
+    public void verifyCompatibility(final Class<?> targetType) {
+        //nothing to do here, everything is pre-validated using the new builder
+    }
+
+    @Override
+    public Object deserialize(final String input, final Class<?> targetType) throws Exception {
+        return this.deserializer.deserialize(input);
     }
 }

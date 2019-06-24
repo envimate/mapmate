@@ -27,11 +27,11 @@
     <parent>
         <groupId>com.envimate.mapmate</groupId>
         <artifactId>mapmate-parent</artifactId>
-        <version>1.6.19</version>
+        <version>1.6.20</version>
     </parent>
     <packaging>jar</packaging>
     <artifactId>core</artifactId>
-    <version>1.6.19</version>
+    <version>1.6.20</version>
     <name>MapMate - Core Library</name>
 
 

@@ -21,8 +21,6 @@
 
 package com.envimate.mapmate.builder.definitions;
 
-import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
-import com.envimate.mapmate.serialization.methods.SerializationCPMethod;
 import com.envimate.mapmate.validators.NotNullValidator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -32,36 +30,48 @@ import lombok.ToString;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import static com.envimate.mapmate.builder.conventional.customprimitives.VerifiedCustomPrimitiveDeserializationMethod.verifiedCustomPrimitiveDeserializationMethod;
-import static com.envimate.mapmate.builder.conventional.customprimitives.VerifiedCustomPrimitiveSerializationMethod.verifiedCustomPrimitiveSerializationMethod;
 import static com.envimate.mapmate.builder.definitions.IncompatibleCustomPrimitiveException.incompatibleCustomPrimitiveException;
+import static com.envimate.mapmate.builder.definitions.implementations.CustomPrimitiveByMethodDeserializer.customPrimitiveByMethodDeserializer;
+import static com.envimate.mapmate.builder.definitions.implementations.CustomPrimitiveByMethodSerializer.verifiedCustomPrimitiveSerializationMethod;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CustomPrimitiveDefinition {
     public final Class<?> type;
-    public final SerializationCPMethod serializer;
-    public final DeserializationCPMethod deserializer;
+    public final CustomPrimitiveSerializer<?> serializer;
+    public final CustomPrimitiveDeserializer<?> deserializer;
+
+    public static <T> CustomPrimitiveDefinition customPrimitiveDefinition(
+            final Class<T> type,
+            final CustomPrimitiveSerializer<T> serializer,
+            final CustomPrimitiveDeserializer<T> deserializer
+    ) {
+        return untypedCustomPrimitiveDefinition(type, serializer, deserializer);
+    }
 
     public static CustomPrimitiveDefinition customPrimitiveDefinition(final Class<?> type,
-                                                                      final SerializationCPMethod serializer,
-                                                                      final DeserializationCPMethod deserializer) {
+                                                                      final Method serializationMethod,
+                                                                      final Method deserializationMethod) {
+        final CustomPrimitiveSerializer<?> serializer = createSerializer(type, serializationMethod);
+        final CustomPrimitiveDeserializer<?> deserializer = createDeserializer(type, deserializationMethod);
+        return untypedCustomPrimitiveDefinition(type, serializer, deserializer);
+    }
+
+
+    private static CustomPrimitiveDefinition untypedCustomPrimitiveDefinition(
+            final Class<?> type,
+            final CustomPrimitiveSerializer<?> serializer,
+            final CustomPrimitiveDeserializer<?> deserializer
+    ) {
         NotNullValidator.validateNotNull(type, "type");
         NotNullValidator.validateNotNull(serializer, "serializer");
         NotNullValidator.validateNotNull(deserializer, "deserializer");
         return new CustomPrimitiveDefinition(type, serializer, deserializer);
     }
 
-    public static CustomPrimitiveDefinition customPrimitiveDefinition(final Class<?> type,
-                                                                      final Method serializationMethod,
-                                                                      final Method deserializationMethod) {
-        final SerializationCPMethod serializer = createSerializer(type, serializationMethod);
-        final DeserializationCPMethod deserializer = createDeserializer(type, deserializationMethod);
-        return customPrimitiveDefinition(type, serializer, deserializer);
-    }
-
-    private static SerializationCPMethod createSerializer(final Class<?> type, final Method serializationMethod) {
+    private static CustomPrimitiveSerializer<?> createSerializer(final Class<?> type,
+                                                                 final Method serializationMethod) {
         final int serializationMethodModifiers = serializationMethod.getModifiers();
         if (!Modifier.isPublic(serializationMethodModifiers)) {
             throw incompatibleCustomPrimitiveException(
@@ -102,7 +112,8 @@ public final class CustomPrimitiveDefinition {
         return verifiedCustomPrimitiveSerializationMethod(serializationMethod);
     }
 
-    private static DeserializationCPMethod createDeserializer(final Class<?> type, final Method deserializationMethod) {
+    private static CustomPrimitiveDeserializer<?> createDeserializer(final Class<?> type,
+                                                                     final Method deserializationMethod) {
         final int deserializationMethodModifiers = deserializationMethod.getModifiers();
         if (!Modifier.isPublic(deserializationMethodModifiers)) {
             throw incompatibleCustomPrimitiveException(
@@ -133,7 +144,7 @@ public final class CustomPrimitiveDefinition {
                             "the custom primitive", deserializationMethod, type);
         }
 
-        return verifiedCustomPrimitiveDeserializationMethod(deserializationMethod);
+        return customPrimitiveByMethodDeserializer(deserializationMethod);
     }
 
 }

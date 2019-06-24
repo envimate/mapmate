@@ -22,6 +22,7 @@
 package com.envimate.mapmate.builder;
 
 import com.envimate.mapmate.deserialization.Deserializer;
+import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.serialization.Serializer;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -60,7 +61,31 @@ public final class MapMate {
         return this.serializer.serializeToJson(object);
     }
 
+    public String serializeToYaml(final Object object) {
+        return this.serializer.serialize(object, MarshallingType.yaml());
+    }
+
+    public String serializeToXml(final Object object) {
+        return this.serializer.serialize(object, MarshallingType.xml());
+    }
+
+    public String serializeTo(final Object object, final MarshallingType marshallingType) {
+        return this.serializer.serialize(object, marshallingType);
+    }
+
     public <T> T deserializeJson(final String json, final Class<T> targetType) {
         return this.deserializer.deserializeJson(json, targetType);
+    }
+
+    public <T> T deserializeYaml(final String yaml, final Class<T> targetType) {
+        return this.deserializer.deserialize(yaml, targetType, MarshallingType.yaml());
+    }
+
+    public <T> T deserializeXml(final String xml, final Class<T> targetType) {
+        return this.deserializer.deserialize(xml, targetType, MarshallingType.xml());
+    }
+
+    public <T> T deserialize(final String json, final Class<T> targetType, final MarshallingType marshallingType) {
+        return this.deserializer.deserialize(json, targetType, marshallingType);
     }
 }

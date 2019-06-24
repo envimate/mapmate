@@ -48,6 +48,6 @@ public final class JacksonMarshaller implements Recipe {
         simpleModule.setDeserializerModifier(new AlwaysStringValueJacksonDeserializerModifier());
         this.objectMapper.setSerializationInclusion(NON_NULL);
         this.objectMapper.registerModule(simpleModule);
-        mapMateBuilder.usingJsonMarshallers(this.objectMapper::writeValueAsString, this.objectMapper::readValue);
+        mapMateBuilder.usingJsonMarshaller(this.objectMapper::writeValueAsString, this.objectMapper::readValue);
     }
 }

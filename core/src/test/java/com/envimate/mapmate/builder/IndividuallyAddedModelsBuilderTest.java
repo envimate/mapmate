@@ -25,6 +25,7 @@ import com.envimate.mapmate.builder.models.customconvention.Body;
 import com.envimate.mapmate.builder.models.customconvention.Email;
 import com.envimate.mapmate.builder.models.customconvention.EmailAddress;
 import com.envimate.mapmate.builder.models.customconvention.Subject;
+import com.envimate.mapmate.builder.recipes.manualregistry.ManualRegistry;
 import com.envimate.mapmate.builder.validation.CustomTypeValidationException;
 import com.envimate.mapmate.deserialization.Deserializer;
 import com.google.gson.Gson;
@@ -32,6 +33,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static com.envimate.mapmate.builder.conventional.ConventionalDetector.conventionalDetector;
+import static com.envimate.mapmate.builder.recipes.manualregistry.ManualRegistry.manuallyRegisteredTypes;
 
 /**
  * This test describes 2 ways of adding Custom Primitives and Serialized Objects individually to the MapMate instance.
@@ -60,7 +62,7 @@ public final class IndividuallyAddedModelsBuilderTest {
                     com.envimate.mapmate.builder.models.conventional.EmailAddress.fromStringValue("receiver@example.com"),
                     com.envimate.mapmate.builder.models.conventional.Subject.fromStringValue("Hello"),
                     com.envimate.mapmate.builder.models.conventional.Body.fromStringValue("Hello World!!!")
-    );
+            );
 
     public static final Email EMAIL =
             Email.restore(
@@ -74,66 +76,50 @@ public final class IndividuallyAddedModelsBuilderTest {
 
     public static MapMate theIndividuallyAddedTypesMapMateConventional() {
         return MapMate.aMapMate()
-                .withSerializedObjects(com.envimate.mapmate.builder.models.conventional.Email.class)
-                .withCustomPrimitives(
-                        com.envimate.mapmate.builder.models.conventional.EmailAddress.class,
-                        com.envimate.mapmate.builder.models.conventional.Subject.class,
-                        com.envimate.mapmate.builder.models.conventional.Body.class
+                .usingRecipe(manuallyRegisteredTypes()
+                        .withSerializedObjects(
+                                com.envimate.mapmate.builder.models.conventional.Email.class
+                        )
+                        .withCustomPrimitives(
+                                com.envimate.mapmate.builder.models.conventional.EmailAddress.class,
+                                com.envimate.mapmate.builder.models.conventional.Subject.class,
+                                com.envimate.mapmate.builder.models.conventional.Body.class)
                 )
-                .usingJsonMarshallers(GSON::toJson, GSON::fromJson)
+                .usingJsonMarshaller(GSON::toJson, GSON::fromJson)
                 .withExceptionIndicatingValidationError(CustomTypeValidationException.class)
                 .build();
     }
 
     public static MapMate theIndividuallyAddedTypesMapMate() {
-        final Class<EmailAddress>
-                customConventionEmail = EmailAddress.class;
-        final Class<Subject>
-                customConventionSubject = Subject.class;
         final Class<Body>
                 customConventionBody = Body.class;
-            return MapMate.aMapMate()
-                    .withSerializedObject(Email.class,
-                            Email.class.getFields(),
-                            "restore"
-                    )
-                    .withCustomPrimitive(
-                            customConventionEmail,
-                            EmailAddress::serialize,
-                            EmailAddress::deserialize
-                    )
-                    .withCustomPrimitive(
-                            customConventionSubject,
-                            Subject::serialize,
-                            Subject::deserialize
-                    )
-                    .withCustomPrimitive(
-                            customConventionBody,
-                            Body::serialize,
-                            Body::deserialize
-                    )
-                    .usingJsonMarshallers(GSON::toJson, GSON::fromJson)
-                    .withExceptionIndicatingValidationError(CustomTypeValidationException.class)
-                    .build();
+        return MapMate.aMapMate()
+                .usingRecipe(manuallyRegisteredTypes()
+                        .withSerializedObject(Email.class, Email.class.getFields(), "restore")
+                        .withCustomPrimitive(EmailAddress.class, EmailAddress::serialize, EmailAddress::deserialize)
+                        .withCustomPrimitive(Subject.class, Subject::serialize, Subject::deserialize)
+                        .withCustomPrimitive(customConventionBody, Body::serialize, Body::deserialize)
+                )
+                .usingJsonMarshaller(GSON::toJson, GSON::fromJson)
+                .withExceptionIndicatingValidationError(CustomTypeValidationException.class)
+                .build();
     }
 
     public static MapMate theIndividuallyAddedTypesMapMate1() {
         final Gson gson = new Gson();
 
         return MapMate.aMapMate()
-                .withSerializedObjects(Email.class)
-                .withCustomPrimitives(
-                        EmailAddress.class,
-                        Subject.class,
-                        Body.class
-                )
                 .withDetector(conventionalDetector(
                         "serialize", "" +
                                 "deserialize",
                         "restore",
                         ".*")
                 )
-                .usingJsonMarshallers(gson::toJson, gson::fromJson)
+                .usingRecipe(manuallyRegisteredTypes()
+                        .withSerializedObjects(Email.class)
+                        .withCustomPrimitives(EmailAddress.class, Subject.class, Body.class)
+                )
+                .usingJsonMarshaller(gson::toJson, gson::fromJson)
                 .withExceptionIndicatingValidationError(CustomTypeValidationException.class)
                 .build();
     }

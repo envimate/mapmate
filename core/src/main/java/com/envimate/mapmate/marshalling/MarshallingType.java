@@ -52,6 +52,6 @@ public final class MarshallingType {
     }
 
     public String internalValueForMapping() {
-        return type;
+        return this.type;
     }
 }

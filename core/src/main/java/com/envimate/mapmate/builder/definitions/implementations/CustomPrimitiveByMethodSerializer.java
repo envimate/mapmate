@@ -19,9 +19,9 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.conventional.customprimitives;
+package com.envimate.mapmate.builder.definitions.implementations;
 
-import com.envimate.mapmate.serialization.methods.SerializationCPMethod;
+import com.envimate.mapmate.builder.definitions.CustomPrimitiveSerializer;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -35,16 +35,13 @@ import static com.envimate.mapmate.CustomPrimitiveSerializationMethodCallExcepti
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class VerifiedCustomPrimitiveSerializationMethod implements SerializationCPMethod {
+public final class CustomPrimitiveByMethodSerializer implements CustomPrimitiveSerializer<Object> {
     private final Method serializationMethod;
 
-    public static SerializationCPMethod verifiedCustomPrimitiveSerializationMethod(final Method serializationMethod) {
-        return new VerifiedCustomPrimitiveSerializationMethod(serializationMethod);
-    }
-
-    @Override
-    public void verifyCompatibility(final Class<?> targetType) {
-        //already verified.
+    public static CustomPrimitiveByMethodSerializer verifiedCustomPrimitiveSerializationMethod(
+            final Method serializationMethod
+    ) {
+        return new CustomPrimitiveByMethodSerializer(serializationMethod);
     }
 
     @Override

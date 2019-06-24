@@ -31,7 +31,7 @@
     <packaging>pom</packaging>
     <groupId>com.envimate.mapmate</groupId>
     <artifactId>mapmate-parent</artifactId>
-    <version>1.6.19</version>
+    <version>1.6.20</version>
     <modules>
         <module>core</module>
     </modules>
