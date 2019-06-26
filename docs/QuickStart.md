@@ -3,11 +3,12 @@
 ## Maven 
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.envimate.mapmate/core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.envimate.mapmate/core)
+
 ```xml
 <dependency>
     <groupId>com.envimate.mapmate</groupId>
     <artifactId>core</artifactId>
-    <version>latest</version>
+    <version>${mapmate.version}</version>
 </dependency>
 ```
 

@@ -467,7 +467,7 @@ note: If you wish to marshall in/from XML, don't forget to add the appropriate d
 <dependency>
     <groupId>xstream</groupId>
     <artifactId>xstream</artifactId>
-    <version>latest</version>
+    <version>${xstream.version}</version>
 </dependency>
 ```
 
@@ -488,7 +488,7 @@ note: don't forget to add the appropriate dependency to use the YAMLFactory with
 <dependency>
     <groupId>com.fasterxml.jackson.dataformat</groupId>
     <artifactId>jackson-dataformat-yaml</artifactId>
-    <version>latest</version>
+    <version>${jackson.version}</version>
 </dependency>
 ```
 
