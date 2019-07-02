@@ -7,7 +7,7 @@
 <dependency>
     <groupId>com.envimate.mapmate</groupId>
     <artifactId>core</artifactId>
-    <version>latest</version>
+    <version>LATEST</version>
 </dependency>
 ```
 
