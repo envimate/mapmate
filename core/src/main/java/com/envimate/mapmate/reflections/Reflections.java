@@ -25,14 +25,14 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static com.envimate.mapmate.reflections.CodeNeedsToBeCompiledWithParameterNamesException.validateParameterNamesArePresent;
 import static com.envimate.mapmate.reflections.FactoryMethodNotFoundException.factoryMethodNotFound;
+import static com.envimate.mapmate.reflections.MultipleFactoryMethodsException.multipleFactoryMethodsFound;
 import static java.lang.invoke.MethodHandles.publicLookup;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.Arrays.asList;
@@ -47,27 +47,12 @@ public final class Reflections {
     public static Method findUniqueFactoryMethod(final Class<?> type) {
         final List<Method> factoryMethods = factoryMethods(type)
                 .collect(toList());
-
-        final int factoryMethodsFound = factoryMethods.size();
-        if (factoryMethodsFound > 1) {
-            throw MultipleFactoryMethodsException.multipleFactoryMethodsFound(type);
-        } else if (factoryMethodsFound == 0) {
-            throw factoryMethodNotFound(type);
-        } else {
-            return factoryMethods.get(0);
-        }
+        return extractSingleFactoryMethod(factoryMethods, type);
     }
 
     public static Method factoryMethodByName(final Class<?> type, final String name) {
         final List<Method> factoryMethodsByName = findFactoryMethodsByName(type, name);
-        final int factoryMethodsFound = factoryMethodsByName.size();
-        if (factoryMethodsFound > 1) {
-            throw MultipleFactoryMethodsException.multipleFactoryMethodsFound(type);
-        } else if (factoryMethodsFound == 0) {
-            throw factoryMethodNotFound(type);
-        } else {
-            return factoryMethodsByName.get(0);
-        }
+        return extractSingleFactoryMethod(factoryMethodsByName, type);
     }
 
     public static List<Method> findFactoryMethodsByName(final Class<?> type, final String name) {
@@ -78,8 +63,8 @@ public final class Reflections {
     }
 
     private static Stream<Method> factoryMethods(final Class<?> type) {
-        return Arrays.stream(type.getMethods())
-                .filter(method -> Modifier.isStatic(method.getModifiers()))
+        return stream(type.getMethods())
+                .filter(method -> isStatic(method.getModifiers()))
                 .filter(method -> method.getReturnType() == type);
     }
 
@@ -123,21 +108,43 @@ public final class Reflections {
                     }
 
                     for (final Class<?> parameterType : parameterTypes) {
-                        if(!containsRightType(parameterType, declaredFields)) {
+                        if (!containsRightType(parameterType, declaredFields)) {
                             return false;
                         }
                     }
                     return true;
                 }).collect(toList());
+        return extractSingleFactoryMethod(factoryMethods, type);
+    }
 
+    private static Method extractSingleFactoryMethod(final List<Method> factoryMethods,
+                                                     final Class<?> type) {
         final int factoryMethodsFound = factoryMethods.size();
         if (factoryMethodsFound > 1) {
-            throw MultipleFactoryMethodsException.multipleFactoryMethodsFound(type);
-        } else if (factoryMethodsFound == 0) {
-            throw factoryMethodNotFound(type);
-        } else {
-            return factoryMethods.get(0);
+            throw multipleFactoryMethodsFound(type);
         }
+        if (factoryMethodsFound == 0) {
+            throw factoryMethodNotFound(type);
+        }
+        final Method method = factoryMethods.get(0);
+        validateParameterNamesArePresent(method);
+        return method;
+    }
+
+    public static boolean isMethodCompatibleWithFields(final Method method, final Field[] fields) {
+        validateParameterNamesArePresent(method);
+        final Class<?>[] parameterTypes = method.getParameterTypes();
+        if (fields.length != parameterTypes.length) {
+            return false;
+        }
+
+        for (final Field serializedField : fields) {
+            final boolean present = stream(parameterTypes).anyMatch(aClass -> serializedField.getType().equals(aClass));
+            if (!present) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static boolean containsRightType(final Class<?> parameterType, final Field[] fields) {
@@ -166,20 +173,5 @@ public final class Reflections {
 
     private static boolean isCollection(final Field field) {
         return Collection.class.isAssignableFrom(field.getType());
-    }
-
-    public static boolean isMethodCompatibleWithFields(final Method method, final Field[] fields) {
-        final Class<?>[] parameterTypes = method.getParameterTypes();
-        if (fields.length != parameterTypes.length) {
-            return false;
-        }
-
-        for (final Field serializedField : fields) {
-            final boolean present = stream(parameterTypes).anyMatch(aClass -> serializedField.getType().equals(aClass));
-            if (!present) {
-                return false;
-            }
-        }
-        return true;
     }
 }
