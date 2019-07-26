@@ -22,10 +22,9 @@
 package com.envimate.mapmate.serialization;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * CircularReferenceDetector provides ways to scan and detect circular references in a given object.
@@ -70,8 +69,11 @@ public final class CircularReferenceDetector {
 
     private void detect(final Object subject, final ArrayList<Object> references) {
         final Class<?> type = subject.getClass();
-        final Field[] fields = type.getFields();
+        final List<Field> fields = Arrays.stream(type.getFields())
+                .filter(field -> !Modifier.isStatic(field.getModifiers()))
+                .collect(Collectors.toList());
         for (final Field field : fields) {
+
             final Object value = this.readFieldValue(subject, field);
             if (value != null) {
                 if (!isWrapperType(value.getClass())) {

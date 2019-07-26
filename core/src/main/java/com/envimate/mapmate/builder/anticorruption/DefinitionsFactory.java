@@ -25,10 +25,14 @@ import com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition;
 import com.envimate.mapmate.builder.definitions.CustomPrimitiveDeserializer;
 import com.envimate.mapmate.builder.definitions.CustomPrimitiveSerializer;
 import com.envimate.mapmate.builder.definitions.SerializedObjectDefinition;
-import com.envimate.mapmate.deserialization.*;
+import com.envimate.mapmate.deserialization.DeserializableCustomPrimitive;
+import com.envimate.mapmate.deserialization.DeserializableDataTransferObject;
+import com.envimate.mapmate.deserialization.DeserializableDefinitions;
 import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
-import com.envimate.mapmate.serialization.*;
-import com.envimate.mapmate.serialization.methods.SerializationCPMethod;
+import com.envimate.mapmate.serialization.SerializableCustomPrimitive;
+import com.envimate.mapmate.serialization.SerializableDataTransferObject;
+import com.envimate.mapmate.serialization.SerializableDefinitions;
+import com.envimate.mapmate.serialization.methods.SerializationCPMethodDefinition;
 import com.envimate.mapmate.serialization.methods.SerializationDTOMethod;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -65,7 +69,7 @@ public final class DefinitionsFactory {
         for (final CustomPrimitiveDefinition customPrimitiveDefinition : this.customPrimitiveDefinitions) {
             final Class<?> type = customPrimitiveDefinition.type;
             final CustomPrimitiveSerializer<?> serializer = customPrimitiveDefinition.serializer;
-            final SerializationCPMethod serializationCPMethod = serializationCPMethodAdapter(serializer);
+            final SerializationCPMethodDefinition serializationCPMethod = serializationCPMethodAdapter(serializer);
             final SerializableCustomPrimitive serializableCP = serializableCustomPrimitive(type, serializationCPMethod);
             serializableCPs.add(serializableCP);
         }

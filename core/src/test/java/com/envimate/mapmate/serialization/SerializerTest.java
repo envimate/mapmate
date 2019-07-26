@@ -25,7 +25,6 @@ import com.envimate.mapmate.DefinitionNotFoundException;
 import com.envimate.mapmate.Lists;
 import com.envimate.mapmate.domain.utils.AStrings;
 import com.envimate.mapmate.domain.valid.*;
-import com.envimate.mapmate.serialization.methods.SerializationCPMethod;
 import com.envimate.mapmate.validators.CustomTypeValidationException;
 import com.google.gson.Gson;
 import org.junit.Test;
@@ -37,6 +36,7 @@ import static com.envimate.mapmate.Defaults.theDefaultSerializer;
 import static com.envimate.mapmate.filters.ClassFilters.*;
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.serialization.Serializer.aSerializer;
+import static com.envimate.mapmate.serialization.methods.ProvidedMethodSerializationCPMethod.providedMethodSerializationCPMethod;
 import static junit.framework.TestCase.fail;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -265,16 +265,7 @@ public final class SerializerTest {
                 .filteredBy(allBut(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("internalValueForMapping")))
                 .thatAre().serializedByItsPublicFields()
                 .withCustomPrimitive(AString.class)
-                .serializedUsing(new SerializationCPMethod() {
-                    @Override
-                    public void verifyCompatibility(final Class<?> targetType) {
-                    }
-
-                    @Override
-                    public String serialize(final Object object) {
-                        return "test";
-                    }
-                })
+                .serializedUsing(targetType -> providedMethodSerializationCPMethod(targetType, o -> "test"))
                 .build();
         final AComplexType given = AComplexType.aComplexType(
                 AString.fromString("a"),
@@ -299,16 +290,7 @@ public final class SerializerTest {
                 .filteredBy(allBut(allClassesThatHaveAPublicStringMethodWithZeroArgumentsNamed("internalValueForMapping")))
                 .thatAre().serializedByItsPublicFields()
                 .withCustomPrimitive(AString.class)
-                .serializedUsing(new SerializationCPMethod() {
-                    @Override
-                    public void verifyCompatibility(final Class<?> targetType) {
-                    }
-
-                    @Override
-                    public String serialize(final Object object) {
-                        return AStrings.provide(object);
-                    }
-                })
+                .serializedUsing(targetType -> providedMethodSerializationCPMethod(targetType, AStrings::provide))
                 .build();
         final AComplexType given = AComplexType.aComplexType(
                 AString.fromString("a"),

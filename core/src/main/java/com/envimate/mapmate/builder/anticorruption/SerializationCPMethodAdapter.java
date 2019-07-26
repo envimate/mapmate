@@ -23,6 +23,7 @@ package com.envimate.mapmate.builder.anticorruption;
 
 import com.envimate.mapmate.builder.definitions.CustomPrimitiveSerializer;
 import com.envimate.mapmate.serialization.methods.SerializationCPMethod;
+import com.envimate.mapmate.serialization.methods.SerializationCPMethodDefinition;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class SerializationCPMethodAdapter implements SerializationCPMethod {
+public final class SerializationCPMethodAdapter implements SerializationCPMethod, SerializationCPMethodDefinition {
     private final CustomPrimitiveSerializer serializer;
 
     public static SerializationCPMethodAdapter serializationCPMethodAdapter(
@@ -41,8 +42,9 @@ public final class SerializationCPMethodAdapter implements SerializationCPMethod
     }
 
     @Override
-    public void verifyCompatibility(final Class<?> targetType) {
+    public SerializationCPMethod verifyCompatibility(final Class<?> targetType) {
         //nothing to do here, everything is pre-validated using the new builder
+        return this;
     }
 
     @Override

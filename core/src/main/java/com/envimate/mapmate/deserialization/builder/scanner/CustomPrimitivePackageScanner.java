@@ -46,8 +46,10 @@ public final class CustomPrimitivePackageScanner implements PackageScanner {
         this.deserializationCPMethod = deserializationCPMethod;
     }
 
-    public static PackageScanner theCustomPrimitivePackageScanner(final List<ClassFilter> classFilters,
-                                                                  final DeserializationCPMethod deserializationCPMethod) {
+    public static PackageScanner theCustomPrimitivePackageScanner(
+            final List<ClassFilter> classFilters,
+            final DeserializationCPMethod deserializationCPMethod
+    ) {
         return new CustomPrimitivePackageScanner(classFilters, deserializationCPMethod);
     }
 

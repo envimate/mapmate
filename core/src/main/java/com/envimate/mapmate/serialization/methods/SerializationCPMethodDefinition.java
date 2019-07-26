@@ -21,6 +21,6 @@
 
 package com.envimate.mapmate.serialization.methods;
 
-public interface SerializationCPMethod {
-    String serialize(Object object);
+public interface SerializationCPMethodDefinition {
+    SerializationCPMethod verifyCompatibility(Class<?> targetType);
 }

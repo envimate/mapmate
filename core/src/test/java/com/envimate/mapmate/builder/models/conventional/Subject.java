@@ -31,6 +31,13 @@ import lombok.ToString;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Subject {
+    /*
+     * These static fields are to verify that map mate is ignoring such things, do not remove these constants.
+     */
+    public static final Subject HELLO_WORLD = fromStringValue("Hello World");
+    public static final Subject HELLO_UNIVERSE = fromStringValue("Hello Universe");
+    public static final Subject HELLO_MULTIVERSE = fromStringValue("Hello Multiverse");
+
     private final String value;
 
     public static Subject fromStringValue(final String value) {

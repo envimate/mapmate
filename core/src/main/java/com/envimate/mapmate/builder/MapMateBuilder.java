@@ -126,8 +126,8 @@ public final class MapMateBuilder {
 
     public MapMateBuilder usingMarshaller(final Map<MarshallingType, Marshaller> marshallerMap,
                                           final Map<MarshallingType, Unmarshaller> unmarshallerMap) {
-        this.marshallerMap = marshallerMap;
-        this.unmarshallerMap = unmarshallerMap;
+        this.marshallerMap = new HashMap<>(marshallerMap);
+        this.unmarshallerMap = new HashMap<>(unmarshallerMap);
         return this;
     }
 

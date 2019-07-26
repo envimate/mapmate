@@ -23,6 +23,7 @@ package com.envimate.mapmate.serialization;
 
 import com.envimate.mapmate.Definition;
 import com.envimate.mapmate.serialization.methods.SerializationCPMethod;
+import com.envimate.mapmate.serialization.methods.SerializationCPMethodDefinition;
 
 public final class SerializableCustomPrimitive implements Definition {
 
@@ -34,9 +35,11 @@ public final class SerializableCustomPrimitive implements Definition {
         this.serializationCPMethod = serializationCPMethod;
     }
 
-    public static SerializableCustomPrimitive serializableCustomPrimitive(final Class<?> type,
-                                                                          final SerializationCPMethod serializationCPMethod) {
-        serializationCPMethod.verifyCompatibility(type);
+    public static SerializableCustomPrimitive serializableCustomPrimitive(
+            final Class<?> type,
+            final SerializationCPMethodDefinition definition
+    ) {
+        final SerializationCPMethod serializationCPMethod = definition.verifyCompatibility(type);
         return new SerializableCustomPrimitive(type, serializationCPMethod);
     }
 

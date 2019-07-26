@@ -21,32 +21,27 @@
 
 package com.envimate.mapmate.serialization.methods;
 
-import com.envimate.mapmate.CustomPrimitiveSerializationMethodCallException;
 import com.envimate.mapmate.reflections.MethodName;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.WrongMethodTypeException;
 import java.lang.reflect.Method;
 
-import static com.envimate.mapmate.reflections.Reflections.findPublicStringMethodByName;
 import static com.envimate.mapmate.serialization.methods.SerializationMethodNotCompatibleException.serializationMethodNotCompatibleException;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
-public final class NamedMethodSerializationCPMethod implements SerializationCPMethod {
-
+public final class NamedMethodSerializationCPMethod implements SerializationCPMethodDefinition {
     private final MethodName methodName;
 
     private NamedMethodSerializationCPMethod(final MethodName methodName) {
         this.methodName = methodName;
     }
 
-    public static SerializationCPMethod theNamedMethodSerializationCPMethod(final MethodName methodName) {
+    public static NamedMethodSerializationCPMethod theNamedMethodSerializationCPMethod(final MethodName methodName) {
         return new NamedMethodSerializationCPMethod(methodName);
     }
 
     @Override
-    public void verifyCompatibility(final Class<?> targetType) {
+    public SerializationCPMethod verifyCompatibility(final Class<?> targetType) {
         try {
             final Method method = targetType.getMethod(this.methodName.internalValueForMapping());
             if (method.getParameterCount() != 0) {
@@ -69,33 +64,11 @@ public final class NamedMethodSerializationCPMethod implements SerializationCPMe
                         " does not have a zero argument String method" +
                         " named '" + this.methodName.internalValueForMapping() + "'");
             }
+            return ReflectionMethodSerializationCPMethod.reflectionMethodSerializationCPMethod(method);
         } catch (final NoSuchMethodException e) {
             throw serializationMethodNotCompatibleException("class '" + targetType.getName() + "'" +
                     " does not have a zero argument String method" +
                     " named '" + this.methodName.internalValueForMapping() + "'", e);
-        }
-    }
-
-    @Override
-    public String serialize(final Object object) {
-        final Class<?> type = object.getClass();
-        final MethodHandle methodHandle = findPublicStringMethodByName(type, this.methodName.internalValueForMapping());
-        try {
-            return (String) methodHandle.invoke(object);
-        } catch (final WrongMethodTypeException | ClassCastException e) {
-            throw CustomPrimitiveSerializationMethodCallException.fromThrowable(
-                    "this should never happen, contact the developers.",
-                    e,
-                    type,
-                    methodHandle,
-                    object);
-        } catch (final Throwable throwable) {
-            throw CustomPrimitiveSerializationMethodCallException.fromThrowable(
-                    "exception invoking serialization method",
-                    throwable,
-                    type,
-                    methodHandle,
-                    object);
         }
     }
 }

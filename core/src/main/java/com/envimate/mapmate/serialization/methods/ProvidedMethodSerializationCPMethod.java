@@ -27,7 +27,8 @@ import java.util.function.Function;
 import static com.envimate.mapmate.serialization.methods.SerializationMethodNotCompatibleException.serializationMethodNotCompatibleException;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
-public final class ProvidedMethodSerializationCPMethod<T> implements SerializationCPMethod {
+public final class ProvidedMethodSerializationCPMethod<T> implements SerializationCPMethod,
+        SerializationCPMethodDefinition {
     private final Class<T> type;
     private final Function<T, String> method;
 
@@ -45,7 +46,7 @@ public final class ProvidedMethodSerializationCPMethod<T> implements Serializati
     }
 
     @Override
-    public void verifyCompatibility(final Class<?> targetType) {
+    public SerializationCPMethod verifyCompatibility(final Class<?> targetType) {
         final Class<?> supplierClass = this.method.getClass();
         for (final Method method : supplierClass.getMethods()) {
             if (!method.getName().equals("apply")) {
@@ -53,7 +54,7 @@ public final class ProvidedMethodSerializationCPMethod<T> implements Serializati
             }
             final Class<?> parameterType = method.getParameterTypes()[0];
             if (parameterType.isAssignableFrom(targetType)) {
-                return;
+                return this;
             } else {
                 throw serializationMethodNotCompatibleException("Provided method returns object " +
                         "of type '" + parameterType.getSimpleName() + "' but" +

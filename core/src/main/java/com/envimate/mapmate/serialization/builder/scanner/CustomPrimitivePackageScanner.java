@@ -26,7 +26,7 @@ import com.envimate.mapmate.filters.ScanablePackage;
 import com.envimate.mapmate.reflections.PackageName;
 import com.envimate.mapmate.serialization.SerializableCustomPrimitive;
 import com.envimate.mapmate.serialization.SerializableDefinitions;
-import com.envimate.mapmate.serialization.methods.SerializationCPMethod;
+import com.envimate.mapmate.serialization.methods.SerializationCPMethodDefinition;
 
 import java.util.List;
 
@@ -38,17 +38,19 @@ import static java.util.stream.Collectors.toList;
 public final class CustomPrimitivePackageScanner implements PackageScanner {
 
     private final List<ClassFilter> classFilters;
-    private final SerializationCPMethod serializationCPMethod;
+    private final SerializationCPMethodDefinition serializationCPMethodDefinition;
 
     private CustomPrimitivePackageScanner(final List<ClassFilter> classFilters,
-                                          final SerializationCPMethod serializationCPMethod) {
+                                          final SerializationCPMethodDefinition serializationCPMethodDefinition) {
         this.classFilters = classFilters;
-        this.serializationCPMethod = serializationCPMethod;
+        this.serializationCPMethodDefinition = serializationCPMethodDefinition;
     }
 
-    public static PackageScanner theCustomPrimitivePackageScanner(final List<ClassFilter> classFilters,
-                                                                  final SerializationCPMethod serializationCPMethod) {
-        return new CustomPrimitivePackageScanner(classFilters, serializationCPMethod);
+    public static PackageScanner theCustomPrimitivePackageScanner(
+            final List<ClassFilter> classFilters,
+            final SerializationCPMethodDefinition serializationCPMethodDefinition
+    ) {
+        return new CustomPrimitivePackageScanner(classFilters, serializationCPMethodDefinition);
     }
 
     @Override
@@ -56,7 +58,7 @@ public final class CustomPrimitivePackageScanner implements PackageScanner {
         final ScanablePackage scanablePackage = scannablePackage(packageName, this.classFilters);
         final List<Class<?>> types = scanablePackage.getTypes();
         final List<SerializableCustomPrimitive> customPrimitives = types.stream()
-                .map(type -> serializableCustomPrimitive(type, this.serializationCPMethod))
+                .map(type -> serializableCustomPrimitive(type, this.serializationCPMethodDefinition))
                 .collect(toList());
         return withTheCustomPrimitives(customPrimitives);
     }

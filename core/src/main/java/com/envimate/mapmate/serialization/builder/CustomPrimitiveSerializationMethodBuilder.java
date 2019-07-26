@@ -22,28 +22,29 @@
 package com.envimate.mapmate.serialization.builder;
 
 import com.envimate.mapmate.reflections.MethodName;
-import com.envimate.mapmate.serialization.methods.SerializationCPMethod;
+import com.envimate.mapmate.serialization.methods.SerializationCPMethodDefinition;
 
 import java.util.function.Function;
 
 import static com.envimate.mapmate.reflections.MethodName.fromString;
 import static com.envimate.mapmate.serialization.methods.NamedMethodSerializationCPMethod.theNamedMethodSerializationCPMethod;
 import static com.envimate.mapmate.serialization.methods.ProvidedMethodSerializationCPMethod.providedMethodSerializationCPMethod;
+import static com.envimate.mapmate.serialization.methods.UniqueNoArgumentsMethodReturningStringCPMethod.theUniqueNoArgumentsMethodReturningStringCPMethod;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
 @SuppressWarnings("unused")
 public final class CustomPrimitiveSerializationMethodBuilder<T> {
     private final Class<T> type;
-    private final Function<SerializationCPMethod, SerializerBuilder> resultConsumer;
+    private final Function<SerializationCPMethodDefinition, SerializerBuilder> resultConsumer;
 
     private CustomPrimitiveSerializationMethodBuilder(
-            final Class<T> type, final Function<SerializationCPMethod, SerializerBuilder> resultConsumer) {
+            final Class<T> type, final Function<SerializationCPMethodDefinition, SerializerBuilder> resultConsumer) {
         this.type = type;
         this.resultConsumer = resultConsumer;
     }
 
     static <T> CustomPrimitiveSerializationMethodBuilder<T> aCustomPrimitiveSerializationMethodBuilder(
-            final Class<T> type, final Function<SerializationCPMethod, SerializerBuilder> resultConsumer) {
+            final Class<T> type, final Function<SerializationCPMethodDefinition, SerializerBuilder> resultConsumer) {
         return new CustomPrimitiveSerializationMethodBuilder<>(type, resultConsumer);
     }
 
@@ -56,12 +57,12 @@ public final class CustomPrimitiveSerializationMethodBuilder<T> {
         return serializedUsing(providedMethodSerializationCPMethod(this.type, method));
     }
 
-    public SerializerBuilder serializedUsing(final SerializationCPMethod method) {
-        validateNotNull(method, "method");
-        return this.resultConsumer.apply(method);
+    public SerializerBuilder serializedUsingTheSingleStringMethodWithZeroArguments() {
+        return serializedUsing(theUniqueNoArgumentsMethodReturningStringCPMethod());
     }
 
-    public SerializerBuilder serializedUsingTheSingleStringMethodWithZeroArguments() {
-        return null;
+    public SerializerBuilder serializedUsing(final SerializationCPMethodDefinition methodDefinition) {
+        validateNotNull(methodDefinition, "methodDefinition");
+        return this.resultConsumer.apply(methodDefinition);
     }
 }
