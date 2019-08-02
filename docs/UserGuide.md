@@ -41,6 +41,7 @@ definition of [Custom Primitives](Concepts.md#custom-primitives) and
      * [JSON with ObjectMapper](#json-with-objectmapper)
      * [XML with X-Stream](#xml-with-x-stream)
      * [Yaml with ObjectMapper](#yaml-with-objectmapper)
+     * [application/x-www-form-urlencoded](#application/x-www-form-urlencoded)
    * [Aggregating Validation Errors](#aggregating-validation-errors)
    * [Recipes](#recipes)
      * [Using Recipes](#using-recipes)
@@ -326,7 +327,7 @@ deserialization method name, and class name patterns to use for Serialized Objec
 ```java
     public static MapMate mapMate() {
         return MapMate.aMapMate("com.envimate.examples")
-                .usingJsonMarshallers(new Gson()::toJson, new Gson()::fromJson)
+                .usingJsonMarshaller(new Gson()::toJson, new Gson()::fromJson)
                 .withDetector(ConventionalDetector.conventionalDetector(
                         "myCustomPrimitiveSerializationMethodName",
                         "myCustomPrimitiveDeserializationMethodName",
@@ -477,8 +478,7 @@ note: If you wish to marshall in/from XML, don't forget to add the appropriate d
 final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
 return MapMate.aMapMate("com.envimate.mapmate.builder.models")
-        .usingJsonMarshallers(objectMapper::writeValueAsString, objectMapper::readValue)
-        .withExceptionIndicatingValidationError(CustomTypeValidationException.class)
+        .usingYamlMarshallers(objectMapper::writeValueAsString, objectMapper::readValue)
         .build();
 ```
 
@@ -495,7 +495,16 @@ note: don't forget to add the appropriate dependency to use the YAMLFactory with
 MapMate _does not_ ship with these libraries, so you need to configure the marshaller of your choice also in the 
 dependencies of your project. 
 
-As you can see the format does not matter, and you can freely provide your  Marshalling mechanism, by implementing the
+### application/x-www-form-urlencoded
+```json
+return MapMate.aMapMate("com.envimate.mapmate.builder.models")
+        .usingRecipe(urlEncodedMarshaller())
+        .build();
+```
+
+This does not require an external library.
+
+As you can see the format does not matter, and you can freely provide your Marshalling mechanism, by implementing the
 [Marshaller](../core/src/main/java/com/envimate/mapmate/serialization/Marshaller.java) and 
 [Unmarshaller](../core/src/main/java/com/envimate/mapmate/deserialization/Unmarshaller.java) interfaces.
 

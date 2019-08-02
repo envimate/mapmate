@@ -56,6 +56,7 @@ public final class Given {
                 .deserializedUsingTheMethodNamed("fromString")
                 .mappingExceptionUsing(AnException.class, ValidationError::fromExceptionMessageAndPropertyPath)
                 .build();
+
         return new Given(deserializer);
     }
 

@@ -22,20 +22,17 @@
 package com.envimate.mapmate.domain.valid;
 
 import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
+@ToString
 @EqualsAndHashCode
+@RequiredArgsConstructor
 public final class AComplexType {
     public final AString stringA;
     public final AString stringB;
     public final ANumber number1;
     public final ANumber number2;
-
-    private AComplexType(final AString stringA, final AString stringB, final ANumber number1, final ANumber number2) {
-        this.stringA = stringA;
-        this.stringB = stringB;
-        this.number1 = number1;
-        this.number2 = number2;
-    }
 
     public static AComplexType aComplexType(
             final AString stringA,
