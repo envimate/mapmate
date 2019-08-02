@@ -19,43 +19,53 @@
  * under the License.
  */
 
-package com.envimate.mapmate.marshalling;
+package com.envimate.mapmate.builder.recipes.marshallers.urlencoded;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import static com.envimate.mapmate.validators.RequiredStringValidator.validateNotNullNorEmpty;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.lang.Integer.parseInt;
+import static java.lang.String.format;
+import static java.net.URLDecoder.decode;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class MarshallingType {
-    private final String type;
+final class KeyElement {
+    private static final Pattern ARRAY_INDEX_PATTERN = Pattern.compile("[0-9]+");
 
-    public static MarshallingType marshallingType(final String type) {
-        validateNotNullNorEmpty(type, "type");
-        return new MarshallingType(type);
+    private final String value;
+
+    static KeyElement keyElement(final String value) {
+        validateNotNull(value, "value");
+        return new KeyElement(value);
     }
 
-    public static MarshallingType json() {
-        return marshallingType("json");
+    boolean isArrayIndex() {
+        final Matcher matcher = ARRAY_INDEX_PATTERN.matcher(this.value);
+        return matcher.matches();
     }
 
-    public static MarshallingType xml() {
-        return marshallingType("xml");
+    int asArrayIndex() {
+        return parseInt(this.value);
     }
 
-    public static MarshallingType yaml() {
-        return marshallingType("yaml");
+    String value() {
+        return this.value;
     }
 
-    public static MarshallingType urlEncoded() {
-        return marshallingType("urlencoded");
+    String renderAsFirstElement() {
+        return decode(this.value, UTF_8);
     }
 
-    public String internalValueForMapping() {
-        return this.type;
+    String renderAsIndexElement() {
+        return format("[%s]", renderAsFirstElement());
     }
 }

@@ -21,9 +21,13 @@
 
 package com.envimate.mapmate.deserialization.specs;
 
+import com.envimate.mapmate.domain.valid.AComplexNestedType;
+import com.envimate.mapmate.domain.valid.AComplexType;
+import com.envimate.mapmate.domain.valid.AComplexTypeWithArray;
 import org.junit.Test;
 
 import static com.envimate.mapmate.deserialization.specs.givenwhenthen.Given.givenTheExampleMapMateDeserializer;
+import static com.envimate.mapmate.deserialization.specs.instances.Instances.*;
 import static com.envimate.mapmate.marshalling.MarshallingType.*;
 
 public final class UnmarshallerSpecs {
@@ -37,9 +41,21 @@ public final class UnmarshallerSpecs {
                 "  \"number2\": \"5\",\n" +
                 "  \"stringA\": \"asdf\",\n" +
                 "  \"stringB\": \"qwer\"\n" +
-                "}").as(json()).toTheExampleDto()
-                .theDeserializedObjectIsTheFullyInitializedExampleDto();
+                "}").as(json()).toTheType(AComplexType.class)
+                .theDeserializedObjectIs(theFullyInitializedExampleDto());
+    }
 
+    @Test
+    public void testJsonUnmarshallingWithCollectionsIsPossible() {
+        givenTheExampleMapMateDeserializer()
+                .when().theDeserializerDeserializes("" +
+                "{\n" +
+                "  \"array\": [\n" +
+                "    \"1\",\n" +
+                "    \"2\"\n" +
+                "  ]\n" +
+                "}").as(json()).toTheType(AComplexTypeWithArray.class)
+                .theDeserializedObjectIs(theFullyInitializedExampleDtoWithCollections());
     }
 
     @Test
@@ -51,8 +67,8 @@ public final class UnmarshallerSpecs {
                 "  <number2>5</number2>\n" +
                 "  <stringA>asdf</stringA>\n" +
                 "  <stringB>qwer</stringB>\n" +
-                "</HashMap>\n").as(xml()).toTheExampleDto()
-                .theDeserializedObjectIsTheFullyInitializedExampleDto();
+                "</HashMap>\n").as(xml()).toTheType(AComplexType.class)
+                .theDeserializedObjectIs(theFullyInitializedExampleDto());
     }
 
     @Test
@@ -62,8 +78,39 @@ public final class UnmarshallerSpecs {
                 "number1: '1'\n" +
                 "number2: '5'\n" +
                 "stringA: asdf\n" +
-                "stringB: qwer\n").as(yaml()).toTheExampleDto()
-                .theDeserializedObjectIsTheFullyInitializedExampleDto();
+                "stringB: qwer\n").as(yaml()).toTheType(AComplexType.class)
+                .theDeserializedObjectIs(theFullyInitializedExampleDto());
+    }
+
+    @Test
+    public void testUrlEncodedUnmarshallingIsPossible() {
+        givenTheExampleMapMateDeserializer()
+                .when().theDeserializerDeserializes("number1=1&number2=5&stringA=asdf&stringB=qwer")
+                .as(urlEncoded()).toTheType(AComplexType.class)
+                .theDeserializedObjectIs(theFullyInitializedExampleDto());
+    }
+
+    @Test
+    public void testUrlEncodedUnmarshallingWithCollectionsIsPossible() {
+        givenTheExampleMapMateDeserializer()
+                .when().theDeserializerDeserializes("array[0]=1&array[1]=2")
+                .as(urlEncoded()).toTheType(AComplexTypeWithArray.class)
+                .theDeserializedObjectIs(theFullyInitializedExampleDtoWithCollections());
+    }
+
+    @Test
+    public void testUrlEncodedUnmarshallingWithMapsIsPossible() {
+        givenTheExampleMapMateDeserializer()
+                .when().theDeserializerDeserializes("" +
+                "complexType2[number1]=3&" +
+                "complexType2[number2]=4&" +
+                "complexType2[stringA]=c&" +
+                "complexType2[stringB]=d&" +
+                "complexType1[number1]=1&" +
+                "complexType1[number2]=2&" +
+                "complexType1[stringA]=a&" +
+                "complexType1[stringB]=b").as(urlEncoded()).toTheType(AComplexNestedType.class)
+                .theDeserializedObjectIs(theFullyInitializedNestedExampleDto());
     }
 
     @Test
@@ -75,9 +122,9 @@ public final class UnmarshallerSpecs {
                 "  \"number2\": \"5\",\n" +
                 "  \"stringA\": \"asdf\",\n" +
                 "  \"stringB\": \"qwer\"\n" +
-                "}").as(marshallingType("unknown")).toTheExampleDto()
+                "}").as(marshallingType("unknown")).toTheType(AComplexType.class)
                 .anExceptionIsThrownWithAMessageContaining(
                         "Unsupported marshalling type 'unknown'," +
-                                " known marshalling types are: ['json', 'xml', 'yaml']");
+                                " known marshalling types are: ['urlencoded', 'json', 'xml', 'yaml']");
     }
 }

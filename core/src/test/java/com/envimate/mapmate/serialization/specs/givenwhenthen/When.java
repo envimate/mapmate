@@ -21,9 +21,6 @@
 
 package com.envimate.mapmate.serialization.specs.givenwhenthen;
 
-import com.envimate.mapmate.domain.valid.AComplexType;
-import com.envimate.mapmate.domain.valid.ANumber;
-import com.envimate.mapmate.domain.valid.AString;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.serialization.Serializer;
 import lombok.AccessLevel;
@@ -32,15 +29,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public final class When {
     private final Serializer serializer;
+    private final Object object;
 
-    public Then theFullyInitializedExampleDtoIsSerializedTo(final MarshallingType marshallingType) {
-        final AComplexType aComplexType = AComplexType.aComplexType(
-                AString.fromString("asdf"),
-                AString.fromString("qwer"),
-                ANumber.fromInt(1),
-                ANumber.fromInt(5));
+    public Then isSerializedTo(final MarshallingType marshallingType) {
         try {
-            final String serialized = this.serializer.serialize(aComplexType, marshallingType);
+            final String serialized = this.serializer.serialize(object, marshallingType);
             return new Then(serialized, null);
         } catch (final Exception e) {
             return new Then(null, e);

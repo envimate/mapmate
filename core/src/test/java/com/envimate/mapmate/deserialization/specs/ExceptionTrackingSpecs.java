@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.deserialization.specs;
 
+import com.envimate.mapmate.domain.valid.AComplexType;
 import org.junit.Test;
 
 import static com.envimate.mapmate.deserialization.specs.givenwhenthen.Given.givenTheExampleMapMateDeserializer;
@@ -37,7 +38,7 @@ public final class ExceptionTrackingSpecs {
                 "  \"number2\": \"5\",\n" +
                 "  \"stringA\": \"asdf\",\n" +
                 "  \"stringB\": \"qwer\"\n" +
-                "}").as(json()).toTheExampleDto()
+                "}").as(json()).toTheType(AComplexType.class)
                 .anExceptionIsThrownWithAMessageContaining("Unrecognized exception deserializing field 'number1': " +
                         "Exception calling deserialize(input: x) on definition DeserializableCustomPrimitive(type=class " +
                         "com.envimate.mapmate.domain.valid.ANumber, deserializationMethod=NamedFactoryMethodCPMethod(" +
@@ -53,7 +54,7 @@ public final class ExceptionTrackingSpecs {
                 "  \"number2\": \"5000\",\n" +
                 "  \"stringA\": \"asdf\",\n" +
                 "  \"stringB\": \"qwer\"\n" +
-                "}").as(json()).toTheExampleDto()
+                "}").as(json()).toTheType(AComplexType.class)
                 .anExceptionIsThrownWithAMessageContaining("deserialization encountered validation errors." +
                         " Validation error at 'number2', value cannot be over 50; ");
     }
@@ -67,7 +68,7 @@ public final class ExceptionTrackingSpecs {
                 "  \"number2\": \"5\",\n" +
                 "  \"stringA\": \"asdf\",\n" +
                 "  \"stringB\": \"qwer\"\n" +
-                "}").toTheExampleDto()
+                "}").toTheType(AComplexType.class)
                 .anExceptionIsThrownWithAMessageContaining("Unrecognized exception deserializing field 'number1': " +
                         "Exception calling deserialize(input: x) on definition " +
                         "DeserializableCustomPrimitive(type=class com.envimate.mapmate.domain.valid.ANumber, " +
@@ -83,7 +84,7 @@ public final class ExceptionTrackingSpecs {
                 "  \"number2\": \"5000\",\n" +
                 "  \"stringA\": \"asdf\",\n" +
                 "  \"stringB\": \"qwer\"\n" +
-                "}").toTheExampleDto()
+                "}").toTheType(AComplexType.class)
                 .anExceptionIsThrownWithAMessageContaining("deserialization encountered validation errors." +
                         " Validation error at 'number2', value cannot be over 50; ");
     }
@@ -97,7 +98,7 @@ public final class ExceptionTrackingSpecs {
                 "  \"number2\": \"5000\",\n" +
                 "  \"stringA\": \"asdf\",\n" +
                 "  \"stringB\": \"qwer\"\n" +
-                "}").as(json()).toTheExampleDto()
+                "}").as(json()).toTheType(AComplexType.class)
                 .anExceptionIsThrownWithAMessageContaining("deserialization encountered validation errors." +
                         " Validation error at 'number1', value cannot be over 50;" +
                         " Validation error at 'number2', value cannot be over 50; ");

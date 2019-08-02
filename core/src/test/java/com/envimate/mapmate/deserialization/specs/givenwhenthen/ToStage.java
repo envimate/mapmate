@@ -21,12 +21,6 @@
 
 package com.envimate.mapmate.deserialization.specs.givenwhenthen;
 
-import com.envimate.mapmate.domain.valid.AComplexType;
-
 public interface ToStage {
     Then toTheType(Class<?> type);
-
-    default Then toTheExampleDto() {
-        return toTheType(AComplexType.class);
-    }
 }

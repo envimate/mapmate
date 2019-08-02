@@ -21,6 +21,9 @@
 
 package com.envimate.mapmate.domain.valid;
 
+import lombok.EqualsAndHashCode;
+
+@EqualsAndHashCode
 public final class AComplexNestedType implements AComplexNestedTypeInterface {
     public final AComplexType complexType1;
     public final AComplexType complexType2;

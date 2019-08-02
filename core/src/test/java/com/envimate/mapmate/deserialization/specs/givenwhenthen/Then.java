@@ -21,9 +21,6 @@
 
 package com.envimate.mapmate.deserialization.specs.givenwhenthen;
 
-import com.envimate.mapmate.domain.valid.AComplexType;
-import com.envimate.mapmate.domain.valid.ANumber;
-import com.envimate.mapmate.domain.valid.AString;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.hamcrest.core.StringContains;
@@ -36,16 +33,13 @@ public final class Then {
     private final Object deserializationResult;
     private final Exception exception;
 
-    public void theDeserializedObjectIsTheFullyInitializedExampleDto() {
-        final AComplexType expected = AComplexType.aComplexType(
-                AString.fromString("asdf"),
-                AString.fromString("qwer"),
-                ANumber.fromInt(1),
-                ANumber.fromInt(5));
+    public Then theDeserializedObjectIs(final Object expected) {
         assertThat(this.deserializationResult, is(expected));
+        return this;
     }
 
-    public void anExceptionIsThrownWithAMessageContaining(final String message) {
+    public Then anExceptionIsThrownWithAMessageContaining(final String message) {
         assertThat(this.exception.getMessage(), StringContains.containsString(message));
+        return this;
     }
 }

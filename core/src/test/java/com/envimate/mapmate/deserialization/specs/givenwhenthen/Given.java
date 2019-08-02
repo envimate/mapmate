@@ -23,13 +23,12 @@ package com.envimate.mapmate.deserialization.specs.givenwhenthen;
 
 import com.envimate.mapmate.deserialization.Deserializer;
 import com.envimate.mapmate.deserialization.validation.ValidationError;
-import com.envimate.mapmate.domain.valid.AComplexType;
-import com.envimate.mapmate.domain.valid.ANumber;
-import com.envimate.mapmate.domain.valid.AString;
-import com.envimate.mapmate.domain.valid.AnException;
+import com.envimate.mapmate.domain.valid.*;
+import com.envimate.mapmate.marshalling.MarshallingType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
+import static com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedUnmarshaller.urlEncodedUnmarshaller;
 import static com.envimate.mapmate.deserialization.Deserializer.aDeserializer;
 import static com.envimate.mapmate.deserialization.specs.givenwhenthen.Unmarshallers.*;
 
@@ -42,8 +41,15 @@ public final class Given {
                 .withJsonUnmarshaller(jsonUnmarshaller())
                 .withXmlUnmarshaller(xmlUnmarshaller())
                 .withYamlUnmarshaller(yamlUnmarshaller())
+                .unmarshallingTheType(MarshallingType.urlEncoded()).using(urlEncodedUnmarshaller())
+
                 .withDataTransferObject(AComplexType.class)
                 .deserializedUsingTheSingleFactoryMethod()
+                .withDataTransferObject(AComplexTypeWithArray.class)
+                .deserializedUsingTheSingleFactoryMethod()
+                .withDataTransferObject(AComplexNestedType.class)
+                .deserializedUsingTheSingleFactoryMethod()
+
                 .withCustomPrimitive(AString.class)
                 .deserializedUsingTheMethodNamed("fromString")
                 .withCustomPrimitive(ANumber.class)

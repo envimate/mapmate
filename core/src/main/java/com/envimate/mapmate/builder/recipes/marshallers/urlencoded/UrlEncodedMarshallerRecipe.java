@@ -19,19 +19,29 @@
  * under the License.
  */
 
-package com.envimate.mapmate.domain.valid;
+package com.envimate.mapmate.builder.recipes.marshallers.urlencoded;
 
+import com.envimate.mapmate.builder.MapMateBuilder;
+import com.envimate.mapmate.builder.recipes.Recipe;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
+import static com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedUnmarshaller.urlEncodedUnmarshaller;
+import static com.envimate.mapmate.marshalling.MarshallingType.urlEncoded;
+
+@ToString
 @EqualsAndHashCode
-public final class AComplexTypeWithArray {
-    public final ANumber[] array;
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class UrlEncodedMarshallerRecipe implements Recipe {
 
-    private AComplexTypeWithArray(final ANumber[] array) {
-        this.array = array;
+    public static UrlEncodedMarshallerRecipe urlEncodedMarshaller() {
+        return new UrlEncodedMarshallerRecipe();
     }
 
-    public static AComplexTypeWithArray aComplexClassWithArrays(final ANumber[] array) {
-        return new AComplexTypeWithArray(array);
+    @Override
+    public void cook(final MapMateBuilder mapMateBuilder) {
+        mapMateBuilder.usingMarshaller(urlEncoded(), UrlEncodedMarshaller.urlEncodedMarshaller(), urlEncodedUnmarshaller());
     }
 }

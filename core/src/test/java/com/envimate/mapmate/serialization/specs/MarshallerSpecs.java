@@ -23,6 +23,7 @@ package com.envimate.mapmate.serialization.specs;
 
 import org.junit.Test;
 
+import static com.envimate.mapmate.deserialization.specs.instances.Instances.*;
 import static com.envimate.mapmate.marshalling.MarshallingType.*;
 import static com.envimate.mapmate.serialization.specs.givenwhenthen.Given.givenTheExampleMapMateSerializer;
 
@@ -31,7 +32,7 @@ public final class MarshallerSpecs {
     @Test
     public void testJsonMarshallingIsPossible() {
         givenTheExampleMapMateSerializer()
-                .when().theFullyInitializedExampleDtoIsSerializedTo(json())
+                .when(theFullyInitializedExampleDto()).isSerializedTo(json())
                 .theSerializationResultWas("" +
                         "{\n" +
                         "  \"number1\": \"1\",\n" +
@@ -42,9 +43,22 @@ public final class MarshallerSpecs {
     }
 
     @Test
+    public void testJsonMarshallingWithCollectionsIsPossible() {
+        givenTheExampleMapMateSerializer()
+                .when(theFullyInitializedExampleDtoWithCollections()).isSerializedTo(json())
+                .theSerializationResultWas("" +
+                        "{\n" +
+                        "  \"array\": [\n" +
+                        "    \"1\",\n" +
+                        "    \"2\"\n" +
+                        "  ]\n" +
+                        "}");
+    }
+
+    @Test
     public void testXmlMarshallingIsPossible() {
         givenTheExampleMapMateSerializer()
-                .when().theFullyInitializedExampleDtoIsSerializedTo(xml())
+                .when(theFullyInitializedExampleDto()).isSerializedTo(xml())
                 .theSerializationResultWas("" +
                         "<HashMap>\n" +
                         "  <number1>1</number1>\n" +
@@ -57,7 +71,7 @@ public final class MarshallerSpecs {
     @Test
     public void testYamlMarshallingIsPossible() {
         givenTheExampleMapMateSerializer()
-                .when().theFullyInitializedExampleDtoIsSerializedTo(yaml())
+                .when(theFullyInitializedExampleDto()).isSerializedTo(yaml())
                 .theSerializationResultWas("" +
                         "number1: '1'\n" +
                         "number2: '5'\n" +
@@ -66,12 +80,41 @@ public final class MarshallerSpecs {
     }
 
     @Test
+    public void testUrlEncodedMarshallingIsPossible() {
+        givenTheExampleMapMateSerializer()
+                .when(theFullyInitializedExampleDto()).isSerializedTo(urlEncoded())
+                .theSerializationResultWas("number1=1&number2=5&stringA=asdf&stringB=qwer");
+    }
+
+    @Test
+    public void testUrlEncodedMarshallingWithCollectionsIsPossible() {
+        givenTheExampleMapMateSerializer()
+                .when(theFullyInitializedExampleDtoWithCollections()).isSerializedTo(urlEncoded())
+                .theSerializationResultWas("array[0]=1&array[1]=2");
+    }
+
+    @Test
+    public void testUrlEncodedMarshallingWithMapsIsPossible() {
+        givenTheExampleMapMateSerializer()
+                .when(theFullyInitializedNestedExampleDto()).isSerializedTo(urlEncoded())
+                .theSerializationResultWas("" +
+                        "complexType2[number1]=3&" +
+                        "complexType2[number2]=4&" +
+                        "complexType2[stringA]=c&" +
+                        "complexType2[stringB]=d&" +
+                        "complexType1[number1]=1&" +
+                        "complexType1[number2]=2&" +
+                        "complexType1[stringA]=a&" +
+                        "complexType1[stringB]=b");
+    }
+
+    @Test
     public void testUnknownMarshallerThrowsAnException() {
         givenTheExampleMapMateSerializer()
-                .when().theFullyInitializedExampleDtoIsSerializedTo(marshallingType("unknown"))
+                .when(theFullyInitializedExampleDto()).isSerializedTo(marshallingType("unknown"))
                 .anExceptionIsThrownWithTheMessage(
                         "Unsupported marshalling type 'unknown'," +
-                                " known marshalling types are: ['json', 'xml', 'yaml']");
+                                " known marshalling types are: ['urlencoded', 'json', 'xml', 'yaml']");
 
     }
 }

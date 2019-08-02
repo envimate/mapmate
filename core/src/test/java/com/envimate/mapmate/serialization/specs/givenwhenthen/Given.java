@@ -21,13 +21,13 @@
 
 package com.envimate.mapmate.serialization.specs.givenwhenthen;
 
-import com.envimate.mapmate.domain.valid.AComplexType;
-import com.envimate.mapmate.domain.valid.ANumber;
-import com.envimate.mapmate.domain.valid.AString;
+import com.envimate.mapmate.domain.valid.*;
 import com.envimate.mapmate.serialization.Serializer;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
+import static com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedMarshaller.urlEncodedMarshaller;
+import static com.envimate.mapmate.marshalling.MarshallingType.urlEncoded;
 import static com.envimate.mapmate.serialization.Serializer.aSerializer;
 import static com.envimate.mapmate.serialization.specs.givenwhenthen.Marshallers.*;
 
@@ -40,7 +40,12 @@ public final class Given {
                 .withJsonMarshaller(jsonMarshaller())
                 .withXmlMarshaller(xmlMarshaller())
                 .withYamlMarshaller(yamlMarshaller())
+                .marshallingTheType(urlEncoded()).using(urlEncodedMarshaller())
                 .withDataTransferObject(AComplexType.class)
+                .serializedByItsPublicFields()
+                .withDataTransferObject(AComplexTypeWithArray.class)
+                .serializedByItsPublicFields()
+                .withDataTransferObject(AComplexNestedType.class)
                 .serializedByItsPublicFields()
                 .withCustomPrimitive(AString.class)
                 .serializedUsingTheMethod(AString::internalValueForMapping)
@@ -50,7 +55,7 @@ public final class Given {
         return new Given(serializer);
     }
 
-    public When when() {
-        return new When(this.serializer);
+    public When when(final Object object) {
+        return new When(this.serializer, object);
     }
 }
