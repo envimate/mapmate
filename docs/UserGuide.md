@@ -41,13 +41,13 @@ definition of [Custom Primitives](Concepts.md#custom-primitives) and
      * [JSON with ObjectMapper](#json-with-objectmapper)
      * [XML with X-Stream](#xml-with-x-stream)
      * [Yaml with ObjectMapper](#yaml-with-objectmapper)
-     * [application/x-www-form-urlencoded](#application/x-www-form-urlencoded)
    * [Aggregating Validation Errors](#aggregating-validation-errors)
    * [Recipes](#recipes)
      * [Using Recipes](#using-recipes)
        * [Jackson configuration support](#jackson-configuration-support)
        * [Support for language primitives (double, int, float, String, ...)](#support-for-language-primitives-double-int-float-string-)
        * [Support for manually registered types](#support-for-manually-registered-types)
+       * [application/x-www-form-urlencoded](#application/x-www-form-urlencoded)
      * [Crafting your own recipes](#crafting-your-own-recipes)
      * [The Builder Process](#the-builder-process)
      * [Understanding the Recipe Interface](#understanding-the-recipe-interface)
@@ -495,15 +495,6 @@ note: don't forget to add the appropriate dependency to use the YAMLFactory with
 MapMate _does not_ ship with these libraries, so you need to configure the marshaller of your choice also in the 
 dependencies of your project. 
 
-### application/x-www-form-urlencoded
-```json
-return MapMate.aMapMate("com.envimate.mapmate.builder.models")
-        .usingRecipe(urlEncodedMarshaller())
-        .build();
-```
-
-This does not require an external library.
-
 As you can see the format does not matter, and you can freely provide your Marshalling mechanism, by implementing the
 [Marshaller](../core/src/main/java/com/envimate/mapmate/serialization/Marshaller.java) and 
 [Unmarshaller](../core/src/main/java/com/envimate/mapmate/deserialization/Unmarshaller.java) interfaces.
@@ -763,6 +754,16 @@ interface. At this point, it carries too many internals, it is hard to understan
 you want/need to provide your own implementation, check out 
 [SerializedObjectDefinition](../core/src/main/java/com/envimate/mapmate/builder/definitions/SerializedObjectDefinition.java)
 and read your way into the code.
+
+
+#### application/x-www-form-urlencoded
+```json
+return MapMate.aMapMate("com.envimate.mapmate.builder.models")
+        .usingRecipe(urlEncodedMarshaller())
+        .build();
+```
+
+This does not require an external library.
 
 ### Crafting your own Recipes
 To create a recipe, one has to understand the 
