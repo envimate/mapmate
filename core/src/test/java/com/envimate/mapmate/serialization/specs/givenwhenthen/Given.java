@@ -21,13 +21,13 @@
 
 package com.envimate.mapmate.serialization.specs.givenwhenthen;
 
+import com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedMarshallerRecipe;
 import com.envimate.mapmate.domain.valid.*;
 import com.envimate.mapmate.serialization.Serializer;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 import static com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedMarshaller.urlEncodedMarshaller;
-import static com.envimate.mapmate.marshalling.MarshallingType.urlEncoded;
 import static com.envimate.mapmate.serialization.Serializer.aSerializer;
 import static com.envimate.mapmate.serialization.specs.givenwhenthen.Marshallers.*;
 
@@ -40,7 +40,7 @@ public final class Given {
                 .withJsonMarshaller(jsonMarshaller())
                 .withXmlMarshaller(xmlMarshaller())
                 .withYamlMarshaller(yamlMarshaller())
-                .marshallingTheType(urlEncoded()).using(urlEncodedMarshaller())
+                .marshallingTheType(UrlEncodedMarshallerRecipe.urlEncoded()).using(urlEncodedMarshaller())
                 .withDataTransferObject(AComplexType.class)
                 .serializedByItsPublicFields()
                 .withDataTransferObject(AComplexTypeWithArray.class)

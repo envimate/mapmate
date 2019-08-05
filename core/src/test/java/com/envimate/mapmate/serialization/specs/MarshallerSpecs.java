@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.serialization.specs;
 
+import com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedMarshallerRecipe;
 import org.junit.Test;
 
 import static com.envimate.mapmate.deserialization.specs.instances.Instances.*;
@@ -82,21 +83,21 @@ public final class MarshallerSpecs {
     @Test
     public void testUrlEncodedMarshallingIsPossible() {
         givenTheExampleMapMateSerializer()
-                .when(theFullyInitializedExampleDto()).isSerializedTo(urlEncoded())
+                .when(theFullyInitializedExampleDto()).isSerializedTo(UrlEncodedMarshallerRecipe.urlEncoded())
                 .theSerializationResultWas("number1=1&number2=5&stringA=asdf&stringB=qwer");
     }
 
     @Test
     public void testUrlEncodedMarshallingWithCollectionsIsPossible() {
         givenTheExampleMapMateSerializer()
-                .when(theFullyInitializedExampleDtoWithCollections()).isSerializedTo(urlEncoded())
+                .when(theFullyInitializedExampleDtoWithCollections()).isSerializedTo(UrlEncodedMarshallerRecipe.urlEncoded())
                 .theSerializationResultWas("array[0]=1&array[1]=2");
     }
 
     @Test
     public void testUrlEncodedMarshallingWithMapsIsPossible() {
         givenTheExampleMapMateSerializer()
-                .when(theFullyInitializedNestedExampleDto()).isSerializedTo(urlEncoded())
+                .when(theFullyInitializedNestedExampleDto()).isSerializedTo(UrlEncodedMarshallerRecipe.urlEncoded())
                 .theSerializationResultWas("" +
                         "complexType2[number1]=3&" +
                         "complexType2[number2]=4&" +

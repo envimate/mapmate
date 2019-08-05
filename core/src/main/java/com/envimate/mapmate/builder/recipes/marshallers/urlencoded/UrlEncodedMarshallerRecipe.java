@@ -23,18 +23,22 @@ package com.envimate.mapmate.builder.recipes.marshallers.urlencoded;
 
 import com.envimate.mapmate.builder.MapMateBuilder;
 import com.envimate.mapmate.builder.recipes.Recipe;
+import com.envimate.mapmate.marshalling.MarshallingType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import static com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedUnmarshaller.urlEncodedUnmarshaller;
-import static com.envimate.mapmate.marshalling.MarshallingType.urlEncoded;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UrlEncodedMarshallerRecipe implements Recipe {
+
+    public static MarshallingType urlEncoded() {
+        return MarshallingType.marshallingType("urlencoded");
+    }
 
     public static UrlEncodedMarshallerRecipe urlEncodedMarshaller() {
         return new UrlEncodedMarshallerRecipe();

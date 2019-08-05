@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.deserialization.specs;
 
+import com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedMarshallerRecipe;
 import com.envimate.mapmate.domain.valid.AComplexNestedType;
 import com.envimate.mapmate.domain.valid.AComplexType;
 import com.envimate.mapmate.domain.valid.AComplexTypeWithArray;
@@ -86,7 +87,7 @@ public final class UnmarshallerSpecs {
     public void testUrlEncodedUnmarshallingIsPossible() {
         givenTheExampleMapMateDeserializer()
                 .when().theDeserializerDeserializes("number1=1&number2=5&stringA=asdf&stringB=qwer")
-                .as(urlEncoded()).toTheType(AComplexType.class)
+                .as(UrlEncodedMarshallerRecipe.urlEncoded()).toTheType(AComplexType.class)
                 .theDeserializedObjectIs(theFullyInitializedExampleDto());
     }
 
@@ -94,7 +95,7 @@ public final class UnmarshallerSpecs {
     public void testUrlEncodedUnmarshallingWithCollectionsIsPossible() {
         givenTheExampleMapMateDeserializer()
                 .when().theDeserializerDeserializes("array[0]=1&array[1]=2")
-                .as(urlEncoded()).toTheType(AComplexTypeWithArray.class)
+                .as(UrlEncodedMarshallerRecipe.urlEncoded()).toTheType(AComplexTypeWithArray.class)
                 .theDeserializedObjectIs(theFullyInitializedExampleDtoWithCollections());
     }
 
@@ -109,7 +110,7 @@ public final class UnmarshallerSpecs {
                 "complexType1[number1]=1&" +
                 "complexType1[number2]=2&" +
                 "complexType1[stringA]=a&" +
-                "complexType1[stringB]=b").as(urlEncoded()).toTheType(AComplexNestedType.class)
+                "complexType1[stringB]=b").as(UrlEncodedMarshallerRecipe.urlEncoded()).toTheType(AComplexNestedType.class)
                 .theDeserializedObjectIs(theFullyInitializedNestedExampleDto());
     }
 

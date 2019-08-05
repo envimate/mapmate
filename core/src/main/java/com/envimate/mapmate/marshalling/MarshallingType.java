@@ -51,10 +51,6 @@ public final class MarshallingType {
         return marshallingType("yaml");
     }
 
-    public static MarshallingType urlEncoded() {
-        return marshallingType("urlencoded");
-    }
-
     public String internalValueForMapping() {
         return this.type;
     }

@@ -21,10 +21,10 @@
 
 package com.envimate.mapmate.deserialization.specs.givenwhenthen;
 
+import com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedMarshallerRecipe;
 import com.envimate.mapmate.deserialization.Deserializer;
 import com.envimate.mapmate.deserialization.validation.ValidationError;
 import com.envimate.mapmate.domain.valid.*;
-import com.envimate.mapmate.marshalling.MarshallingType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -41,7 +41,7 @@ public final class Given {
                 .withJsonUnmarshaller(jsonUnmarshaller())
                 .withXmlUnmarshaller(xmlUnmarshaller())
                 .withYamlUnmarshaller(yamlUnmarshaller())
-                .unmarshallingTheType(MarshallingType.urlEncoded()).using(urlEncodedUnmarshaller())
+                .unmarshallingTheType(UrlEncodedMarshallerRecipe.urlEncoded()).using(urlEncodedUnmarshaller())
 
                 .withDataTransferObject(AComplexType.class)
                 .deserializedUsingTheSingleFactoryMethod()
