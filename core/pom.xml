@@ -111,4 +111,8 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <finalName>mapmate-core-${project.version}</finalName>
+    </build>
 </project>
