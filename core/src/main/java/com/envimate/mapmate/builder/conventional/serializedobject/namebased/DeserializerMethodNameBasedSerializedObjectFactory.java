@@ -33,6 +33,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.envimate.mapmate.builder.definitions.SerializedObjectDefinition.serializedObjectDefinition;
@@ -43,18 +45,20 @@ import static java.util.Arrays.stream;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DeserializerMethodNameBasedSerializedObjectFactory implements SerializedObjectDefinitionFactory {
-    private final String deserializationMethodName;
+    private final Predicate<String> methodNameMatchPredicate;
 
     public static DeserializerMethodNameBasedSerializedObjectFactory deserializerMethodNameBasedSerializedObjectFactory(
             final String deserializationMethodName) {
-        return new DeserializerMethodNameBasedSerializedObjectFactory(deserializationMethodName);
+        final Pattern pattern = Pattern.compile(deserializationMethodName);
+        final Predicate<String> matchPredicate = pattern.asMatchPredicate();
+        return new DeserializerMethodNameBasedSerializedObjectFactory(matchPredicate);
     }
 
     @Override
     public Optional<SerializedObjectDefinition> analyze(final Class<?> type) {
         final Method[] methods = type.getMethods();
         final List<Method> deserializerMethods = stream(methods)
-                .filter(method -> method.getName().equals(this.deserializationMethodName))
+                .filter(method -> methodNameMatchPredicate.test(method.getName()))
                 .filter(method -> isStatic(method.getModifiers()))
                 .filter(method -> isPublic(method.getModifiers()))
                 .filter(method -> method.getReturnType().equals(type))

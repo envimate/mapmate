@@ -66,30 +66,30 @@ public final class ConventionalDetector implements Detector {
         );
     }
 
-    public static ConventionalDetector conventionalDetector(final String customPrimitiveSerializationMethodName,
-                                                            final String customPrimitiveDeserializationMethodName,
-                                                            final String serializedObjectDeserializationMethodName,
+    public static ConventionalDetector conventionalDetector(final String customPrimitiveSerializationMethodNamePattern,
+                                                            final String customPrimitiveDeserializationMethodNamePattern,
+                                                            final String serializedObjectDeserializationMethodNamePattern,
                                                             final String... serializedObjectNameDetectionPatterns
     ) {
-        validateNotNull(customPrimitiveSerializationMethodName, "customPrimitiveSerializationMethodName");
-        validateNotNull(customPrimitiveDeserializationMethodName, "customPrimitiveDeserializationMethodName");
-        validateNotNull(serializedObjectDeserializationMethodName, "serializedObjectDeserializationMethodName");
+        validateNotNull(customPrimitiveSerializationMethodNamePattern, "customPrimitiveSerializationMethodNamePattern");
+        validateNotNull(customPrimitiveDeserializationMethodNamePattern, "customPrimitiveDeserializationMethodNamePattern");
+        validateNotNull(serializedObjectDeserializationMethodNamePattern, "serializedObjectDeserializationMethodNamePattern");
         validateNotNull(serializedObjectNameDetectionPatterns, "serializedObjectNameDetectionPatterns");
 
         final List<CustomPrimitiveDefinitionFactory> customPrimitiveDefinitionFactories = List.of(
                 nameBasedCustomPrimitiveDefinitionFactory(
-                        customPrimitiveSerializationMethodName,
-                        customPrimitiveDeserializationMethodName)
+                        customPrimitiveSerializationMethodNamePattern,
+                        customPrimitiveDeserializationMethodNamePattern)
         );
 
         final List<Pattern> patterns = Arrays.stream(serializedObjectNameDetectionPatterns)
                 .map(Pattern::compile)
                 .collect(Collectors.toList());
         final List<SerializedObjectDefinitionFactory> serializedObjectDefinitionFactories = List.of(
-                deserializerMethodNameBasedSerializedObjectFactory(serializedObjectDeserializationMethodName),
+                deserializerMethodNameBasedSerializedObjectFactory(serializedObjectDeserializationMethodNamePattern),
                 nameBasedSerializedObjectFactory(
                         patterns,
-                        serializedObjectDeserializationMethodName));
+                        serializedObjectDeserializationMethodNamePattern));
         return conventionalDetector(customPrimitiveDefinitionFactories, serializedObjectDefinitionFactories);
     }
 
@@ -115,22 +115,22 @@ public final class ConventionalDetector implements Detector {
     }
 
     public static ConventionalDetector conventionalDetectorWithAnnotations(
-            final String customPrimitiveSerializationMethodName,
-            final String customPrimitiveDeserializationMethodName,
-            final String serializedObjectDeserializationMethodName,
+            final String customPrimitiveSerializationMethodNamePattern,
+            final String customPrimitiveDeserializationMethodNamePattern,
+            final String serializedObjectDeserializationMethodNamePattern,
             final String... serializedObjectNameDetectionPatterns
     ) {
-        validateNotNull(customPrimitiveSerializationMethodName, "customPrimitiveSerializationMethodName");
-        validateNotNull(customPrimitiveDeserializationMethodName, "customPrimitiveDeserializationMethodName");
-        validateNotNull(serializedObjectDeserializationMethodName, "serializedObjectDeserializationMethodName");
+        validateNotNull(customPrimitiveSerializationMethodNamePattern, "customPrimitiveSerializationMethodNamePattern");
+        validateNotNull(customPrimitiveDeserializationMethodNamePattern, "customPrimitiveDeserializationMethodNamePattern");
+        validateNotNull(serializedObjectDeserializationMethodNamePattern, "serializedObjectDeserializationMethodNamePattern");
         validateNotNull(serializedObjectNameDetectionPatterns, "serializedObjectNameDetectionPatterns");
 
         final List<CustomPrimitiveDefinitionFactory> customPrimitiveDefinitionFactories = List.of(
                 customPrimitiveClassAnnotationFactory(),
                 customPrimitiveMethodAnnotationFactory(),
                 nameBasedCustomPrimitiveDefinitionFactory(
-                        customPrimitiveSerializationMethodName,
-                        customPrimitiveDeserializationMethodName)
+                        customPrimitiveSerializationMethodNamePattern,
+                        customPrimitiveDeserializationMethodNamePattern)
         );
 
         final List<Pattern> patterns = Arrays.stream(serializedObjectNameDetectionPatterns)
@@ -140,8 +140,8 @@ public final class ConventionalDetector implements Detector {
                 serializedObjectClassAnnotationFactory(),
                 nameBasedSerializedObjectFactory(
                         patterns,
-                        serializedObjectDeserializationMethodName),
-                deserializerMethodNameBasedSerializedObjectFactory(serializedObjectDeserializationMethodName)
+                        serializedObjectDeserializationMethodNamePattern),
+                deserializerMethodNameBasedSerializedObjectFactory(serializedObjectDeserializationMethodNamePattern)
         );
         return conventionalDetector(customPrimitiveDefinitionFactories, serializedObjectDefinitionFactories);
     }
