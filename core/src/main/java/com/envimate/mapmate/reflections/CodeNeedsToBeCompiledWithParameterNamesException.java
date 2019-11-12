@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.reflections;
 
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
@@ -33,7 +34,7 @@ public final class CodeNeedsToBeCompiledWithParameterNamesException extends Runt
         super(message);
     }
 
-    static void validateParameterNamesArePresent(final Method method) {
+    static void validateParameterNamesArePresent(final Executable method) {
         validateNotNull(method, "method");
         if (method.getParameterCount() == 0) {
             return;
@@ -47,7 +48,7 @@ public final class CodeNeedsToBeCompiledWithParameterNamesException extends Runt
     }
 
     private static CodeNeedsToBeCompiledWithParameterNamesException codeNeedsToBeCompiledWithParameterNamesException(
-            final Method method) {
+            final Executable method) {
         final String className = method.getDeclaringClass().getName();
         final String methodName = method.getName();
         final String message = String.format("" +

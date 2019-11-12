@@ -23,6 +23,7 @@ package com.envimate.mapmate.reflections;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -131,7 +132,7 @@ public final class Reflections {
         return method;
     }
 
-    public static boolean isMethodCompatibleWithFields(final Method method, final Field[] fields) {
+    public static boolean isMethodCompatibleWithFields(final Executable method, final Field[] fields) {
         validateParameterNamesArePresent(method);
         final Class<?>[] parameterTypes = method.getParameterTypes();
         if (fields.length != parameterTypes.length) {

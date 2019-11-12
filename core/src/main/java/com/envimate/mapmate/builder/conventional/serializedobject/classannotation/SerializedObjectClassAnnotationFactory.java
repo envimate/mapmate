@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.builder.conventional.serializedobject.classannotation;
 
+import com.envimate.mapmate.builder.definitions.IncompatibleSerializedObjectException;
 import com.envimate.mapmate.builder.definitions.SerializedObjectDefinition;
 import com.envimate.mapmate.builder.definitions.SerializedObjectDefinitionFactory;
 import lombok.AccessLevel;
@@ -35,7 +36,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.envimate.mapmate.builder.definitions.IncompatibleSerializedObjectException.incompatibleserializedObjectException;
 import static com.envimate.mapmate.builder.definitions.SerializedObjectDefinition.serializedObjectDefinition;
 
 @ToString
@@ -60,7 +60,7 @@ public final class SerializedObjectClassAnnotationFactory implements SerializedO
 
         final int annotatedMethods = annotatedDeserializationMethods.size();
         if (annotatedMethods > 1) {
-            throw incompatibleserializedObjectException(
+            throw IncompatibleSerializedObjectException.incompatibleSerializedObjectException(
                     "The SerializedObject %s has multiple deserialization methods(%s) annotated as " +
                             "MapMateDeserializationMethod",
                     type,

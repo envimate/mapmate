@@ -23,21 +23,25 @@ package com.envimate.mapmate.builder.conventional.serializedobject.namebased;
 
 import com.envimate.mapmate.builder.definitions.SerializedObjectDefinition;
 import com.envimate.mapmate.builder.definitions.SerializedObjectDefinitionFactory;
-import com.envimate.mapmate.reflections.Reflections;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.envimate.mapmate.builder.definitions.SerializedObjectDefinition.serializedObjectDefinition;
+import static com.envimate.mapmate.reflections.Reflections.isMethodCompatibleWithFields;
 import static java.lang.reflect.Modifier.*;
 import static java.util.Arrays.stream;
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
 
 @ToString
 @EqualsAndHashCode
@@ -52,42 +56,69 @@ public final class DeserializerMethodNameBasedSerializedObjectFactory implements
 
     @Override
     public Optional<SerializedObjectDefinition> analyze(final Class<?> type) {
+        final Field[] serializedFields = fields(type);
+        return deserializationMethod(type, serializedFields)
+                .or(() -> deserializationConstructor(type, serializedFields));
+    }
+
+    private Optional<SerializedObjectDefinition> deserializationMethod(final Class<?> type, final Field[] serializedFields) {
         final Method[] methods = type.getMethods();
         final List<Method> deserializerMethods = stream(methods)
                 .filter(method -> method.getName().equals(this.deserializationMethodName))
                 .filter(method -> isStatic(method.getModifiers()))
                 .filter(method -> isPublic(method.getModifiers()))
                 .filter(method -> method.getReturnType().equals(type))
-                .collect(Collectors.toList());
-        if (!deserializerMethods.isEmpty()) {
-            final Field[] serializedFields = stream(type.getFields())
-                    .filter(field -> isPublic(field.getModifiers()))
-                    .filter(field -> !isStatic(field.getModifiers()))
-                    .filter(field -> !isTransient(field.getModifiers()))
-                    .toArray(Field[]::new);
+                .collect(toList());
+        return findMatchingMethod(serializedFields, deserializerMethods)
+                .map(method -> serializedObjectDefinition(type, serializedFields, method));
+    }
 
-            final int deserializerMethodsFound = deserializerMethods.size();
-            Method deserializationMethod = null;
-            if (deserializerMethodsFound == 1) {
-                deserializationMethod = deserializerMethods.get(0);
-            } else if (serializedFields.length > 0) {
-                final Optional<Method> firstCompatibleDeserializerMethod = deserializerMethods.stream()
-                        .filter(method -> Reflections.isMethodCompatibleWithFields(method, serializedFields))
-                        .findFirst();
-                if (firstCompatibleDeserializerMethod.isPresent()) {
-                    deserializationMethod = firstCompatibleDeserializerMethod.get();
-                }
-            }
+    private Optional<SerializedObjectDefinition> deserializationConstructor(final Class<?> type, final Field[] serializedFields) {
+        final Constructor<?>[] constructors = type.getConstructors();
+        final List<Constructor<?>> deserializerConstructors = stream(constructors)
+                .filter(constructor -> isPublic(constructor.getModifiers()))
+                .collect(toList());
+        return findMatchingMethod(serializedFields, deserializerConstructors)
+                .map(constructor -> serializedObjectDefinition(type, serializedFields, constructor));
+    }
 
-            if (serializedFields.length > 0 || deserializationMethod != null) {
-                final boolean isMostLikelyACustomPrimitive = serializedFields.length == 0 &&
-                        deserializationMethod.getParameterCount() == 1 &&
-                        deserializationMethod.getParameterTypes()[0] == String.class;
-                if (!isMostLikelyACustomPrimitive) {
-                    return Optional.of(serializedObjectDefinition(type, serializedFields, deserializationMethod));
-                }
+    private static <T extends Executable> Optional<T> findMatchingMethod(final Field[] serializedFields, final List<T> methods) {
+        if (serializedFields.length == 0) {
+            return empty();
+        }
+
+        T deserializationConstructor = null;
+        if (methods.size() == 1) {
+            deserializationConstructor = methods.get(0);
+        } else {
+            final Optional<T> firstCompatibleDeserializerConstructor = methods.stream()
+                    .filter(constructor -> isMethodCompatibleWithFields(constructor, serializedFields))
+                    .findFirst();
+            if (firstCompatibleDeserializerConstructor.isPresent()) {
+                deserializationConstructor = firstCompatibleDeserializerConstructor.get();
             }
         }
-        return Optional.empty();
+
+        if (isMostLikelyACustomPrimitive(serializedFields, deserializationConstructor)) {
+            return empty();
+        }
+
+        return ofNullable(deserializationConstructor);
+    }
+
+    private static boolean isMostLikelyACustomPrimitive(final Field[] fields, final Executable executable) {
+        final boolean isMostLikelyACustomPrimitive = fields.length == 0 &&
+                executable.getParameterCount() == 1 &&
+                executable.getParameterTypes()[0] == String.class;
+        return isMostLikelyACustomPrimitive;
+    }
+
+    private static Field[] fields(final Class<?> type) {
+        final Field[] serializedFields = stream(type.getFields())
+                .filter(field -> isPublic(field.getModifiers()))
+                .filter(field -> !isStatic(field.getModifiers()))
+                .filter(field -> !isTransient(field.getModifiers()))
+                .toArray(Field[]::new);
+        return serializedFields;
     }
 }

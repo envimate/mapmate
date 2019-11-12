@@ -30,7 +30,7 @@ public final class IncompatibleSerializedObjectException extends RuntimeExceptio
         super(message, cause);
     }
 
-    public static IncompatibleSerializedObjectException incompatibleserializedObjectException(final String messageFormat,
+    public static IncompatibleSerializedObjectException incompatibleSerializedObjectException(final String messageFormat,
                                                                                               final Object... args) {
         return new IncompatibleSerializedObjectException(String.format(messageFormat, args));
     }

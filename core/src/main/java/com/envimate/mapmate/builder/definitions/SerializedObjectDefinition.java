@@ -23,21 +23,23 @@ package com.envimate.mapmate.builder.definitions;
 
 import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
 import com.envimate.mapmate.serialization.methods.SerializationDTOMethod;
-import com.envimate.mapmate.validators.NotNullValidator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.envimate.mapmate.builder.conventional.serializedobject.VerifiedDeserializationDTOMethod.verifiedDeserializationDTOMethod;
-import static com.envimate.mapmate.builder.definitions.IncompatibleSerializedObjectException.incompatibleserializedObjectException;
+import static com.envimate.mapmate.builder.conventional.serializedobject.VerifiedDeserializationDTOConstructor.createDeserializer;
+import static com.envimate.mapmate.builder.conventional.serializedobject.VerifiedDeserializationDTOMethod.createDeserializer;
+import static com.envimate.mapmate.builder.definitions.IncompatibleSerializedObjectException.incompatibleSerializedObjectException;
+import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.lang.reflect.Modifier.*;
 import static java.util.Arrays.stream;
 
 @ToString
@@ -51,11 +53,11 @@ public final class SerializedObjectDefinition {
     public static SerializedObjectDefinition serializedObjectDefinition(final Class<?> type,
                                                                         final SerializationDTOMethod serializer,
                                                                         final DeserializationDTOMethod deserializer) {
-        NotNullValidator.validateNotNull(type, "type");
+        validateNotNull(type, "type");
         if (serializer == null) {
-            NotNullValidator.validateNotNull(deserializer, "deserializer");
+            validateNotNull(deserializer, "deserializer");
         } else if (deserializer == null) {
-            NotNullValidator.validateNotNull(serializer, "serializer");
+            validateNotNull(serializer, "serializer");
         }
         return new SerializedObjectDefinition(type, serializer, deserializer);
     }
@@ -77,6 +79,21 @@ public final class SerializedObjectDefinition {
 
     public static SerializedObjectDefinition serializedObjectDefinition(final Class<?> type,
                                                                         final Field[] serializedFields,
+                                                                        final Constructor<?> deserializationConstructor) {
+        SerializationDTOMethod serializer = null;
+        DeserializationDTOMethod deserializer = null;
+        if (serializedFields.length > 0) {
+            serializer = createSerializer(type, serializedFields);
+        }
+        if (deserializationConstructor != null) {
+            deserializer = createDeserializer(type, deserializationConstructor);
+        }
+
+        return serializedObjectDefinition(type, serializer, deserializer);
+    }
+
+    public static SerializedObjectDefinition serializedObjectDefinition(final Class<?> type,
+                                                                        final Field[] serializedFields,
                                                                         final String deserializationMethodName) {
         final Class<?>[] parameterTypes = stream(serializedFields).map(Field::getType).toArray(Class<?>[]::new);
         try {
@@ -85,46 +102,15 @@ public final class SerializedObjectDefinition {
                     type.getMethod(deserializationMethodName, parameterTypes)
             );
         } catch (final NoSuchMethodException e) {
-            throw incompatibleserializedObjectException(
+            throw incompatibleSerializedObjectException(
                     "Could not find method %s with parameters of types %s", deserializationMethodName,
                     stream(parameterTypes).map(Class::getName).collect(Collectors.joining(",")), e);
         }
     }
 
-    private static DeserializationDTOMethod createDeserializer(final Class<?> type,
-                                                               final Method deserializationMethod) {
-        validateDeserializerModifiers(type, deserializationMethod);
-        return verifiedDeserializationDTOMethod(deserializationMethod);
-    }
-
-    private static void validateDeserializerModifiers(final Class<?> type, final Method deserializationMethod) {
-        final int deserializationMethodModifiers = deserializationMethod.getModifiers();
-
-        if (!Modifier.isPublic(deserializationMethodModifiers)) {
-            throw incompatibleserializedObjectException(
-                    "The deserialization method %s configured for the SerializedObject of type %s must be public",
-                    deserializationMethod, type);
-        }
-        if (!Modifier.isStatic(deserializationMethodModifiers)) {
-            throw incompatibleserializedObjectException(
-                    "The deserialization method %s configured for the SerializedObject of type %s must be static",
-                    deserializationMethod, type);
-        }
-        if (Modifier.isAbstract(deserializationMethodModifiers)) {
-            throw incompatibleserializedObjectException(
-                    "The deserialization method %s configured for the SerializedObject of type %s must not be abstract",
-                    deserializationMethod, type);
-        }
-        if (deserializationMethod.getReturnType() != type) {
-            throw incompatibleserializedObjectException(
-                    "The serialization method %s configured for the SerializedObject of type %s must return the DTO",
-                    deserializationMethod, type);
-        }
-    }
-
     private static SerializationDTOMethod createSerializer(final Class<?> type, final Field[] serializedFields) {
         if (serializedFields.length < 1) {
-            throw incompatibleserializedObjectException(
+            throw incompatibleSerializedObjectException(
                     "The SerializedObject %s does not have any serialized fields",
                     type
             );
@@ -159,18 +145,18 @@ public final class SerializedObjectDefinition {
     private static void validateFieldModifiers(final Class<?> type, final Field field) {
         final int fieldModifiers = field.getModifiers();
 
-        if (!Modifier.isPublic(fieldModifiers)) {
-            throw incompatibleserializedObjectException(
+        if (!isPublic(fieldModifiers)) {
+            throw incompatibleSerializedObjectException(
                     "The field %s for the SerializedObject of type %s must be public",
                     field, type);
         }
-        if (Modifier.isStatic(fieldModifiers)) {
-            throw incompatibleserializedObjectException(
+        if (isStatic(fieldModifiers)) {
+            throw incompatibleSerializedObjectException(
                     "The field %s for the SerializedObject of type %s must not be static",
                     field, type);
         }
-        if (Modifier.isTransient(fieldModifiers)) {
-            throw incompatibleserializedObjectException(
+        if (isTransient(fieldModifiers)) {
+            throw incompatibleSerializedObjectException(
                     "The field %s for the SerializedObject of type %s must not be transient",
                     field, type);
         }
