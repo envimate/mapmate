@@ -19,9 +19,8 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.definitions.implementations;
+package com.envimate.mapmate.builder.definitions.serializers;
 
-import com.envimate.mapmate.builder.definitions.CustomPrimitiveSerializer;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -29,8 +28,10 @@ import lombok.ToString;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import static com.envimate.mapmate.CustomPrimitiveSerializationMethodCallException.customPrimitiveSerializationMethodCallException;
+import static com.envimate.mapmate.builder.definitions.IncompatibleCustomPrimitiveException.incompatibleCustomPrimitiveException;
 
 @ToString
 @EqualsAndHashCode
@@ -38,9 +39,45 @@ import static com.envimate.mapmate.CustomPrimitiveSerializationMethodCallExcepti
 public final class CustomPrimitiveByMethodSerializer implements CustomPrimitiveSerializer<Object> {
     private final Method serializationMethod;
 
-    public static CustomPrimitiveByMethodSerializer verifiedCustomPrimitiveSerializationMethod(
-            final Method serializationMethod
-    ) {
+    public static CustomPrimitiveSerializer<?> createSerializer(final Class<?> type,
+                                                                final Method serializationMethod) {
+        final int serializationMethodModifiers = serializationMethod.getModifiers();
+        if (!Modifier.isPublic(serializationMethodModifiers)) {
+            throw incompatibleCustomPrimitiveException(
+                    "The serialization method %s configured for the custom primitive of type %s must be public",
+                    serializationMethod,
+                    type
+            );
+        }
+        if (Modifier.isStatic(serializationMethodModifiers)) {
+            throw incompatibleCustomPrimitiveException(
+                    "The serialization method %s configured for the custom primitive of type %s must not be static",
+                    serializationMethod,
+                    type
+            );
+        }
+        if (Modifier.isAbstract(serializationMethodModifiers)) {
+            throw incompatibleCustomPrimitiveException(
+                    "The serialization method %s configured for the custom primitive of type %s must not be abstract",
+                    serializationMethod,
+                    type
+            );
+        }
+        if (serializationMethod.getParameterCount() > 0) {
+            throw incompatibleCustomPrimitiveException(
+                    "The serialization method %s configured for the custom primitive of type %s must " +
+                            "not accept any parameters",
+                    serializationMethod,
+                    type
+            );
+        }
+        if (serializationMethod.getReturnType() != String.class) {
+            throw incompatibleCustomPrimitiveException(
+                    "The serialization method %s configured for the custom primitive of type %s must return a String",
+                    serializationMethod,
+                    type
+            );
+        }
         return new CustomPrimitiveByMethodSerializer(serializationMethod);
     }
 

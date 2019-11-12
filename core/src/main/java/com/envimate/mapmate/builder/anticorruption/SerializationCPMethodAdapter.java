@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder.anticorruption;
 
-import com.envimate.mapmate.builder.definitions.CustomPrimitiveSerializer;
+import com.envimate.mapmate.builder.definitions.serializers.CustomPrimitiveSerializer;
 import com.envimate.mapmate.serialization.methods.SerializationCPMethod;
 import com.envimate.mapmate.serialization.methods.SerializationCPMethodDefinition;
 import lombok.AccessLevel;

@@ -38,7 +38,6 @@ import com.envimate.mapmate.serialization.Serializer;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.envimate.mapmate.builder.DefaultPackageScanner.defaultPackageScanner;
 import static com.envimate.mapmate.builder.MapMate.mapMate;
@@ -48,6 +47,9 @@ import static com.envimate.mapmate.injector.InjectorFactory.injectorFactory;
 import static com.envimate.mapmate.marshalling.MarshallerRegistry.marshallerRegistry;
 import static com.envimate.mapmate.serialization.Serializer.theSerializer;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 public final class MapMateBuilder {
     private static final int INITIAL_CAPACITY = 10000;
@@ -171,35 +173,25 @@ public final class MapMateBuilder {
     public MapMate build() {
         this.recipes.forEach(recipe -> recipe.cook(this));
 
-        final Map<Class<?>, CustomPrimitiveDefinition> customPrimitives = new HashMap<>(INITIAL_CAPACITY);
-        this.recipes.stream()
-                .map(Recipe::customPrimitiveDefinitions)
-                .forEach(customPrimitives::putAll);
-        final Map<Class<?>, SerializedObjectDefinition> serializedObjects = new HashMap<>(INITIAL_CAPACITY);
-        this.recipes.stream()
-                .map(Recipe::serializedObjectDefinitions)
-                .forEach(serializedObjects::putAll);
+        final Map<Class<?>, CustomPrimitiveDefinition> customPrimitives =
+                collectMaps(this.recipes, Recipe::customPrimitiveDefinitions);
+        final Map<Class<?>, SerializedObjectDefinition> serializedObjects =
+                collectMaps(this.recipes, Recipe::serializedObjectDefinitions);
+
         final List<Class<?>> scannedClasses = this.packageScanner.scan();
-        final List<Class<?>> customPrimitiveDetectionCandidates = scannedClasses.stream()
+        final List<Class<?>> detectionCandidates = scannedClasses.stream()
                 .filter(detectionCandidate ->
                         !customPrimitives.containsKey(detectionCandidate) &&
                                 !serializedObjects.containsKey(detectionCandidate)
                 )
-                .collect(Collectors.toList());
-        final Map<Class<?>, CustomPrimitiveDefinition> detectedCustomPrimitives = this.detector
-                .customPrimitives(customPrimitiveDetectionCandidates)
-                .stream()
-                .collect(Collectors.toMap(o -> o.type, Function.identity()));
-        customPrimitives.putAll(detectedCustomPrimitives);
+                .collect(toList());
 
-        final List<Class<?>> serializedObjectDetectionCandidates = customPrimitiveDetectionCandidates.stream()
-                .filter(detectionCandidate -> !detectedCustomPrimitives.containsKey(detectionCandidate))
-                .collect(Collectors.toList());
-        final Map<Class<?>, SerializedObjectDefinition> detectedSerializedObjects = this.detector
-                .serializedObjects(serializedObjectDetectionCandidates)
-                .stream()
-                .collect(Collectors.toMap(o -> o.type, Function.identity()));
-        serializedObjects.putAll(detectedSerializedObjects);
+        this.detector.customPrimitives(detectionCandidates)
+                .forEach(definition -> customPrimitives.put(definition.type, definition));
+
+        final List<Class<?>> serializedObjectDetectionCandidates = subtractKeys(detectionCandidates, customPrimitives);
+        this.detector.serializedObjects(serializedObjectDetectionCandidates)
+                .forEach(definition -> serializedObjects.put(definition.type, definition));
 
         final MarshallerRegistry<Marshaller> marshallerRegistry = marshallerRegistry(this.marshallerMap);
         final DefinitionsFactory definitionsFactory = definitionsFactory(
@@ -218,6 +210,26 @@ public final class MapMateBuilder {
                 this.injectorFactory
         );
         return mapMate(serializer, deserializer);
+    }
+
+    private static <T> Map<Class<?>, T> toTypeMap(final List<T> list, final Function<T, Class<?>> typeFunction) {
+        return list.stream()
+                .collect(toMap(typeFunction, identity()));
+    }
+
+    private static <T> List<T> subtractKeys(final List<T> list, final Map<T, ?> map) {
+        return list.stream()
+                .filter(element -> !map.containsKey(element))
+                .collect(toList());
+    }
+
+    private static <T, K, V> Map<K, V> collectMaps(final List<T> recipes,
+                                                   final Function<T, Map<K, V>> mapper) {
+        final Map<K, V> map = new HashMap<>(INITIAL_CAPACITY);
+        recipes.stream()
+                .map(mapper)
+                .forEach(map::putAll);
+        return map;
     }
 }
 

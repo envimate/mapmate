@@ -23,20 +23,29 @@ package com.envimate.mapmate.builder.conventional.customprimitives.namebased;
 
 import com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition;
 import com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinitionFactory;
+import com.envimate.mapmate.builder.definitions.deserializers.CustomPrimitiveDeserializer;
+import com.envimate.mapmate.builder.definitions.serializers.CustomPrimitiveSerializer;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import static com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition.customPrimitiveDefinition;
+import static com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition.untypedCustomPrimitiveDefinition;
+import static com.envimate.mapmate.builder.definitions.deserializers.CustomPrimitiveByConstructorDeserializer.createDeserializer;
+import static com.envimate.mapmate.builder.definitions.deserializers.CustomPrimitiveByMethodDeserializer.createDeserializer;
+import static com.envimate.mapmate.builder.definitions.serializers.CustomPrimitiveByMethodSerializer.createSerializer;
 import static java.lang.reflect.Modifier.*;
 import static java.util.Arrays.stream;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static java.util.regex.Pattern.compile;
+import static java.util.stream.Collectors.toList;
 
 @ToString
 @EqualsAndHashCode
@@ -47,76 +56,89 @@ public final class MethodNameBasedCustomPrimitiveDefinitionFactory implements Cu
 
     public static MethodNameBasedCustomPrimitiveDefinitionFactory nameBasedCustomPrimitiveDefinitionFactory(
             final String serializationMethodName,
-            final String deserializationMethodName
-    ) {
+            final String deserializationMethodName) {
         return new MethodNameBasedCustomPrimitiveDefinitionFactory(
-                Pattern.compile(serializationMethodName),
-                Pattern.compile(deserializationMethodName)
-        );
+                compile(serializationMethodName),
+                compile(deserializationMethodName));
     }
 
     @Override
     public Optional<CustomPrimitiveDefinition> analyze(final Class<?> type) {
         final Method[] methods = type.getMethods();
-        final Optional<Method> serializationMethod = this.findSerializerMethod(
-                methods, this.serializationMethodName
-        );
-        final Optional<Method> deserializationMethod = this.findDeserializerMethod(
-                type, methods, this.deserializationMethodName
-        );
+        final Optional<CustomPrimitiveSerializer<?>> serializer = findSerializer(type, methods);
+        final Optional<CustomPrimitiveDeserializer<?>> deserializer = findDeserializer(type, methods);
 
-        if (serializationMethod.isPresent() || deserializationMethod.isPresent()) {
-            if (serializationMethod.isPresent() && deserializationMethod.isPresent()) {
-                return Optional.of(
-                        customPrimitiveDefinition(type, serializationMethod.get(), deserializationMethod.get())
-                );
-            }
-
+        if (serializer.isPresent() && deserializer.isPresent()) {
+            return of(untypedCustomPrimitiveDefinition(type, serializer.get(), deserializer.get()));
         }
-        return Optional.empty();
+        return empty();
     }
 
-    private Optional<Method> findSerializerMethod(final Method[] methods,
-                                                  final Pattern methodNamePattern) {
-        final List<Method> serializerMethodCandidates = stream(methods)
+    private Optional<CustomPrimitiveSerializer<?>> findSerializer(final Class<?> type, final Method[] methods) {
+        return findSerializerMethod(methods, this.serializationMethodName)
+                .map(method -> createSerializer(type, method));
+    }
+
+    private static Optional<Method> findSerializerMethod(final Method[] methods,
+                                                         final Pattern methodNamePattern) {
+        return stream(methods)
                 .filter(method -> !isStatic(method.getModifiers()))
                 .filter(method -> !isAbstract(method.getModifiers()))
                 .filter(method -> isPublic(method.getModifiers()))
                 .filter(method -> method.getReturnType().equals(String.class))
                 .filter(method -> method.getParameterCount() == 0)
-                .collect(Collectors.toList());
-        final List<Method> methodsMatchingName = serializerMethodCandidates.stream()
                 .filter(method -> methodNamePattern.matcher(method.getName()).matches())
-                .collect(Collectors.toList());
-        if (methodsMatchingName.size() > 0) {
-            return Optional.of(methodsMatchingName.get(0));
-        }
-        return Optional.empty();
-
+                .findFirst();
     }
 
-    private Optional<Method> findDeserializerMethod(final Class<?> type, final Method[] methods,
-                                                    final Pattern methodNamePattern) {
+    private Optional<CustomPrimitiveDeserializer<?>> findDeserializer(final Class<?> type,
+                                                                      final Method[] methods) {
+        return methodDeserializer(type, methods).or(() -> constructorDeserializer(type));
+    }
+
+    private Optional<CustomPrimitiveDeserializer<?>> methodDeserializer(final Class<?> type,
+                                                                        final Method[] methods) {
+        return findDeserializerMethod(type, methods, this.deserializationMethodName)
+                .map(method -> createDeserializer(type, method));
+    }
+
+    private static Optional<Method> findDeserializerMethod(final Class<?> type,
+                                                           final Method[] methods,
+                                                           final Pattern methodNamePattern) {
         final List<Method> deserializerMethodCandidates = stream(methods)
                 .filter(method -> isStatic(method.getModifiers()))
                 .filter(method -> isPublic(method.getModifiers()))
                 .filter(method -> method.getReturnType().equals(type))
                 .filter(method -> method.getParameterCount() == 1)
                 .filter(method -> method.getParameterTypes()[0].equals(String.class))
-                .collect(Collectors.toList());
+                .collect(toList());
+
         final List<Method> methodsMatchingName = deserializerMethodCandidates.stream()
                 .filter(method -> methodNamePattern.matcher(method.getName()).matches())
-                .collect(Collectors.toList());
+                .collect(toList());
         if (methodsMatchingName.size() > 0) {
-            return Optional.of(methodsMatchingName.get(0));
+            return of(methodsMatchingName.get(0));
         }
 
         final List<Method> methodsMatchingClassName = deserializerMethodCandidates.stream()
                 .filter(method -> method.getName().toLowerCase().contains(type.getSimpleName().toLowerCase()))
-                .collect(Collectors.toList());
+                .collect(toList());
         if (methodsMatchingClassName.size() > 0) {
-            return Optional.of(methodsMatchingClassName.get(0));
+            return of(methodsMatchingClassName.get(0));
         }
-        return Optional.empty();
+        return empty();
+    }
+
+    private static Optional<CustomPrimitiveDeserializer<?>> constructorDeserializer(final Class<?> type) {
+        return stringConstructor(type)
+                .map(constructor -> createDeserializer(type, constructor));
+    }
+
+    private static <T> Optional<Constructor<T>> stringConstructor(final Class<T> type) {
+        try {
+            return of(type.getConstructor(String.class));
+        } catch (final NoSuchMethodException e) {
+            return empty();
+        }
     }
 }

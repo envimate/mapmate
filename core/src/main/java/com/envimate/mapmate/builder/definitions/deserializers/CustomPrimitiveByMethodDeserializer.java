@@ -19,9 +19,8 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.definitions.implementations;
+package com.envimate.mapmate.builder.definitions.deserializers;
 
-import com.envimate.mapmate.builder.definitions.CustomPrimitiveDeserializer;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -29,8 +28,10 @@ import lombok.ToString;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import static com.envimate.mapmate.CustomPrimitiveSerializationMethodCallException.customPrimitiveSerializationMethodCallException;
+import static com.envimate.mapmate.builder.definitions.IncompatibleCustomPrimitiveException.incompatibleCustomPrimitiveException;
 
 @ToString
 @EqualsAndHashCode
@@ -38,8 +39,39 @@ import static com.envimate.mapmate.CustomPrimitiveSerializationMethodCallExcepti
 public final class CustomPrimitiveByMethodDeserializer implements CustomPrimitiveDeserializer<Object> {
     private final Method deserializationMethod;
 
-    public static CustomPrimitiveByMethodDeserializer customPrimitiveByMethodDeserializer(final Method method) {
-        return new CustomPrimitiveByMethodDeserializer(method);
+    public static CustomPrimitiveDeserializer<?> createDeserializer(final Class<?> type,
+                                                                    final Method deserializationMethod) {
+        final int deserializationMethodModifiers = deserializationMethod.getModifiers();
+        if (!Modifier.isPublic(deserializationMethodModifiers)) {
+            throw incompatibleCustomPrimitiveException(
+                    "The deserialization method %s configured for the custom primitive of type %s must be public",
+                    deserializationMethod, type);
+        }
+        if (!Modifier.isStatic(deserializationMethodModifiers)) {
+            throw incompatibleCustomPrimitiveException(
+                    "The deserialization method %s configured for the custom primitive of type %s must be static",
+                    deserializationMethod, type);
+        }
+        if (Modifier.isAbstract(deserializationMethodModifiers)) {
+            throw incompatibleCustomPrimitiveException(
+                    "The deserialization method %s configured for the custom primitive of type %s must not be abstract",
+                    deserializationMethod, type);
+        }
+        final Class<?>[] deserializationMethodParameterTypes = deserializationMethod.getParameterTypes();
+        if (deserializationMethodParameterTypes.length != 1 ||
+                !deserializationMethodParameterTypes[0].equals(String.class)) {
+            throw incompatibleCustomPrimitiveException(
+                    "The deserialization method %s configured for the custom primitive of type %s must " +
+                            "accept only one parameter of type String",
+                    deserializationMethod, type);
+        }
+        if (deserializationMethod.getReturnType() != type) {
+            throw incompatibleCustomPrimitiveException(
+                    "The deserialization method %s configured for the custom primitive of type %s must return " +
+                            "the custom primitive", deserializationMethod, type);
+        }
+
+        return new CustomPrimitiveByMethodDeserializer(deserializationMethod);
     }
 
     @Override

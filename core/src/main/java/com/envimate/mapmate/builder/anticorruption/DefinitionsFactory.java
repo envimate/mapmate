@@ -22,8 +22,8 @@
 package com.envimate.mapmate.builder.anticorruption;
 
 import com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition;
-import com.envimate.mapmate.builder.definitions.CustomPrimitiveDeserializer;
-import com.envimate.mapmate.builder.definitions.CustomPrimitiveSerializer;
+import com.envimate.mapmate.builder.definitions.deserializers.CustomPrimitiveDeserializer;
+import com.envimate.mapmate.builder.definitions.serializers.CustomPrimitiveSerializer;
 import com.envimate.mapmate.builder.definitions.SerializedObjectDefinition;
 import com.envimate.mapmate.deserialization.DeserializableCustomPrimitive;
 import com.envimate.mapmate.deserialization.DeserializableDataTransferObject;

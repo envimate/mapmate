@@ -19,8 +19,22 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.definitions;
+package com.envimate.mapmate.builder.models.constructor;
 
-public interface CustomPrimitiveSerializer<T> {
-    String serialize(T object);
+import lombok.EqualsAndHashCode;
+
+import static com.envimate.mapmate.builder.validation.NotNullValidator.ensureNotNull;
+
+@EqualsAndHashCode
+public final class Name {
+    private final String name;
+
+    public Name(final String name) {
+        ensureNotNull(name, "name");
+        this.name = name;
+    }
+
+    public String stringValue() {
+        return this.name;
+    }
 }

@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.builder;
 
+import com.envimate.mapmate.builder.models.constructor.Name;
 import com.envimate.mapmate.builder.models.conventional.Body;
 import com.envimate.mapmate.builder.models.conventional.Email;
 import com.envimate.mapmate.builder.models.conventional.EmailAddress;
@@ -32,8 +33,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.Body.body;
-import static com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.EmailDto.emailDto;
 import static com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.EmailAddress.anEmailAddress;
+import static com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.EmailDto.emailDto;
 import static com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.Subject.aSubject;
 
 public final class ConventionalBuilderTest {
@@ -90,5 +91,11 @@ public final class ConventionalBuilderTest {
                 EMAIL_JSON, EmailDto.class
         );
         Assert.assertEquals(EMAIL_DTO, result);
+    }
+
+    @Test
+    public void testNameDeserialization() {
+        final Name result = theConventionalMapMateInstance().deserializer().deserializeJson("bob", Name.class);
+        Assert.assertEquals(new Name("bob"), result);
     }
 }

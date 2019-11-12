@@ -21,18 +21,18 @@
 
 package com.envimate.mapmate.builder.definitions;
 
-import com.envimate.mapmate.validators.NotNullValidator;
+import com.envimate.mapmate.builder.definitions.deserializers.CustomPrimitiveDeserializer;
+import com.envimate.mapmate.builder.definitions.serializers.CustomPrimitiveSerializer;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
-import static com.envimate.mapmate.builder.definitions.IncompatibleCustomPrimitiveException.incompatibleCustomPrimitiveException;
-import static com.envimate.mapmate.builder.definitions.implementations.CustomPrimitiveByMethodDeserializer.customPrimitiveByMethodDeserializer;
-import static com.envimate.mapmate.builder.definitions.implementations.CustomPrimitiveByMethodSerializer.verifiedCustomPrimitiveSerializationMethod;
+import static com.envimate.mapmate.builder.definitions.deserializers.CustomPrimitiveByMethodDeserializer.createDeserializer;
+import static com.envimate.mapmate.builder.definitions.serializers.CustomPrimitiveByMethodSerializer.createSerializer;
+import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
 @ToString
 @EqualsAndHashCode
@@ -42,11 +42,9 @@ public final class CustomPrimitiveDefinition {
     public final CustomPrimitiveSerializer<?> serializer;
     public final CustomPrimitiveDeserializer<?> deserializer;
 
-    public static <T> CustomPrimitiveDefinition customPrimitiveDefinition(
-            final Class<T> type,
-            final CustomPrimitiveSerializer<T> serializer,
-            final CustomPrimitiveDeserializer<T> deserializer
-    ) {
+    public static <T> CustomPrimitiveDefinition customPrimitiveDefinition(final Class<T> type,
+                                                                          final CustomPrimitiveSerializer<T> serializer,
+                                                                          final CustomPrimitiveDeserializer<T> deserializer) {
         return untypedCustomPrimitiveDefinition(type, serializer, deserializer);
     }
 
@@ -58,91 +56,13 @@ public final class CustomPrimitiveDefinition {
         return untypedCustomPrimitiveDefinition(type, serializer, deserializer);
     }
 
-    private static CustomPrimitiveDefinition untypedCustomPrimitiveDefinition(
+    public static CustomPrimitiveDefinition untypedCustomPrimitiveDefinition(
             final Class<?> type,
             final CustomPrimitiveSerializer<?> serializer,
-            final CustomPrimitiveDeserializer<?> deserializer
-    ) {
-        NotNullValidator.validateNotNull(type, "type");
-        NotNullValidator.validateNotNull(serializer, "serializer");
-        NotNullValidator.validateNotNull(deserializer, "deserializer");
+            final CustomPrimitiveDeserializer<?> deserializer) {
+        validateNotNull(type, "type");
+        validateNotNull(serializer, "serializer");
+        validateNotNull(deserializer, "deserializer");
         return new CustomPrimitiveDefinition(type, serializer, deserializer);
-    }
-
-    private static CustomPrimitiveSerializer<?> createSerializer(final Class<?> type,
-                                                                 final Method serializationMethod) {
-        final int serializationMethodModifiers = serializationMethod.getModifiers();
-        if (!Modifier.isPublic(serializationMethodModifiers)) {
-            throw incompatibleCustomPrimitiveException(
-                    "The serialization method %s configured for the custom primitive of type %s must be public",
-                    serializationMethod,
-                    type
-            );
-        }
-        if (Modifier.isStatic(serializationMethodModifiers)) {
-            throw incompatibleCustomPrimitiveException(
-                    "The serialization method %s configured for the custom primitive of type %s must not be static",
-                    serializationMethod,
-                    type
-            );
-        }
-        if (Modifier.isAbstract(serializationMethodModifiers)) {
-            throw incompatibleCustomPrimitiveException(
-                    "The serialization method %s configured for the custom primitive of type %s must not be abstract",
-                    serializationMethod,
-                    type
-            );
-        }
-        if (serializationMethod.getParameterCount() > 0) {
-            throw incompatibleCustomPrimitiveException(
-                    "The serialization method %s configured for the custom primitive of type %s must " +
-                            "not accept any parameters",
-                    serializationMethod,
-                    type
-            );
-        }
-        if (serializationMethod.getReturnType() != String.class) {
-            throw incompatibleCustomPrimitiveException(
-                    "The serialization method %s configured for the custom primitive of type %s must return a String",
-                    serializationMethod,
-                    type
-            );
-        }
-        return verifiedCustomPrimitiveSerializationMethod(serializationMethod);
-    }
-
-    private static CustomPrimitiveDeserializer<?> createDeserializer(final Class<?> type,
-                                                                     final Method deserializationMethod) {
-        final int deserializationMethodModifiers = deserializationMethod.getModifiers();
-        if (!Modifier.isPublic(deserializationMethodModifiers)) {
-            throw incompatibleCustomPrimitiveException(
-                    "The deserialization method %s configured for the custom primitive of type %s must be public",
-                    deserializationMethod, type);
-        }
-        if (!Modifier.isStatic(deserializationMethodModifiers)) {
-            throw incompatibleCustomPrimitiveException(
-                    "The deserialization method %s configured for the custom primitive of type %s must be static",
-                    deserializationMethod, type);
-        }
-        if (Modifier.isAbstract(deserializationMethodModifiers)) {
-            throw incompatibleCustomPrimitiveException(
-                    "The deserialization method %s configured for the custom primitive of type %s must not be abstract",
-                    deserializationMethod, type);
-        }
-        final Class<?>[] deserializationMethodParameterTypes = deserializationMethod.getParameterTypes();
-        if (deserializationMethodParameterTypes.length != 1 ||
-                !deserializationMethodParameterTypes[0].equals(String.class)) {
-            throw incompatibleCustomPrimitiveException(
-                    "The serialization method %s configured for the custom primitive of type %s must " +
-                            "accept only one parameter of type String",
-                    deserializationMethod, type);
-        }
-        if (deserializationMethod.getReturnType() != type) {
-            throw incompatibleCustomPrimitiveException(
-                    "The serialization method %s configured for the custom primitive of type %s must return " +
-                            "the custom primitive", deserializationMethod, type);
-        }
-
-        return customPrimitiveByMethodDeserializer(deserializationMethod);
     }
 }

@@ -22,7 +22,7 @@
 package com.envimate.mapmate.builder.recipes.primitives;
 
 import com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition;
-import com.envimate.mapmate.builder.definitions.CustomPrimitiveSerializer;
+import com.envimate.mapmate.builder.definitions.serializers.CustomPrimitiveSerializer;
 import com.envimate.mapmate.builder.recipes.Recipe;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;

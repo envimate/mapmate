@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.definitions;
+package com.envimate.mapmate.builder.definitions.deserializers;
 
 public interface CustomPrimitiveDeserializer<T> {
     T deserialize(String value) throws Exception;

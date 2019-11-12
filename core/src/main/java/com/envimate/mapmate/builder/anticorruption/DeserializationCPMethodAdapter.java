@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder.anticorruption;
 
-import com.envimate.mapmate.builder.definitions.CustomPrimitiveDeserializer;
+import com.envimate.mapmate.builder.definitions.deserializers.CustomPrimitiveDeserializer;
 import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;

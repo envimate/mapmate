@@ -235,11 +235,20 @@ MapMate respects the access modifiers and does not use any non-public field or m
 package(s), visiting every class to identify whether it is a Custom Primitive or a Serialized Object.
 
 #### Default Conventions for Custom Primitives
-A class is considered to be a Custom Primitive if it has a serialization method named "stringValue" and a static
-deserialization method either named "fromStringValue" or whose name contains the class name.
-A serialization method is public, returns an instance of String and takes no arguments. A deserialization method is 
-public, static, returns an instance of the class it is declared in and takes one parameter of type String.
- 
+A class is considered to be a Custom Primitive if it has
+
+a) a serialization method named "stringValue" AND
+
+b) at least one of the following (interpreted in that order):
+- a static deserialization method* named "fromStringValue"
+- a static deserialization method** whose name contains the class name
+- a public constructor that takes exactly one single String argument
+
+*A serialization method is public, returns an instance of String and takes no arguments.
+
+**A deserialization method is 
+public, static, returns an instance of the class it is declared in and takes one parameter of type String. 
+
 Example:
  
  ```java
