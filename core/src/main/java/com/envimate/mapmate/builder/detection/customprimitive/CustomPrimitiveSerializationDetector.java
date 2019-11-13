@@ -19,30 +19,13 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.models.annotated;
+package com.envimate.mapmate.builder.detection.customprimitive;
 
-import com.envimate.mapmate.builder.conventional.annotations.MapMatePrimitiveDeserializer;
-import com.envimate.mapmate.builder.conventional.annotations.MapMatePrimitiveSerializer;
-import com.envimate.mapmate.builder.validation.LengthValidator;
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import com.envimate.mapmate.builder.definitions.serializers.CustomPrimitiveSerializer;
+import com.envimate.mapmate.reflections.CachedReflectionType;
 
-@ToString
-@EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class Body {
-    private final String value;
+import java.util.Optional;
 
-    @MapMatePrimitiveDeserializer
-    public static Body body(final String value) {
-        final String emailAddress = LengthValidator.ensureLength(value, 1, 1000, "body");
-        return new Body(emailAddress);
-    }
-
-    @MapMatePrimitiveSerializer
-    public String value() {
-        return this.value;
-    }
+public interface CustomPrimitiveSerializationDetector {
+    Optional<CustomPrimitiveSerializer<?>> detect(CachedReflectionType type);
 }

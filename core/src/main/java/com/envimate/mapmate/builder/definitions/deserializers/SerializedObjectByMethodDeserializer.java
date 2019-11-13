@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.conventional.serializedobject;
+package com.envimate.mapmate.builder.definitions.deserializers;
 
 import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
 import lombok.AccessLevel;
@@ -40,7 +40,7 @@ import static java.lang.reflect.Modifier.*;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class VerifiedDeserializationDTOMethod implements DeserializationDTOMethod {
+public final class SerializedObjectByMethodDeserializer implements DeserializationDTOMethod {
     private final Map<String, Class<?>> fields;
     private final Method factoryMethod;
     private final String[] parameterNames;
@@ -51,7 +51,7 @@ public final class VerifiedDeserializationDTOMethod implements DeserializationDT
         return verifiedDeserializationDTOMethod(deserializationMethod);
     }
 
-    private static VerifiedDeserializationDTOMethod verifiedDeserializationDTOMethod(final Method factoryMethod) {
+    private static SerializedObjectByMethodDeserializer verifiedDeserializationDTOMethod(final Method factoryMethod) {
         final Parameter[] parameters = factoryMethod.getParameters();
         final String[] parameterNames = Arrays.stream(parameters).map(Parameter::getName).toArray(String[]::new);
         final Map<String, Class<?>> parameterFields = Arrays.stream(parameters)
@@ -59,7 +59,7 @@ public final class VerifiedDeserializationDTOMethod implements DeserializationDT
                         Parameter::getName,
                         Parameter::getType
                 ));
-        return new VerifiedDeserializationDTOMethod(parameterFields, factoryMethod, parameterNames);
+        return new SerializedObjectByMethodDeserializer(parameterFields, factoryMethod, parameterNames);
     }
 
     @Override

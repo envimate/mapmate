@@ -19,30 +19,27 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.models.annotated;
+package com.envimate.mapmate.builder.detection.serializedobject;
 
-import com.envimate.mapmate.builder.conventional.annotations.MapMatePrimitiveDeserializer;
-import com.envimate.mapmate.builder.conventional.annotations.MapMatePrimitiveSerializer;
-import com.envimate.mapmate.builder.validation.LengthValidator;
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 
-@ToString
-@EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class Body {
-    private final String value;
+import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.lang.reflect.Modifier.*;
 
-    @MapMatePrimitiveDeserializer
-    public static Body body(final String value) {
-        final String emailAddress = LengthValidator.ensureLength(value, 1, 1000, "body");
-        return new Body(emailAddress);
+public interface FieldDetector {
+
+    static FieldDetector modifierBased() {
+        return field -> {
+            final int modifiers = field.getModifiers();
+            return isPublic(modifiers) && !isStatic(modifiers) && !isTransient(modifiers);
+        };
     }
 
-    @MapMatePrimitiveSerializer
-    public String value() {
-        return this.value;
+    static FieldDetector annotationBased(final Class<? extends Annotation> annotation) {
+        validateNotNull(annotation, "annotation");
+        return field -> field.isAnnotationPresent(annotation);
     }
+
+    boolean useForSerialization(Field field);
 }

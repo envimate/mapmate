@@ -21,8 +21,8 @@
 
 package com.envimate.mapmate.builder.models.annotated;
 
-import com.envimate.mapmate.builder.conventional.customprimitives.methodannotation.MapMatePrimitiveDeserializer;
-import com.envimate.mapmate.builder.conventional.customprimitives.methodannotation.MapMatePrimitiveSerializer;
+import com.envimate.mapmate.builder.conventional.annotations.MapMatePrimitiveDeserializer;
+import com.envimate.mapmate.builder.conventional.annotations.MapMatePrimitiveSerializer;
 import com.envimate.mapmate.builder.validation.EmailAddressValidator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;

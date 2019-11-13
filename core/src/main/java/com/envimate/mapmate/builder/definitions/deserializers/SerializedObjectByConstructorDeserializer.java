@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.conventional.serializedobject;
+package com.envimate.mapmate.builder.definitions.deserializers;
 
 import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
 import lombok.AccessLevel;
@@ -41,7 +41,7 @@ import static java.util.stream.Collectors.toMap;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class VerifiedDeserializationDTOConstructor implements DeserializationDTOMethod {
+public final class SerializedObjectByConstructorDeserializer implements DeserializationDTOMethod {
     private final Map<String, Class<?>> fields;
     private final Constructor<?> factoryConstructor;
     private final String[] parameterNames;
@@ -52,14 +52,15 @@ public final class VerifiedDeserializationDTOConstructor implements Deserializat
         return verifiedDeserializationDTOConstructor(deserializationConstructor);
     }
 
-    private static VerifiedDeserializationDTOConstructor verifiedDeserializationDTOConstructor(final Constructor<?> factoryConstructor) {
+    private static SerializedObjectByConstructorDeserializer verifiedDeserializationDTOConstructor(
+            final Constructor<?> factoryConstructor) {
         final Parameter[] parameters = factoryConstructor.getParameters();
         final String[] parameterNames = stream(parameters)
                 .map(Parameter::getName)
                 .toArray(String[]::new);
         final Map<String, Class<?>> parameterFields = stream(parameters)
                 .collect(toMap(Parameter::getName, Parameter::getType));
-        return new VerifiedDeserializationDTOConstructor(parameterFields, factoryConstructor, parameterNames);
+        return new SerializedObjectByConstructorDeserializer(parameterFields, factoryConstructor, parameterNames);
     }
 
     @Override

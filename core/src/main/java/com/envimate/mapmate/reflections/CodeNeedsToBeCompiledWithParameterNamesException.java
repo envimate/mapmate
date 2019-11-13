@@ -22,7 +22,6 @@
 package com.envimate.mapmate.reflections;
 
 import java.lang.reflect.Executable;
-import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;

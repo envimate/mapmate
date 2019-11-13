@@ -19,28 +19,17 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.models.annotated;
+package com.envimate.mapmate.builder.conventional.annotations;
 
-import com.envimate.mapmate.builder.conventional.annotations.MapMatePrimitive;
-import com.envimate.mapmate.builder.validation.LengthValidator;
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@ToString
-@EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-@MapMatePrimitive(deserializationMethodName = "subject", serializationMethodName = "value")
-public final class Subject {
-    private final String value;
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface MapMatePrimitive {
+    String serializationMethodName() default "stringValue";
 
-    public static Subject subject(final String value) {
-        final String validated = LengthValidator.ensureLength(value, 1, 256, "subject");
-        return new Subject(validated);
-    }
-
-    public String value() {
-        return this.value;
-    }
+    String deserializationMethodName() default "fromStringValue";
 }

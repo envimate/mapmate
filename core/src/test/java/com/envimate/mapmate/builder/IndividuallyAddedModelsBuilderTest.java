@@ -31,7 +31,7 @@ import com.google.gson.Gson;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.envimate.mapmate.builder.conventional.ConventionalDetector.conventionalDetector;
+import static com.envimate.mapmate.builder.conventional.ConventionalDetectors.conventionalDetector;
 import static com.envimate.mapmate.builder.recipes.manualregistry.ManualRegistry.manuallyRegisteredTypes;
 
 /**

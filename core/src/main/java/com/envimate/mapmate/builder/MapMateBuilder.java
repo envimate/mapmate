@@ -22,7 +22,8 @@
 package com.envimate.mapmate.builder;
 
 import com.envimate.mapmate.builder.anticorruption.DefinitionsFactory;
-import com.envimate.mapmate.builder.conventional.ConventionalDetector;
+import com.envimate.mapmate.builder.conventional.ConventionalDetectors;
+import com.envimate.mapmate.builder.conventional.DetectorBuilder;
 import com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition;
 import com.envimate.mapmate.builder.definitions.SerializedObjectDefinition;
 import com.envimate.mapmate.builder.recipes.Recipe;
@@ -53,7 +54,7 @@ import static java.util.stream.Collectors.toMap;
 
 public final class MapMateBuilder {
     private static final int INITIAL_CAPACITY = 10000;
-    public Detector detector = ConventionalDetector.conventionalDetectorWithAnnotations();
+    public Detector detector = ConventionalDetectors.conventionalDetectorWithAnnotations();
     private final PackageScanner packageScanner;
     private final List<Recipe> recipes = new LinkedList<>();
     private final ValidationMappings validationMappings = ValidationMappings.empty();
@@ -84,6 +85,10 @@ public final class MapMateBuilder {
     public static MapMateBuilder mapMateBuilder(final PackageScanner packageScanner) {
         validateNotNull(packageScanner, "packageScanner");
         return new MapMateBuilder(packageScanner);
+    }
+
+    public MapMateBuilder withDetector(final DetectorBuilder detector) {
+        return withDetector(detector.build());
     }
 
     public MapMateBuilder withDetector(final Detector detector) {

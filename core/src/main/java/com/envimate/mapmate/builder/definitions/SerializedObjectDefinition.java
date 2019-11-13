@@ -35,8 +35,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.envimate.mapmate.builder.conventional.serializedobject.VerifiedDeserializationDTOConstructor.createDeserializer;
-import static com.envimate.mapmate.builder.conventional.serializedobject.VerifiedDeserializationDTOMethod.createDeserializer;
+import static com.envimate.mapmate.builder.definitions.deserializers.SerializedObjectByConstructorDeserializer.createDeserializer;
+import static com.envimate.mapmate.builder.definitions.deserializers.SerializedObjectByMethodDeserializer.createDeserializer;
 import static com.envimate.mapmate.builder.definitions.IncompatibleSerializedObjectException.incompatibleSerializedObjectException;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.lang.reflect.Modifier.*;
@@ -60,6 +60,16 @@ public final class SerializedObjectDefinition {
             validateNotNull(serializer, "serializer");
         }
         return new SerializedObjectDefinition(type, serializer, deserializer);
+    }
+
+    public static SerializedObjectDefinition serializedObjectDefinition(final Class<?> type,
+                                                                        final Field[] serializedFields,
+                                                                        final DeserializationDTOMethod deserializer) {
+        SerializationDTOMethod serializer = null;
+        if (serializedFields.length > 0) {
+            serializer = createSerializer(type, serializedFields);
+        }
+        return serializedObjectDefinition(type, serializer, deserializer);
     }
 
     public static SerializedObjectDefinition serializedObjectDefinition(final Class<?> type,

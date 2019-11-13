@@ -19,15 +19,26 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.conventional.serializedobject.classannotation;
+package com.envimate.mapmate.builder.detection.serializedobject;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.List;
+import java.util.regex.Pattern;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface MapMateSerializedField {
+import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
+public interface ClassFilter {
+
+    static ClassFilter allowAll() {
+        return type -> true;
+    }
+
+    static ClassFilter patternFilter(final List<Pattern> patterns) {
+        validateNotNull(patterns, "patterns");
+        return type -> {
+            final String typeName = type.getName();
+            return patterns.stream().anyMatch(pattern -> pattern.matcher(typeName).matches());
+        };
+    }
+
+    boolean filter(Class<?> type);
 }

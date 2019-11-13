@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.conventional.serializedobject.classannotation;
+package com.envimate.mapmate.builder.conventional.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -27,6 +27,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface MapMateDeserializationMethod {
+@Target(ElementType.FIELD)
+public @interface MapMateSerializedField {
+
 }

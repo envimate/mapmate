@@ -19,17 +19,13 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.conventional.customprimitives.classannotation;
+package com.envimate.mapmate.builder.detection.serializedobject;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface MapMatePrimitive {
-    String serializationMethodName() default "stringValue";
+import java.lang.reflect.Field;
+import java.util.Optional;
 
-    String deserializationMethodName() default "fromStringValue";
+public interface SerializedObjectDeserializationDetector {
+    Optional<DeserializationDTOMethod> detect(Class<?> type, Field[] fields);
 }

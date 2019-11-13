@@ -19,30 +19,29 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.models.annotated;
+package com.envimate.mapmate.builder.models.constructor;
 
-import com.envimate.mapmate.builder.conventional.annotations.MapMatePrimitiveDeserializer;
-import com.envimate.mapmate.builder.conventional.annotations.MapMatePrimitiveSerializer;
-import com.envimate.mapmate.builder.validation.LengthValidator;
-import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 @ToString
 @EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class Body {
-    private final String value;
+public final class GroupTicketRequest {
+    public final Name firstParticipant;
+    public final Name secondParticipant;
+    public final Name thirdParticipant;
+    public final Name fourthParticipant;
+    public final Name fifthParticipant;
 
-    @MapMatePrimitiveDeserializer
-    public static Body body(final String value) {
-        final String emailAddress = LengthValidator.ensureLength(value, 1, 1000, "body");
-        return new Body(emailAddress);
-    }
-
-    @MapMatePrimitiveSerializer
-    public String value() {
-        return this.value;
+    public GroupTicketRequest(final Name firstParticipant,
+                              final Name secondParticipant,
+                              final Name thirdParticipant,
+                              final Name fourthParticipant,
+                              final Name fifthParticipant) {
+        this.firstParticipant = firstParticipant;
+        this.secondParticipant = secondParticipant;
+        this.thirdParticipant = thirdParticipant;
+        this.fourthParticipant = fourthParticipant;
+        this.fifthParticipant = fifthParticipant;
     }
 }

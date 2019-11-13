@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.conventional.customprimitives.methodannotation;
+package com.envimate.mapmate.builder.conventional.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

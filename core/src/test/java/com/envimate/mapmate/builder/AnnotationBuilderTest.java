@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder;
 
-import com.envimate.mapmate.builder.conventional.ConventionalDetector;
+import com.envimate.mapmate.builder.conventional.ConventionalDetectors;
 import com.envimate.mapmate.builder.models.annotated.Email;
 import com.envimate.mapmate.builder.validation.CustomTypeValidationException;
 import com.google.gson.Gson;
@@ -51,7 +51,7 @@ public final class AnnotationBuilderTest {
         final Gson gson = new Gson();
 
         return MapMate.aMapMate("com.envimate.mapmate.builder.models")
-                .withDetector(ConventionalDetector.conventionalDetectorWithAnnotations())
+                .withDetector(ConventionalDetectors.conventionalDetectorWithAnnotations())
                 .usingJsonMarshaller(gson::toJson, gson::fromJson)
                 .withExceptionIndicatingValidationError(CustomTypeValidationException.class)
                 .build();

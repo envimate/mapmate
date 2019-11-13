@@ -265,12 +265,12 @@ public final class EmailAddress {
     }
 }
 ```
-The method "anEmailAddress" is a valid deserialization method, since it's name contains the className. other valid 
+The method "anEmailAddress" is a valid deserialization method, since it's name contains the className. Other valid 
 names would be "deserialize", "theEmailAddressWithValue", etc.
 
 #### Default Conventions for Serialized Objects 
 A class is considered to be a Serialized Object if it has a public static factory method name "deserialize". 
-Alternatively, is also considered as such if the name of the class matches one of the patterns
+Alternatively, it is also considered as such if the name of the class matches one of the patterns
 ```
 .*DTO
 .*Dto
@@ -278,7 +278,9 @@ Alternatively, is also considered as such if the name of the class matches one o
 .*Response
 .*State
 ```
-AND MapMate can find a "conventional deserialization method", which follows the algorithm:
+AND MapMate can find either a "conventional deserialization method" or, alternatively, a public constructor.
+
+The detection of a "conventional deserialization method" follows this algorithm:
 
 1. If the class has a single factory method -> that's the one
 2. alternatively, if there are multiple factory methods, the one called "deserialize" wins
@@ -316,6 +318,11 @@ public final class EmailDto {
 ```
 Here, the last method wins, since it is called `emailDto`. If we were to add another factory method called deserialize 
 here, that one would be picked.
+
+The detection of the public constructor follows this algorithm:
+1. If the class has a single public constructor -> that's the one
+2. if you have multiple public constructors, the one that has all the fields as 
+parameters wins
 
 Serialized Objects are serialized using the public fields(key:value) and deserialized using the same public factory
 method that was used to determine the class being a Serialized Object

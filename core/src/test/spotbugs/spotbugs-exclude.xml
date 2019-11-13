@@ -59,4 +59,8 @@
         <Class name="com.envimate.mapmate.examples.domain.User"/>
         <Bug pattern="UUF_UNUSED_PUBLIC_OR_PROTECTED_FIELD"/>
     </Match>
+    <Match>
+        <Class name="com.envimate.mapmate.reflections.CachedReflectionType"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
 </FindBugsFilter>

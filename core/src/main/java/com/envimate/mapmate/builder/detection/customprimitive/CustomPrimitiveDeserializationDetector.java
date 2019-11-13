@@ -19,14 +19,13 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.conventional.customprimitives.methodannotation;
+package com.envimate.mapmate.builder.detection.customprimitive;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.envimate.mapmate.builder.definitions.deserializers.CustomPrimitiveDeserializer;
+import com.envimate.mapmate.reflections.CachedReflectionType;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface MapMatePrimitiveSerializer {
+import java.util.Optional;
+
+public interface CustomPrimitiveDeserializationDetector {
+    Optional<CustomPrimitiveDeserializer<?>> detect(CachedReflectionType type);
 }

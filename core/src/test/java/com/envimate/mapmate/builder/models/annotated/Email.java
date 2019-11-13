@@ -21,8 +21,8 @@
 
 package com.envimate.mapmate.builder.models.annotated;
 
-import com.envimate.mapmate.builder.conventional.serializedobject.classannotation.MapMateDeserializationMethod;
-import com.envimate.mapmate.builder.conventional.serializedobject.classannotation.MapMateSerializedField;
+import com.envimate.mapmate.builder.conventional.annotations.MapMateDeserializationMethod;
+import com.envimate.mapmate.builder.conventional.annotations.MapMateSerializedField;
 import com.envimate.mapmate.builder.validation.RequiredParameterValidator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;

@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.builder;
 
+import com.envimate.mapmate.builder.models.constructor.GroupTicketRequest;
 import com.envimate.mapmate.builder.models.constructor.Name;
 import com.envimate.mapmate.builder.models.conventional.Body;
 import com.envimate.mapmate.builder.models.conventional.Email;
@@ -58,6 +59,23 @@ public final class ConventionalBuilderTest {
             aSubject("Hello"),
             body("Hello World!!!")
     );
+
+    public static final GroupTicketRequest GROUP_TICKET_REQUEST = new GroupTicketRequest(
+            new Name("Aaron"),
+            new Name("Abdul"),
+            new Name("Abe"),
+            new Name("Abel"),
+            new Name("Abraham")
+    );
+
+    public static final String GROUP_TICKET_REQUEST_JSON = "" +
+            "{" +
+            "   \"firstParticipant\": \"Aaron\"," +
+            "   \"secondParticipant\": \"Abdul\"," +
+            "   \"thirdParticipant\": \"Abe\"," +
+            "   \"fourthParticipant\": \"Abel\"," +
+            "   \"fifthParticipant\": \"Abraham\"" +
+            "}";
 
     public static MapMate theConventionalMapMateInstance() {
         final Gson gson = new Gson();
@@ -97,5 +115,12 @@ public final class ConventionalBuilderTest {
     public void testNameDeserialization() {
         final Name result = theConventionalMapMateInstance().deserializer().deserializeJson("bob", Name.class);
         Assert.assertEquals(new Name("bob"), result);
+    }
+
+    @Test
+    public void testGroupTicketDeserialization() {
+        final GroupTicketRequest result = theConventionalMapMateInstance().deserializer()
+                .deserializeJson(GROUP_TICKET_REQUEST_JSON, GroupTicketRequest.class);
+        Assert.assertEquals(GROUP_TICKET_REQUEST, result);
     }
 }
