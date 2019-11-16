@@ -23,7 +23,11 @@ package com.envimate.mapmate.serialization;
 
 import com.envimate.mapmate.Definition;
 import com.envimate.mapmate.serialization.methods.SerializationDTOMethod;
+import com.envimate.mapmate.serialization.methods.SerializationField;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public final class SerializableDataTransferObject implements Definition {
@@ -42,7 +46,14 @@ public final class SerializableDataTransferObject implements Definition {
     }
 
     public Object serialize(final Object object, final Function<Object, Object> serializerCallback) {
-        return this.serializationDTOMethod.serialize(object, serializerCallback);
+        final List<SerializationField> fields = this.serializationDTOMethod.fields();
+        final Map<String, Object> map = new HashMap<>(10);
+        fields.forEach(serializationField -> {
+            final String name = serializationField.name();
+            final Object value = serializationField.query(object);
+            map.put(name, value);
+        });
+        return map;
     }
 
     @Override

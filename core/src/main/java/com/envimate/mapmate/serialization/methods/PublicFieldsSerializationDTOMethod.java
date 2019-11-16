@@ -23,12 +23,7 @@ package com.envimate.mapmate.serialization.methods;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
-
-import static com.envimate.mapmate.serialization.SerializationException.fromException;
-import static java.util.Arrays.stream;
+import java.util.List;
 
 public final class PublicFieldsSerializationDTOMethod implements SerializationDTOMethod {
 
@@ -39,6 +34,12 @@ public final class PublicFieldsSerializationDTOMethod implements SerializationDT
         return new PublicFieldsSerializationDTOMethod();
     }
 
+    @Override
+    public List<SerializationField> fields() {
+        throw new UnsupportedOperationException();
+    }
+
+    /*
     @Override
     public Object serialize(final Object object, final Function<Object, Object> serializerCallback) {
         final Field[] fields = object.getClass().getFields();
@@ -63,9 +64,9 @@ public final class PublicFieldsSerializationDTOMethod implements SerializationDT
 
         return normalizedChildren;
     }
+     */
 
     private boolean isNotTransient(final Field field) {
         return !Modifier.isTransient(field.getModifiers());
     }
-
 }

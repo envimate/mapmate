@@ -28,7 +28,6 @@ import java.util.function.Function;
 import static com.envimate.mapmate.serialization.methods.PublicFieldsSerializationDTOMethod.thePublicFieldsSerializationDTOMethod;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
-@SuppressWarnings("unused")
 public final class DataTransferObjectSerializationMethodBuilder {
 
     private final Function<SerializationDTOMethod, SerializerBuilder> resultConsumer;

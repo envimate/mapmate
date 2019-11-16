@@ -19,10 +19,18 @@
  * under the License.
  */
 
-package com.envimate.mapmate.serialization.methods;
+package com.envimate.mapmate.builder.usecases;
 
-import java.util.List;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-public interface SerializationDTOMethod {
-    List<SerializationField> fields();
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class FoundType {
+    private final Class<?> type;
+    private final boolean requiresSerialization;
+    private final boolean requiresDeserialization;
 }
