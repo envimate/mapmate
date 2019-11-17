@@ -21,20 +21,18 @@
 
 package com.envimate.mapmate.builder.recipes.primitives;
 
-import com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition;
-import com.envimate.mapmate.builder.definitions.serializers.CustomPrimitiveSerializer;
 import com.envimate.mapmate.builder.recipes.Recipe;
+import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
+import com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import static com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition.customPrimitiveDefinition;
+import static com.envimate.mapmate.definitions.CustomPrimitiveDefinition.customPrimitiveDefinition;
 
 @ToString
 @EqualsAndHashCode
@@ -45,7 +43,7 @@ public final class BuiltInPrimitiveSerializedAsStringSupport implements Recipe {
     }
 
     @Override
-    public Map<Class<?>, CustomPrimitiveDefinition> customPrimitiveDefinitions() {
+    public List<CustomPrimitiveDefinition> customPrimitiveDefinitions() {
         return List.of(
                 toCustomPrimitiveDefinition(int.class, Integer::parseInt),
                 toCustomPrimitiveDefinition(Integer.class, Integer::valueOf),
@@ -60,9 +58,6 @@ public final class BuiltInPrimitiveSerializedAsStringSupport implements Recipe {
                 toCustomPrimitiveDefinition(boolean.class, Boolean::parseBoolean),
                 toCustomPrimitiveDefinition(Boolean.class, Boolean::valueOf),
                 toCustomPrimitiveDefinition(String.class, Function.identity())
-        ).stream().collect(Collectors.toMap(
-                customPrimitiveDefinition -> customPrimitiveDefinition.type,
-                Function.identity())
         );
     }
 

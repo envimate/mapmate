@@ -21,53 +21,38 @@
 
 package com.envimate.mapmate.examples;
 
-import com.envimate.mapmate.deserialization.Deserializer;
-import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
-import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethodFactory;
+import com.envimate.mapmate.MapMate;
 import com.envimate.mapmate.deserialization.validation.AggregatedValidationException;
 import com.envimate.mapmate.examples.domain.*;
-import com.envimate.mapmate.serialization.Serializer;
-import com.google.gson.Gson;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.envimate.mapmate.deserialization.Deserializer.aDeserializer;
-import static com.envimate.mapmate.filters.ClassFilters.includingAll;
-
 @SuppressWarnings("ALL")
-@Ignore
 public final class Examples {
     private final Injector injector = Guice.createInjector(new ExampleModule());
-    private Serializer serializer;
-    private Deserializer deserializer;
+    private MapMate mapMate;
 
     @Test
     public void example_serializing() {
-        final Person queen = Person.person(
-                FullName.fullName(
-                        FirstName.fromString("Beatrix"),
-                        LastName.fromString("Armgard"),
-                        LastNamePrefix.fromString("van"),
-                        new MiddleName[]{MiddleName.fromString("Wilhelmina")}
+        final Person queen = Person.deserialize(
+                FullName.deserialize(
+                        FirstName.fromStringValue("Beatrix"),
+                        LastName.fromStringValue("Armgard"),
+                        LastNamePrefix.fromStringValue("van"),
+                        new MiddleName[]{MiddleName.fromStringValue("Wilhelmina")}
                 ),
-                Address.address(
-                        StreetName.fromString("Dam"),
-                        HouseNumber.fromString("1"),
-                        ZipCode.fromString("1012KB"),
-                        CityName.fromString("Amsterdam"),
-                        Region.fromString("Noord-Holland"),
-                        Country.fromString("Netherlands")
-
+                Address.deserialize(
+                        StreetName.fromStringValue("Dam"),
+                        HouseNumber.fromStringValue("1"),
+                        ZipCode.fromStringValue("1012KB"),
+                        CityName.fromStringValue("Amsterdam"),
+                        Region.fromStringValue("Noord-Holland"),
+                        Country.fromStringValue("Netherlands")
                 ));
 
-        final String result = this.serializer.serializeToJson(queen);
+        final String result = this.mapMate.serializeToJson(queen);
         System.out.println(result);
     }
 
@@ -86,7 +71,7 @@ public final class Examples {
                 "\"region\":\"Noord-Holland\"," +
                 "\"city\":\"Amsterdam\"}}";
 
-        final Person queen = this.deserializer.deserializeJson(json, Person.class);
+        final Person queen = this.mapMate.deserializeJson(json, Person.class);
 
         System.out.println(queen.fullName.textual());
         System.out.println(queen.address.textual());
@@ -105,83 +90,14 @@ public final class Examples {
                 "\"city\":\"Amsterdam\"}}";
 
         try {
-            this.deserializer.deserializeJson(json, ValidPerson.class);
+            this.mapMate.deserializeJson(json, ValidPerson.class);
         } catch (AggregatedValidationException e) {
             System.out.println(e.getValidationErrors());
         }
     }
 
-    @Test
-    public void example_complexPerson() {
-        final DeserializationDTOMethodFactory deserializerAdapter = complexPersonAdapter();
-
-        final Deserializer deserializer = aDeserializer()
-                .withJsonUnmarshaller(new Gson()::fromJson)
-                .thatScansThePackage("com.envimate.mapmate.examples.domain")
-                .forCustomPrimitives()
-                .filteredBy(includingAll())
-                .thatAre().deserializedUsingTheMethodNamed("fromString")
-                .thatScansThePackage("com.envimate.mapmate.examples.domain")
-                .forDataTransferObjects()
-                .filteredBy(includingAll())
-                .excluding(ComplexPerson.class)
-                .thatAre().deserializedUsingTheSingleFactoryMethod()
-                .withDataTransferObject(ComplexPerson.class)
-                .deserializedUsing(deserializerAdapter)
-                .build();
-
-        final String json = "{\n" +
-                "  \"firstNames\": [\"Patrick\", \"Richard\", \"Nune\"],\n" +
-                "  \"addresses\": [\n" +
-                "    {\n" +
-                "      \"streetName\": \"Strasse\",\n" +
-                "      \"houseNumber\": \"123\",\n" +
-                "      \"zipCode\": \"12345\",\n" +
-                "      \"city\": \"Berlin\",\n" +
-                "      \"region\": \"Berlin-west\",\n" +
-                "      \"country\": \"Berlinnia\"\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"streetName\": \"Dr ehaushof\",\n" +
-                "      \"houseNumber\": \"83\",\n" +
-                "      \"zipCode\": \"5042EY\",\n" +
-                "      \"city\": \"Tilburg\",\n" +
-                "      \"region\": \"Noord-brabant\",\n" +
-                "      \"country\": \"Netherlands\"\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}";
-
-        final ComplexPerson personWithComplexes = deserializer.deserializeJson(json, ComplexPerson.class);
-
-        System.out.println(personWithComplexes);
-    }
-
-    private DeserializationDTOMethodFactory complexPersonAdapter() {
-        return targetType -> new DeserializationDTOMethod() {
-            @Override
-            public Object deserialize(Class<?> targetType, Map<String, Object> elements) throws Exception {
-                final FirstName[] firstNames = (FirstName[]) elements.get("firstNames");
-                final Address[] addresses = (Address[]) elements.get("addresses");
-                return ComplexPerson.person(
-                        Arrays.asList(firstNames),
-                        Arrays.asList(addresses));
-            }
-
-            @Override
-            public Map<String, Class<?>> elements(Class<?> targetType) {
-                final Map<String, Class<?>> elements = new HashMap<>();
-                elements.put("firstNames", FirstName[].class);
-                elements.put("addresses", Address[].class);
-                return elements;
-            }
-        };
-    }
-
     @Before
     public void before() {
-        this.serializer = this.injector.getInstance(Serializer.class);
-        this.deserializer = this.injector.getInstance(Deserializer.class);
+        this.mapMate = this.injector.getInstance(MapMate.class);
     }
-
 }

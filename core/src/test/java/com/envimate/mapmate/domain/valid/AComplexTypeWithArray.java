@@ -21,17 +21,18 @@
 
 package com.envimate.mapmate.domain.valid;
 
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
+@ToString
 @EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AComplexTypeWithArray {
     public final ANumber[] array;
 
-    private AComplexTypeWithArray(final ANumber[] array) {
-        this.array = array;
-    }
-
-    public static AComplexTypeWithArray aComplexClassWithArrays(final ANumber[] array) {
+    public static AComplexTypeWithArray deserialize(final ANumber[] array) {
         return new AComplexTypeWithArray(array);
     }
 }

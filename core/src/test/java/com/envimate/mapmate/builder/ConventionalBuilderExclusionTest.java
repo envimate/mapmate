@@ -21,7 +21,9 @@
 
 package com.envimate.mapmate.builder;
 
-import com.envimate.mapmate.DefinitionNotFoundException;
+import com.envimate.mapmate.MapMate;
+import com.envimate.mapmate.builder.scanning.DefaultPackageScanner;
+import com.envimate.mapmate.definitions.DefinitionNotFoundException;
 import com.envimate.mapmate.builder.models.excluded.Body;
 import com.envimate.mapmate.builder.models.excluded.Email;
 import com.envimate.mapmate.builder.models.excluded.EmailAddress;

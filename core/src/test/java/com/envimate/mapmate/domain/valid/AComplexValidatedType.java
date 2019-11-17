@@ -21,14 +21,18 @@
 
 package com.envimate.mapmate.domain.valid;
 
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AComplexValidatedType {
-    public AValidatedString leaf;
+    public final AValidatedString leaf;
 
-    private AComplexValidatedType(final AValidatedString leaf) {
-        this.leaf = leaf;
-    }
-
-    public static AComplexValidatedType aComplexValidatedType(final AValidatedString leaf) {
+    public static AComplexValidatedType deserialize(final AValidatedString leaf) {
         if (leaf == null) {
             throw AValidationException.aValidationException("leaf cannot be null", "leaf");
         }

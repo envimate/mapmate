@@ -30,17 +30,12 @@
         <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE"/>
     </Match>
     <Match>
-        <Class name="com.envimate.mapmate.builder.DefaultPackageScanner"/>
+        <Class name="com.envimate.mapmate.builder.scanning.DefaultPackageScanner"/>
         <Method name="scan"/>
         <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE"/>
     </Match>
     <Match>
-        <Class name="com.envimate.mapmate.filters.ScanablePackage"/>
-        <Method name="findClasses"/>
-        <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE"/>
-    </Match>
-    <Match>
-        <Class name="com.envimate.mapmate.MapmateTest"/>
+        <Class name="com.envimate.mapmate.ParameterNameTest"/>
         <Bug pattern="NS_DANGEROUS_NON_SHORT_CIRCUIT"/>
     </Match>
     <Match>
@@ -60,7 +55,7 @@
         <Bug pattern="UUF_UNUSED_PUBLIC_OR_PROTECTED_FIELD"/>
     </Match>
     <Match>
-        <Class name="com.envimate.mapmate.reflections.CachedReflectionType"/>
+        <Class name="com.envimate.mapmate.builder.detection.customprimitive.CachedReflectionType"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
 </FindBugsFilter>

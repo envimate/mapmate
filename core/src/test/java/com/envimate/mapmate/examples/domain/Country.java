@@ -28,11 +28,11 @@ public final class Country {
         this.value = value;
     }
 
-    public static Country fromString(final String value) {
+    public static Country fromStringValue(final String value) {
         return new Country(value);
     }
 
-    public String internalValueForMapping() {
+    public String stringValue() {
         return this.value;
     }
 }

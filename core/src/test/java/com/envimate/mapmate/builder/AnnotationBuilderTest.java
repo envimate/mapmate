@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.builder;
 
+import com.envimate.mapmate.MapMate;
 import com.envimate.mapmate.builder.conventional.ConventionalDetectors;
 import com.envimate.mapmate.builder.models.annotated.Email;
 import com.envimate.mapmate.builder.validation.CustomTypeValidationException;
@@ -36,9 +37,9 @@ public final class AnnotationBuilderTest {
 
     public static final String EMAIL_JSON = "{" +
             "\"receiver\":\"receiver@example.com\"," +
-            "\"body\":\"Hello World!!!\"," +
             "\"sender\":\"sender@example.com\"," +
-            "\"subject\":\"Hello\"" +
+            "\"subject\":\"Hello\"," +
+            "\"body\":\"Hello World!!!\"" +
             "}";
     public static final Email EMAIL = Email.restore(
             emailAddress("sender@example.com"),

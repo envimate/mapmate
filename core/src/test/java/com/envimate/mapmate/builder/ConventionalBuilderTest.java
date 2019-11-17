@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.builder;
 
+import com.envimate.mapmate.MapMate;
 import com.envimate.mapmate.builder.models.constructor.GroupTicketRequest;
 import com.envimate.mapmate.builder.models.constructor.Name;
 import com.envimate.mapmate.builder.models.conventional.Body;
@@ -42,9 +43,9 @@ public final class ConventionalBuilderTest {
 
     public static final String EMAIL_JSON = "{" +
             "\"receiver\":\"receiver@example.com\"," +
-            "\"body\":\"Hello World!!!\"," +
             "\"sender\":\"sender@example.com\"," +
-            "\"subject\":\"Hello\"" +
+            "\"subject\":\"Hello\"," +
+            "\"body\":\"Hello World!!!\"" +
             "}";
     public static final Email EMAIL = Email.deserialize(
             EmailAddress.fromStringValue("sender@example.com"),

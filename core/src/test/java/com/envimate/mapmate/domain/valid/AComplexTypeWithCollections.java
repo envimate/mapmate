@@ -21,20 +21,22 @@
 
 package com.envimate.mapmate.domain.valid;
 
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
 import java.util.List;
 
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AComplexTypeWithCollections {
     public final List<AString> arrayList;
     public final ANumber[] array;
 
-    private AComplexTypeWithCollections(final List<AString> arrayList, final ANumber[] array) {
-        this.arrayList = arrayList;
-        this.array = array;
-    }
-
-    public static AComplexTypeWithCollections aComplexTypeWithCollection(
-            final List<AString> arrayList,
-            final ANumber[] array) {
+    public static AComplexTypeWithCollections deserialize(final List<AString> arrayList,
+                                                          final ANumber[] array) {
         return new AComplexTypeWithCollections(arrayList, array);
     }
 }

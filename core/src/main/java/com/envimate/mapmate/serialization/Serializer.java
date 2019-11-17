@@ -21,42 +21,40 @@
 
 package com.envimate.mapmate.serialization;
 
-import com.envimate.mapmate.Definition;
+import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
+import com.envimate.mapmate.definitions.Definition;
+import com.envimate.mapmate.definitions.Definitions;
+import com.envimate.mapmate.definitions.SerializedObjectDefinition;
+import com.envimate.mapmate.marshalling.Marshaller;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
-import com.envimate.mapmate.serialization.builder.SerializerBuilder;
+import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
-import static com.envimate.mapmate.serialization.builder.SerializerBuilder.aSerializerBuilder;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.util.Objects.isNull;
 
-@SuppressWarnings("rawtypes")
 public final class Serializer {
     private final MarshallerRegistry<Marshaller> marshallers;
     private final CircularReferenceDetector circularReferenceDetector;
-    private final SerializableDefinitions definitions;
+    private final Definitions definitions;
 
     private Serializer(final MarshallerRegistry<Marshaller> marshallers,
                        final CircularReferenceDetector circularReferenceDetector,
-                       final SerializableDefinitions definitions) {
+                       final Definitions definitions) {
         this.marshallers = marshallers;
         this.circularReferenceDetector = circularReferenceDetector;
         this.definitions = definitions;
     }
 
     public static Serializer theSerializer(final MarshallerRegistry<Marshaller> marshallers,
-                                           final SerializableDefinitions definitions) {
+                                           final Definitions definitions) {
         final CircularReferenceDetector circularReferenceDetector = new CircularReferenceDetector();
         return new Serializer(marshallers, circularReferenceDetector, definitions);
-    }
-
-    public static SerializerBuilder aSerializer() {
-        return aSerializerBuilder();
     }
 
     public Set<MarshallingType> supportedMarshallingTypes() {
@@ -142,15 +140,28 @@ public final class Serializer {
 
     private Object serializeDefinition(final Object object) {
         final Definition definition = this.definitions.getDefinitionForObject(object);
-        if (definition instanceof SerializableCustomPrimitive) {
-            final SerializableCustomPrimitive customPrimitive = (SerializableCustomPrimitive) definition;
-            return customPrimitive.serialize(object);
+        if (definition instanceof CustomPrimitiveDefinition) {
+            final CustomPrimitiveDefinition customPrimitive = (CustomPrimitiveDefinition) definition;
+            return customPrimitive.serializer().serialize(object);
         }
-        if (definition instanceof SerializableDataTransferObject) {
-            final SerializableDataTransferObject dataTransferObject = (SerializableDataTransferObject) definition;
-            return dataTransferObject.serialize(object, this::normalize);
+        if (definition instanceof SerializedObjectDefinition) {
+            final SerializedObjectDefinition dataTransferObject = (SerializedObjectDefinition) definition;
+            return serializeSerializedObject(dataTransferObject, object);
         }
         throw new UnsupportedOperationException("This should never happen.");
+    }
+
+    private Object serializeSerializedObject(final SerializedObjectDefinition definition,
+                                             final Object object) {
+        final SerializationFields fields = definition.serializer().fields();
+        final Map<String, Object> map = new HashMap<>(10);
+        fields.fields().forEach(serializationField -> {
+            final String name = serializationField.name();
+            final Object value = serializationField.query(object);
+            final Object serializedValue = normalize(value);
+            map.put(name, serializedValue);
+        });
+        return map;
     }
 
     private Object serializeMap(final Object object) {
@@ -173,7 +184,7 @@ public final class Serializer {
                 .collect(Collectors.toList());
     }
 
-    public SerializableDefinitions getDefinitions() {
+    public Definitions getDefinitions() {
         return this.definitions;
     }
 }

@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder.recipes.marshallers.jackson;
 
-import com.envimate.mapmate.builder.MapMateBuilder;
+import com.envimate.mapmate.MapMateBuilder;
 import com.envimate.mapmate.builder.recipes.Recipe;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;

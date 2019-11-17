@@ -21,52 +21,26 @@
 
 package com.envimate.mapmate.domain.valid;
 
-import java.util.Objects;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AValidatedString {
     private static final int MIN_VALUE_LENGTH = 5;
     private final String value;
 
-    private AValidatedString(final String value) {
-        this.value = value;
-    }
-
-    public static AValidatedString fromString(final String value) {
+    public static AValidatedString fromStringValue(final String value) {
         if (value.length() < MIN_VALUE_LENGTH) {
             throw AnException.anException("value must contain atleast 5 characters");
         }
         return new AValidatedString(value);
     }
 
-    public String internalValueForMapping() {
+    public String stringValue() {
         return this.value;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final AValidatedString aString = (AValidatedString) o;
-        return Objects.equals(this.value, aString.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.value);
-    }
-
-    @Override
-    public String toString() {
-        return "AString{" +
-                "value='" + this.value + '\'' +
-                '}';
-    }
-
-    public boolean isEmpty() {
-        return this.value.isEmpty();
     }
 }

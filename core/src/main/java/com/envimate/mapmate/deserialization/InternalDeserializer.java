@@ -21,8 +21,11 @@
 
 package com.envimate.mapmate.deserialization;
 
-import com.envimate.mapmate.Definition;
-import com.envimate.mapmate.deserialization.methods.DeserializationDTOMethod;
+import com.envimate.mapmate.definitions.Definition;
+import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
+import com.envimate.mapmate.definitions.Definitions;
+import com.envimate.mapmate.definitions.SerializedObjectDefinition;
+import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.deserialization.validation.ExceptionTracker;
 import com.envimate.mapmate.deserialization.validation.ValidationErrorsMapping;
 import com.envimate.mapmate.deserialization.validation.ValidationResult;
@@ -35,21 +38,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static com.envimate.mapmate.DefinitionNotFoundException.definitionNotFound;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.lang.reflect.Array.newInstance;
 
 @SuppressWarnings({"unchecked", "InstanceofConcreteClass", "CastToConcreteClass", "rawtypes"})
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 final class InternalDeserializer {
-    private final DeserializableDefinitions definitions;
+    private final Definitions definitions;
     private final ValidationErrorsMapping onValidationErrors;
 
-    static InternalDeserializer internalDeserializer(final DeserializableDefinitions deserializableDefinitions,
+    static InternalDeserializer internalDeserializer(final Definitions definitions,
                                                      final ValidationErrorsMapping validationErrorsMapping) {
-        validateNotNull(deserializableDefinitions, "deserializableDefinitions");
+        validateNotNull(definitions, "definitions");
         validateNotNull(validationErrorsMapping, "validationErrorsMapping");
-        return new InternalDeserializer(deserializableDefinitions, validationErrorsMapping);
+        return new InternalDeserializer(definitions, validationErrorsMapping);
     }
 
     <T> T deserialize(final Object input,
@@ -79,33 +81,32 @@ final class InternalDeserializer {
         if (injected instanceof List) {
             return this.deserializeArray((List) injected, targetType, exceptionTracker, injector);
         }
-        final Definition definition = this.definitions.getDefinitionForType(targetType)
-                .orElseThrow(() -> definitionNotFound(targetType));
-        if (definition instanceof DeserializableDataTransferObject) {
+        final Definition definition = this.definitions.getDefinitionForType(targetType);
+        if (definition instanceof SerializedObjectDefinition) {
             return this.deserializeDataTransferObject(
                     (Map<String, Object>) injected,
-                    (DeserializableDataTransferObject) definition,
+                    (SerializedObjectDefinition) definition,
                     exceptionTracker,
                     injector);
         }
-        if (definition instanceof DeserializableCustomPrimitive) {
+        if (definition instanceof CustomPrimitiveDefinition) {
             return this.deserializeCustomPrimitive(
                     (String) injected,
-                    (DeserializableCustomPrimitive) definition,
+                    (CustomPrimitiveDefinition) definition,
                     exceptionTracker);
         }
         throw new UnsupportedOperationException(definition.getClass().getName());
     }
 
     private <T> T deserializeDataTransferObject(final Map<String, Object> input,
-                                                final DeserializableDataTransferObject definition,
+                                                final SerializedObjectDefinition definition,
                                                 final ExceptionTracker exceptionTracker,
                                                 final Injector injector) {
-        final DeserializationDTOMethod deserializationDTOMethod = definition.getDeserializationMethod();
-        final Class type = definition.getType();
-        final Map<String, Class<?>> elementTypes = deserializationDTOMethod.elements(type);
+        final SerializedObjectDeserializer deserializer = definition.deserializer();
+        final Class type = definition.type();
+        final DeserializationFields deserializationFields = deserializer.fields();
         final Map<String, Object> elements = new HashMap<>(0);
-        for (final Entry<String, Class<?>> entry : elementTypes.entrySet()) {
+        for (final Entry<String, Class<?>> entry : deserializationFields.fields().entrySet()) {
             final String elementName = entry.getKey();
             final Class elementType = entry.getValue();
 
@@ -130,11 +131,11 @@ final class InternalDeserializer {
             return null;
         } else {
             try {
-                return (T) deserializationDTOMethod.deserialize(type, elements);
+                return (T) deserializer.deserialize(type, elements);
             } catch (final Exception e) {
                 final String message = String.format(
                         "Exception calling deserialize(type: %s, elements: %s) on deserializationMethod %s",
-                        type, elements, deserializationDTOMethod
+                        type, elements, deserializer
                 );
                 exceptionTracker.track(e, message);
                 return null;
@@ -143,10 +144,10 @@ final class InternalDeserializer {
     }
 
     private <T> T deserializeCustomPrimitive(final String input,
-                                             final DeserializableCustomPrimitive definition,
+                                             final CustomPrimitiveDefinition definition,
                                              final ExceptionTracker exceptionTracker) {
         try {
-            return (T) definition.deserialize(input);
+            return (T) definition.deserializer().deserialize(input);
         } catch (final Exception e) {
             final String message = String.format(
                     "Exception calling deserialize(input: %s) on definition %s",

@@ -32,7 +32,7 @@ public final class ValidPerson {
         this.address = address;
     }
 
-    public static ValidPerson person(final FullName fullName, final Address address) {
+    public static ValidPerson deserialize(final FullName fullName, final Address address) {
         if (Objects.isNull(fullName)) {
             throw new IllegalArgumentException("fullName must not be null");
         }

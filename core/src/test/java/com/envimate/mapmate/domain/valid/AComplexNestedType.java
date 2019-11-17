@@ -21,19 +21,19 @@
 
 package com.envimate.mapmate.domain.valid;
 
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
+@ToString
 @EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AComplexNestedType implements AComplexNestedTypeInterface {
     public final AComplexType complexType1;
     public final AComplexType complexType2;
 
-    private AComplexNestedType(final AComplexType complexType1, final AComplexType complexType2) {
-        this.complexType1 = complexType1;
-        this.complexType2 = complexType2;
-    }
-
-    public static AComplexNestedType aComplexNestedType(final AComplexType complexType1, final AComplexType complexType2) {
+    public static AComplexNestedType deserialize(final AComplexType complexType1, final AComplexType complexType2) {
         return new AComplexNestedType(complexType1, complexType2);
     }
 }

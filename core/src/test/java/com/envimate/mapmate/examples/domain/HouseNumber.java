@@ -28,11 +28,11 @@ public final class HouseNumber {
         this.value = value;
     }
 
-    public static HouseNumber fromString(final String value) {
+    public static HouseNumber fromStringValue(final String value) {
         return new HouseNumber(value);
     }
 
-    public String internalValueForMapping() {
+    public String stringValue() {
         return this.value;
     }
 }

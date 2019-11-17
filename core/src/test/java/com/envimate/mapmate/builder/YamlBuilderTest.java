@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.builder;
 
+import com.envimate.mapmate.MapMate;
 import com.envimate.mapmate.builder.models.conventional.Body;
 import com.envimate.mapmate.builder.models.conventional.Email;
 import com.envimate.mapmate.builder.models.conventional.EmailAddress;
@@ -33,11 +34,11 @@ import org.junit.Test;
 
 public final class YamlBuilderTest {
 
-    public static final String EMAIL_XML = "---\n" +
+    public static final String EMAIL_YAML = "---\n" +
             "receiver: \"receiver@example.com\"\n" +
-            "body: \"Hello World!!!\"\n" +
             "sender: \"sender@example.com\"\n" +
-            "subject: \"Hello\"\n";
+            "subject: \"Hello\"\n" +
+            "body: \"Hello World!!!\"\n";
     public static final Email EMAIL = Email.deserialize(
             EmailAddress.fromStringValue("sender@example.com"),
             EmailAddress.fromStringValue("receiver@example.com"),
@@ -57,12 +58,12 @@ public final class YamlBuilderTest {
     @Test
     public void testEmailSerialization() {
         final String result = theYamlMapMateInstance().serializeToJson(EMAIL);
-        Assert.assertEquals(EMAIL_XML, result);
+        Assert.assertEquals(EMAIL_YAML, result);
     }
 
     @Test
     public void testEmailDeserialization() {
-        final Email result = theYamlMapMateInstance().deserializeJson(EMAIL_XML, Email.class);
+        final Email result = theYamlMapMateInstance().deserializeJson(EMAIL_YAML, Email.class);
         Assert.assertEquals(EMAIL, result);
     }
 }

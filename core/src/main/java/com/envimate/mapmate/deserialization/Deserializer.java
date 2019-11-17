@@ -21,8 +21,8 @@
 
 package com.envimate.mapmate.deserialization;
 
-import com.envimate.mapmate.Definition;
-import com.envimate.mapmate.deserialization.builder.DeserializerBuilder;
+import com.envimate.mapmate.definitions.Definition;
+import com.envimate.mapmate.definitions.Definitions;
 import com.envimate.mapmate.deserialization.validation.ExceptionTracker;
 import com.envimate.mapmate.deserialization.validation.ValidationErrorsMapping;
 import com.envimate.mapmate.deserialization.validation.ValidationMappings;
@@ -31,6 +31,7 @@ import com.envimate.mapmate.injector.InjectorFactory;
 import com.envimate.mapmate.injector.InjectorLambda;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
+import com.envimate.mapmate.marshalling.Unmarshaller;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -39,10 +40,8 @@ import lombok.ToString;
 import java.util.Map;
 import java.util.Set;
 
-import static com.envimate.mapmate.DefinitionNotFoundException.definitionNotFound;
 import static com.envimate.mapmate.deserialization.InternalDeserializer.internalDeserializer;
 import static com.envimate.mapmate.deserialization.Unmarshallers.unmarshallers;
-import static com.envimate.mapmate.deserialization.builder.DeserializerBuilder.aDeserializerBuilder;
 import static com.envimate.mapmate.deserialization.validation.ExceptionTracker.emptyTracker;
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
@@ -51,14 +50,14 @@ import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Deserializer {
-    private final DeserializableDefinitions definitions;
+    private final Definitions definitions;
     private final ValidationMappings validationMappings;
     private final Unmarshallers unmarshallers;
     private final InternalDeserializer internalDeserializer;
     private final InjectorFactory injectorFactory;
 
     public static Deserializer theDeserializer(final MarshallerRegistry<Unmarshaller> unmarshallerRegistry,
-                                               final DeserializableDefinitions definitions,
+                                               final Definitions definitions,
                                                final ValidationMappings exceptionMapping,
                                                final ValidationErrorsMapping onValidationErrors,
                                                final boolean validateNoUnsupportedOutgoingReferences,
@@ -73,24 +72,19 @@ public final class Deserializer {
             definitions.validateNoUnsupportedOutgoingReferences();
         }
 
-        final Unmarshallers unmarshalles = unmarshallers(unmarshallerRegistry, definitions);
+        final Unmarshallers unmarshallers = unmarshallers(unmarshallerRegistry, definitions);
         final InternalDeserializer internalDeserializer = internalDeserializer(definitions, onValidationErrors);
-        return new Deserializer(definitions, exceptionMapping, unmarshalles, internalDeserializer, injectorFactory);
-    }
-
-    public static DeserializerBuilder aDeserializer() {
-        return aDeserializerBuilder();
+        return new Deserializer(definitions, exceptionMapping, unmarshallers, internalDeserializer, injectorFactory);
     }
 
     public <T> T deserializeFromMap(final Map<String, Object> input,
                                     final Class<T> targetType) {
         validateNotNull(input, "input");
 
-        final Definition definition = this.definitions.getDefinitionForType(targetType)
-                .orElseThrow(() -> definitionNotFound(targetType));
+        final Definition definition = this.definitions.getDefinitionForType(targetType);
 
-        if (!definition.isDataTransferObject()) {
-            throw new UnsupportedOperationException("Only DTOs can be deserialized from map but found: " + definition);
+        if (!definition.isSerializedObject()) {
+            throw new UnsupportedOperationException("Only serialized objects can be deserialized from map but found: " + definition);
         }
         final ExceptionTracker exceptionTracker = emptyTracker(input, this.validationMappings);
         final Injector injector = this.injectorFactory.create();
@@ -137,7 +131,7 @@ public final class Deserializer {
         return this.unmarshallers.supportedMarshallingTypes();
     }
 
-    public DeserializableDefinitions getDefinitions() {
+    public Definitions getDefinitions() {
         return this.definitions;
     }
 }

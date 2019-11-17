@@ -21,9 +21,8 @@
 
 package com.envimate.mapmate.builder.detection.customprimitive.deserialization;
 
-import com.envimate.mapmate.builder.detection.customprimitive.CustomPrimitiveDeserializationDetector;
-import com.envimate.mapmate.builder.definitions.deserializers.CustomPrimitiveDeserializer;
-import com.envimate.mapmate.reflections.CachedReflectionType;
+import com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
+import com.envimate.mapmate.builder.detection.customprimitive.CachedReflectionType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +33,8 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static com.envimate.mapmate.builder.definitions.IncompatibleCustomPrimitiveException.incompatibleCustomPrimitiveException;
-import static com.envimate.mapmate.builder.definitions.deserializers.CustomPrimitiveByMethodDeserializer.createDeserializer;
+import static com.envimate.mapmate.builder.detection.customprimitive.IncompatibleCustomPrimitiveException.incompatibleCustomPrimitiveException;
+import static com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveByMethodDeserializer.createDeserializer;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;

@@ -21,9 +21,11 @@
 
 package com.envimate.mapmate.deserialization;
 
-import com.envimate.mapmate.Definition;
+import com.envimate.mapmate.definitions.Definition;
+import com.envimate.mapmate.definitions.Definitions;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
+import com.envimate.mapmate.marshalling.Unmarshaller;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +37,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import static com.envimate.mapmate.DefinitionNotFoundException.definitionNotFound;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
 @ToString
@@ -45,13 +46,13 @@ final class Unmarshallers {
     private static final Pattern PATTERN = Pattern.compile("\"");
 
     private final MarshallerRegistry<Unmarshaller> unmarshallers;
-    private final DeserializableDefinitions definitions;
+    private final Definitions definitions;
 
     static Unmarshallers unmarshallers(final MarshallerRegistry<Unmarshaller> unmarshallers,
-                                       final DeserializableDefinitions deserializableDefinitions) {
+                                       final Definitions definitions) {
         validateNotNull(unmarshallers, "unmarshallers");
-        validateNotNull(deserializableDefinitions, "deserializableDefinitions");
-        return new Unmarshallers(unmarshallers, deserializableDefinitions);
+        validateNotNull(definitions, "definitions");
+        return new Unmarshallers(unmarshallers, definitions);
     }
 
     @SuppressWarnings("unchecked")
@@ -80,8 +81,7 @@ final class Unmarshallers {
             return null;
         }
         final Unmarshaller unmarshaller = this.unmarshallers.getForType(marshallingType);
-        final Definition definition = this.definitions.getDefinitionForType(targetType)
-                .orElseThrow(() -> definitionNotFound(targetType));
+        final Definition definition = this.definitions.getDefinitionForType(targetType);
 
         final String trimmedInput = input.trim();
         if (targetType.isArray() || Collection.class.isAssignableFrom(targetType)) {
@@ -95,7 +95,7 @@ final class Unmarshallers {
                         e
                 );
             }
-        } else if (definition.isDataTransferObject()) {
+        } else if (definition.isSerializedObject()) {
             try {
                 return unmarshaller.unmarshal(trimmedInput, Map.class);
             } catch (final Exception e) {

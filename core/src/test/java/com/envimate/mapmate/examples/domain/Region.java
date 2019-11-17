@@ -28,11 +28,11 @@ public final class Region {
         this.value = value;
     }
 
-    public static Region fromString(final String value) {
+    public static Region fromStringValue(final String value) {
         return new Region(value);
     }
 
-    public String internalValueForMapping() {
+    public String stringValue() {
         return this.value;
     }
 }

@@ -21,15 +21,13 @@
 
 package com.envimate.mapmate.examples;
 
-import com.envimate.mapmate.deserialization.Deserializer;
-import com.envimate.mapmate.serialization.Serializer;
+import com.envimate.mapmate.MapMate;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 
 public final class ExampleModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(Deserializer.class).toProvider(DeserializerProvider.class).in(Singleton.class);
-        bind(Serializer.class).toProvider(SerializerProvider.class).in(Singleton.class);
+        bind(MapMate.class).toProvider(MapMateProvider.class).in(Singleton.class);
     }
 }

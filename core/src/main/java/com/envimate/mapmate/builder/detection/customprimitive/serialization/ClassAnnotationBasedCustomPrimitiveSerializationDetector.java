@@ -21,9 +21,8 @@
 
 package com.envimate.mapmate.builder.detection.customprimitive.serialization;
 
-import com.envimate.mapmate.builder.detection.customprimitive.CustomPrimitiveSerializationDetector;
-import com.envimate.mapmate.builder.definitions.serializers.CustomPrimitiveSerializer;
-import com.envimate.mapmate.reflections.CachedReflectionType;
+import com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
+import com.envimate.mapmate.builder.detection.customprimitive.CachedReflectionType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +33,8 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static com.envimate.mapmate.builder.definitions.IncompatibleCustomPrimitiveException.incompatibleCustomPrimitiveException;
-import static com.envimate.mapmate.builder.definitions.serializers.CustomPrimitiveByMethodSerializer.createSerializer;
+import static com.envimate.mapmate.builder.detection.customprimitive.IncompatibleCustomPrimitiveException.incompatibleCustomPrimitiveException;
+import static com.envimate.mapmate.serialization.serializers.customprimitives.MethodCustomPrimitiveSerializer.createSerializer;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.util.Optional.ofNullable;
 

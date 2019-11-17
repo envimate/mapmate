@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder.recipes.marshallers.urlencoded;
 
-import com.envimate.mapmate.serialization.Marshaller;
+import com.envimate.mapmate.marshalling.Marshaller;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;

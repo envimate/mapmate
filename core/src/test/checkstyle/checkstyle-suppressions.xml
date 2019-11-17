@@ -39,11 +39,12 @@
     <suppress checks="MethodLength" files="MapMateBuilder.java"/>
     <suppress checks="VisibilityModifier" files="MapMateBuilder.java"/>
     <suppress
-            checks="MagicNumber|MethodName|IllegalCatch|LineLength|MethodLength|FinalParameters|FileLength|InnerTypeLast"
-            files="DeserializerBuilderTest|DeserializerTest|SerializerTest|SerializerBuilderTest|CircularReferenceDetectorTest|Examples|Instances"/>
+            checks="MagicNumber|MethodName|IllegalCatch|LineLength|MethodLength|FinalParameters|LineLength|InnerTypeLast"
+            files="Examples|Instances"/>
     <suppress checks="VisibilityModifier" files="AComplexValidatedType|ACyclicType|User"/>
     <suppress checks="MethodName|Regex" files="Examples"/>
     <suppress checks="ClassFanOutComplexityCheck" files="MapMateBuilder.java"/>
     <suppress checks="RedundantModifier" files="DefaultPackageScanner.java"/>
+    <suppress checks="MethodName|MagicNumber|LineLength|FileLength" files=".*Specs" />
 
 </suppressions>

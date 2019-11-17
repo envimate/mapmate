@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder.lowlevel.withPrimitives;
 
-import com.envimate.mapmate.builder.MapMate;
+import com.envimate.mapmate.MapMate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;

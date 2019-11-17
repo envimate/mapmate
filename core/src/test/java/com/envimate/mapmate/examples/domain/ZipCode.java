@@ -28,11 +28,11 @@ public final class ZipCode {
         this.value = value;
     }
 
-    public static ZipCode fromString(final String value) {
+    public static ZipCode fromStringValue(final String value) {
         return new ZipCode(value);
     }
 
-    public String internalValueForMapping() {
+    public String stringValue() {
         return this.value;
     }
 }

@@ -21,37 +21,25 @@
 
 package com.envimate.mapmate.domain.valid;
 
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-import java.io.Serializable;
-
+@ToString
 @EqualsAndHashCode
-public final class AString implements Serializable {
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class AString {
     private final String value;
 
-    private AString(final String value) {
-        this.value = value;
-    }
-
-    public static AString fromString(final String value) {
+    public static AString fromStringValue(final String value) {
         if (value.contains("~")) {
             throw AnException.anException("value must not contain '~'");
         }
         return new AString(value);
     }
 
-    public String internalValueForMapping() {
+    public String stringValue() {
         return this.value;
-    }
-
-    @Override
-    public String toString() {
-        return "AString{" +
-                "value='" + this.value + '\'' +
-                '}';
-    }
-
-    public boolean isEmpty() {
-        return this.value.isEmpty();
     }
 }

@@ -30,7 +30,7 @@ public final class Person {
         this.address = address;
     }
 
-    public static Person person(final FullName fullName, final Address address) {
+    public static Person deserialize(final FullName fullName, final Address address) {
         return new Person(fullName, address);
     }
 

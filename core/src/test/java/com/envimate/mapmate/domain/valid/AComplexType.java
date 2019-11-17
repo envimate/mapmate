@@ -21,24 +21,24 @@
 
 package com.envimate.mapmate.domain.valid;
 
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 @ToString
 @EqualsAndHashCode
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AComplexType {
     public final AString stringA;
     public final AString stringB;
     public final ANumber number1;
     public final ANumber number2;
 
-    public static AComplexType aComplexType(
-            final AString stringA,
-            final AString stringB,
-            final ANumber number1,
-            final ANumber number2) {
+    public static AComplexType deserialize(final AString stringA,
+                                           final AString stringB,
+                                           final ANumber number1,
+                                           final ANumber number2) {
         return new AComplexType(stringA, stringB, number1, number2);
     }
 }

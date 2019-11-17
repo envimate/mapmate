@@ -28,11 +28,11 @@ public final class CityName {
         this.value = value;
     }
 
-    public static CityName fromString(final String value) {
+    public static CityName fromStringValue(final String value) {
         return new CityName(value);
     }
 
-    public String internalValueForMapping() {
+    public String stringValue() {
         return this.value;
     }
 }

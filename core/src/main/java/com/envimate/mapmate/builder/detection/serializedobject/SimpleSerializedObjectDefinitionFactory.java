@@ -21,23 +21,26 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject;
 
-import com.envimate.mapmate.builder.definitions.SerializedObjectDefinition;
-import com.envimate.mapmate.builder.definitions.SerializedObjectDefinitionFactory;
+import com.envimate.mapmate.builder.detection.serializedobject.deserialization.SerializedObjectDeserializationDetector;
+import com.envimate.mapmate.builder.detection.serializedobject.fields.FieldDetector;
+import com.envimate.mapmate.definitions.SerializedObjectDefinition;
+import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
+import com.envimate.mapmate.serialization.serializers.serializedobject.SerializedObjectSerializer;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 
-import static com.envimate.mapmate.builder.detection.serializedobject.FieldDetector.modifierBased;
 import static com.envimate.mapmate.builder.detection.serializedobject.ClassFilter.allowAll;
-import static com.envimate.mapmate.builder.definitions.SerializedObjectDefinition.serializedObjectDefinition;
+import static com.envimate.mapmate.builder.detection.serializedobject.CodeNeedsToBeCompiledWithParameterNamesException.validateParameterNamesArePresent;
+import static com.envimate.mapmate.builder.detection.serializedobject.fields.ModifierFieldDetector.modifierBased;
+import static com.envimate.mapmate.definitions.SerializedObjectDefinition.serializedObjectDefinition;
+import static com.envimate.mapmate.serialization.serializers.serializedobject.SerializedObjectSerializer.serializedObjectSerializer;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.util.Arrays.asList;
-import static java.util.Arrays.stream;
 import static java.util.Optional.empty;
 
 @ToString
@@ -74,13 +77,15 @@ public final class SimpleSerializedObjectDefinitionFactory implements Serialized
         if (!this.filter.filter(type)) {
             return empty();
         }
-        final Field[] serializedFields = stream(type.getFields())
-                .filter(this.fieldDetector::useForSerialization)
-                .toArray(Field[]::new);
+        validateParameterNamesArePresent(type);
+        final SerializationFields serializationFields = this.fieldDetector.detect(type);
         return this.detectors.stream()
-                .map(detector -> detector.detect(type, serializedFields))
+                .map(detector -> detector.detect(type, serializationFields))
                 .flatMap(Optional::stream)
                 .findFirst()
-                .map(deserializationDTOMethod -> serializedObjectDefinition(type, serializedFields, deserializationDTOMethod));
+                .map(deserializationDTOMethod -> {
+                    final SerializedObjectSerializer serializer = serializedObjectSerializer(type, serializationFields);
+                    return serializedObjectDefinition(type, serializer, deserializationDTOMethod);
+                });
     }
 }

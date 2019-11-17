@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder.recipes.marshallers.urlencoded;
 
-import com.envimate.mapmate.builder.MapMateBuilder;
+import com.envimate.mapmate.MapMateBuilder;
 import com.envimate.mapmate.builder.recipes.Recipe;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import lombok.AccessLevel;

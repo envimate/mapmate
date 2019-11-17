@@ -31,7 +31,7 @@ public final class LastName {
         this.value = value;
     }
 
-    public static LastName fromString(final String value) {
+    public static LastName fromStringValue(final String value) {
         if (Objects.isNull(value)) {
             throw new IllegalArgumentException("value for lastname must not be null");
         }
@@ -41,7 +41,7 @@ public final class LastName {
         return new LastName(value);
     }
 
-    public String internalValueForMapping() {
+    public String stringValue() {
         return this.value;
     }
 

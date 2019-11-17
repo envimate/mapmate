@@ -21,11 +21,11 @@
 
 package com.envimate.mapmate.builder.detection.customprimitive;
 
-import com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition;
-import com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinitionFactory;
-import com.envimate.mapmate.builder.definitions.deserializers.CustomPrimitiveDeserializer;
-import com.envimate.mapmate.builder.definitions.serializers.CustomPrimitiveSerializer;
-import com.envimate.mapmate.reflections.CachedReflectionType;
+import com.envimate.mapmate.builder.detection.customprimitive.deserialization.CustomPrimitiveDeserializationDetector;
+import com.envimate.mapmate.builder.detection.customprimitive.serialization.CustomPrimitiveSerializationDetector;
+import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
+import com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
+import com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +34,8 @@ import lombok.ToString;
 import java.util.List;
 import java.util.Optional;
 
-import static com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition.untypedCustomPrimitiveDefinition;
-import static com.envimate.mapmate.reflections.CachedReflectionType.cachedReflectionType;
+import static com.envimate.mapmate.definitions.CustomPrimitiveDefinition.untypedCustomPrimitiveDefinition;
+import static com.envimate.mapmate.builder.detection.customprimitive.CachedReflectionType.cachedReflectionType;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.util.Arrays.asList;
 import static java.util.Optional.empty;

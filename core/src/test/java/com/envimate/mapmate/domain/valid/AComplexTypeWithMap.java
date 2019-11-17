@@ -21,27 +21,25 @@
 
 package com.envimate.mapmate.domain.valid;
 
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings({"WeakerAccess", "CollectionDeclaredAsConcreteClass"})
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AComplexTypeWithMap {
     public final Map<AString, ANumber> map;
     public final HashMap<AString, ANumber> hashMap;
     public final HashMap<AString, AComplexType> complexMap;
 
-    public AComplexTypeWithMap(
-            final Map<AString, ANumber> map,
-            final HashMap<AString, ANumber> hashMap,
-            final HashMap<AString, AComplexType> complexMap) {
-        this.map = map;
-        this.hashMap = hashMap;
-        this.complexMap = complexMap;
-    }
-
-    public static AComplexTypeWithMap aComplexTypeWithMap(final Map<AString, ANumber> map,
-                                                          final HashMap<AString, ANumber> hashMap1,
-                                                          final HashMap<AString, AComplexType> hashMap2) {
+    public static AComplexTypeWithMap deserialize(final Map<AString, ANumber> map,
+                                                  final HashMap<AString, ANumber> hashMap1,
+                                                  final HashMap<AString, AComplexType> hashMap2) {
         return new AComplexTypeWithMap(map, hashMap1, hashMap2);
     }
 }

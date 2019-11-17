@@ -30,11 +30,11 @@ public final class LastNamePrefix {
         this.value = value;
     }
 
-    public static LastNamePrefix fromString(final String value) {
+    public static LastNamePrefix fromStringValue(final String value) {
         return new LastNamePrefix(value);
     }
 
-    public String internalValueForMapping() {
+    public String stringValue() {
         return this.value;
     }
 

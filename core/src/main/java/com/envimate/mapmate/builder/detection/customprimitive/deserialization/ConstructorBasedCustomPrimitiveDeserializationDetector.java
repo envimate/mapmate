@@ -21,14 +21,13 @@
 
 package com.envimate.mapmate.builder.detection.customprimitive.deserialization;
 
-import com.envimate.mapmate.reflections.CachedReflectionType;
-import com.envimate.mapmate.builder.detection.customprimitive.CustomPrimitiveDeserializationDetector;
-import com.envimate.mapmate.builder.definitions.deserializers.CustomPrimitiveDeserializer;
+import com.envimate.mapmate.builder.detection.customprimitive.CachedReflectionType;
+import com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
 
 import java.lang.reflect.Constructor;
 import java.util.Optional;
 
-import static com.envimate.mapmate.builder.definitions.deserializers.CustomPrimitiveByConstructorDeserializer.createDeserializer;
+import static com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveByConstructorDeserializer.createDeserializer;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 

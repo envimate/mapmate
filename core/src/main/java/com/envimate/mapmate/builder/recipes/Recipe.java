@@ -21,21 +21,23 @@
 
 package com.envimate.mapmate.builder.recipes;
 
-import com.envimate.mapmate.builder.MapMateBuilder;
-import com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition;
-import com.envimate.mapmate.builder.definitions.SerializedObjectDefinition;
+import com.envimate.mapmate.MapMateBuilder;
+import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
+import com.envimate.mapmate.definitions.SerializedObjectDefinition;
 
-import java.util.Map;
+import java.util.List;
+
+import static java.util.Collections.emptyList;
 
 public interface Recipe {
     default void cook(final MapMateBuilder mapMateBuilder) {
     }
 
-    default Map<Class<?>, CustomPrimitiveDefinition> customPrimitiveDefinitions() {
-        return Map.of();
+    default List<CustomPrimitiveDefinition> customPrimitiveDefinitions() {
+        return emptyList();
     }
 
-    default Map<Class<?>, SerializedObjectDefinition> serializedObjectDefinitions() {
-        return Map.of();
+    default List<SerializedObjectDefinition> serializedObjectDefinitions() {
+        return emptyList();
     }
 }

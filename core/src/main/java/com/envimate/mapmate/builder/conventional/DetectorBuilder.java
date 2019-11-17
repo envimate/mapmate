@@ -21,9 +21,9 @@
 
 package com.envimate.mapmate.builder.conventional;
 
-import com.envimate.mapmate.builder.Detector;
-import com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinitionFactory;
-import com.envimate.mapmate.builder.definitions.SerializedObjectDefinitionFactory;
+import com.envimate.mapmate.builder.detection.Detector;
+import com.envimate.mapmate.builder.detection.customprimitive.CustomPrimitiveDefinitionFactory;
+import com.envimate.mapmate.builder.detection.serializedobject.SerializedObjectDefinitionFactory;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +33,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static com.envimate.mapmate.builder.conventional.SimpleDetector.detector;
-import static com.envimate.mapmate.builder.conventional.DefinitionFactories.*;
+import static com.envimate.mapmate.builder.detection.SimpleDetector.detector;
+import static com.envimate.mapmate.builder.conventional.ConventionalDefinitionFactories.*;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;

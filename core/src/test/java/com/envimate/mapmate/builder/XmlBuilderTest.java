@@ -21,11 +21,12 @@
 
 package com.envimate.mapmate.builder;
 
+import com.envimate.mapmate.MapMate;
 import com.envimate.mapmate.builder.models.conventional.Body;
 import com.envimate.mapmate.builder.models.conventional.Email;
 import com.envimate.mapmate.builder.models.conventional.EmailAddress;
 import com.envimate.mapmate.builder.models.conventional.Subject;
-import com.envimate.mapmate.deserialization.Unmarshaller;
+import com.envimate.mapmate.marshalling.Unmarshaller;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 import org.junit.Assert;
@@ -42,16 +43,16 @@ public final class XmlBuilderTest {
             "    <string>receiver@example.com</string>\n" +
             "  </entry>\n" +
             "  <entry>\n" +
-            "    <string>body</string>\n" +
-            "    <string>Hello World!!!</string>\n" +
-            "  </entry>\n" +
-            "  <entry>\n" +
             "    <string>sender</string>\n" +
             "    <string>sender@example.com</string>\n" +
             "  </entry>\n" +
             "  <entry>\n" +
             "    <string>subject</string>\n" +
             "    <string>Hello</string>\n" +
+            "  </entry>\n" +
+            "  <entry>\n" +
+            "    <string>body</string>\n" +
+            "    <string>Hello World!!!</string>\n" +
             "  </entry>\n" +
             "</root>";
     public static final Email EMAIL = Email.deserialize(

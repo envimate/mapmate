@@ -21,17 +21,19 @@
 
 package com.envimate.mapmate.domain.valid;
 
-@SuppressWarnings("WeakerAccess")
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ACyclicType {
     public final AString aString;
     public ACyclicType aCyclicType;
 
-    public ACyclicType(final AString aString) {
-        this.aString = aString;
-    }
-
-    public static ACyclicType aCyclicType(final AString aString) {
+    public static ACyclicType deserialize(final AString aString) {
         return new ACyclicType(aString);
     }
-
 }

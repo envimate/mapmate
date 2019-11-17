@@ -30,11 +30,11 @@ public final class MiddleName {
         this.value = value;
     }
 
-    public static MiddleName fromString(final String value) {
+    public static MiddleName fromStringValue(final String value) {
         return new MiddleName(value);
     }
 
-    public String internalValueForMapping() {
+    public String stringValue() {
         return this.value;
     }
 

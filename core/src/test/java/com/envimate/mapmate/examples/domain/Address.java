@@ -47,7 +47,7 @@ public final class Address {
         this.country = country;
     }
 
-    public static Address address(
+    public static Address deserialize(
             final StreetName streetName,
             final HouseNumber houseNumber,
             final ZipCode zipCode,
@@ -77,11 +77,11 @@ public final class Address {
 
     public String textual() {
         return String.format("%s %s - %s %s - %s - %s",
-                this.streetName.internalValueForMapping(),
-                this.houseNumber.internalValueForMapping(),
-                this.zipCode.internalValueForMapping(),
-                this.city.internalValueForMapping(),
-                this.region.internalValueForMapping(),
-                this.country.internalValueForMapping());
+                this.streetName.stringValue(),
+                this.houseNumber.stringValue(),
+                this.zipCode.stringValue(),
+                this.city.stringValue(),
+                this.region.stringValue(),
+                this.country.stringValue());
     }
 }

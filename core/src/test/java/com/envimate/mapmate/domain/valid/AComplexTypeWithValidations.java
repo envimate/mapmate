@@ -21,6 +21,14 @@
 
 package com.envimate.mapmate.domain.valid;
 
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AComplexTypeWithValidations {
     private static final int MINIMUM_VALUE = 20;
 
@@ -29,18 +37,7 @@ public final class AComplexTypeWithValidations {
     public final ANumber number1;
     public final ANumber number2;
 
-    private AComplexTypeWithValidations(
-            final AString stringA,
-            final AString stringB,
-            final ANumber number1,
-            final ANumber number2) {
-        this.stringA = stringA;
-        this.stringB = stringB;
-        this.number1 = number1;
-        this.number2 = number2;
-    }
-
-    public static AComplexTypeWithValidations aComplexTypeWithValidations(
+    public static AComplexTypeWithValidations deserialize(
             final AString stringA,
             final AString stringB,
             final ANumber number1,

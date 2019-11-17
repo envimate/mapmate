@@ -43,7 +43,7 @@ public final class FullName {
         this.middleNames = middleNames;
     }
 
-    public static FullName fullName(
+    public static FullName deserialize(
             final FirstName firstName,
             final LastName lastName,
             final LastNamePrefix lastNamePrefix,
@@ -61,7 +61,7 @@ public final class FullName {
             names = new MiddleName[]{};
         }
         if (prefix == null) {
-            prefix = LastNamePrefix.fromString("");
+            prefix = LastNamePrefix.fromStringValue("");
         }
 
         return new FullName(firstName, lastName, prefix, names);
@@ -69,9 +69,9 @@ public final class FullName {
 
     public String textual() {
         return String.format("%s %s %s %s",
-                this.firstName.internalValueForMapping(),
-                Arrays.stream(this.middleNames).map(MiddleName::internalValueForMapping).collect(Collectors.joining(" ")),
-                this.lastNamePrefix.internalValueForMapping(),
-                this.lastName.internalValueForMapping());
+                this.firstName.stringValue(),
+                Arrays.stream(this.middleNames).map(MiddleName::stringValue).collect(Collectors.joining(" ")),
+                this.lastNamePrefix.stringValue(),
+                this.lastName.stringValue());
     }
 }

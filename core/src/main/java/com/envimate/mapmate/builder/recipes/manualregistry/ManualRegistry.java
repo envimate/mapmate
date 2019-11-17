@@ -21,29 +21,46 @@
 
 package com.envimate.mapmate.builder.recipes.manualregistry;
 
-import com.envimate.mapmate.builder.Detector;
-import com.envimate.mapmate.builder.MapMateBuilder;
-import com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition;
-import com.envimate.mapmate.builder.definitions.SerializedObjectDefinition;
+import com.envimate.mapmate.MapMateBuilder;
+import com.envimate.mapmate.builder.detection.Detector;
+import com.envimate.mapmate.builder.detection.serializedobject.fields.FieldDetector;
 import com.envimate.mapmate.builder.recipes.Recipe;
+import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
+import com.envimate.mapmate.definitions.Definition;
+import com.envimate.mapmate.definitions.SerializedObjectDefinition;
+import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
+import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
+import com.envimate.mapmate.serialization.serializers.serializedobject.SerializedObjectSerializer;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
-import static com.envimate.mapmate.builder.definitions.CustomPrimitiveDefinition.customPrimitiveDefinition;
-import static com.envimate.mapmate.builder.definitions.SerializedObjectDefinition.serializedObjectDefinition;
+import static com.envimate.mapmate.builder.detection.serializedobject.fields.ModifierFieldDetector.modifierBased;
+import static com.envimate.mapmate.definitions.CustomPrimitiveDefinition.customPrimitiveDefinition;
+import static com.envimate.mapmate.definitions.SerializedObjectDefinition.serializedObjectDefinition;
+import static com.envimate.mapmate.deserialization.deserializers.serializedobjects.MethodSerializedObjectDeserializer.methodNameDeserializer;
+import static com.envimate.mapmate.serialization.serializers.serializedobject.SerializedObjectSerializer.serializedObjectSerializer;
+import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
+import static java.util.Collections.unmodifiableList;
+import static java.util.stream.Collectors.toList;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ManualRegistry implements Recipe {
-    private final Map<Class<?>, CustomPrimitiveDefinition> customPrimitiveDefinitions = new HashMap<>(1);
-    private final Map<Class<?>, SerializedObjectDefinition> serializedObjectDefinitions = new HashMap<>(1);
+    private static final FieldDetector FIELD_DETECTOR = modifierBased();
+
+    private final List<CustomPrimitiveDefinition> customPrimitiveDefinitions = new LinkedList<>();
+    private final List<SerializedObjectDefinition> serializedObjectDefinitions = new LinkedList<>();
     private final List<Class<?>> manuallyAddedCustomPrimitiveTypes = new LinkedList<>();
     private final List<Class<?>> manuallyAddedSerializedObjectTypes = new LinkedList<>();
 
@@ -62,73 +79,82 @@ public final class ManualRegistry implements Recipe {
     }
 
     public ManualRegistry withCustomPrimitive(final CustomPrimitiveDefinition customPrimitive) {
-        final CustomPrimitiveDefinition alreadyAdded = this.customPrimitiveDefinitions.put(
-                customPrimitive.type,
-                customPrimitive);
-        if (alreadyAdded != null) {
+        if (this.customPrimitiveDefinitions.contains(customPrimitive)) {
             throw new UnsupportedOperationException(String.format(
-                    "The customPrimitive %s has already been added for type %s and is %s",
+                    "The customPrimitive %s has already been added for type %s",
                     customPrimitive,
-                    customPrimitive.type,
-                    alreadyAdded));
+                    customPrimitive.type()));
         }
+        this.customPrimitiveDefinitions.add(customPrimitive);
 
         return this;
     }
 
     public ManualRegistry withCustomPrimitives(final Class<?>... customPrimitiveTypes) {
-        this.manuallyAddedCustomPrimitiveTypes.addAll(Arrays.asList(customPrimitiveTypes));
+        stream(customPrimitiveTypes).forEach(type -> validateNotNull(type, "type"));
+        this.manuallyAddedCustomPrimitiveTypes.addAll(asList(customPrimitiveTypes));
         return this;
     }
 
     public ManualRegistry withSerializedObject(final SerializedObjectDefinition serializedObject) {
-        final SerializedObjectDefinition alreadyAdded = this.serializedObjectDefinitions.put(serializedObject.type,
-                serializedObject);
-        if (alreadyAdded != null) {
+        if (this.serializedObjectDefinitions.contains(serializedObject)) {
             throw new UnsupportedOperationException(String.format(
-                    "The serializedObject %s has already been added for type %s and is %s",
+                    "The serializedObject %s has already been added for type %s",
                     serializedObject,
-                    serializedObject.type,
-                    alreadyAdded));
+                    serializedObject.type()));
         }
+        this.serializedObjectDefinitions.add(serializedObject);
         return this;
     }
 
     public ManualRegistry withSerializedObject(final Class<?> type,
                                                final Field[] serializedFields,
                                                final String deserializationMethodName) {
-        return this.withSerializedObject(serializedObjectDefinition(type, serializedFields, deserializationMethodName));
+        final SerializedObjectDeserializer deserializer = methodNameDeserializer(type, deserializationMethodName, serializedFields);
+        final SerializationFields serializationFields = FIELD_DETECTOR.detect(type);
+        final SerializedObjectSerializer serializer = serializedObjectSerializer(type, serializationFields);
+        final SerializedObjectDefinition serializedObject = serializedObjectDefinition(type, serializer, deserializer);
+        return this.withSerializedObject(serializedObject);
     }
 
     public ManualRegistry withSerializedObjects(final Class<?>... serializedObjectTypes) {
-        this.manuallyAddedSerializedObjectTypes.addAll(Arrays.asList(serializedObjectTypes));
+        stream(serializedObjectTypes).forEach(type -> validateNotNull(type, "type"));
+        this.manuallyAddedSerializedObjectTypes.addAll(asList(serializedObjectTypes));
         return this;
     }
 
     @Override
-    public Map<Class<?>, CustomPrimitiveDefinition> customPrimitiveDefinitions() {
-        return Collections.unmodifiableMap(this.customPrimitiveDefinitions);
+    public List<CustomPrimitiveDefinition> customPrimitiveDefinitions() {
+        return unmodifiableList(this.customPrimitiveDefinitions);
     }
 
     @Override
-    public Map<Class<?>, SerializedObjectDefinition> serializedObjectDefinitions() {
-        return Collections.unmodifiableMap(this.serializedObjectDefinitions);
+    public List<SerializedObjectDefinition> serializedObjectDefinitions() {
+        return unmodifiableList(this.serializedObjectDefinitions);
     }
 
     @Override
     public void cook(final MapMateBuilder mapMateBuilder) {
         final Detector detector = mapMateBuilder.detector;
 
-        final List<CustomPrimitiveDefinition> customPrimitives = detector
-                .customPrimitives(this.manuallyAddedCustomPrimitiveTypes);
-        customPrimitives.forEach(customPrimitiveDefinition ->
-                this.customPrimitiveDefinitions.put(customPrimitiveDefinition.type, customPrimitiveDefinition)
-        );
+        final List<Definition> definitions = this.manuallyAddedCustomPrimitiveTypes.stream()
+                .map(detector::detect)
+                .flatMap(Optional::stream)
+                .collect(toList());
 
-        final List<SerializedObjectDefinition> serializedObjects = detector
-                .serializedObjects(this.manuallyAddedSerializedObjectTypes);
-        serializedObjects.forEach(serializedObjectDefinition ->
-                this.serializedObjectDefinitions.put(serializedObjectDefinition.type, serializedObjectDefinition)
-        );
+        this.manuallyAddedSerializedObjectTypes.stream()
+                .map(detector::detect)
+                .flatMap(Optional::stream)
+                .forEach(definitions::add);
+
+        definitions.stream()
+                .filter(Definition::isCustomPrimitive)
+                .map(definition -> (CustomPrimitiveDefinition) definition)
+                .forEach(this.customPrimitiveDefinitions::add);
+
+        definitions.stream()
+                .filter(Definition::isSerializedObject)
+                .map(definition -> (SerializedObjectDefinition) definition)
+                .forEach(this.serializedObjectDefinitions::add);
     }
 }

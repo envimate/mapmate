@@ -31,7 +31,7 @@ public final class StreetName {
         this.value = value;
     }
 
-    public static StreetName fromString(final String value) {
+    public static StreetName fromStringValue(final String value) {
         if (Objects.isNull(value)) {
             throw new IllegalArgumentException("value for streetname must not be null");
         }
@@ -41,7 +41,7 @@ public final class StreetName {
         return new StreetName(value);
     }
 
-    public String internalValueForMapping() {
+    public String stringValue() {
         return this.value;
     }
 }

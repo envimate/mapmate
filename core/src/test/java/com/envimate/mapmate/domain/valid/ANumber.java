@@ -21,40 +21,32 @@
 
 package com.envimate.mapmate.domain.valid;
 
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-import java.io.Serializable;
-
+@ToString
 @EqualsAndHashCode
-public final class ANumber implements Serializable {
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ANumber {
     private static final int MAX_VALUE = 50;
     private final int value;
-
-    private ANumber(final int value) {
-        this.value = value;
-    }
 
     public static ANumber fromInt(final int value) {
         return new ANumber(value);
     }
 
-    public static ANumber fromString(final String value) {
+    public static ANumber fromStringValue(final String value) {
         final Double number = Double.valueOf(value);
-        if (number > MAX_VALUE) {
+        if (number > (double) MAX_VALUE) {
             throw AnException.anException("value cannot be over 50");
         }
         return new ANumber(number.intValue());
     }
 
-    public String internalValueForMapping() {
+    public String stringValue() {
         return String.valueOf(this.value);
-    }
-
-    @Override
-    public String toString() {
-        return "AScannableNumber{" +
-                "value=" + this.value +
-                '}';
     }
 
     public boolean isLowerThen(final int value) {

@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.builder;
 
+import com.envimate.mapmate.MapMate;
 import com.envimate.mapmate.builder.models.customconvention.Body;
 import com.envimate.mapmate.builder.models.customconvention.Email;
 import com.envimate.mapmate.builder.models.customconvention.EmailAddress;
@@ -36,9 +37,9 @@ public final class CustomConventionalBuilderTest {
 
     public static final String EMAIL_JSON = "{" +
             "\"receiver\":\"receiver@example.com\"," +
-            "\"body\":\"Hello World!!!\"," +
             "\"sender\":\"sender@example.com\"," +
-            "\"subject\":\"Hello\"" +
+            "\"subject\":\"Hello\"," +
+            "\"body\":\"Hello World!!!\"" +
             "}";
     public static final Email EMAIL = Email.restore(
             EmailAddress.deserialize("sender@example.com"),

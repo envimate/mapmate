@@ -21,11 +21,11 @@
 
 package com.envimate.mapmate.builder.conventional;
 
-import com.envimate.mapmate.builder.Detector;
+import com.envimate.mapmate.builder.detection.Detector;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import static com.envimate.mapmate.builder.conventional.DefinitionFactories.*;
+import static com.envimate.mapmate.builder.conventional.ConventionalDefinitionFactories.*;
 import static com.envimate.mapmate.builder.conventional.DetectorBuilder.detectorBuilder;
 
 @ToString
