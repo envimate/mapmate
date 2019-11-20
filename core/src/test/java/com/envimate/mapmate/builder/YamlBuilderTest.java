@@ -36,9 +36,9 @@ public final class YamlBuilderTest {
 
     public static final String EMAIL_YAML = "---\n" +
             "receiver: \"receiver@example.com\"\n" +
+            "body: \"Hello World!!!\"\n" +
             "sender: \"sender@example.com\"\n" +
-            "subject: \"Hello\"\n" +
-            "body: \"Hello World!!!\"\n";
+            "subject: \"Hello\"\n";
     public static final Email EMAIL = Email.deserialize(
             EmailAddress.fromStringValue("sender@example.com"),
             EmailAddress.fromStringValue("receiver@example.com"),

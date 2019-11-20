@@ -22,44 +22,48 @@
 package com.envimate.mapmate.injector;
 
 import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.hub.universal.UniversalType;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 import static com.envimate.mapmate.definitions.hub.FullType.type;
 import static com.envimate.mapmate.definitions.hub.FullType.typeOfObject;
+import static com.envimate.mapmate.definitions.hub.universal.UniversalPrimitive.universalPrimitive;
+import static com.envimate.mapmate.injector.NamedDirectInjection.namedDirectInjection;
+import static com.envimate.mapmate.injector.PropertyName.propertyName;
+import static com.envimate.mapmate.injector.TypedDirectInjection.typedDirectInjection;
+import static com.envimate.mapmate.injector.UniversalInjection.universalInjection;
 
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Injector {
-
-    private final Collection<Injection> injections;
-
-    private Injector() {
-        this.injections = new ArrayList<>(0);
-    }
+    private final List<UniversalInjection> universalInjections = new LinkedList<>();
+    private final List<NamedDirectInjection> namedDirectInjections = new LinkedList<>();
+    private final List<TypedDirectInjection> typedDirectInjections = new LinkedList<>();
 
     static Injector empty() {
         return new Injector();
     }
 
     public Injector put(final String propertyName, final String value) {
-        this.injections.add(Injection.fromPropertyNameAndValue(propertyName, value));
+        this.universalInjections.add(universalInjection(propertyName(propertyName), universalPrimitive(value)));
         return this;
     }
 
     public Injector put(final String propertyName, final Object instance) {
-        this.injections.add(Injection.fromPropertyNameAndInstance(propertyName, instance, typeOfObject(instance)));
-        return this;
-    }
-
-    public Injector put(final String propertyName, final FullType type, final Object instance) {
-        this.injections.add(Injection.fromPropertyNameAndInstance(propertyName, instance, type));
+        this.namedDirectInjections.add(namedDirectInjection(propertyName(propertyName), instance));
         return this;
     }
 
     public Injector put(final Object instance) {
-        this.injections.add(Injection.fromInstance(instance, typeOfObject(instance)));
-        return this;
+        return put(typeOfObject(instance), instance);
     }
 
     public Injector put(final Class<?> type, final Object instance) {
@@ -67,81 +71,32 @@ public final class Injector {
     }
 
     public Injector put(final FullType type, final Object instance) {
-        this.injections.add(Injection.fromInstance(instance, type));
+        this.typedDirectInjections.add(typedDirectInjection(type, instance));
         return this;
     }
 
-    public Optional<Object> getInjectionForPropertyPath(final String position, final FullType targetType) {
-        return this.injections.stream()
-                .filter(Injection::containsPropertyName)
-                .filter(injection -> injection.propertyName.equals(position))
-                .map(Injection::getValue)
-                .findFirst();
+    public Optional<UniversalType> getUniversalInjectionFor(final String position) {
+        System.out.println("position = " + position);
+        final PropertyName propertyName = propertyName(position);
+        return this.universalInjections.stream()
+                .filter(injection -> injection.propertyName().equals(propertyName))
+                .findFirst()
+                .map(UniversalInjection::value);
     }
 
-    public Object getInjectionForPropertyNameOrInstance(final String propertyName, final FullType elementType) {
-        final Object injected = this.injections.stream()
-                .filter(Injection::containsPropertyName)
-                .filter(injection -> injection.propertyName.equals(propertyName))
-                .filter(injection -> injection.instanceValue != null)
-                .filter(injection -> injection.type == elementType)
-                .map(Injection::getValue)
-                .findFirst().orElse(null);
-
-        if (injected == null) {
-            return this.injections.stream()
-                    .filter(injection -> !injection.containsPropertyName())
-                    .filter(injection -> injection.instanceValue != null)
-                    .filter(injection -> injection.type == elementType)
-                    .map(Injection::getValue)
-                    .findFirst().orElse(null);
-        } else {
-            return injected;
-        }
+    public Optional<Object> getDirectInjectionForPropertyPath(final String position) {
+        final PropertyName propertyName = propertyName(position);
+        return this.namedDirectInjections.stream()
+                .filter(injection -> injection.propertyName().equals(propertyName))
+                .findFirst()
+                .map(NamedDirectInjection::value);
     }
 
-    private static final class Injection {
-
-        final String propertyName;
-        final String stringValue;
-        final Object instanceValue;
-        final FullType type;
-        private final boolean recursive;
-
-        private Injection(final String propertyName, final String stringValue, final Object instanceValue, final FullType type) {
-            this.propertyName = propertyName;
-            this.stringValue = stringValue;
-            this.instanceValue = instanceValue;
-            this.type = type;
-            this.recursive = false;
-        }
-
-        static Injection fromPropertyNameAndValue(final String propertyName, final String value) {
-            return new Injection(propertyName, value, null, null);
-        }
-
-        static Injection fromPropertyNameAndInstance(final String propertyName, final Object instance, final FullType type) {
-            return new Injection(propertyName, null, instance, type);
-        }
-
-        static Injection fromInstance(final Object instance, final FullType type) {
-            return new Injection(null, null, instance, type);
-        }
-
-        boolean containsPropertyName() {
-            return this.propertyName != null;
-        }
-
-        Object getValue() {
-            if (this.stringValue != null) {
-                return this.stringValue;
-            } else {
-                return this.instanceValue;
-            }
-        }
-
-        public boolean isRecursive() {
-            return this.recursive;
-        }
+    public Optional<Object> getDirectInjectionForType(final FullType type) {
+        final Class<?> clazz = type.type();
+        return this.typedDirectInjections.stream()
+                .filter(injection -> clazz.isAssignableFrom(injection.type().type()))
+                .findFirst()
+                .map(TypedDirectInjection::value);
     }
 }

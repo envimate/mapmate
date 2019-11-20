@@ -23,6 +23,7 @@ package com.envimate.mapmate.deserialization;
 
 import com.envimate.mapmate.definitions.*;
 import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.hub.universal.*;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.deserialization.validation.ExceptionTracker;
 import com.envimate.mapmate.deserialization.validation.ValidationErrorsMapping;
@@ -31,14 +32,13 @@ import com.envimate.mapmate.injector.Injector;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import static com.envimate.mapmate.definitions.hub.FullType.type;
+import static com.envimate.mapmate.definitions.hub.universal.UniversalNull.universalNull;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.lang.String.format;
 
 @SuppressWarnings({"unchecked", "InstanceofConcreteClass", "CastToConcreteClass", "rawtypes"})
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -53,7 +53,7 @@ final class InternalDeserializer {
         return new InternalDeserializer(definitions, validationErrorsMapping);
     }
 
-    <T> T deserialize(final Object input,
+    <T> T deserialize(final UniversalType input,
                       final Class<T> targetType,
                       final ExceptionTracker exceptionTracker,
                       final Injector injector) {
@@ -65,39 +65,52 @@ final class InternalDeserializer {
         return result;
     }
 
-    private Object deserializeRecursive(final Object input,
+    private Object deserializeRecursive(final UniversalType input,
                                         final FullType targetType,
                                         final ExceptionTracker exceptionTracker,
                                         final Injector injector) {
-        final Object injected = injector.getInjectionForPropertyPath(exceptionTracker.getPosition(), targetType).orElse(input);
-        if (injected != null && type(injected.getClass()).equals(targetType)) {
-            return injected;
+        final Optional<Object> namedDirectInjection = injector.getDirectInjectionForPropertyPath(exceptionTracker.getPosition());
+        if (namedDirectInjection.isPresent()) {
+            return namedDirectInjection.get();
         }
-        if (input == null) {
+
+        final Optional<Object> typedDirectInjection = injector.getDirectInjectionForType(targetType);
+        if(typedDirectInjection.isPresent()) {
+            return typedDirectInjection.get();
+        }
+
+        final UniversalType resolved = injector.getUniversalInjectionFor(exceptionTracker.getPosition()).orElse(input);
+
+        if (input instanceof UniversalNull) {
             return null;
         }
 
         final Definition definition = this.definitions.getDefinitionForType(targetType);
         if (definition instanceof SerializedObjectDefinition) {
             return this.deserializeDataTransferObject(
-                    (Map<String, Object>) injected,
+                    castSafely(resolved, UniversalObject.class, exceptionTracker),
                     (SerializedObjectDefinition) definition,
                     exceptionTracker,
                     injector);
         }
         if (definition instanceof CustomPrimitiveDefinition) {
             return this.deserializeCustomPrimitive(
-                    (String) injected,
+                    castSafely(resolved, UniversalPrimitive.class, exceptionTracker),
                     (CustomPrimitiveDefinition) definition,
                     exceptionTracker);
         }
         if (definition instanceof CollectionDefinition) {
-            return this.deserializeArray(injected, (CollectionDefinition) definition, exceptionTracker, injector);
+            return this.deserializeCollection(
+                    castSafely(resolved, UniversalCollection.class, exceptionTracker),
+                    (CollectionDefinition) definition,
+                    exceptionTracker,
+                    injector);
         }
         throw new UnsupportedOperationException(definition.getClass().getName());
     }
 
-    private <T> T deserializeDataTransferObject(final Map<String, Object> input,
+    // TODO what if null?
+    private <T> T deserializeDataTransferObject(final UniversalObject input,
                                                 final SerializedObjectDefinition definition,
                                                 final ExceptionTracker exceptionTracker,
                                                 final Injector injector) {
@@ -108,21 +121,13 @@ final class InternalDeserializer {
             final String elementName = entry.getKey();
             final FullType elementType = entry.getValue();
 
-            final Object injected = injector.getInjectionForPropertyNameOrInstance(
-                    exceptionTracker.getWouldBePosition(elementName), elementType);
-            if (injected != null) {
-                elements.put(elementName, injected);
-            } else {
-                final Object elementInput = input.get(elementName);
-                if (elementInput != null) {
-                    final Object elementObject = this.deserializeRecursive(
-                            elementInput,
-                            elementType,
-                            exceptionTracker.stepInto(elementName),
-                            injector);
-                    elements.put(elementName, elementObject);
-                }
-            }
+            final UniversalType elementInput = input.getField(elementName).orElse(universalNull());
+            final Object elementObject = this.deserializeRecursive(
+                    elementInput,
+                    elementType,
+                    exceptionTracker.stepInto(elementName),
+                    injector);
+            elements.put(elementName, elementObject);
         }
 
         if (exceptionTracker.validationResult().hasValidationErrors()) {
@@ -131,7 +136,7 @@ final class InternalDeserializer {
             try {
                 return (T) deserializer.deserialize(elements);
             } catch (final Exception e) {
-                final String message = String.format(
+                final String message = format(
                         "Exception calling deserialize(type: %s, elements: %s) on deserializationMethod %s",
                         definition.type().description(), elements, deserializer
                 );
@@ -141,41 +146,46 @@ final class InternalDeserializer {
         }
     }
 
-    private <T> T deserializeCustomPrimitive(final String input,
+    private <T> T deserializeCustomPrimitive(final UniversalPrimitive input,
                                              final CustomPrimitiveDefinition definition,
                                              final ExceptionTracker exceptionTracker) {
         try {
-            return (T) definition.deserializer().deserialize(input);
+            return (T) definition.deserializer().deserialize(input.stringValue());
         } catch (final Exception e) {
-            final String message = String.format(
+            final String message = format(
                     "Exception calling deserialize(input: %s) on definition %s",
-                    input, definition
+                    input.toNativeJava(), definition
             );
             exceptionTracker.track(e, message);
             return null;
         }
     }
 
-    private Object deserializeArray(final Object input,
-                                    final CollectionDefinition definition,
-                                    final ExceptionTracker exceptionTracker,
-                                    final Injector injector) {
-        if (!(input instanceof List)) {
-            // TODO
-            throw new UnsupportedOperationException(
-                    String.format("Requiring an input of type List at position '%s' but found '%s'",
-                            exceptionTracker.getPosition(), input));
-        }
-        final List list = (List) input;
-
+    private Object deserializeCollection(final UniversalCollection input,
+                                         final CollectionDefinition definition,
+                                         final ExceptionTracker exceptionTracker,
+                                         final Injector injector) {
+        final List deserializedList = new LinkedList();
         final FullType contentType = definition.contentType();
         int index = 0;
-        final List deserializedList = new LinkedList();
-        for (final Object element : list) {
+        for (final UniversalType element : input.content()) {
             final Object deserialized = deserializeRecursive(element, contentType, exceptionTracker.stepIntoArray(index), injector);
             deserializedList.add(deserialized);
             index = index + 1;
         }
         return definition.deserializer().deserialize(deserializedList);
+    }
+
+    private static <T extends UniversalType> T castSafely(final UniversalType universalType,
+                                                          final Class<T> type,
+                                                          final ExceptionTracker exceptionTracker) {
+        if (!type.isInstance(universalType)) {
+            throw new UnsupportedOperationException(format(
+                    "Requiring an input of type '%s' but found '%s' at '%s'",
+                    type.getName(),
+                    universalType,
+                    exceptionTracker.getPosition())); // TODO more error description
+        }
+        return (T) universalType;
     }
 }

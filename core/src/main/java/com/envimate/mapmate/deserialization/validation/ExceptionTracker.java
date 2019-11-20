@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.deserialization.validation;
 
+import com.envimate.mapmate.definitions.hub.universal.UniversalType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -40,18 +41,18 @@ import static java.lang.String.format;
 public final class ExceptionTracker {
     private final TrackingPosition position;
     private final ValidationMappings validationMappings;
-    private final Object originalInput;
+    private final UniversalType originalInput;
 
     private final List<ValidationError> validationErrors = new LinkedList<>();
     private final List<ExceptionTracker> children = new LinkedList<>();
 
-    public static ExceptionTracker emptyTracker(final Object originalInput, final ValidationMappings validationMappings) {
+    public static ExceptionTracker emptyTracker(final UniversalType originalInput, final ValidationMappings validationMappings) {
         return initializedTracker(empty(), validationMappings, originalInput);
     }
 
     private static ExceptionTracker initializedTracker(final TrackingPosition position,
                                                        final ValidationMappings validationMappings,
-                                                       final Object originalInput) {
+                                                       final UniversalType originalInput) {
         return new ExceptionTracker(position, validationMappings, originalInput);
     }
 
@@ -67,7 +68,7 @@ public final class ExceptionTracker {
         final Throwable resolvedThrowable = resolveThrowable(e);
         final ExceptionMappingList<Throwable> exceptionMapping = this.validationMappings.get(resolvedThrowable.getClass())
                 .orElseThrow(() -> fromException(
-                        messageProvidingDebugInformation, this.position, resolvedThrowable, this.originalInput));
+                        messageProvidingDebugInformation, this.position, resolvedThrowable, this.originalInput.toNativeJava()));
         final List<ValidationError> mapped = exceptionMapping.map(resolvedThrowable, this.position.render());
         this.validationErrors.addAll(mapped);
     }

@@ -23,6 +23,7 @@ package com.envimate.mapmate.deserialization;
 
 import com.envimate.mapmate.definitions.*;
 import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.hub.universal.*;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.marshalling.Unmarshaller;
@@ -36,6 +37,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import static com.envimate.mapmate.definitions.hub.universal.UniversalCollection.universalCollectionFromNativeList;
+import static com.envimate.mapmate.definitions.hub.universal.UniversalNull.universalNull;
+import static com.envimate.mapmate.definitions.hub.universal.UniversalObject.universalObject;
+import static com.envimate.mapmate.definitions.hub.universal.UniversalObject.universalObjectFromNativeMap;
+import static com.envimate.mapmate.definitions.hub.universal.UniversalPrimitive.universalPrimitive;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
 @ToString
@@ -72,12 +78,12 @@ final class Unmarshallers {
         }
     }
 
-    Object unmarshal(final String input,
-                     final FullType targetType,
-                     final MarshallingType marshallingType) {
+    UniversalType unmarshal(final String input,
+                            final FullType targetType,
+                            final MarshallingType marshallingType) {
         validateNotNull(input, "input");
         if (input.isEmpty()) {
-            return null;
+            return universalNull();
         }
         final Unmarshaller unmarshaller = this.unmarshallers.getForType(marshallingType);
         final Definition definition = this.definitions.getDefinitionForType(targetType);
@@ -85,7 +91,7 @@ final class Unmarshallers {
         final String trimmedInput = input.trim();
         if (definition instanceof CollectionDefinition) {
             try {
-                return unmarshaller.unmarshal(trimmedInput, List.class);
+                return universalCollectionFromNativeList(unmarshaller.unmarshal(trimmedInput, List.class));
             } catch (final Exception e) {
                 throw new UnsupportedOperationException(
                         String.format(
@@ -96,7 +102,7 @@ final class Unmarshallers {
             }
         } else if (definition instanceof SerializedObjectDefinition) {
             try {
-                return unmarshaller.unmarshal(trimmedInput, Map.class);
+                return universalObjectFromNativeMap(unmarshaller.unmarshal(trimmedInput, Map.class));
             } catch (final Exception e) {
                 throw new UnsupportedOperationException(
                         String.format(
@@ -106,7 +112,7 @@ final class Unmarshallers {
                 );
             }
         } else if (definition instanceof CustomPrimitiveDefinition) {
-            return PATTERN.matcher(trimmedInput).replaceAll("");
+            return universalPrimitive(PATTERN.matcher(trimmedInput).replaceAll(""));
         } else {
             throw new UnsupportedOperationException(definition.getClass().getName());
         }

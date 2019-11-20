@@ -19,52 +19,34 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.hub.universal;
+package com.envimate.mapmate.injector;
 
-
+import com.envimate.mapmate.definitions.hub.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.List;
-
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
-import static java.util.Collections.unmodifiableList;
-import static java.util.stream.Collectors.toList;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class UniversalCollection implements UniversalType {
-    private final List<UniversalType> list;
+public final class TypedDirectInjection {
+    private final FullType type;
+    private final Object value;
 
-    public static UniversalCollection universalCollectionFromNativeList(final List<Object> list) {
-        validateNotNull(list, "list");
-        final List<UniversalType> mappedList = list.stream()
-                .map(UniversalType::fromNativeJava)
-                .collect(toList());
-        return universalCollection(mappedList);
+    public static TypedDirectInjection typedDirectInjection(final FullType type, final Object value) {
+        validateNotNull(type, "type");
+        validateNotNull(value, "value");
+        return new TypedDirectInjection(type, value);
     }
 
-    public static UniversalCollection universalCollection(final List<UniversalType> list) {
-        validateNotNull(list, "list");
-        return new UniversalCollection(list);
+    public FullType type() {
+        return this.type;
     }
 
-    public List<UniversalType> content() {
-        return unmodifiableList(this.list);
-    }
-
-    @Override
-    public String nativeJavaTypeName() {
-        return "List";
-    }
-
-    @Override
-    public Object toNativeJava() {
-        return this.list.stream()
-                .map(UniversalType::toNativeJava)
-                .collect(toList());
+    public Object value() {
+        return this.value;
     }
 }

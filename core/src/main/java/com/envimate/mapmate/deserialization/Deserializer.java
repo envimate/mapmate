@@ -21,9 +21,9 @@
 
 package com.envimate.mapmate.deserialization;
 
-import com.envimate.mapmate.definitions.Definition;
 import com.envimate.mapmate.definitions.Definitions;
-import com.envimate.mapmate.definitions.SerializedObjectDefinition;
+import com.envimate.mapmate.definitions.hub.universal.UniversalObject;
+import com.envimate.mapmate.definitions.hub.universal.UniversalType;
 import com.envimate.mapmate.deserialization.validation.ExceptionTracker;
 import com.envimate.mapmate.deserialization.validation.ValidationErrorsMapping;
 import com.envimate.mapmate.deserialization.validation.ValidationMappings;
@@ -42,9 +42,11 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.envimate.mapmate.definitions.hub.FullType.type;
+import static com.envimate.mapmate.definitions.hub.universal.UniversalObject.universalObjectFromNativeMap;
 import static com.envimate.mapmate.deserialization.InternalDeserializer.internalDeserializer;
 import static com.envimate.mapmate.deserialization.Unmarshallers.unmarshallers;
 import static com.envimate.mapmate.deserialization.validation.ExceptionTracker.emptyTracker;
+import static com.envimate.mapmate.injector.InjectorLambda.noop;
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
@@ -62,17 +64,12 @@ public final class Deserializer {
                                                final Definitions definitions,
                                                final ValidationMappings exceptionMapping,
                                                final ValidationErrorsMapping onValidationErrors,
-                                               final boolean validateNoUnsupportedOutgoingReferences, // TODO validate with requirements
                                                final InjectorFactory injectorFactory) {
         validateNotNull(unmarshallerRegistry, "unmarshallerRegistry");
         validateNotNull(definitions, "definitions");
         validateNotNull(exceptionMapping, "validationMappings");
         validateNotNull(onValidationErrors, "onValidationErrors");
         validateNotNull(injectorFactory, "injectorFactory");
-
-        if (validateNoUnsupportedOutgoingReferences) {
-            definitions.validateNoUnsupportedOutgoingReferences();
-        }
 
         final Unmarshallers unmarshallers = unmarshallers(unmarshallerRegistry, definitions);
         final InternalDeserializer internalDeserializer = internalDeserializer(definitions, onValidationErrors);
@@ -81,14 +78,14 @@ public final class Deserializer {
 
     public <T> T deserializeFromMap(final Map<String, Object> input,
                                     final Class<T> targetType) {
-        validateNotNull(input, "input");
-        final Definition definition = this.definitions.getDefinitionForType(type(targetType));
-        if (!(definition instanceof SerializedObjectDefinition)) {
-            throw new UnsupportedOperationException("Only serialized objects can be deserialized from map but found: " + definition);
-        }
-        final ExceptionTracker exceptionTracker = emptyTracker(input, this.validationMappings);
-        final Injector injector = this.injectorFactory.create();
-        return this.internalDeserializer.deserialize(input, targetType, exceptionTracker, injector);
+        return deserializeFromMap(input, targetType, noop());
+    }
+
+    public <T> T deserializeFromMap(final Map<String, Object> input,
+                                    final Class<T> targetType,
+                                    final InjectorLambda injectorProducer) {
+        final UniversalObject universalObject = universalObjectFromNativeMap(input);
+        return deserialize(universalObject, targetType, injectorProducer);
     }
 
     public Map<String, Object> deserializeToMap(final String input,
@@ -110,21 +107,28 @@ public final class Deserializer {
     public <T> T deserialize(final String input,
                              final Class<T> targetType,
                              final MarshallingType marshallingType) {
-        return deserialize(input, targetType, marshallingType, InjectorLambda.noop());
+        return deserialize(input, targetType, marshallingType, noop());
     }
 
     public <T> T deserialize(final String input,
                              final Class<T> targetType,
                              final MarshallingType marshallingType,
                              final InjectorLambda injectorProducer) {
-        validateNotNull(input, "originalInput");
+        validateNotNull(input, "input");
+        final UniversalType unmarshalled = this.unmarshallers.unmarshal(input, type(targetType), marshallingType);
+        return deserialize(unmarshalled, targetType, injectorProducer);
+    }
+
+    private <T> T deserialize(final UniversalType input,
+                              final Class<T> targetType,
+                              final InjectorLambda injectorProducer) {
+        validateNotNull(input, "input");
         validateNotNull(targetType, "targetType");
         validateNotNull(injectorProducer, "jsonInjector");
         final ExceptionTracker exceptionTracker = emptyTracker(input, this.validationMappings);
         final Injector injector = this.injectorFactory.create();
         injectorProducer.setupInjector(injector);
-        final Object unmarshalled = this.unmarshallers.unmarshal(input, type(targetType), marshallingType);
-        return this.internalDeserializer.deserialize(unmarshalled, targetType, exceptionTracker, injector);
+        return this.internalDeserializer.deserialize(input, targetType, exceptionTracker, injector);
     }
 
     public Set<MarshallingType> supportedMarshallingTypes() {

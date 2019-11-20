@@ -24,8 +24,9 @@ package com.envimate.mapmate.definitions.hub.universal;
 import java.util.List;
 import java.util.Map;
 
-import static com.envimate.mapmate.definitions.hub.universal.UniversalCollection.universalCollection;
+import static com.envimate.mapmate.definitions.hub.universal.UniversalCollection.universalCollectionFromNativeList;
 import static com.envimate.mapmate.definitions.hub.universal.UniversalNull.universalNull;
+import static com.envimate.mapmate.definitions.hub.universal.UniversalObject.universalObjectFromNativeMap;
 import static com.envimate.mapmate.definitions.hub.universal.UniversalPrimitive.universalPrimitive;
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
@@ -39,13 +40,15 @@ public interface UniversalType {
             return universalPrimitive((String) object);
         }
         if (object instanceof List) {
-            return universalCollection((List<Object>) object);
+            return universalCollectionFromNativeList((List<Object>) object);
         }
         if (object instanceof Map) {
-            return UniversalObject.universalObject((Map<String, Object>) object);
+            return universalObjectFromNativeMap((Map<String, Object>) object);
         }
         throw new UnsupportedOperationException(format("Object '%s' cannot be mapped to universal type", object));
     }
 
     Object toNativeJava();
+
+    String nativeJavaTypeName();
 }

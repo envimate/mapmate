@@ -36,10 +36,10 @@ public final class MarshallerSpecs {
                 .when().mapMateSerializes(theFullyInitializedExampleDto()).withMarshallingType(json())
                 .theSerializationResultWas("" +
                         "{\n" +
-                        "  \"stringA\": \"asdf\",\n" +
-                        "  \"stringB\": \"qwer\",\n" +
                         "  \"number1\": \"1\",\n" +
-                        "  \"number2\": \"5\"\n" +
+                        "  \"number2\": \"5\",\n" +
+                        "  \"stringA\": \"asdf\",\n" +
+                        "  \"stringB\": \"qwer\"\n" +
                         "}");
     }
 
@@ -63,10 +63,10 @@ public final class MarshallerSpecs {
                 .when().mapMateSerializes(theFullyInitializedExampleDto()).withMarshallingType(xml())
                 .theSerializationResultWas("" +
                         "<HashMap>\n" +
-                        "  <stringA>asdf</stringA>\n" +
-                        "  <stringB>qwer</stringB>\n" +
                         "  <number1>1</number1>\n" +
                         "  <number2>5</number2>\n" +
+                        "  <stringA>asdf</stringA>\n" +
+                        "  <stringB>qwer</stringB>\n" +
                         "</HashMap>\n");
     }
 
@@ -75,17 +75,17 @@ public final class MarshallerSpecs {
         givenTheExampleMapMateWithAllMarshallers()
                 .when().mapMateSerializes(theFullyInitializedExampleDto()).withMarshallingType(yaml())
                 .theSerializationResultWas("" +
-                        "stringA: asdf\n" +
-                        "stringB: qwer\n" +
                         "number1: '1'\n" +
-                        "number2: '5'\n");
+                        "number2: '5'\n" +
+                        "stringA: asdf\n" +
+                        "stringB: qwer\n");
     }
 
     @Test
     public void testUrlEncodedMarshallingIsPossible() {
         givenTheExampleMapMateWithAllMarshallers()
                 .when().mapMateSerializes(theFullyInitializedExampleDto()).withMarshallingType(urlEncoded())
-                .theSerializationResultWas("stringA=asdf&stringB=qwer&number1=1&number2=5");
+                .theSerializationResultWas("number1=1&number2=5&stringA=asdf&stringB=qwer");
     }
 
     @Test
@@ -100,14 +100,14 @@ public final class MarshallerSpecs {
         givenTheExampleMapMateWithAllMarshallers()
                 .when().mapMateSerializes(theFullyInitializedNestedExampleDto()).withMarshallingType(urlEncoded())
                 .theSerializationResultWas("" +
-                        "complexType1[stringA]=a&" +
-                        "complexType1[stringB]=b&" +
-                        "complexType1[number1]=1&" +
-                        "complexType1[number2]=2&" +
+                        "complexType2[number1]=3&" +
+                        "complexType2[number2]=4&" +
                         "complexType2[stringA]=c&" +
                         "complexType2[stringB]=d&" +
-                        "complexType2[number1]=3&" +
-                        "complexType2[number2]=4");
+                        "complexType1[number1]=1&" +
+                        "complexType1[number2]=2&" +
+                        "complexType1[stringA]=a&" +
+                        "complexType1[stringB]=b");
     }
 
     @Test

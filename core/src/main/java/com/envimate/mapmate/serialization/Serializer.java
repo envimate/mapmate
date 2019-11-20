@@ -23,6 +23,9 @@ package com.envimate.mapmate.serialization;
 
 import com.envimate.mapmate.definitions.*;
 import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.hub.universal.UniversalCollection;
+import com.envimate.mapmate.definitions.hub.universal.UniversalObject;
+import com.envimate.mapmate.definitions.hub.universal.UniversalType;
 import com.envimate.mapmate.marshalling.Marshaller;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
@@ -33,11 +36,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
 import static com.envimate.mapmate.definitions.hub.FullType.typeOfObject;
+import static com.envimate.mapmate.definitions.hub.universal.UniversalCollection.universalCollection;
+import static com.envimate.mapmate.definitions.hub.universal.UniversalNull.universalNull;
+import static com.envimate.mapmate.definitions.hub.universal.UniversalObject.universalObject;
+import static com.envimate.mapmate.definitions.hub.universal.UniversalPrimitive.universalPrimitive;
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.util.Objects.isNull;
@@ -80,8 +88,7 @@ public final class Serializer {
         if (normalized instanceof Map) {
             normalized = serializedPropertyInjector.apply((Map<String, Object>) normalized);
         }
-        final Marshaller marshaller = this.marshallers
-                .getForType(marshallingType);
+        final Marshaller marshaller = this.marshallers.getForType(marshallingType);
         try {
             return marshaller.marshal(normalized);
         } catch (final Exception e) {
@@ -129,17 +136,17 @@ public final class Serializer {
         }
 
         final FullType type = typeOfObject(object);
-        return serializeDefinition(type, object);
+        return serializeDefinition(type, object).toNativeJava();
     }
 
-    private Object serializeDefinition(final FullType type, final Object object) {
-        final Definition definition = this.definitions.getDefinitionForType(type);
+    private UniversalType serializeDefinition(final FullType type, final Object object) {
         if (isNull(object)) {
-            return null;
+            return universalNull();
         }
+        final Definition definition = this.definitions.getDefinitionForType(type);
         if (definition instanceof CustomPrimitiveDefinition) {
             final CustomPrimitiveDefinition customPrimitive = (CustomPrimitiveDefinition) definition;
-            return customPrimitive.serializer().serialize(object);
+            return universalPrimitive(customPrimitive.serializer().serialize(object));
         }
         if (definition instanceof SerializedObjectDefinition) {
             return serializeSerializedObject((SerializedObjectDefinition) definition, object);
@@ -150,27 +157,28 @@ public final class Serializer {
         throw new UnsupportedOperationException("This should never happen.");
     }
 
-    private Object serializeSerializedObject(final SerializedObjectDefinition definition,
-                                             final Object object) {
+    private UniversalObject serializeSerializedObject(final SerializedObjectDefinition definition,
+                                                      final Object object) {
         final SerializationFields fields = definition.serializer().fields();
-        final Map<String, Object> map = new HashMap<>(10);
+        final Map<String, UniversalType> map = new HashMap<>(10);
         fields.fields().forEach(serializationField -> {
             final FullType type = serializationField.type();
             final Object value = ofNullable(object).map(serializationField::query).orElse(null);
-            final Object serializedValue = serializeDefinition(type, value);
+            final UniversalType serializedValue = serializeDefinition(type, value);
             final String name = serializationField.name();
             map.put(name, serializedValue);
         });
-        return map;
+        return universalObject(map);
     }
 
-    private Object serializeCollection(final CollectionDefinition definition,
-                                       final Object object) {
+    private UniversalCollection serializeCollection(final CollectionDefinition definition,
+                                                    final Object object) {
         final FullType contentType = definition.contentType();
-        return definition.serializer().serialize(object)
+        final List<UniversalType> list = definition.serializer().serialize(object)
                 .stream()
                 .map(element -> serializeDefinition(contentType, element))
                 .collect(toList());
+        return universalCollection(list);
     }
 
     public Definitions getDefinitions() {

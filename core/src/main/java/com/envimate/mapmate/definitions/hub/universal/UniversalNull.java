@@ -36,6 +36,11 @@ public final class UniversalNull implements UniversalType {
     }
 
     @Override
+    public String nativeJavaTypeName() {
+        return "null";
+    }
+
+    @Override
     public Object toNativeJava() {
         return null;
     }

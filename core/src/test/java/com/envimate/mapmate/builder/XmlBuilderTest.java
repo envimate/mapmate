@@ -43,16 +43,16 @@ public final class XmlBuilderTest {
             "    <string>receiver@example.com</string>\n" +
             "  </entry>\n" +
             "  <entry>\n" +
+            "    <string>body</string>\n" +
+            "    <string>Hello World!!!</string>\n" +
+            "  </entry>\n" +
+            "  <entry>\n" +
             "    <string>sender</string>\n" +
             "    <string>sender@example.com</string>\n" +
             "  </entry>\n" +
             "  <entry>\n" +
             "    <string>subject</string>\n" +
             "    <string>Hello</string>\n" +
-            "  </entry>\n" +
-            "  <entry>\n" +
-            "    <string>body</string>\n" +
-            "    <string>Hello World!!!</string>\n" +
             "  </entry>\n" +
             "</root>";
     public static final Email EMAIL = Email.deserialize(

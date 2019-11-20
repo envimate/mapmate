@@ -60,7 +60,7 @@ public final class Definitions {
         return of(this.definitions.get(targetType));
     }
 
-    // TODO
+    // TODO call this
     public void validateNoUnsupportedOutgoingReferences() {
         final List<FullType> references = this.allReferences();
         for (final FullType reference : references) {

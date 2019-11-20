@@ -42,10 +42,10 @@ public final class SerializerSpecs {
                         ANumber.fromInt(5555))).withMarshallingType(json())
                 .theSerializationResultWas("" +
                         "{\n" +
-                        "  \"stringA\": \"asdf\",\n" +
-                        "  \"stringB\": \"qwer\",\n" +
                         "  \"number1\": \"1\",\n" +
-                        "  \"number2\": \"5555\"\n" +
+                        "  \"number2\": \"5555\",\n" +
+                        "  \"stringA\": \"asdf\",\n" +
+                        "  \"stringB\": \"qwer\"\n" +
                         "}");
     }
 
@@ -75,10 +75,10 @@ public final class SerializerSpecs {
                 .withMarshallingType(json())
                 .theSerializationResultWas("" +
                         "{\n" +
-                        "  \"stringA\": \"a\",\n" +
-                        "  \"stringB\": \"b\",\n" +
                         "  \"number1\": \"1\",\n" +
-                        "  \"number2\": \"2\"\n" +
+                        "  \"number2\": \"2\",\n" +
+                        "  \"stringA\": \"a\",\n" +
+                        "  \"stringB\": \"b\"\n" +
                         "}");
     }
 
@@ -128,17 +128,17 @@ public final class SerializerSpecs {
                         ANumber.fromInt(4)))).withMarshallingType(json())
                 .theSerializationResultWas("" +
                         "{\n" +
-                        "  \"complexType1\": {\n" +
-                        "    \"stringA\": \"a\",\n" +
-                        "    \"stringB\": \"b\",\n" +
-                        "    \"number1\": \"1\",\n" +
-                        "    \"number2\": \"2\"\n" +
-                        "  },\n" +
                         "  \"complexType2\": {\n" +
-                        "    \"stringA\": \"c\",\n" +
-                        "    \"stringB\": \"d\",\n" +
                         "    \"number1\": \"3\",\n" +
-                        "    \"number2\": \"4\"\n" +
+                        "    \"number2\": \"4\",\n" +
+                        "    \"stringA\": \"c\",\n" +
+                        "    \"stringB\": \"d\"\n" +
+                        "  },\n" +
+                        "  \"complexType1\": {\n" +
+                        "    \"number1\": \"1\",\n" +
+                        "    \"number2\": \"2\",\n" +
+                        "    \"stringA\": \"a\",\n" +
+                        "    \"stringB\": \"b\"\n" +
                         "  }\n" +
                         "}");
     }
@@ -185,13 +185,13 @@ public final class SerializerSpecs {
                 .noExceptionHasBeenThrown()
                 .theSerializationResultWas("" +
                         "{\n" +
+                        "  \"aString\": \"a\",\n" +
                         "  \"aCyclicType\": {\n" +
+                        "    \"aString\": \"b\",\n" +
                         "    \"aCyclicType\": {\n" +
                         "      \"aString\": \"c\"\n" +
-                        "    },\n" +
-                        "    \"aString\": \"b\"\n" +
-                        "  },\n" +
-                        "  \"aString\": \"a\"\n" +
+                        "    }\n" +
+                        "  }\n" +
                         "}");
     }
 
@@ -204,10 +204,11 @@ public final class SerializerSpecs {
                         null,
                         ANumber.fromInt(1),
                         null)).withMarshallingType(json())
+                .noExceptionHasBeenThrown()
                 .theSerializationResultWas("" +
                         "{\n" +
-                        "  \"stringA\": \"a\",\n" +
-                        "  \"number1\": \"1\"\n" +
+                        "  \"number1\": \"1\",\n" +
+                        "  \"stringA\": \"a\"\n" +
                         "}");
     }
 
@@ -228,10 +229,10 @@ public final class SerializerSpecs {
                 .withMarshallingType(json())
                 .theSerializationResultWas("" +
                         "{\n" +
-                        "  \"stringA\": \"test\",\n" +
-                        "  \"stringB\": \"b\",\n" +
                         "  \"number1\": \"1\",\n" +
-                        "  \"number2\": \"2\"\n" +
+                        "  \"number2\": \"2\",\n" +
+                        "  \"stringA\": \"test\",\n" +
+                        "  \"stringB\": \"b\"\n" +
                         "}");
     }
 

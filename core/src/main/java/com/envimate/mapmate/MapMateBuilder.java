@@ -38,13 +38,13 @@ import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.marshalling.Unmarshaller;
 import com.envimate.mapmate.serialization.Serializer;
-import com.envimate.mapmate.validators.NotNullValidator;
 
 import java.util.*;
 
 import static com.envimate.mapmate.MapMate.mapMate;
 import static com.envimate.mapmate.builder.conventional.ConventionalDetectors.conventionalDetectorWithAnnotations;
 import static com.envimate.mapmate.builder.scanning.DefaultPackageScanner.defaultPackageScanner;
+import static com.envimate.mapmate.builder.scanning.PackageScannerRecipe.packageScannerRecipe;
 import static com.envimate.mapmate.definitions.DefinitionsBuilder.definitionsBuilder;
 import static com.envimate.mapmate.definitions.hub.FullType.type;
 import static com.envimate.mapmate.deserialization.Deserializer.theDeserializer;
@@ -56,7 +56,6 @@ import static java.util.Arrays.stream;
 
 public final class MapMateBuilder {
     private volatile Detector detector = conventionalDetectorWithAnnotations();
-    private final PackageScanner packageScanner;
     private final List<FullType> addedTypes = new LinkedList<>();
     private final List<Definition> addedDefinitions = new LinkedList<>();
     private final List<Recipe> recipes = new LinkedList<>();
@@ -66,11 +65,7 @@ public final class MapMateBuilder {
     };
     private Map<MarshallingType, Marshaller> marshallerMap = new HashMap<>(1);
     private Map<MarshallingType, Unmarshaller> unmarshallerMap = new HashMap<>(1);
-    private InjectorFactory injectorFactory = InjectorFactory.emptyInjectorFactory();
-
-    private MapMateBuilder(final PackageScanner packageScanner) {
-        this.packageScanner = packageScanner;
-    }
+    private volatile InjectorFactory injectorFactory = InjectorFactory.emptyInjectorFactory();
 
     public static MapMateBuilder mapMateBuilder(final String... packageNames) {
         if (packageNames != null) {
@@ -90,7 +85,7 @@ public final class MapMateBuilder {
 
     public static MapMateBuilder mapMateBuilder(final PackageScanner packageScanner) {
         validateNotNull(packageScanner, "packageScanner");
-        return new MapMateBuilder(packageScanner);
+        return new MapMateBuilder().usingRecipe(packageScannerRecipe(packageScanner));
     }
 
     public MapMateBuilder withDetector(final DetectorBuilder detector) {
@@ -189,10 +184,6 @@ public final class MapMateBuilder {
     public MapMate build() {
         this.recipes.forEach(recipe -> recipe.cook(this));
 
-        this.packageScanner.scan().stream()
-                .map(FullType::type)
-                .forEach(this.addedTypes::add);
-
         final DefinitionsBuilder definitionsBuilder = definitionsBuilder(this.detector);
         this.addedDefinitions.forEach(definitionsBuilder::addDefinition);
         this.addedTypes.forEach(definitionsBuilder::detectAndAdd);
@@ -209,7 +200,6 @@ public final class MapMateBuilder {
                 definitions,
                 this.validationMappings,
                 this.validationErrorsMapping,
-                false,
                 this.injectorFactory
         );
         return mapMate(serializer, deserializer);

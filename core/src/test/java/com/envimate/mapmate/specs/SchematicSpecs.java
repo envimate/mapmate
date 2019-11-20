@@ -19,21 +19,8 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.scanning;
+package com.envimate.mapmate.specs;
 
-import com.envimate.mapmate.definitions.hub.FullType;
-
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
-
-public interface PackageScanner {
-
-    default List<FullType> scanFullTypes() {
-        return scan().stream()
-                .map(FullType::type)
-                .collect(toList());
-    }
-
-    List<Class<?>> scan();
+public final class SchematicSpecs {
+    // TODO mixed collection
 }

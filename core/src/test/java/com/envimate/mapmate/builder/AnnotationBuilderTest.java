@@ -37,9 +37,9 @@ public final class AnnotationBuilderTest {
 
     public static final String EMAIL_JSON = "{" +
             "\"receiver\":\"receiver@example.com\"," +
+            "\"body\":\"Hello World!!!\"," +
             "\"sender\":\"sender@example.com\"," +
-            "\"subject\":\"Hello\"," +
-            "\"body\":\"Hello World!!!\"" +
+            "\"subject\":\"Hello\"" +
             "}";
     public static final Email EMAIL = Email.restore(
             emailAddress("sender@example.com"),

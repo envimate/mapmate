@@ -39,8 +39,17 @@ public final class UniversalPrimitive implements UniversalType {
         return new UniversalPrimitive(value);
     }
 
+    public String stringValue() {
+        return this.value;
+    }
+
+    @Override
+    public String nativeJavaTypeName() {
+        return "String";
+    }
+
     @Override
     public Object toNativeJava() {
-        return this.value;
+        return stringValue();
     }
 }

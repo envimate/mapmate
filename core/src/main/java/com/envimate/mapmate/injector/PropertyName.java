@@ -19,52 +19,28 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.hub.universal;
-
+package com.envimate.mapmate.injector;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.List;
-
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
-import static java.util.Collections.unmodifiableList;
-import static java.util.stream.Collectors.toList;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class UniversalCollection implements UniversalType {
-    private final List<UniversalType> list;
+public final class PropertyName {
+    private final String value;
 
-    public static UniversalCollection universalCollectionFromNativeList(final List<Object> list) {
-        validateNotNull(list, "list");
-        final List<UniversalType> mappedList = list.stream()
-                .map(UniversalType::fromNativeJava)
-                .collect(toList());
-        return universalCollection(mappedList);
+    public static PropertyName propertyName(final String value) {
+        validateNotNull(value, "value");
+        return new PropertyName(value);
     }
 
-    public static UniversalCollection universalCollection(final List<UniversalType> list) {
-        validateNotNull(list, "list");
-        return new UniversalCollection(list);
-    }
-
-    public List<UniversalType> content() {
-        return unmodifiableList(this.list);
-    }
-
-    @Override
-    public String nativeJavaTypeName() {
-        return "List";
-    }
-
-    @Override
-    public Object toNativeJava() {
-        return this.list.stream()
-                .map(UniversalType::toNativeJava)
-                .collect(toList());
+    public boolean matches(final String string) {
+        validateNotNull(string, "string");
+        return equals(propertyName(string));
     }
 }
