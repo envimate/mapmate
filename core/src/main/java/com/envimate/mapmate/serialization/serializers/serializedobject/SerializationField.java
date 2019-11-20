@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.serialization.serializers.serializedobject;
 
+import com.envimate.mapmate.definitions.hub.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ import java.lang.reflect.Field;
 import java.util.function.Function;
 
 import static com.envimate.mapmate.builder.detection.serializedobject.IncompatibleSerializedObjectException.incompatibleSerializedObjectException;
+import static com.envimate.mapmate.definitions.hub.FullType.typeOfField;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.lang.reflect.Modifier.*;
 
@@ -37,11 +39,11 @@ import static java.lang.reflect.Modifier.*;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SerializationField {
-    private final Class<?> type;
+    private final FullType type;
     private final String name;
     private final Function<Object, Object> query;
 
-    public static SerializationField serializationField(final Class<?> type,
+    public static SerializationField serializationField(final FullType type,
                                                         final String name,
                                                         final Function<Object, Object> query) {
         validateNotNull(type, "type");
@@ -50,16 +52,18 @@ public final class SerializationField {
         return new SerializationField(type, name, query);
     }
 
-    public static SerializationField fromPublicField(final Class<?> declaringType, final Field field) {
+    public static SerializationField fromPublicField(final FullType declaringType,
+                                                     final Field field) {
+        validateNotNull(declaringType, "declaringType");
         validateNotNull(field, "field");
         validateFieldModifiers(declaringType, field);
-        final Class<?> type = field.getType();
+        final FullType fullType = typeOfField(field);
         final String name = field.getName();
         final Function<Object, Object> query = object -> readField(object, field);
-        return serializationField(type, name, query);
+        return serializationField(fullType, name, query);
     }
 
-    public Class<?> type() {
+    public FullType type() {
         return this.type;
     }
 
@@ -80,23 +84,23 @@ public final class SerializationField {
         }
     }
 
-    private static void validateFieldModifiers(final Class<?> type, final Field field) {
+    private static void validateFieldModifiers(final FullType type, final Field field) {
         final int fieldModifiers = field.getModifiers();
 
         if (!isPublic(fieldModifiers)) {
             throw incompatibleSerializedObjectException(
                     "The field %s for the SerializedObject of type %s must be public",
-                    field, type);
+                    field, type.description());
         }
         if (isStatic(fieldModifiers)) {
             throw incompatibleSerializedObjectException(
                     "The field %s for the SerializedObject of type %s must not be static",
-                    field, type);
+                    field, type.description());
         }
         if (isTransient(fieldModifiers)) {
             throw incompatibleSerializedObjectException(
                     "The field %s for the SerializedObject of type %s must not be transient",
-                    field, type);
+                    field, type.description());
         }
     }
 }

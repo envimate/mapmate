@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.deserialization;
 
+import com.envimate.mapmate.definitions.hub.FullType;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
 import lombok.AccessLevel;
@@ -47,7 +48,7 @@ public final class SingleMethodDeserializationDetector implements SerializedObje
     }
 
     @Override
-    public Optional<SerializedObjectDeserializer> detect(final Class<?> type, final SerializationFields fields) {
+    public Optional<SerializedObjectDeserializer> detect(final FullType type, final SerializationFields fields) {
         final List<Method> deserializerCandidates = detectDeserializerMethods(type);
         if (deserializerCandidates.size() == 1) {
             final Method method = deserializerCandidates.get(0);

@@ -24,6 +24,8 @@ package com.envimate.mapmate.specs;
 import com.envimate.mapmate.domain.valid.*;
 import org.junit.Test;
 
+import java.util.List;
+
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.givenTheExampleMapMateWithAllMarshallers;
 
@@ -61,6 +63,7 @@ public final class DeserializerSpecs {
         givenTheExampleMapMateWithAllMarshallers()
                 .when().mapMateDeserializes("{\"array\":[\"1\", \"2\", \"3\"]}")
                 .as(json()).toTheType(AComplexTypeWithArray.class)
+                .noExceptionHasBeenThrown()
                 .theDeserializedObjectIs(AComplexTypeWithArray.deserialize(
                         new ANumber[]{ANumber.fromInt(1), ANumber.fromInt(2), ANumber.fromInt(3)})
                 );
@@ -329,6 +332,7 @@ public final class DeserializerSpecs {
     public void deserializerCanFindFactoryMethodsWithArrays() {
         givenTheExampleMapMateWithAllMarshallers()
                 .when().mapMateDeserializes("{list: [\"1\"]}").as(json()).toTheType(AComplexTypeWithListButArrayConstructor.class)
-                .theDeserializedObjectIs(AComplexTypeWithListButArrayConstructor.deserialize(new ANumber[]{ANumber.fromInt(1)}));
+                .noExceptionHasBeenThrown()
+                .theDeserializedObjectIs(AComplexTypeWithListButArrayConstructor.deserialize(List.of(ANumber.fromInt(1))));
     }
 }

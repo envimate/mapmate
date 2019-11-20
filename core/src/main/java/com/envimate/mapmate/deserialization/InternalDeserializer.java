@@ -21,10 +21,8 @@
 
 package com.envimate.mapmate.deserialization;
 
-import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
-import com.envimate.mapmate.definitions.Definitions;
-import com.envimate.mapmate.definitions.SerializedObjectDefinition;
+import com.envimate.mapmate.definitions.*;
+import com.envimate.mapmate.definitions.hub.FullType;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.deserialization.validation.ExceptionTracker;
 import com.envimate.mapmate.deserialization.validation.ValidationErrorsMapping;
@@ -34,12 +32,13 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import static com.envimate.mapmate.definitions.hub.FullType.type;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
-import static java.lang.reflect.Array.newInstance;
 
 @SuppressWarnings({"unchecked", "InstanceofConcreteClass", "CastToConcreteClass", "rawtypes"})
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -58,7 +57,7 @@ final class InternalDeserializer {
                       final Class<T> targetType,
                       final ExceptionTracker exceptionTracker,
                       final Injector injector) {
-        final T result = this.deserializeRecursive(input, targetType, exceptionTracker, injector);
+        final T result = (T) this.deserializeRecursive(input, type(targetType), exceptionTracker, injector);
         final ValidationResult validationResult = exceptionTracker.validationResult();
         if (validationResult.hasValidationErrors()) {
             this.onValidationErrors.map(validationResult.validationErrors());
@@ -66,21 +65,18 @@ final class InternalDeserializer {
         return result;
     }
 
-    private <T> T deserializeRecursive(final Object input,
-                                       final Class<T> targetType,
-                                       final ExceptionTracker exceptionTracker,
-                                       final Injector injector) {
+    private Object deserializeRecursive(final Object input,
+                                        final FullType targetType,
+                                        final ExceptionTracker exceptionTracker,
+                                        final Injector injector) {
         final Object injected = injector.getInjectionForPropertyPath(exceptionTracker.getPosition(), targetType).orElse(input);
-        if (injected != null && injected.getClass() == targetType) {
-            return (T) injected;
+        if (injected != null && type(injected.getClass()).equals(targetType)) {
+            return injected;
         }
         if (input == null) {
             return null;
         }
 
-        if (injected instanceof List) {
-            return this.deserializeArray((List) injected, targetType, exceptionTracker, injector);
-        }
         final Definition definition = this.definitions.getDefinitionForType(targetType);
         if (definition instanceof SerializedObjectDefinition) {
             return this.deserializeDataTransferObject(
@@ -95,6 +91,9 @@ final class InternalDeserializer {
                     (CustomPrimitiveDefinition) definition,
                     exceptionTracker);
         }
+        if (definition instanceof CollectionDefinition) {
+            return this.deserializeArray(injected, (CollectionDefinition) definition, exceptionTracker, injector);
+        }
         throw new UnsupportedOperationException(definition.getClass().getName());
     }
 
@@ -103,12 +102,11 @@ final class InternalDeserializer {
                                                 final ExceptionTracker exceptionTracker,
                                                 final Injector injector) {
         final SerializedObjectDeserializer deserializer = definition.deserializer();
-        final Class type = definition.type();
         final DeserializationFields deserializationFields = deserializer.fields();
         final Map<String, Object> elements = new HashMap<>(0);
-        for (final Entry<String, Class<?>> entry : deserializationFields.fields().entrySet()) {
+        for (final Entry<String, FullType> entry : deserializationFields.fields().entrySet()) {
             final String elementName = entry.getKey();
-            final Class elementType = entry.getValue();
+            final FullType elementType = entry.getValue();
 
             final Object injected = injector.getInjectionForPropertyNameOrInstance(
                     exceptionTracker.getWouldBePosition(elementName), elementType);
@@ -128,14 +126,14 @@ final class InternalDeserializer {
         }
 
         if (exceptionTracker.validationResult().hasValidationErrors()) {
-            return null;
+            return null; // TODO
         } else {
             try {
-                return (T) deserializer.deserialize(type, elements);
+                return (T) deserializer.deserialize(elements);
             } catch (final Exception e) {
                 final String message = String.format(
                         "Exception calling deserialize(type: %s, elements: %s) on deserializationMethod %s",
-                        type, elements, deserializer
+                        definition.type().description(), elements, deserializer
                 );
                 exceptionTracker.track(e, message);
                 return null;
@@ -158,20 +156,26 @@ final class InternalDeserializer {
         }
     }
 
-    private <T> T deserializeArray(final List input,
-                                   final Class<T> targetType,
-                                   final ExceptionTracker exceptionTracker,
-                                   final Injector injector) {
-        final Object[] output = (Object[]) newInstance(targetType.getComponentType(), input.size());
-
-        for (int i = 0; i < input.size(); i++) {
-            output[i] = this.deserializeRecursive(
-                    input.get(i),
-                    targetType.getComponentType(),
-                    exceptionTracker.stepIntoArray(i),
-                    injector);
+    private Object deserializeArray(final Object input,
+                                    final CollectionDefinition definition,
+                                    final ExceptionTracker exceptionTracker,
+                                    final Injector injector) {
+        if (!(input instanceof List)) {
+            // TODO
+            throw new UnsupportedOperationException(
+                    String.format("Requiring an input of type List at position '%s' but found '%s'",
+                            exceptionTracker.getPosition(), input));
         }
+        final List list = (List) input;
 
-        return (T) output;
+        final FullType contentType = definition.contentType();
+        int index = 0;
+        final List deserializedList = new LinkedList();
+        for (final Object element : list) {
+            final Object deserialized = deserializeRecursive(element, contentType, exceptionTracker.stepIntoArray(index), injector);
+            deserializedList.add(deserialized);
+            index = index + 1;
+        }
+        return definition.deserializer().deserialize(deserializedList);
     }
 }

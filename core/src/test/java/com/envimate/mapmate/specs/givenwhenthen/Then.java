@@ -21,8 +21,11 @@
 
 package com.envimate.mapmate.specs.givenwhenthen;
 
+import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
 import com.envimate.mapmate.definitions.Definition;
 import com.envimate.mapmate.definitions.Definitions;
+import com.envimate.mapmate.definitions.SerializedObjectDefinition;
+import com.envimate.mapmate.definitions.hub.FullType;
 import com.envimate.mapmate.deserialization.validation.AggregatedValidationException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Arrays.stream;
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -57,13 +61,16 @@ public final class Then {
     }
 
     public Then noExceptionHasBeenThrown() {
+        if (nonNull(this.thenData.getException())) {
+            this.thenData.getException().printStackTrace();
+        }
         assertThat(this.thenData.getException(), is(nullValue()));
         return this;
     }
 
     public Then anAggregatedExceptionHasBeenThrownWithNumberOfErrors(final int numberOfErrors) {
         assertThat(this.thenData.getException(), instanceOf(AggregatedValidationException.class));
-        final AggregatedValidationException aggregatedValidationException = (AggregatedValidationException) thenData.getException();
+        final AggregatedValidationException aggregatedValidationException = (AggregatedValidationException) this.thenData.getException();
         assertThat(aggregatedValidationException.getValidationErrors(), hasSize(numberOfErrors));
         return this;
     }
@@ -71,10 +78,12 @@ public final class Then {
     public Then theDefinitionsContainExactlyTheCustomPrimitives(final Class<?>... types) {
         final Definitions definitions = this.thenData.getDefinitions();
         final List<Class<?>> actualTypes = stream(types)
+                .map(FullType::type)
                 .map(definitions::getOptionalDefinitionForType)
                 .flatMap(Optional::stream)
-                .filter(Definition::isCustomPrimitive)
+                .filter(definition -> definition instanceof CustomPrimitiveDefinition)
                 .map(Definition::type)
+                .map(FullType::type)
                 .collect(toList());
         assertThat(actualTypes, containsInAnyOrder(types));
         assertThat(definitions.countCustomPrimitives(), is(types.length));
@@ -84,10 +93,12 @@ public final class Then {
     public Then theDefinitionsContainExactlyTheSerializedObjects(final Class<?>... types) {
         final Definitions definitions = this.thenData.getDefinitions();
         final List<Class<?>> actualTypes = stream(types)
+                .map(FullType::type)
                 .map(definitions::getOptionalDefinitionForType)
                 .flatMap(Optional::stream)
-                .filter(Definition::isSerializedObject)
+                .filter(definition -> definition instanceof SerializedObjectDefinition)
                 .map(Definition::type)
+                .map(FullType::type)
                 .collect(toList());
         assertThat(actualTypes, containsInAnyOrder(types));
         assertThat(definitions.countSerializedObjects(), is(types.length));

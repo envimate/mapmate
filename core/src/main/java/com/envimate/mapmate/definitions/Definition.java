@@ -21,11 +21,8 @@
 
 package com.envimate.mapmate.definitions;
 
+import com.envimate.mapmate.definitions.hub.FullType;
+
 public interface Definition {
-
-    boolean isCustomPrimitive();
-
-    boolean isSerializedObject();
-
-    Class<?> type();
+    FullType type();
 }

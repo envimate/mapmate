@@ -22,19 +22,18 @@
 package com.envimate.mapmate.builder.conventional;
 
 import com.envimate.mapmate.builder.conventional.annotations.*;
-import com.envimate.mapmate.builder.detection.customprimitive.CustomPrimitiveDefinitionFactory;
-import com.envimate.mapmate.builder.detection.serializedobject.SerializedObjectDefinitionFactory;
+import com.envimate.mapmate.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.builder.detection.customprimitive.deserialization.CustomPrimitiveDeserializationDetector;
 import com.envimate.mapmate.builder.detection.customprimitive.serialization.CustomPrimitiveSerializationDetector;
 import com.envimate.mapmate.builder.detection.serializedobject.ClassFilter;
-import com.envimate.mapmate.builder.detection.serializedobject.deserialization.SerializedObjectDeserializationDetector;
 import com.envimate.mapmate.builder.detection.serializedobject.deserialization.ConstructorBasedDeserializationDetector;
+import com.envimate.mapmate.builder.detection.serializedobject.deserialization.SerializedObjectDeserializationDetector;
 import com.envimate.mapmate.builder.detection.serializedobject.fields.FieldDetector;
 
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static com.envimate.mapmate.builder.detection.customprimitive.SimpleCustomPrimitiveDefinitionFactory.definitionFactory;
+import static com.envimate.mapmate.builder.detection.customprimitive.CustomPrimitiveDefinitionFactory.customPrimitiveFactory;
 import static com.envimate.mapmate.builder.detection.customprimitive.deserialization.ClassAnnotationBasedCustomPrimitiveDeserializationDetector.classAnnotationBasedDeserializer;
 import static com.envimate.mapmate.builder.detection.customprimitive.deserialization.ConstructorBasedCustomPrimitiveDeserializationDetector.constructorBased;
 import static com.envimate.mapmate.builder.detection.customprimitive.deserialization.MethodAnnotationBasedCustomPrimitiveDeserializationDetector.annotationBasedDeserializer;
@@ -44,7 +43,7 @@ import static com.envimate.mapmate.builder.detection.customprimitive.serializati
 import static com.envimate.mapmate.builder.detection.customprimitive.serialization.MethodNameBasedCustomPrimitiveSerializationDetector.methodNameBased;
 import static com.envimate.mapmate.builder.detection.serializedobject.ClassFilter.allowAll;
 import static com.envimate.mapmate.builder.detection.serializedobject.ClassFilter.patternFilter;
-import static com.envimate.mapmate.builder.detection.serializedobject.SimpleSerializedObjectDefinitionFactory.serializedObjectFactory;
+import static com.envimate.mapmate.builder.detection.serializedobject.SerializedObjectDefinitionFactory.serializedObjectFactory;
 import static com.envimate.mapmate.builder.detection.serializedobject.deserialization.AnnotationBasedDeserializationDetector.annotationBasedDeserialzer;
 import static com.envimate.mapmate.builder.detection.serializedobject.deserialization.MatchingMethodDeserializationDetector.matchingMethodBased;
 import static com.envimate.mapmate.builder.detection.serializedobject.deserialization.NamedMethodDeserializationDetector.namedMethodBased;
@@ -56,38 +55,38 @@ public final class ConventionalDefinitionFactories {
     private ConventionalDefinitionFactories() {
     }
 
-    public static CustomPrimitiveDefinitionFactory nameAndConstructorBasedCustomPrimitiveDefinitionFactory(
+    public static DefinitionFactory nameAndConstructorBasedCustomPrimitiveDefinitionFactory(
             final String serializationMethodName,
             final String deserializationMethodName) {
-        return definitionFactory(methodNameBased(serializationMethodName),
+        return customPrimitiveFactory(methodNameBased(serializationMethodName),
                 staticMethodBased(deserializationMethodName),
                 constructorBased());
     }
 
-    public static CustomPrimitiveDefinitionFactory nameBasedCustomPrimitiveDefinitionFactory(
+    public static DefinitionFactory nameBasedCustomPrimitiveDefinitionFactory(
             final String serializationMethodName,
             final String deserializationMethodName) {
-        return definitionFactory(methodNameBased(serializationMethodName),
+        return customPrimitiveFactory(methodNameBased(serializationMethodName),
                 staticMethodBased(deserializationMethodName));
     }
 
-    public static CustomPrimitiveDefinitionFactory customPrimitiveMethodAnnotationFactory() {
+    public static DefinitionFactory customPrimitiveMethodAnnotationFactory() {
         final CustomPrimitiveSerializationDetector serializationDetector = annotationBasedSerializer(
                 MapMatePrimitiveSerializer.class);
         final CustomPrimitiveDeserializationDetector deserializationDetector = annotationBasedDeserializer(
                 MapMatePrimitiveDeserializer.class);
-        return definitionFactory(serializationDetector, deserializationDetector);
+        return customPrimitiveFactory(serializationDetector, deserializationDetector);
     }
 
-    public static CustomPrimitiveDefinitionFactory customPrimitiveClassAnnotationFactory() {
+    public static DefinitionFactory customPrimitiveClassAnnotationFactory() {
         final CustomPrimitiveSerializationDetector serializationDetector =
                 classAnnotationBasedSerializer(MapMatePrimitive.class, MapMatePrimitive::serializationMethodName);
         final CustomPrimitiveDeserializationDetector deserializationDetector =
                 classAnnotationBasedDeserializer(MapMatePrimitive.class, MapMatePrimitive::deserializationMethodName);
-        return definitionFactory(serializationDetector, deserializationDetector);
+        return customPrimitiveFactory(serializationDetector, deserializationDetector);
     }
 
-    public static SerializedObjectDefinitionFactory nameAndConstructorBasedSerializedObjectFactory(
+    public static DefinitionFactory nameAndConstructorBasedSerializedObjectFactory(
             final List<Pattern> patterns,
             final String deserializationMethodNamePattern) {
         final ClassFilter filter = patternFilter(patterns);
@@ -99,7 +98,7 @@ public final class ConventionalDefinitionFactories {
         return serializedObjectFactory(filter, singleMethod, matchingMethod, constructor);
     }
 
-    public static SerializedObjectDefinitionFactory nameBasedSerializedObjectFactory(
+    public static DefinitionFactory nameBasedSerializedObjectFactory(
             final List<Pattern> patterns,
             final String deserializationMethodNamePattern) {
         final ClassFilter filter = patternFilter(patterns);
@@ -109,12 +108,12 @@ public final class ConventionalDefinitionFactories {
         return serializedObjectFactory(filter, singleMethod, matchingMethod);
     }
 
-    public static SerializedObjectDefinitionFactory deserializerMethodNameBasedSerializedObjectFactory(
+    public static DefinitionFactory deserializerMethodNameBasedSerializedObjectFactory(
             final String deserializationMethodName) {
         return serializedObjectFactory(namedMethodBased(deserializationMethodName));
     }
 
-    public static SerializedObjectDefinitionFactory serializedObjectClassAnnotationFactory() {
+    public static DefinitionFactory serializedObjectClassAnnotationFactory() {
         final FieldDetector fieldDetector = annotationBased(MapMateSerializedField.class);
         final SerializedObjectDeserializationDetector deserializationDetector =
                 annotationBasedDeserialzer(MapMateDeserializationMethod.class);

@@ -21,10 +21,54 @@
 
 package com.envimate.mapmate.builder.detection.customprimitive;
 
-import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
+import com.envimate.mapmate.builder.detection.DefinitionFactory;
+import com.envimate.mapmate.builder.detection.customprimitive.deserialization.CustomPrimitiveDeserializationDetector;
+import com.envimate.mapmate.builder.detection.customprimitive.serialization.CustomPrimitiveSerializationDetector;
+import com.envimate.mapmate.definitions.Definition;
+import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
+import com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
+import java.util.List;
 import java.util.Optional;
 
-public interface CustomPrimitiveDefinitionFactory {
-    Optional<CustomPrimitiveDefinition> analyze(Class<?> type);
+import static com.envimate.mapmate.builder.detection.customprimitive.CachedReflectionType.cachedReflectionType;
+import static com.envimate.mapmate.definitions.CustomPrimitiveDefinition.untypedCustomPrimitiveDefinition;
+import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.util.Arrays.asList;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class CustomPrimitiveDefinitionFactory implements DefinitionFactory {
+    private final CustomPrimitiveSerializationDetector serializationDetector;
+    private final List<CustomPrimitiveDeserializationDetector> deserializationDetectors;
+
+    public static CustomPrimitiveDefinitionFactory customPrimitiveFactory(
+            final CustomPrimitiveSerializationDetector serializationDetector,
+            final CustomPrimitiveDeserializationDetector... deserializationDetectors) {
+        validateNotNull(serializationDetector, "serializationDetector");
+        validateNotNull(deserializationDetectors, "deserializationDetectors");
+        return new CustomPrimitiveDefinitionFactory(serializationDetector, asList(deserializationDetectors));
+    }
+
+    @Override
+    public Optional<Definition> analyze(final FullType type) {
+        final CachedReflectionType cachedReflectionType = cachedReflectionType(type.type());
+        final Optional<CustomPrimitiveSerializer<?>> serializer = this.serializationDetector.detect(cachedReflectionType);
+        final Optional<CustomPrimitiveDeserializer<?>> deserializer = this.deserializationDetectors.stream()
+                .map(detector -> detector.detect(cachedReflectionType))
+                .flatMap(Optional::stream)
+                .findFirst();
+        if (serializer.isPresent() && deserializer.isPresent()) {
+            return of(untypedCustomPrimitiveDefinition(type, serializer.get(), deserializer.get()));
+        }
+        return empty();
+    }
 }

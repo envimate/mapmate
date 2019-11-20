@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.deserialization;
 
+import com.envimate.mapmate.definitions.hub.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -36,25 +37,28 @@ import static java.util.stream.Collectors.toList;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DeserializationFields {
-    private final Map<String, Class<?>> elements;
+    private final Map<String, FullType> elements;
 
-    public static DeserializationFields deserializationFields(final Map<String, Class<?>> elements) {
+    public static DeserializationFields deserializationFields(final Map<String, FullType> elements) {
         return new DeserializationFields(elements);
     }
 
-    public Map<String, Class<?>> fields() {
+    public Map<String, FullType> fields() {
         return unmodifiableMap(this.elements);
     }
 
-    public List<Class<?>> referencedTypes() {
+    public List<FullType> referencedTypes() {
         return this.elements.values()
                 .stream()
+                /*
+                TODO
                 .map(type -> {
                     if (type.isArray()) {
                         return type.getComponentType();
                     }
                     return type;
                 })
+                 */
                 .distinct()
                 .collect(toList());
     }

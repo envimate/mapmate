@@ -47,6 +47,7 @@ public final class MarshallerSpecs {
     public void testJsonMarshallingWithCollectionsIsPossible() {
         givenTheExampleMapMateWithAllMarshallers()
                 .when().mapMateSerializes(theFullyInitializedExampleDtoWithCollections()).withMarshallingType(json())
+                .noExceptionHasBeenThrown()
                 .theSerializationResultWas("" +
                         "{\n" +
                         "  \"array\": [\n" +

@@ -22,11 +22,9 @@
 package com.envimate.mapmate.specs;
 
 import com.envimate.mapmate.domain.valid.*;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static com.envimate.mapmate.MapMate.aMapMate;
-import static com.envimate.mapmate.builder.recipes.recursive.RecursiveRecipe.addWithAllDependencies;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.given;
 
 public final class RecursionSpecs {
@@ -34,9 +32,7 @@ public final class RecursionSpecs {
     @Test
     public void recursionRecipeCanDetectCustomPrimitives() {
         given(
-                aMapMate()
-                        .usingRecipe(addWithAllDependencies(AString.class))
-                        .build()
+                aMapMate().withManuallyAddedType(AString.class).build()
         )
                 .when().theDefinitionsAreQueried()
                 .theDefinitionsContainExactlyTheCustomPrimitives(AString.class)
@@ -46,22 +42,17 @@ public final class RecursionSpecs {
     @Test
     public void recursionRecipeCanDetectRequiredTypesForSerializedObjects() {
         given(
-                aMapMate()
-                        .usingRecipe(addWithAllDependencies(AComplexNestedValidatedType.class))
-                        .build()
+                aMapMate().withManuallyAddedType(AComplexNestedValidatedType.class).build()
         )
                 .when().theDefinitionsAreQueried()
                 .theDefinitionsContainExactlyTheSerializedObjects(AComplexNestedValidatedType.class, AComplexValidatedType.class)
                 .theDefinitionsContainExactlyTheCustomPrimitives(AValidatedString.class);
     }
 
-    @Ignore
     @Test
     public void recursionRecipeCanDetectThroughCollections() {
         given(
-                aMapMate()
-                        .usingRecipe(addWithAllDependencies(AComplexTypeWithCollections.class))
-                        .build()
+                aMapMate().withManuallyAddedType(AComplexTypeWithCollections.class).build()
         )
                 .when().theDefinitionsAreQueried()
                 .theDefinitionsContainExactlyTheSerializedObjects(AComplexTypeWithCollections.class)
@@ -71,9 +62,7 @@ public final class RecursionSpecs {
     @Test
     public void recursionRecipeCanAutoloadPrimitiveDataTypes() {
         given(
-                aMapMate()
-                        .usingRecipe(addWithAllDependencies(AComplexNestedValidatedType.class))
-                        .build()
+                aMapMate().withManuallyAddedType(AComplexNestedValidatedType.class).build()
         )
                 .when().theDefinitionsAreQueried()
                 .theDefinitionsContainExactlyTheCustomPrimitives(AValidatedString.class)

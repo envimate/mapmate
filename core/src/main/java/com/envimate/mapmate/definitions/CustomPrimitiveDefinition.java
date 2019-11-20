@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.definitions;
 
+import com.envimate.mapmate.definitions.hub.FullType;
 import com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
 import com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
 import lombok.AccessLevel;
@@ -34,18 +35,18 @@ import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CustomPrimitiveDefinition implements Definition {
-    private final Class<?> type;
+    private final FullType type;
     private final CustomPrimitiveSerializer<?> serializer;
     private final CustomPrimitiveDeserializer<?> deserializer;
 
-    public static <T> CustomPrimitiveDefinition customPrimitiveDefinition(final Class<T> type,
+    public static <T> CustomPrimitiveDefinition customPrimitiveDefinition(final FullType type,
                                                                           final CustomPrimitiveSerializer<T> serializer,
                                                                           final CustomPrimitiveDeserializer<T> deserializer) {
         return untypedCustomPrimitiveDefinition(type, serializer, deserializer);
     }
 
     public static CustomPrimitiveDefinition untypedCustomPrimitiveDefinition(
-            final Class<?> type,
+            final FullType type,
             final CustomPrimitiveSerializer<?> serializer,
             final CustomPrimitiveDeserializer<?> deserializer) {
         validateNotNull(type, "type");
@@ -56,26 +57,16 @@ public final class CustomPrimitiveDefinition implements Definition {
 
     @SuppressWarnings("unchecked")
     public CustomPrimitiveDeserializer<Object> deserializer() {
-        return (CustomPrimitiveDeserializer<Object>) this.deserializer;
+        return (CustomPrimitiveDeserializer<Object>) this.deserializer; // TODO
     }
 
     @SuppressWarnings("unchecked")
     public CustomPrimitiveSerializer<Object> serializer() {
-        return (CustomPrimitiveSerializer<Object>) this.serializer;
+        return (CustomPrimitiveSerializer<Object>) this.serializer; // TODO
     }
 
     @Override
-    public boolean isCustomPrimitive() {
-        return true;
-    }
-
-    @Override
-    public boolean isSerializedObject() {
-        return false;
-    }
-
-    @Override
-    public Class<?> type() {
+    public FullType type() {
         return this.type;
     }
 }

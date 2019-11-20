@@ -21,6 +21,9 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.deserialization;
 
+import com.envimate.mapmate.definitions.Definition;
+import com.envimate.mapmate.definitions.hub.FullType;
+
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -39,17 +42,17 @@ public final class Common {
     private Common() {
     }
 
-    public static List<Method> detectDeserializerMethods(final Class<?> type) {
-        final Method[] methods = type.getMethods();
+    public static List<Method> detectDeserializerMethods(final FullType type) {
+        final Method[] methods = type.type().getMethods();
         return stream(methods)
                 .filter(method -> isStatic(method.getModifiers()))
                 .filter(method -> isPublic(method.getModifiers()))
-                .filter(method -> method.getReturnType().equals(type))
+                .filter(method -> method.getReturnType().equals(type.type()))
                 .filter(method -> method.getParameterCount() > 0)
                 .collect(toList());
     }
 
-    public static <T extends Executable> Optional<T> findMatchingMethod(final List<Class<?>> serializedFields, final List<T> methods) {
+    public static <T extends Executable> Optional<T> findMatchingMethod(final List<FullType> serializedFields, final List<T> methods) {
         if (serializedFields.isEmpty()) {
             return empty();
         }
@@ -73,13 +76,14 @@ public final class Common {
         return ofNullable(deserializationConstructor);
     }
 
-    public static boolean isMethodCompatibleWithFields(final Executable method, final List<Class<?>> fields) {
+    public static boolean isMethodCompatibleWithFields(final Executable method, final List<FullType> fields) {
         final List<Class<?>> parameterTypes = asList(method.getParameterTypes());
         if (fields.size() != parameterTypes.size()) {
             return false;
         }
 
-        for (final Class<?> serializedField : fields) {
+        for (final FullType serializedField : fields) {
+            // TODO
             final boolean present = parameterTypes.contains(serializedField);
             if (!present) {
                 return false;
@@ -88,7 +92,7 @@ public final class Common {
         return true;
     }
 
-    private static boolean isMostLikelyACustomPrimitive(final List<Class<?>> fields, final Executable executable) {
+    private static boolean isMostLikelyACustomPrimitive(final List<FullType> fields, final Executable executable) {
         final boolean isMostLikelyACustomPrimitive = fields.isEmpty() &&
                 executable.getParameterCount() == 1 &&
                 executable.getParameterTypes()[0] == String.class;

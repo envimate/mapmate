@@ -28,7 +28,6 @@ import org.junit.Test;
 
 import static com.envimate.mapmate.builder.recipes.manualregistry.ManualRegistry.manuallyRegisteredTypes;
 import static com.envimate.mapmate.builder.recipes.marshallers.jackson.JacksonMarshaller.jacksonMarshallerJson;
-import static com.envimate.mapmate.builder.recipes.primitives.BuiltInPrimitiveSerializedAsStringSupport.builtInPrimitiveSerializedAsStringSupport;
 
 public final class WithPrimitivesBuilderTest {
     private static final String JSON_WITH_STRING_SERIALIZED_PRIMITIVES = "{" +
@@ -80,10 +79,7 @@ public final class WithPrimitivesBuilderTest {
     );
 
     private static final MapMate MAP_MATE = MapMate.aMapMate()
-            .usingRecipe(manuallyRegisteredTypes()
-                    .withSerializedObjects(SerializedObjectWithPrimitives.class)
-            )
-            .usingRecipe(builtInPrimitiveSerializedAsStringSupport())
+            .withManuallyAddedType(SerializedObjectWithPrimitives.class)
             .usingRecipe(jacksonMarshallerJson(new ObjectMapper()))
             .build();
 

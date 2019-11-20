@@ -70,7 +70,7 @@ public final class CircularReferenceDetector {
     private void detect(final Object subject, final ArrayList<Object> references) {
         final Class<?> type = subject.getClass();
         final List<Field> fields = Arrays.stream(type.getFields())
-                .filter(field -> !Modifier.isStatic(field.getModifiers()))
+                .filter(field -> !Modifier.isStatic(field.getModifiers())) // TODO
                 .collect(Collectors.toList());
         for (final Field field : fields) {
 

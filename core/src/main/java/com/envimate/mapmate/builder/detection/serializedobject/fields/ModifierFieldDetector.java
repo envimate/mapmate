@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.fields;
 
+import com.envimate.mapmate.definitions.hub.FullType;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationField;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
 import lombok.AccessLevel;
@@ -45,8 +46,8 @@ public final class ModifierFieldDetector implements FieldDetector {
     }
 
     @Override
-    public SerializationFields detect(final Class<?> type) {
-        final List<SerializationField> list = stream(type.getFields())
+    public SerializationFields detect(final FullType type) {
+        final List<SerializationField> list = stream(type.type().getFields())
                 .filter(field -> isPublic(field.getModifiers()))
                 .filter(field -> !isStatic(field.getModifiers()))
                 .filter(field -> !isTransient(field.getModifiers()))

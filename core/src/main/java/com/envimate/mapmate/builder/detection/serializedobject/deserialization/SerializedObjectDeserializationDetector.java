@@ -21,11 +21,12 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.deserialization;
 
+import com.envimate.mapmate.definitions.hub.FullType;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
 
 import java.util.Optional;
 
 public interface SerializedObjectDeserializationDetector {
-    Optional<SerializedObjectDeserializer> detect(Class<?> type, SerializationFields fields);
+    Optional<SerializedObjectDeserializer> detect(FullType type, SerializationFields fields);
 }

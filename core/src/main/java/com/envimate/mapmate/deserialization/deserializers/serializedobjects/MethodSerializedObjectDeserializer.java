@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.deserialization.deserializers.serializedobjects;
 
+import com.envimate.mapmate.definitions.hub.FullType;
 import com.envimate.mapmate.deserialization.DeserializationFields;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -28,12 +29,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.envimate.mapmate.builder.detection.serializedobject.IncompatibleSerializedObjectException.incompatibleSerializedObjectException;
+import static com.envimate.mapmate.deserialization.DeserializationFields.deserializationFields;
 import static java.lang.reflect.Modifier.*;
 import static java.util.Arrays.stream;
 
@@ -45,12 +48,12 @@ public final class MethodSerializedObjectDeserializer implements SerializedObjec
     private final Method factoryMethod;
     private final String[] parameterNames;
 
-    public static SerializedObjectDeserializer methodNameDeserializer(final Class<?> type,
+    public static SerializedObjectDeserializer methodNameDeserializer(final FullType type,
                                                                       final String methodName,
                                                                       final Field[] requiredFields) {
         final Class<?>[] parameterTypes = stream(requiredFields).map(Field::getType).toArray(Class<?>[]::new);
         try {
-            final Method method = type.getMethod(methodName, parameterTypes);
+            final Method method = type.type().getMethod(methodName, parameterTypes);
             return methodDeserializer(type, method);
         } catch (final NoSuchMethodException e) {
             throw incompatibleSerializedObjectException(
@@ -60,7 +63,7 @@ public final class MethodSerializedObjectDeserializer implements SerializedObjec
 
     }
 
-    public static SerializedObjectDeserializer methodDeserializer(final Class<?> type,
+    public static SerializedObjectDeserializer methodDeserializer(final FullType type,
                                                                   final Method deserializationMethod) {
         validateDeserializerModifiers(type, deserializationMethod);
         return verifiedDeserializationDTOMethod(deserializationMethod);
@@ -69,22 +72,25 @@ public final class MethodSerializedObjectDeserializer implements SerializedObjec
     private static MethodSerializedObjectDeserializer verifiedDeserializationDTOMethod(final Method factoryMethod) {
         final Parameter[] parameters = factoryMethod.getParameters();
         final String[] parameterNames = stream(parameters).map(Parameter::getName).toArray(String[]::new);
-        final Map<String, Class<?>> parameterFields = stream(parameters)
+        final Map<String, FullType> parameterFields = stream(parameters)
                 .collect(Collectors.toMap(
                         Parameter::getName,
-                        Parameter::getType
+                        FullType::typeOfParameter
                 ));
-        return new MethodSerializedObjectDeserializer(DeserializationFields.deserializationFields(parameterFields), factoryMethod, parameterNames);
+        return new MethodSerializedObjectDeserializer(deserializationFields(parameterFields), factoryMethod, parameterNames);
     }
 
     @Override
-    public Object deserialize(final Class<?> targetType,
-                              final Map<String, Object> elements) throws Exception {
+    public Object deserialize(final Map<String, Object> elements) {
         final Object[] arguments = new Object[this.parameterNames.length];
         for (int i = 0; i < arguments.length; i++) {
             arguments[i] = elements.get(this.parameterNames[i]);
         }
-        return this.factoryMethod.invoke(null, arguments);
+        try {
+            return this.factoryMethod.invoke(null, arguments);
+        } catch (final IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e); // TODO
+        }
     }
 
     @Override
@@ -92,7 +98,7 @@ public final class MethodSerializedObjectDeserializer implements SerializedObjec
         return this.fields;
     }
 
-    private static void validateDeserializerModifiers(final Class<?> type, final Method deserializationMethod) {
+    private static void validateDeserializerModifiers(final FullType type, final Method deserializationMethod) {
         final int deserializationMethodModifiers = deserializationMethod.getModifiers();
 
         if (!isPublic(deserializationMethodModifiers)) {
@@ -110,7 +116,7 @@ public final class MethodSerializedObjectDeserializer implements SerializedObjec
                     "The deserialization method %s configured for the SerializedObject of type %s must not be abstract",
                     deserializationMethod, type);
         }
-        if (deserializationMethod.getReturnType() != type) {
+        if (deserializationMethod.getReturnType() != type.type()) {
             throw incompatibleSerializedObjectException(
                     "The deserialization method %s configured for the SerializedObject of type %s must return the DTO",
                     deserializationMethod, type);

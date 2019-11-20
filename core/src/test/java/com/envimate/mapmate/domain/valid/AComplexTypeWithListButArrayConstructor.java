@@ -28,15 +28,14 @@ import lombok.ToString;
 
 import java.util.List;
 
-import static java.util.Arrays.asList;
-
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AComplexTypeWithListButArrayConstructor {
     public final List<ANumber> list;
 
-    public static AComplexTypeWithListButArrayConstructor deserialize(final ANumber[] list) {
-        return new AComplexTypeWithListButArrayConstructor(asList(list));
+    // TODO
+    public static AComplexTypeWithListButArrayConstructor deserialize(final List<ANumber> list) {
+        return new AComplexTypeWithListButArrayConstructor(list);
     }
 }

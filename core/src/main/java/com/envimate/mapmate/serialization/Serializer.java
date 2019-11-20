@@ -21,35 +21,36 @@
 
 package com.envimate.mapmate.serialization;
 
-import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
-import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.Definitions;
-import com.envimate.mapmate.definitions.SerializedObjectDefinition;
+import com.envimate.mapmate.definitions.*;
+import com.envimate.mapmate.definitions.hub.FullType;
 import com.envimate.mapmate.marshalling.Marshaller;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
+import static com.envimate.mapmate.definitions.hub.FullType.typeOfObject;
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.util.Objects.isNull;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
 
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Serializer {
     private final MarshallerRegistry<Marshaller> marshallers;
     private final CircularReferenceDetector circularReferenceDetector;
     private final Definitions definitions;
-
-    private Serializer(final MarshallerRegistry<Marshaller> marshallers,
-                       final CircularReferenceDetector circularReferenceDetector,
-                       final Definitions definitions) {
-        this.marshallers = marshallers;
-        this.circularReferenceDetector = circularReferenceDetector;
-        this.definitions = definitions;
-    }
 
     public static Serializer theSerializer(final MarshallerRegistry<Marshaller> marshallers,
                                            final Definitions definitions) {
@@ -111,42 +112,40 @@ public final class Serializer {
     @SuppressWarnings("unchecked")
     public Map<String, Object> serializeToMap(final Object object) {
         if (isNull(object)) {
-            return new HashMap<>();
+            return new HashMap<>(0);
         }
         final Object normalized = normalize(object);
         if (!(normalized instanceof Map)) {
-            throw new UnsupportedOperationException("Only DTOs can be serialized to map");
+            throw new UnsupportedOperationException("Only serialized objects can be serialized to map");
         }
         return (Map<String, Object>) normalized;
     }
 
     private Object normalize(final Object object) {
-        this.circularReferenceDetector.detect(object);
+        this.circularReferenceDetector.detect(object); // TODO
 
         if (isNull(object)) {
             return null;
         }
 
-        if (object instanceof Collection<?>) {
-            return serializeCollection((Collection<?>) object);
-        } else if (object.getClass().isArray()) {
-            return serializeArray((Object[]) object);
-        } else if (object instanceof Map<?, ?>) {
-            return serializeMap(object);
-        }
-
-        return serializeDefinition(object);
+        final FullType type = typeOfObject(object);
+        return serializeDefinition(type, object);
     }
 
-    private Object serializeDefinition(final Object object) {
-        final Definition definition = this.definitions.getDefinitionForObject(object);
+    private Object serializeDefinition(final FullType type, final Object object) {
+        final Definition definition = this.definitions.getDefinitionForType(type);
+        if (isNull(object)) {
+            return null;
+        }
         if (definition instanceof CustomPrimitiveDefinition) {
             final CustomPrimitiveDefinition customPrimitive = (CustomPrimitiveDefinition) definition;
             return customPrimitive.serializer().serialize(object);
         }
         if (definition instanceof SerializedObjectDefinition) {
-            final SerializedObjectDefinition dataTransferObject = (SerializedObjectDefinition) definition;
-            return serializeSerializedObject(dataTransferObject, object);
+            return serializeSerializedObject((SerializedObjectDefinition) definition, object);
+        }
+        if (definition instanceof CollectionDefinition) {
+            return serializeCollection((CollectionDefinition) definition, object);
         }
         throw new UnsupportedOperationException("This should never happen.");
     }
@@ -156,32 +155,22 @@ public final class Serializer {
         final SerializationFields fields = definition.serializer().fields();
         final Map<String, Object> map = new HashMap<>(10);
         fields.fields().forEach(serializationField -> {
+            final FullType type = serializationField.type();
+            final Object value = ofNullable(object).map(serializationField::query).orElse(null);
+            final Object serializedValue = serializeDefinition(type, value);
             final String name = serializationField.name();
-            final Object value = serializationField.query(object);
-            final Object serializedValue = normalize(value);
             map.put(name, serializedValue);
         });
         return map;
     }
 
-    private Object serializeMap(final Object object) {
-        final Map<?, ?> castMap = (Map<?, ?>) object;
-        final Map<Object, Object> normalizedMap = new HashMap<>(castMap.size());
-        ((Map<?, ?>) object).forEach((key, value) -> {
-            normalizedMap.put(normalize(key), normalize(value));
-        });
-        return normalizedMap;
-    }
-
-    private Object serializeArray(final Object[] object) {
-        return Arrays.stream(object)
-                .map(this::normalize).toArray();
-    }
-
-    private Object serializeCollection(final Collection<?> object) {
-        return object.stream()
-                .map(this::normalize)
-                .collect(Collectors.toList());
+    private Object serializeCollection(final CollectionDefinition definition,
+                                       final Object object) {
+        final FullType contentType = definition.contentType();
+        return definition.serializer().serialize(object)
+                .stream()
+                .map(element -> serializeDefinition(contentType, element))
+                .collect(toList());
     }
 
     public Definitions getDefinitions() {

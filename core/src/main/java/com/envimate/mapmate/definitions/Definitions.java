@@ -21,94 +21,102 @@
 
 package com.envimate.mapmate.definitions;
 
+import com.envimate.mapmate.definitions.hub.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import static com.envimate.mapmate.definitions.DefinitionMultiplexer.multiplex;
 import static com.envimate.mapmate.definitions.DefinitionNotFoundException.definitionNotFound;
+import static com.envimate.mapmate.definitions.hub.FullType.type;
 import static com.envimate.mapmate.deserialization.UnknownReferenceException.fromType;
+import static java.util.Optional.of;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Definitions {
-    private final Collection<CustomPrimitiveDefinition> customPrimitives;
-    private final Collection<SerializedObjectDefinition> serializedObjects;
+    private final Map<FullType, Definition> definitions;
 
-    public static Definitions definitions(final Collection<CustomPrimitiveDefinition> customPrimitives,
-                                          final Collection<SerializedObjectDefinition> serializedObjects) {
-        return new Definitions(customPrimitives, serializedObjects);
+    public static Definitions definitions(final Map<FullType, Definition> definitions) {
+        return new Definitions(definitions);
     }
 
-    public Definition getDefinitionForObject(final Object object) {
-        final Class<?> targetType = object.getClass();
-        return this.getDefinitionForType(targetType);
-    }
-
-    public Definition getDefinitionForType(final Class<?> targetType) {
-        final List<Definition> allDefinitions = new LinkedList<>();
-        allDefinitions.addAll(this.customPrimitives);
-        allDefinitions.addAll(this.serializedObjects);
-        return allDefinitions.stream()
-                .filter(e -> e.type() == targetType)
-                .findAny()
+    public Definition getDefinitionForType(final FullType targetType) {
+        return getOptionalDefinitionForType(targetType)
                 .orElseThrow(() -> definitionNotFound(targetType));
     }
 
-    public Optional<Definition> getOptionalDefinitionForType(final Class<?> targetType) {
-        final List<Definition> allDefinitions = new LinkedList<>();
-        allDefinitions.addAll(this.customPrimitives);
-        allDefinitions.addAll(this.serializedObjects);
-        return allDefinitions.stream()
-                .filter(e -> e.type() == targetType)
-                .findAny();
+    public Optional<Definition> getOptionalDefinitionForType(final FullType targetType) {
+        if (!this.definitions.containsKey(targetType)) {
+            return Optional.empty();
+        }
+        return of(this.definitions.get(targetType));
     }
 
+    // TODO
     public void validateNoUnsupportedOutgoingReferences() {
-        final List<Class<?>> references = this.allReferences();
-        for (final Class<?> reference : references) {
+        final List<FullType> references = this.allReferences();
+        for (final FullType reference : references) {
             if (this.getOptionalDefinitionForType(reference).isEmpty()) {
                 throw fromType(reference);
             }
         }
     }
 
-    private List<Class<?>> allReferences() {
-        final List<Class<?>> allReferences = new LinkedList<>();
-        for (final SerializedObjectDefinition serializedObjectDefinition : this.serializedObjects) {
-            final List<Class<?>> references = serializedObjectDefinition.deserializer().fields().referencedTypes();
-            allReferences.addAll(references);
-        }
+    private List<FullType> allReferences() {
+        final List<FullType> allReferences = new LinkedList<>();
+        this.definitions.values().forEach(definition -> {
+            multiplex(definition).forSerializedObject(serializedObject -> {
+                final List<FullType> references = serializedObject.deserializer().fields().referencedTypes();
+                allReferences.addAll(references);
+            });
+        });
         return allReferences;
     }
 
+    // TODO remove
     public int countCustomPrimitives() {
-        return this.customPrimitives.size();
+        return (int) this.definitions.values().stream()
+                .filter(definition -> definition instanceof CustomPrimitiveDefinition)
+                .count();
     }
 
+    // TODO remove
     public int countSerializedObjects() {
-        return this.serializedObjects.size();
+        return (int) this.definitions.values().stream()
+                .filter(definition -> definition instanceof SerializedObjectDefinition)
+                .count();
     }
 
     public String dump() {
         final StringBuilder stringBuilder = new StringBuilder(10);
         stringBuilder.append("------------------------------\n");
         stringBuilder.append("Serialized Objects:\n");
-        this.serializedObjects.stream()
-                .map(SerializedObjectDefinition::type)
-                .map(Class::getName)
+        this.definitions.values().stream()
+                .filter(definition -> definition instanceof SerializedObjectDefinition)
+                .map(Definition::type)
+                .map(FullType::description)
                 .forEach(type -> stringBuilder.append(type).append("\n"));
         stringBuilder.append("------------------------------\n");
         stringBuilder.append("Custom Primitives:\n");
-        this.customPrimitives.stream()
-                .map(CustomPrimitiveDefinition::type)
-                .map(Class::getName)
+        this.definitions.values().stream()
+                .filter(definition -> definition instanceof CustomPrimitiveDefinition)
+                .map(Definition::type)
+                .map(FullType::description)
+                .forEach(type -> stringBuilder.append(type).append("\n"));
+        stringBuilder.append("------------------------------\n");
+        stringBuilder.append("Collections:\n");
+        this.definitions.values().stream()
+                .filter(definition -> definition instanceof CollectionDefinition)
+                .map(Definition::type)
+                .map(FullType::description)
                 .forEach(type -> stringBuilder.append(type).append("\n"));
         stringBuilder.append("------------------------------\n");
         return stringBuilder.toString();

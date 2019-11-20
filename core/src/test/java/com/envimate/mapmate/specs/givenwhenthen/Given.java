@@ -23,19 +23,20 @@ package com.envimate.mapmate.specs.givenwhenthen;
 
 import com.envimate.mapmate.MapMate;
 import com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedMarshallerRecipe;
-import com.envimate.mapmate.domain.valid.*;
+import com.envimate.mapmate.domain.valid.AnException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 import static com.envimate.mapmate.MapMate.aMapMate;
-import static com.envimate.mapmate.specs.givenwhenthen.Unmarshallers.*;
 import static com.envimate.mapmate.specs.givenwhenthen.Marshallers.*;
+import static com.envimate.mapmate.specs.givenwhenthen.Unmarshallers.*;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Given {
     private final MapMate mapMate;
 
     public static Given given(final MapMate mapMate) {
+        System.out.println(mapMate.deserializer().getDefinitions().dump());
         return new Given(mapMate);
     }
 
@@ -45,10 +46,6 @@ public final class Given {
                 .usingXmlMarshaller(xmlMarshaller(), xmlUnmarshaller())
                 .usingYamlMarshaller(yamlMarshaller(), yamlUnmarshaller())
                 .usingRecipe(UrlEncodedMarshallerRecipe.urlEncodedMarshaller())
-                //.usingRecipe(manuallyRegisteredTypes()
-                //        .withCustomPrimitives(AString.class, ANumber.class)
-                //        .withSerializedObjects(AComplexType.class, AComplexTypeWithArray.class, AComplexNestedType.class)
-                //)
                 .withExceptionIndicatingValidationError(AnException.class)
                 .build();
         return given(mapMate);

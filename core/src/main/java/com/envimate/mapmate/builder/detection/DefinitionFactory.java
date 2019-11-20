@@ -19,27 +19,13 @@
  * under the License.
  */
 
-package com.envimate.mapmate.domain.valid;
+package com.envimate.mapmate.builder.detection;
 
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import com.envimate.mapmate.definitions.Definition;
+import com.envimate.mapmate.definitions.hub.FullType;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 
-@ToString
-@EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class AComplexTypeWithMap {
-    public final Map<AString, ANumber> map;
-    public final HashMap<AString, ANumber> hashMap;
-    public final HashMap<AString, AComplexType> complexMap;
-
-    public static AComplexTypeWithMap deserialize(final Map<AString, ANumber> map,
-                                                  final HashMap<AString, ANumber> hashMap1,
-                                                  final HashMap<AString, AComplexType> hashMap2) {
-        return new AComplexTypeWithMap(map, hashMap1, hashMap2);
-    }
+public interface DefinitionFactory {
+    Optional<Definition> analyze(FullType type);
 }

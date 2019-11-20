@@ -21,14 +21,19 @@
 
 package com.envimate.mapmate.definitions;
 
+import com.envimate.mapmate.builder.detection.Detector;
+import com.envimate.mapmate.definitions.hub.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
+import static com.envimate.mapmate.definitions.DefinitionMultiplexer.multiplex;
 import static com.envimate.mapmate.definitions.Definitions.definitions;
 
 @ToString
@@ -37,28 +42,53 @@ import static com.envimate.mapmate.definitions.Definitions.definitions;
 public final class DefinitionsBuilder {
     private static final int INITIAL_CAPACITY = 10000;
 
-    private final Map<Class<?>, CustomPrimitiveDefinition> customPrimitives = new HashMap<>(INITIAL_CAPACITY);
-    private final Map<Class<?>, SerializedObjectDefinition> serializedObjects = new HashMap<>(INITIAL_CAPACITY);
+    private final Map<FullType, Definition> definitions = new HashMap<>(INITIAL_CAPACITY);
+    private final Detector detector;
 
-    public static DefinitionsBuilder definitionsBuilder() {
-        return new DefinitionsBuilder();
+    public static DefinitionsBuilder definitionsBuilder(final Detector detector) {
+        return new DefinitionsBuilder(detector);
     }
 
-    @SuppressWarnings("CastToConcreteClass")
-    public void addDefinition(final Definition definition) {
-        if (definition.isCustomPrimitive()) {
-            this.customPrimitives.put(definition.type(), (CustomPrimitiveDefinition) definition);
-        } else {
-            this.serializedObjects.put(definition.type(), (SerializedObjectDefinition) definition);
+    public void detectAndAdd(final FullType type) {
+        if (isPresent(type)) {
+            return;
         }
+        this.detector.detect(type).ifPresent(this::addDefinition);
     }
 
-    public boolean notPresent(final Class<?> detectionCandidate) {
-        return !this.customPrimitives.containsKey(detectionCandidate) &&
-                !this.serializedObjects.containsKey(detectionCandidate);
+    public void addDefinition(final Definition definition) {
+        this.definitions.put(definition.type(), definition);
+    }
+
+    private boolean isPresent(final FullType detectionCandidate) {
+        return this.definitions.containsKey(detectionCandidate);
+    }
+
+    public void resolveRecursively(final Detector detector) {
+        final List<Definition> seedDefinitions = new LinkedList<>(this.definitions.values());
+        seedDefinitions.forEach(definition -> diveIntoChildren(definition, detector));
+    }
+
+    private void recurse(final FullType type, final Detector detector) {
+        if (isPresent(type)) {
+            return;
+        }
+        detector.detect(type).ifPresent(definition -> {
+            addDefinition(definition);
+            diveIntoChildren(definition, detector);
+        });
+    }
+
+    private void diveIntoChildren(final Definition definition, final Detector detector) {
+        multiplex(definition)
+                .forSerializedObject(serializedObject -> {
+                    serializedObject.serializer().fields().fields().forEach(field -> recurse(field.type(), detector));
+                    serializedObject.deserializer().fields().referencedTypes().forEach(referencedType -> recurse(referencedType, detector));
+                })
+                .forCollection(collection -> recurse(collection.contentType(), detector));
     }
 
     public Definitions build() {
-        return definitions(this.customPrimitives.values(), this.serializedObjects.values());
+        return definitions(this.definitions);
     }
 }

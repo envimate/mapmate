@@ -22,7 +22,6 @@
 package com.envimate.mapmate.builder.recipes.manualregistry;
 
 import com.envimate.mapmate.MapMateBuilder;
-import com.envimate.mapmate.builder.detection.Detector;
 import com.envimate.mapmate.builder.detection.serializedobject.fields.FieldDetector;
 import com.envimate.mapmate.builder.recipes.Recipe;
 import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
@@ -39,28 +38,26 @@ import lombok.ToString;
 import java.lang.reflect.Field;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 
 import static com.envimate.mapmate.builder.detection.serializedobject.fields.ModifierFieldDetector.modifierBased;
 import static com.envimate.mapmate.definitions.CustomPrimitiveDefinition.customPrimitiveDefinition;
 import static com.envimate.mapmate.definitions.SerializedObjectDefinition.serializedObjectDefinition;
+import static com.envimate.mapmate.definitions.hub.FullType.type;
 import static com.envimate.mapmate.deserialization.deserializers.serializedobjects.MethodSerializedObjectDeserializer.methodNameDeserializer;
 import static com.envimate.mapmate.serialization.serializers.serializedobject.SerializedObjectSerializer.serializedObjectSerializer;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
-import static java.util.Collections.unmodifiableList;
-import static java.util.stream.Collectors.toList;
 
+// TODO not necessary
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ManualRegistry implements Recipe {
     private static final FieldDetector FIELD_DETECTOR = modifierBased();
 
-    private final List<CustomPrimitiveDefinition> customPrimitiveDefinitions = new LinkedList<>();
-    private final List<SerializedObjectDefinition> serializedObjectDefinitions = new LinkedList<>();
+    private final List<Definition> definitions = new LinkedList<>();
     private final List<Class<?>> manuallyAddedCustomPrimitiveTypes = new LinkedList<>();
     private final List<Class<?>> manuallyAddedSerializedObjectTypes = new LinkedList<>();
 
@@ -72,20 +69,20 @@ public final class ManualRegistry implements Recipe {
                                                   final Function<T, String> serializationMethod,
                                                   final Function<String, T> deserializationMethod) {
         return this.withCustomPrimitive(customPrimitiveDefinition(
-                type,
+                type(type),
                 serializationMethod::apply,
                 deserializationMethod::apply
         ));
     }
 
     public ManualRegistry withCustomPrimitive(final CustomPrimitiveDefinition customPrimitive) {
-        if (this.customPrimitiveDefinitions.contains(customPrimitive)) {
+        if (this.definitions.contains(customPrimitive)) {
             throw new UnsupportedOperationException(String.format(
                     "The customPrimitive %s has already been added for type %s",
                     customPrimitive,
-                    customPrimitive.type()));
+                    customPrimitive.type().description()));
         }
-        this.customPrimitiveDefinitions.add(customPrimitive);
+        this.definitions.add(customPrimitive);
 
         return this;
     }
@@ -97,23 +94,23 @@ public final class ManualRegistry implements Recipe {
     }
 
     public ManualRegistry withSerializedObject(final SerializedObjectDefinition serializedObject) {
-        if (this.serializedObjectDefinitions.contains(serializedObject)) {
+        if (this.definitions.contains(serializedObject)) {
             throw new UnsupportedOperationException(String.format(
                     "The serializedObject %s has already been added for type %s",
                     serializedObject,
-                    serializedObject.type()));
+                    serializedObject.type().description()));
         }
-        this.serializedObjectDefinitions.add(serializedObject);
+        this.definitions.add(serializedObject);
         return this;
     }
 
     public ManualRegistry withSerializedObject(final Class<?> type,
                                                final Field[] serializedFields,
                                                final String deserializationMethodName) {
-        final SerializedObjectDeserializer deserializer = methodNameDeserializer(type, deserializationMethodName, serializedFields);
-        final SerializationFields serializationFields = FIELD_DETECTOR.detect(type);
-        final SerializedObjectSerializer serializer = serializedObjectSerializer(type, serializationFields);
-        final SerializedObjectDefinition serializedObject = serializedObjectDefinition(type, serializer, deserializer);
+        final SerializedObjectDeserializer deserializer = methodNameDeserializer(type(type), deserializationMethodName, serializedFields);
+        final SerializationFields serializationFields = FIELD_DETECTOR.detect(type(type));
+        final SerializedObjectSerializer serializer = serializedObjectSerializer(type(type), serializationFields);
+        final SerializedObjectDefinition serializedObject = serializedObjectDefinition(type(type), serializer, deserializer);
         return this.withSerializedObject(serializedObject);
     }
 
@@ -124,37 +121,9 @@ public final class ManualRegistry implements Recipe {
     }
 
     @Override
-    public List<CustomPrimitiveDefinition> customPrimitiveDefinitions() {
-        return unmodifiableList(this.customPrimitiveDefinitions);
-    }
-
-    @Override
-    public List<SerializedObjectDefinition> serializedObjectDefinitions() {
-        return unmodifiableList(this.serializedObjectDefinitions);
-    }
-
-    @Override
     public void cook(final MapMateBuilder mapMateBuilder) {
-        final Detector detector = mapMateBuilder.detector;
-
-        final List<Definition> definitions = this.manuallyAddedCustomPrimitiveTypes.stream()
-                .map(detector::detect)
-                .flatMap(Optional::stream)
-                .collect(toList());
-
-        this.manuallyAddedSerializedObjectTypes.stream()
-                .map(detector::detect)
-                .flatMap(Optional::stream)
-                .forEach(definitions::add);
-
-        definitions.stream()
-                .filter(Definition::isCustomPrimitive)
-                .map(definition -> (CustomPrimitiveDefinition) definition)
-                .forEach(this.customPrimitiveDefinitions::add);
-
-        definitions.stream()
-                .filter(Definition::isSerializedObject)
-                .map(definition -> (SerializedObjectDefinition) definition)
-                .forEach(this.serializedObjectDefinitions::add);
+        this.definitions.forEach(mapMateBuilder::withManuallyAddedDefinition);
+        this.manuallyAddedCustomPrimitiveTypes.forEach(mapMateBuilder::withManuallyAddedType);
+        this.manuallyAddedSerializedObjectTypes.forEach(mapMateBuilder::withManuallyAddedType);
     }
 }

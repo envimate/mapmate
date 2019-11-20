@@ -21,19 +21,18 @@
 
 package com.envimate.mapmate.builder.recipes.recursive;
 
-import com.envimate.mapmate.builder.detection.Detector;
 import com.envimate.mapmate.MapMateBuilder;
+import com.envimate.mapmate.builder.detection.Detector;
 import com.envimate.mapmate.builder.recipes.Recipe;
-import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
-import com.envimate.mapmate.definitions.SerializedObjectDefinition;
+import com.envimate.mapmate.definitions.hub.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.List;
-
 import static com.envimate.mapmate.builder.recipes.recursive.ScanResultBuilder.scanResultBuilder;
+import static com.envimate.mapmate.definitions.DefinitionMultiplexer.multiplex;
+import static com.envimate.mapmate.definitions.hub.FullType.type;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
 @ToString
@@ -50,34 +49,22 @@ public final class RecursiveRecipe implements Recipe {
 
     @Override
     public void cook(final MapMateBuilder mapMateBuilder) {
-        final Detector detector = mapMateBuilder.detector;
-        recurse(this.type, detector);
+        final Detector detector = null; // TODO
+        recurse(type(this.type), detector);
     }
 
-    @Override
-    public List<CustomPrimitiveDefinition> customPrimitiveDefinitions() {
-        return this.scanResultBuilder.customPrimitiveDefinitions();
-    }
-
-    @Override
-    public List<SerializedObjectDefinition> serializedObjectDefinitions() {
-        return this.scanResultBuilder.serializedObjectDefinitions();
-    }
-
-    @SuppressWarnings("CastToConcreteClass")
-    private void recurse(final Class<?> type, final Detector detector) {
+    private void recurse(final FullType type, final Detector detector) {
         if (this.scanResultBuilder.alreadyHas(type)) {
             return;
         }
-        detector.detect(type).ifPresent(definition -> {
-            if (definition.isCustomPrimitive()) {
-                this.scanResultBuilder.addCustomPrimitive((CustomPrimitiveDefinition) definition);
-            } else {
-                final SerializedObjectDefinition serializedObject = (SerializedObjectDefinition) definition;
-                this.scanResultBuilder.addSerializedObject(serializedObject);
-                serializedObject.serializer().fields().fields().forEach(field -> recurse(field.type(), detector));
-                serializedObject.deserializer().fields().referencedTypes().forEach(referencedType -> recurse(referencedType, detector));
-            }
-        });
+        detector.detect(type).ifPresent(definition -> multiplex(definition)
+                .forCustomPrimitive(this.scanResultBuilder::addCustomPrimitive)
+                .forSerializedObject(serializedObject -> {
+                    this.scanResultBuilder.addSerializedObject(serializedObject);
+                    serializedObject.serializer().fields().fields().forEach(field -> recurse(field.type(), detector));
+                    serializedObject.deserializer().fields().referencedTypes().forEach(referencedType -> recurse(referencedType, detector));
+                })
+                .forCollection(collectionDefinition -> recurse(collectionDefinition.contentType(), detector))
+                .throwExceptionForAllOtherDefinitionTypes());
     }
 }

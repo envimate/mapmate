@@ -22,10 +22,7 @@
 package com.envimate.mapmate.builder.detection;
 
 import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.builder.detection.customprimitive.CustomPrimitiveDefinitionFactory;
-import com.envimate.mapmate.builder.detection.serializedobject.SerializedObjectDefinitionFactory;
-import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
-import com.envimate.mapmate.definitions.SerializedObjectDefinition;
+import com.envimate.mapmate.definitions.hub.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -42,41 +39,48 @@ import static java.util.Optional.empty;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SimpleDetector implements Detector {
-    private final List<CustomPrimitiveDefinitionFactory> customPrimitiveDefinitionFactories;
-    private final List<SerializedObjectDefinitionFactory> serializedObjectDefinitionFactories;
+    private final List<DefinitionFactory> collectionDefinitionFactories;
+    private final List<DefinitionFactory> customPrimitiveDefinitionFactories;
+    private final List<DefinitionFactory> serializedObjectDefinitionFactories;
 
-    public static Detector detector(final List<CustomPrimitiveDefinitionFactory> customPrimitiveDefinitionFactories,
-                                    final List<SerializedObjectDefinitionFactory> serializedObjectDefinitionFactories) {
+    public static Detector detector(final List<DefinitionFactory> collectionDefinitionFactories,
+                                    final List<DefinitionFactory> customPrimitiveDefinitionFactories,
+                                    final List<DefinitionFactory> serializedObjectDefinitionFactories) {
+        validateNotNull(collectionDefinitionFactories, "collectionDefinitionFactories");
         validateNotNull(customPrimitiveDefinitionFactories, "customPrimitiveDefinitionFactories");
         validateNotNull(serializedObjectDefinitionFactories, "serializedObjectDefinitionFactories");
-        return new SimpleDetector(customPrimitiveDefinitionFactories, serializedObjectDefinitionFactories);
+        return new SimpleDetector(collectionDefinitionFactories, customPrimitiveDefinitionFactories, serializedObjectDefinitionFactories);
     }
 
     @Override
-    public Optional<? extends Definition> detect(final Class<?> type) {
-        if (isAbstract(type.getModifiers())) {
-            return empty();
+    public Optional<? extends Definition> detect(final FullType type) {
+        final Optional<? extends Definition> collection = detectCollectionDefinition(type);
+        if (collection.isPresent()) {
+            return collection;
         }
+
         final Optional<? extends Definition> customPrimitive = detectCustomPrimitive(type);
-        if(customPrimitive.isPresent()) {
+        if (customPrimitive.isPresent()) {
             return customPrimitive;
         }
         return detectSerializedObject(type);
     }
 
-    private Optional<CustomPrimitiveDefinition> detectCustomPrimitive(final Class<?> type) {
-        for (final CustomPrimitiveDefinitionFactory factory : this.customPrimitiveDefinitionFactories) {
-            final Optional<CustomPrimitiveDefinition> analyzedClass = factory.analyze(type);
-            if (analyzedClass.isPresent()) {
-                return analyzedClass;
-            }
-        }
-        return empty();
+    private Optional<Definition> detectCollectionDefinition(final FullType type) {
+        return detectIn(type, this.collectionDefinitionFactories);
     }
 
-    private Optional<SerializedObjectDefinition> detectSerializedObject(final Class<?> type) {
-        for (final SerializedObjectDefinitionFactory factory : this.serializedObjectDefinitionFactories) {
-            final Optional<SerializedObjectDefinition> analyzedClass = factory.analyze(type);
+    private Optional<Definition> detectCustomPrimitive(final FullType type) {
+        return detectIn(type, this.customPrimitiveDefinitionFactories);
+    }
+
+    private Optional<Definition> detectSerializedObject(final FullType type) {
+        return detectIn(type, this.serializedObjectDefinitionFactories);
+    }
+
+    private static Optional<Definition> detectIn(final FullType type, final List<DefinitionFactory> factories) {
+        for (final DefinitionFactory factory : factories) {
+            final Optional<Definition> analyzedClass = factory.analyze(type);
             if (analyzedClass.isPresent()) {
                 return analyzedClass;
             }

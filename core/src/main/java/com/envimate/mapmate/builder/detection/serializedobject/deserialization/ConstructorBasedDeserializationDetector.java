@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.deserialization;
 
+import com.envimate.mapmate.definitions.hub.FullType;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
 import lombok.AccessLevel;
@@ -48,8 +49,8 @@ public final class ConstructorBasedDeserializationDetector implements Serialized
     }
 
     @Override
-    public Optional<SerializedObjectDeserializer> detect(final Class<?> type, final SerializationFields fields) {
-        final Constructor<?>[] constructors = type.getConstructors();
+    public Optional<SerializedObjectDeserializer> detect(final FullType type, final SerializationFields fields) {
+        final Constructor<?>[] constructors = type.type().getConstructors();
         final List<Constructor<?>> deserializerConstructors = stream(constructors)
                 .filter(constructor -> isPublic(constructor.getModifiers()))
                 .collect(toList());

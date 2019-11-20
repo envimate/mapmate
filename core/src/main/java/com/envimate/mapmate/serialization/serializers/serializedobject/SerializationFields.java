@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.serialization.serializers.serializedobject;
 
+import com.envimate.mapmate.definitions.hub.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -51,9 +52,10 @@ public final class SerializationFields {
         return unmodifiableList(this.fields);
     }
 
-    public List<Class<?>> typesList() {
+    public List<FullType> typesList() {
         return this.fields.stream()
                 .map(SerializationField::type)
                 .collect(toUnmodifiableList());
+
     }
 }

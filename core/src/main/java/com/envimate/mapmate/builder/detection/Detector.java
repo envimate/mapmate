@@ -22,9 +22,10 @@
 package com.envimate.mapmate.builder.detection;
 
 import com.envimate.mapmate.definitions.Definition;
+import com.envimate.mapmate.definitions.hub.FullType;
 
 import java.util.Optional;
 
 public interface Detector {
-    Optional<? extends Definition> detect(Class<?> type);
+    Optional<? extends Definition> detect(FullType type);
 }

@@ -21,8 +21,8 @@
 
 package com.envimate.mapmate.deserialization;
 
-import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.Definitions;
+import com.envimate.mapmate.definitions.*;
+import com.envimate.mapmate.definitions.hub.FullType;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.marshalling.Unmarshaller;
@@ -31,7 +31,6 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -74,7 +73,7 @@ final class Unmarshallers {
     }
 
     Object unmarshal(final String input,
-                     final Class<?> targetType,
+                     final FullType targetType,
                      final MarshallingType marshallingType) {
         validateNotNull(input, "input");
         if (input.isEmpty()) {
@@ -84,7 +83,7 @@ final class Unmarshallers {
         final Definition definition = this.definitions.getDefinitionForType(targetType);
 
         final String trimmedInput = input.trim();
-        if (targetType.isArray() || Collection.class.isAssignableFrom(targetType)) {
+        if (definition instanceof CollectionDefinition) {
             try {
                 return unmarshaller.unmarshal(trimmedInput, List.class);
             } catch (final Exception e) {
@@ -95,7 +94,7 @@ final class Unmarshallers {
                         e
                 );
             }
-        } else if (definition.isSerializedObject()) {
+        } else if (definition instanceof SerializedObjectDefinition) {
             try {
                 return unmarshaller.unmarshal(trimmedInput, Map.class);
             } catch (final Exception e) {
@@ -106,7 +105,7 @@ final class Unmarshallers {
                         e
                 );
             }
-        } else if (definition.isCustomPrimitive()) {
+        } else if (definition instanceof CustomPrimitiveDefinition) {
             return PATTERN.matcher(trimmedInput).replaceAll("");
         } else {
             throw new UnsupportedOperationException(definition.getClass().getName());

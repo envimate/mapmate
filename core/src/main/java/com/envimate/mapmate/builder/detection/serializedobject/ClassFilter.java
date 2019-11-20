@@ -21,6 +21,8 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject;
 
+import com.envimate.mapmate.definitions.hub.FullType;
+
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -35,10 +37,10 @@ public interface ClassFilter {
     static ClassFilter patternFilter(final List<Pattern> patterns) {
         validateNotNull(patterns, "patterns");
         return type -> {
-            final String typeName = type.getName();
+            final String typeName = type.type().getName();
             return patterns.stream().anyMatch(pattern -> pattern.matcher(typeName).matches());
         };
     }
 
-    boolean filter(Class<?> type);
+    boolean filter(FullType type);
 }

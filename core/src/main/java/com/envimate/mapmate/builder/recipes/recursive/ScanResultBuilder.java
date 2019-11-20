@@ -21,8 +21,10 @@
 
 package com.envimate.mapmate.builder.recipes.recursive;
 
+import com.envimate.mapmate.definitions.CollectionDefinition;
 import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
 import com.envimate.mapmate.definitions.SerializedObjectDefinition;
+import com.envimate.mapmate.definitions.hub.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -55,7 +57,7 @@ public final class ScanResultBuilder {
         this.serializedObjectDefinitions.add(serializedObjectDefinition);
     }
 
-    public boolean alreadyHas(final Class<?> type) {
+    public boolean alreadyHas(final FullType type) {
         final long customPrimitives = this.customPrimitiveDefinitions.stream()
                 .filter(customPrimitiveDefinition -> customPrimitiveDefinition.type().equals(type))
                 .count();

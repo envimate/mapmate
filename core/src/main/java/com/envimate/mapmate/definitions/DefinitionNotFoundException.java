@@ -21,13 +21,15 @@
 
 package com.envimate.mapmate.definitions;
 
+import com.envimate.mapmate.definitions.hub.FullType;
+
 public final class DefinitionNotFoundException extends RuntimeException {
     private DefinitionNotFoundException(final String msg) {
         super(msg);
     }
 
-    public static DefinitionNotFoundException definitionNotFound(final Class<?> targetType) {
-        final String msg = String.format("no definition found for type '%s'", targetType.getName());
+    public static DefinitionNotFoundException definitionNotFound(final FullType targetType) {
+        final String msg = String.format("no definition found for type '%s'", targetType.description());
         return new DefinitionNotFoundException(msg);
     }
 }

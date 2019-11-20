@@ -25,8 +25,10 @@ import com.envimate.mapmate.builder.conventional.DetectorBuilder;
 import com.envimate.mapmate.builder.detection.Detector;
 import com.envimate.mapmate.builder.recipes.Recipe;
 import com.envimate.mapmate.builder.scanning.PackageScanner;
+import com.envimate.mapmate.definitions.Definition;
 import com.envimate.mapmate.definitions.Definitions;
 import com.envimate.mapmate.definitions.DefinitionsBuilder;
+import com.envimate.mapmate.definitions.hub.FullType;
 import com.envimate.mapmate.deserialization.Deserializer;
 import com.envimate.mapmate.deserialization.validation.*;
 import com.envimate.mapmate.injector.InjectorFactory;
@@ -36,6 +38,7 @@ import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.marshalling.Unmarshaller;
 import com.envimate.mapmate.serialization.Serializer;
+import com.envimate.mapmate.validators.NotNullValidator;
 
 import java.util.*;
 
@@ -43,6 +46,7 @@ import static com.envimate.mapmate.MapMate.mapMate;
 import static com.envimate.mapmate.builder.conventional.ConventionalDetectors.conventionalDetectorWithAnnotations;
 import static com.envimate.mapmate.builder.scanning.DefaultPackageScanner.defaultPackageScanner;
 import static com.envimate.mapmate.definitions.DefinitionsBuilder.definitionsBuilder;
+import static com.envimate.mapmate.definitions.hub.FullType.type;
 import static com.envimate.mapmate.deserialization.Deserializer.theDeserializer;
 import static com.envimate.mapmate.injector.InjectorFactory.injectorFactory;
 import static com.envimate.mapmate.marshalling.MarshallerRegistry.marshallerRegistry;
@@ -51,8 +55,10 @@ import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.util.Arrays.stream;
 
 public final class MapMateBuilder {
-    public volatile Detector detector = conventionalDetectorWithAnnotations();
+    private volatile Detector detector = conventionalDetectorWithAnnotations();
     private final PackageScanner packageScanner;
+    private final List<FullType> addedTypes = new LinkedList<>();
+    private final List<Definition> addedDefinitions = new LinkedList<>();
     private final List<Recipe> recipes = new LinkedList<>();
     private final ValidationMappings validationMappings = ValidationMappings.empty();
     private final ValidationErrorsMapping validationErrorsMapping = validationErrors -> {
@@ -93,6 +99,18 @@ public final class MapMateBuilder {
 
     public MapMateBuilder withDetector(final Detector detector) {
         this.detector = detector;
+        return this;
+    }
+
+    public MapMateBuilder withManuallyAddedType(final Class<?> type) {
+        validateNotNull(type, "type");
+        this.addedTypes.add(type(type));
+        return this;
+    }
+
+    public MapMateBuilder withManuallyAddedDefinition(final Definition definition) {
+        validateNotNull(definition, "definition");
+        this.addedDefinitions.add(definition);
         return this;
     }
 
@@ -170,20 +188,19 @@ public final class MapMateBuilder {
 
     public MapMate build() {
         this.recipes.forEach(recipe -> recipe.cook(this));
-        final DefinitionsBuilder definitionsBuilder = definitionsBuilder();
-        this.recipes.forEach(recipe -> {
-            recipe.customPrimitiveDefinitions().forEach(definitionsBuilder::addDefinition);
-            recipe.serializedObjectDefinitions().forEach(definitionsBuilder::addDefinition);
-        });
 
         this.packageScanner.scan().stream()
-                .filter(definitionsBuilder::notPresent)
-                .map(this.detector::detect)
-                .flatMap(Optional::stream)
-                .forEach(definitionsBuilder::addDefinition);
+                .map(FullType::type)
+                .forEach(this.addedTypes::add);
+
+        final DefinitionsBuilder definitionsBuilder = definitionsBuilder(this.detector);
+        this.addedDefinitions.forEach(definitionsBuilder::addDefinition);
+        this.addedTypes.forEach(definitionsBuilder::detectAndAdd);
+
+        definitionsBuilder.resolveRecursively(this.detector);
+        final Definitions definitions = definitionsBuilder.build();
 
         final MarshallerRegistry<Marshaller> marshallerRegistry = marshallerRegistry(this.marshallerMap);
-        final Definitions definitions = definitionsBuilder.build();
         final Serializer serializer = theSerializer(marshallerRegistry, definitions);
 
         final MarshallerRegistry<Unmarshaller> unmarshallerRegistry = marshallerRegistry(this.unmarshallerMap);

@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.serialization.serializers.serializedobject;
 
+import com.envimate.mapmate.definitions.hub.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -35,12 +36,12 @@ import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 public final class SerializedObjectSerializer {
     private final SerializationFields fields;
 
-    public static SerializedObjectSerializer serializedObjectSerializer(final Class<?> type, final SerializationFields fields) {
+    public static SerializedObjectSerializer serializedObjectSerializer(final FullType type, final SerializationFields fields) {
         validateNotNull(fields, "fields");
         if (fields.isEmpty()) {
             throw incompatibleSerializedObjectException(
                     "The SerializedObject %s does not have any serialized fields",
-                    type
+                    type.description()
             );
         }
         return new SerializedObjectSerializer(fields);

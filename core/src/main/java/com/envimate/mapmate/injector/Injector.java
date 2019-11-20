@@ -21,9 +21,14 @@
 
 package com.envimate.mapmate.injector;
 
+import com.envimate.mapmate.definitions.hub.FullType;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
+
+import static com.envimate.mapmate.definitions.hub.FullType.type;
+import static com.envimate.mapmate.definitions.hub.FullType.typeOfObject;
 
 public final class Injector {
 
@@ -43,26 +48,30 @@ public final class Injector {
     }
 
     public Injector put(final String propertyName, final Object instance) {
-        this.injections.add(Injection.fromPropertyNameAndInstance(propertyName, instance, instance.getClass()));
+        this.injections.add(Injection.fromPropertyNameAndInstance(propertyName, instance, typeOfObject(instance)));
         return this;
     }
 
-    public Injector put(final String propertyName, final Class<?> type, final Object instance) {
+    public Injector put(final String propertyName, final FullType type, final Object instance) {
         this.injections.add(Injection.fromPropertyNameAndInstance(propertyName, instance, type));
         return this;
     }
 
     public Injector put(final Object instance) {
-        this.injections.add(Injection.fromInstance(instance, instance.getClass()));
+        this.injections.add(Injection.fromInstance(instance, typeOfObject(instance)));
         return this;
     }
 
     public Injector put(final Class<?> type, final Object instance) {
+        return put(type(type), instance);
+    }
+
+    public Injector put(final FullType type, final Object instance) {
         this.injections.add(Injection.fromInstance(instance, type));
         return this;
     }
 
-    public Optional<Object> getInjectionForPropertyPath(final String position, final Class<?> targetType) {
+    public Optional<Object> getInjectionForPropertyPath(final String position, final FullType targetType) {
         return this.injections.stream()
                 .filter(Injection::containsPropertyName)
                 .filter(injection -> injection.propertyName.equals(position))
@@ -70,7 +79,7 @@ public final class Injector {
                 .findFirst();
     }
 
-    public Object getInjectionForPropertyNameOrInstance(final String propertyName, final Class<?> elementType) {
+    public Object getInjectionForPropertyNameOrInstance(final String propertyName, final FullType elementType) {
         final Object injected = this.injections.stream()
                 .filter(Injection::containsPropertyName)
                 .filter(injection -> injection.propertyName.equals(propertyName))
@@ -96,10 +105,10 @@ public final class Injector {
         final String propertyName;
         final String stringValue;
         final Object instanceValue;
-        final Class<?> type;
+        final FullType type;
         private final boolean recursive;
 
-        private Injection(final String propertyName, final String stringValue, final Object instanceValue, final Class<?> type) {
+        private Injection(final String propertyName, final String stringValue, final Object instanceValue, final FullType type) {
             this.propertyName = propertyName;
             this.stringValue = stringValue;
             this.instanceValue = instanceValue;
@@ -111,11 +120,11 @@ public final class Injector {
             return new Injection(propertyName, value, null, null);
         }
 
-        static Injection fromPropertyNameAndInstance(final String propertyName, final Object instance, final Class<?> type) {
+        static Injection fromPropertyNameAndInstance(final String propertyName, final Object instance, final FullType type) {
             return new Injection(propertyName, null, instance, type);
         }
 
-        static Injection fromInstance(final Object instance, final Class<?> type) {
+        static Injection fromInstance(final Object instance, final FullType type) {
             return new Injection(null, null, instance, type);
         }
 

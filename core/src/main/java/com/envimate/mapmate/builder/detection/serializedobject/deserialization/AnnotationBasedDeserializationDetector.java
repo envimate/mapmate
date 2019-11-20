@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.deserialization;
 
+import com.envimate.mapmate.definitions.hub.FullType;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
 import lombok.AccessLevel;
@@ -53,8 +54,8 @@ public final class AnnotationBasedDeserializationDetector implements SerializedO
     }
 
     @Override
-    public Optional<SerializedObjectDeserializer> detect(final Class<?> type, final SerializationFields fields) {
-        final List<Method> annotatedDeserializationMethods = stream(type.getMethods())
+    public Optional<SerializedObjectDeserializer> detect(final FullType type, final SerializationFields fields) {
+        final List<Method> annotatedDeserializationMethods = stream(type.type().getMethods())
                 .filter(method -> {
                     final Annotation[] annotations = method.getAnnotationsByType(this.annotation);
                     return annotations.length > 0;

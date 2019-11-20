@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.definitions;
 
+import com.envimate.mapmate.definitions.hub.FullType;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializedObjectSerializer;
 import lombok.AccessLevel;
@@ -34,11 +35,11 @@ import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SerializedObjectDefinition implements Definition {
-    private final Class<?> type;
+    private final FullType type;
     private final SerializedObjectSerializer serializer;
     private final SerializedObjectDeserializer deserializer;
 
-    public static SerializedObjectDefinition serializedObjectDefinition(final Class<?> type,
+    public static SerializedObjectDefinition serializedObjectDefinition(final FullType type,
                                                                         final SerializedObjectSerializer serializer,
                                                                         final SerializedObjectDeserializer deserializer) {
         validateNotNull(type, "type");
@@ -59,17 +60,7 @@ public final class SerializedObjectDefinition implements Definition {
     }
 
     @Override
-    public boolean isCustomPrimitive() {
-        return false;
-    }
-
-    @Override
-    public boolean isSerializedObject() {
-        return true;
-    }
-
-    @Override
-    public Class<?> type() {
+    public FullType type() {
         return this.type;
     }
 }

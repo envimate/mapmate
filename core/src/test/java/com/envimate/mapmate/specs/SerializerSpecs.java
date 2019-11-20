@@ -25,8 +25,6 @@ import com.envimate.mapmate.domain.valid.*;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.givenTheExampleMapMateWithAllMarshallers;
@@ -97,6 +95,7 @@ public final class SerializerSpecs {
                         ANumber.fromInt(3),
                 }))
                 .withMarshallingType(json())
+                .noExceptionHasBeenThrown()
                 .theSerializationResultWas("" +
                         "{\n" +
                         "  \"array\": [\n" +
@@ -109,68 +108,6 @@ public final class SerializerSpecs {
                         "    \"b\",\n" +
                         "    \"c\"\n" +
                         "  ]\n" +
-                        "}");
-    }
-
-    @Test
-    public void givenComplexDomainWithMap_whenSerializing_thenReturnsJsonString() {
-        final Map<AString, ANumber> hashMap1 = new HashMap<>(2);
-        hashMap1.put(AString.fromStringValue("a"), ANumber.fromInt(1));
-        hashMap1.put(AString.fromStringValue("b"), ANumber.fromInt(2));
-        final HashMap<AString, ANumber> hashMap2 = new HashMap<>(2);
-        hashMap2.put(AString.fromStringValue("c"), ANumber.fromInt(3));
-        hashMap2.put(AString.fromStringValue("d"), ANumber.fromInt(4));
-
-        givenTheExampleMapMateWithAllMarshallers()
-                .when().mapMateSerializes(AComplexTypeWithMap.deserialize(hashMap1, hashMap2, null))
-                .withMarshallingType(json())
-                .theSerializationResultWas("" +
-                        "{\n" +
-                        "  \"map\": {\n" +
-                        "    \"a\": \"1\",\n" +
-                        "    \"b\": \"2\"\n" +
-                        "  },\n" +
-                        "  \"hashMap\": {\n" +
-                        "    \"d\": \"4\",\n" +
-                        "    \"c\": \"3\"\n" +
-                        "  }\n" +
-                        "}");
-    }
-
-    @Test
-    public void givenComplexDomainWithMapContainingComplexDomains_whenSerializing_thenReturnsJsonString() {
-        final AComplexType aComplexType1 = AComplexType.deserialize(
-                AString.fromStringValue("a"),
-                AString.fromStringValue("b"),
-                ANumber.fromInt(1),
-                ANumber.fromInt(2));
-        final AComplexType aComplexType2 = AComplexType.deserialize(
-                AString.fromStringValue("c"),
-                AString.fromStringValue("d"),
-                ANumber.fromInt(3),
-                ANumber.fromInt(4));
-        final HashMap<AString, AComplexType> hashMap = new HashMap<>(2);
-        hashMap.put(AString.fromStringValue("a"), aComplexType1);
-        hashMap.put(AString.fromStringValue("b"), aComplexType2);
-
-        givenTheExampleMapMateWithAllMarshallers()
-                .when().mapMateSerializes(AComplexTypeWithMap.deserialize(null, null, hashMap)).withMarshallingType(json())
-                .theSerializationResultWas("" +
-                        "{\n" +
-                        "  \"complexMap\": {\n" +
-                        "    \"a\": {\n" +
-                        "      \"stringA\": \"a\",\n" +
-                        "      \"stringB\": \"b\",\n" +
-                        "      \"number1\": \"1\",\n" +
-                        "      \"number2\": \"2\"\n" +
-                        "    },\n" +
-                        "    \"b\": {\n" +
-                        "      \"stringA\": \"c\",\n" +
-                        "      \"stringB\": \"d\",\n" +
-                        "      \"number1\": \"3\",\n" +
-                        "      \"number2\": \"4\"\n" +
-                        "    }\n" +
-                        "  }\n" +
                         "}");
     }
 
@@ -245,6 +182,7 @@ public final class SerializerSpecs {
 
         givenTheExampleMapMateWithAllMarshallers()
                 .when().mapMateSerializes(given1).withMarshallingType(json())
+                .noExceptionHasBeenThrown()
                 .theSerializationResultWas("" +
                         "{\n" +
                         "  \"aCyclicType\": {\n" +

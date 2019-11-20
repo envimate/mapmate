@@ -21,9 +21,8 @@
 
 package com.envimate.mapmate.builder.conventional;
 
+import com.envimate.mapmate.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.builder.detection.Detector;
-import com.envimate.mapmate.builder.detection.customprimitive.CustomPrimitiveDefinitionFactory;
-import com.envimate.mapmate.builder.detection.serializedobject.SerializedObjectDefinitionFactory;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +32,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static com.envimate.mapmate.builder.detection.SimpleDetector.detector;
 import static com.envimate.mapmate.builder.conventional.ConventionalDefinitionFactories.*;
+import static com.envimate.mapmate.builder.detection.SimpleDetector.detector;
+import static com.envimate.mapmate.builder.detection.collection.ArrayCollectionDefinitionFactory.arrayFactory;
+import static com.envimate.mapmate.builder.detection.collection.ListCollectionDefinitionFactory.listFactory;
+import static com.envimate.mapmate.builder.detection.customprimitive.BuiltInPrimitivesFactory.builtInPrimitivesFactory;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
@@ -43,8 +46,8 @@ import static java.util.stream.Collectors.toList;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DetectorBuilder {
-    private final List<CustomPrimitiveDefinitionFactory> customPrimitiveDefinitionFactories;
-    private final List<SerializedObjectDefinitionFactory> serializedObjectDefinitionFactories;
+    private final List<DefinitionFactory> customPrimitiveDefinitionFactories;
+    private final List<DefinitionFactory> serializedObjectDefinitionFactories;
 
     public static DetectorBuilder detectorBuilder() {
         return new DetectorBuilder(new LinkedList<>(), new LinkedList<>());
@@ -54,13 +57,13 @@ public final class DetectorBuilder {
                                                                              final String deserializationMethodName) {
         validateNotNull(serializationMethodName, "serializationMethodName");
         validateNotNull(deserializationMethodName, "deserializationMethodName");
-        final CustomPrimitiveDefinitionFactory factory = nameAndConstructorBasedCustomPrimitiveDefinitionFactory(
+        final DefinitionFactory factory = nameAndConstructorBasedCustomPrimitiveDefinitionFactory(
                 serializationMethodName,
                 deserializationMethodName);
         return withCustomPrimitiveFactory(factory);
     }
 
-    public DetectorBuilder withCustomPrimitiveFactory(final CustomPrimitiveDefinitionFactory factory) {
+    public DetectorBuilder withCustomPrimitiveFactory(final DefinitionFactory factory) {
         validateNotNull(factory, "factory");
         this.customPrimitiveDefinitionFactories.add(factory);
         return this;
@@ -68,7 +71,7 @@ public final class DetectorBuilder {
 
     public DetectorBuilder withMethodNameBasedSerializedObjectFactory(final String deserializationMethodName) {
         validateNotNull(deserializationMethodName, "deserializationMethodName");
-        final SerializedObjectDefinitionFactory factory =
+        final DefinitionFactory factory =
                 deserializerMethodNameBasedSerializedObjectFactory(deserializationMethodName);
         return withSerializedObjectFactory(factory);
     }
@@ -80,18 +83,20 @@ public final class DetectorBuilder {
         final List<Pattern> patterns = stream(classPatterns)
                 .map(Pattern::compile)
                 .collect(toList());
-        final SerializedObjectDefinitionFactory factory = nameAndConstructorBasedSerializedObjectFactory(patterns,
+        final DefinitionFactory factory = nameAndConstructorBasedSerializedObjectFactory(patterns,
                 deserializationMethodName);
         return withSerializedObjectFactory(factory);
     }
 
-    public DetectorBuilder withSerializedObjectFactory(final SerializedObjectDefinitionFactory factory) {
+    public DetectorBuilder withSerializedObjectFactory(final DefinitionFactory factory) {
         validateNotNull(factory, "factory");
         this.serializedObjectDefinitionFactories.add(factory);
         return this;
     }
 
     public Detector build() {
-        return detector(this.customPrimitiveDefinitionFactories, this.serializedObjectDefinitionFactories);
+        withCustomPrimitiveFactory(builtInPrimitivesFactory()); // TODO
+        final List<DefinitionFactory> collectionFactories = asList(arrayFactory(), listFactory());
+        return detector(collectionFactories, this.customPrimitiveDefinitionFactories, this.serializedObjectDefinitionFactories);
     }
 }

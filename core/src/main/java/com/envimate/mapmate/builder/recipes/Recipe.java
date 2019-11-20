@@ -22,22 +22,7 @@
 package com.envimate.mapmate.builder.recipes;
 
 import com.envimate.mapmate.MapMateBuilder;
-import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
-import com.envimate.mapmate.definitions.SerializedObjectDefinition;
-
-import java.util.List;
-
-import static java.util.Collections.emptyList;
 
 public interface Recipe {
-    default void cook(final MapMateBuilder mapMateBuilder) {
-    }
-
-    default List<CustomPrimitiveDefinition> customPrimitiveDefinitions() {
-        return emptyList();
-    }
-
-    default List<SerializedObjectDefinition> serializedObjectDefinitions() {
-        return emptyList();
-    }
+    void cook(final MapMateBuilder mapMateBuilder);
 }

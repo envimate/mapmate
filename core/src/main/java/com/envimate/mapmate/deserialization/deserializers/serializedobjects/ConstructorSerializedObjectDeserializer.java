@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.deserialization.deserializers.serializedobjects;
 
+import com.envimate.mapmate.definitions.hub.FullType;
 import com.envimate.mapmate.deserialization.DeserializationFields;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -28,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
 import java.util.Map;
 
@@ -46,7 +48,7 @@ public final class ConstructorSerializedObjectDeserializer implements Serialized
     private final Constructor<?> factoryConstructor;
     private final String[] parameterNames;
 
-    public static SerializedObjectDeserializer createDeserializer(final Class<?> type,
+    public static SerializedObjectDeserializer createDeserializer(final FullType type,
                                                                   final Constructor<?> deserializationConstructor) {
         validateDeserializerModifiers(type, deserializationConstructor);
         return verifiedDeserializationDTOConstructor(deserializationConstructor);
@@ -58,19 +60,22 @@ public final class ConstructorSerializedObjectDeserializer implements Serialized
         final String[] parameterNames = stream(parameters)
                 .map(Parameter::getName)
                 .toArray(String[]::new);
-        final Map<String, Class<?>> parameterFields = stream(parameters)
-                .collect(toMap(Parameter::getName, Parameter::getType));
+        final Map<String, FullType> parameterFields = stream(parameters)
+                .collect(toMap(Parameter::getName, FullType::typeOfParameter));
         return new ConstructorSerializedObjectDeserializer(deserializationFields(parameterFields), factoryConstructor, parameterNames);
     }
 
     @Override
-    public Object deserialize(final Class<?> targetType,
-                              final Map<String, Object> elements) throws Exception {
+    public Object deserialize(final Map<String, Object> elements) {
         final Object[] arguments = new Object[this.parameterNames.length];
         for (int i = 0; i < arguments.length; i++) {
             arguments[i] = elements.get(this.parameterNames[i]);
         }
-        return this.factoryConstructor.newInstance(arguments);
+        try {
+            return this.factoryConstructor.newInstance(arguments);
+        } catch (final InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e); // TODO
+        }
     }
 
     @Override
@@ -78,7 +83,7 @@ public final class ConstructorSerializedObjectDeserializer implements Serialized
         return this.fields;
     }
 
-    private static void validateDeserializerModifiers(final Class<?> type, final Constructor<?> deserializationConstructor) {
+    private static void validateDeserializerModifiers(final FullType type, final Constructor<?> deserializationConstructor) {
         final int deserializationMethodModifiers = deserializationConstructor.getModifiers();
 
         if (!isPublic(deserializationMethodModifiers)) {
@@ -91,7 +96,7 @@ public final class ConstructorSerializedObjectDeserializer implements Serialized
                     "The deserialization constructor %s configured for the SerializedObject of type %s must not be abstract",
                     deserializationConstructor, type);
         }
-        if (deserializationConstructor.getDeclaringClass() != type) {
+        if (deserializationConstructor.getDeclaringClass() != type.type()) {
             throw incompatibleSerializedObjectException(
                     "The deserialization constructor %s configured for the SerializedObject of type %s must return the DTO",
                     deserializationConstructor, type);
