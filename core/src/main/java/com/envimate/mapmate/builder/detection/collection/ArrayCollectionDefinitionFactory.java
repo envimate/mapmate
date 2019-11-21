@@ -23,7 +23,7 @@ package com.envimate.mapmate.builder.detection.collection;
 
 import com.envimate.mapmate.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 import com.envimate.mapmate.deserialization.deserializers.collections.CollectionDeserializer;
 import com.envimate.mapmate.serialization.serializers.collections.CollectionSerializer;
 import lombok.AccessLevel;
@@ -36,6 +36,7 @@ import java.util.Optional;
 import static com.envimate.mapmate.definitions.CollectionDefinition.collectionDefinition;
 import static com.envimate.mapmate.deserialization.deserializers.collections.ArrayCollectionDeserializer.arrayDeserializer;
 import static com.envimate.mapmate.serialization.serializers.collections.ArrayCollectionSerializer.arraySerializer;
+import static java.lang.String.format;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
@@ -55,10 +56,10 @@ public final class ArrayCollectionDefinitionFactory implements DefinitionFactory
         }
 
         if (type.typeParameters().size() != 1) {
-            return empty(); // TODO
+            throw new UnsupportedOperationException(format(
+                    "This should never happen. An array of type '%s' has more than one type parameter", type.description()));
         }
         final FullType genericType = type.typeParameters().get(0);
-
 
         final CollectionSerializer serializer = arraySerializer();
         final CollectionDeserializer deserializer = arrayDeserializer(genericType.type());

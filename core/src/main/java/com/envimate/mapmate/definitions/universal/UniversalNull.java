@@ -19,10 +19,24 @@
  * under the License.
  */
 
-package com.envimate.mapmate.serialization;
+package com.envimate.mapmate.definitions.universal;
 
-public final class CircularReferenceException extends RuntimeException {
-    CircularReferenceException(final String message) {
-        super(message);
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class UniversalNull implements UniversalType {
+
+    public static UniversalNull universalNull() {
+        return new UniversalNull();
+    }
+
+    @Override
+    public Object toNativeJava() {
+        return null;
     }
 }

@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.definitions;
 
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 import com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
 import com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
 import lombok.AccessLevel;
@@ -36,33 +36,31 @@ import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CustomPrimitiveDefinition implements Definition {
     private final FullType type;
-    private final CustomPrimitiveSerializer<?> serializer;
-    private final CustomPrimitiveDeserializer<?> deserializer;
+    private final CustomPrimitiveSerializer serializer;
+    private final CustomPrimitiveDeserializer deserializer;
 
     public static <T> CustomPrimitiveDefinition customPrimitiveDefinition(final FullType type,
-                                                                          final CustomPrimitiveSerializer<T> serializer,
-                                                                          final CustomPrimitiveDeserializer<T> deserializer) {
+                                                                          final CustomPrimitiveSerializer serializer,
+                                                                          final CustomPrimitiveDeserializer deserializer) {
         return untypedCustomPrimitiveDefinition(type, serializer, deserializer);
     }
 
     public static CustomPrimitiveDefinition untypedCustomPrimitiveDefinition(
             final FullType type,
-            final CustomPrimitiveSerializer<?> serializer,
-            final CustomPrimitiveDeserializer<?> deserializer) {
+            final CustomPrimitiveSerializer serializer,
+            final CustomPrimitiveDeserializer deserializer) {
         validateNotNull(type, "type");
         validateNotNull(serializer, "serializer");
         validateNotNull(deserializer, "deserializer");
         return new CustomPrimitiveDefinition(type, serializer, deserializer);
     }
 
-    @SuppressWarnings("unchecked")
-    public CustomPrimitiveDeserializer<Object> deserializer() {
-        return (CustomPrimitiveDeserializer<Object>) this.deserializer; // TODO
+    public CustomPrimitiveDeserializer deserializer() {
+        return this.deserializer;
     }
 
-    @SuppressWarnings("unchecked")
-    public CustomPrimitiveSerializer<Object> serializer() {
-        return (CustomPrimitiveSerializer<Object>) this.serializer; // TODO
+    public CustomPrimitiveSerializer serializer() {
+        return this.serializer;
     }
 
     @Override

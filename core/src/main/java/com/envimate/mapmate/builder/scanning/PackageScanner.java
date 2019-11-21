@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder.scanning;
 
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ public interface PackageScanner {
 
     default List<FullType> scanFullTypes() {
         return scan().stream()
-                .map(FullType::type)
+                .map(FullType::fullType)
                 .collect(toList());
     }
 

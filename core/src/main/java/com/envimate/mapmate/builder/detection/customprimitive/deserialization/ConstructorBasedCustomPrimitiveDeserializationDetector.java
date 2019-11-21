@@ -38,7 +38,7 @@ public final class ConstructorBasedCustomPrimitiveDeserializationDetector implem
     }
 
     @Override
-    public Optional<CustomPrimitiveDeserializer<?>> detect(final CachedReflectionType type) {
+    public Optional<CustomPrimitiveDeserializer> detect(final CachedReflectionType type) {
         return stringConstructor(type.type())
                 .map(constructor -> createDeserializer(type.type(), constructor));
     }

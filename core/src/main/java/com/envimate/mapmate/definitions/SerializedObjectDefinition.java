@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.definitions;
 
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializedObjectSerializer;
 import lombok.AccessLevel;

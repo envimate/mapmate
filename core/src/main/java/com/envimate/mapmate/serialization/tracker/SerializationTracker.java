@@ -19,37 +19,36 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.hub.universal;
+package com.envimate.mapmate.serialization.tracker;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import static com.envimate.mapmate.serialization.tracker.CircularReferenceException.circularReferenceException;
+import static com.envimate.mapmate.serialization.tracker.TrackedObject.trackedObject;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class UniversalPrimitive implements UniversalType {
-    private final String value;
+public final class SerializationTracker {
+    private final List<TrackedObject> visitedObjects = new LinkedList<>();
 
-    public static UniversalPrimitive universalPrimitive(final String value) {
-        validateNotNull(value, "value");
-        return new UniversalPrimitive(value);
+    public static SerializationTracker serializationTracker() {
+        return new SerializationTracker();
     }
 
-    public String stringValue() {
-        return this.value;
-    }
-
-    @Override
-    public String nativeJavaTypeName() {
-        return "String";
-    }
-
-    @Override
-    public Object toNativeJava() {
-        return stringValue();
+    public void trackToProhibitCyclicReferences(final Object object) {
+        validateNotNull(object, "object");
+        final TrackedObject trackedObject = trackedObject(object);
+        if (this.visitedObjects.contains(trackedObject)) {
+            throw circularReferenceException(object);
+        }
+        this.visitedObjects.add(trackedObject);
     }
 }

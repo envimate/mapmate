@@ -22,7 +22,7 @@
 package com.envimate.mapmate.builder.detection;
 
 import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
-import static java.lang.reflect.Modifier.isAbstract;
 import static java.util.Optional.empty;
 
 @ToString

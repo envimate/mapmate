@@ -21,7 +21,8 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.fields;
 
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.UnsupportedJvmFeatureInTypeException;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationField;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
 import lombok.AccessLevel;
@@ -29,11 +30,15 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Optional;
 
 import static com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields.serializationFields;
 import static java.lang.reflect.Modifier.*;
 import static java.util.Arrays.stream;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 
 @ToString
@@ -51,8 +56,17 @@ public final class ModifierFieldDetector implements FieldDetector {
                 .filter(field -> isPublic(field.getModifiers()))
                 .filter(field -> !isStatic(field.getModifiers()))
                 .filter(field -> !isTransient(field.getModifiers()))
-                .map(field -> SerializationField.fromPublicField(type, field))
+                .map(field -> fromPublicField(type, field))
+                .flatMap(Optional::stream)
                 .collect(toList());
         return serializationFields(list);
+    }
+
+    private static Optional<SerializationField> fromPublicField(final FullType type, final Field field) {
+        try {
+            return of(SerializationField.fromPublicField(type, field));
+        } catch (final UnsupportedJvmFeatureInTypeException e) {
+            return empty();
+        }
     }
 }

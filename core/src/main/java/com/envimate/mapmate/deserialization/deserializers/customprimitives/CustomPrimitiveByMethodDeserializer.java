@@ -30,17 +30,18 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import static com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializationMethodCallException.customPrimitiveSerializationMethodCallException;
 import static com.envimate.mapmate.builder.detection.customprimitive.IncompatibleCustomPrimitiveException.incompatibleCustomPrimitiveException;
+import static com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializationMethodCallException.customPrimitiveSerializationMethodCallException;
+import static java.lang.String.format;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class CustomPrimitiveByMethodDeserializer implements CustomPrimitiveDeserializer<Object> {
+public final class CustomPrimitiveByMethodDeserializer implements CustomPrimitiveDeserializer {
     private final Method deserializationMethod;
 
-    public static CustomPrimitiveDeserializer<?> createDeserializer(final Class<?> type,
-                                                                    final Method deserializationMethod) {
+    public static CustomPrimitiveDeserializer createDeserializer(final Class<?> type,
+                                                                 final Method deserializationMethod) {
         final int deserializationMethodModifiers = deserializationMethod.getModifiers();
         if (!Modifier.isPublic(deserializationMethodModifiers)) {
             throw incompatibleCustomPrimitiveException(
@@ -79,10 +80,9 @@ public final class CustomPrimitiveByMethodDeserializer implements CustomPrimitiv
         try {
             return this.deserializationMethod.invoke(null, value);
         } catch (final IllegalAccessException e) {
-            throw customPrimitiveSerializationMethodCallException(String.format(
+            throw customPrimitiveSerializationMethodCallException(format(
                     "Unexpected error invoking deserialization method %s for serialized custom primitive %s",
-                    this.deserializationMethod,
-                    value), e);
+                    this.deserializationMethod, value), e);
         } catch (final InvocationTargetException e) {
             throw handleInvocationTargetException(e, value);
         }
@@ -93,11 +93,9 @@ public final class CustomPrimitiveByMethodDeserializer implements CustomPrimitiv
         if (targetException instanceof Exception) {
             return (Exception) targetException;
         } else {
-            throw customPrimitiveSerializationMethodCallException(String.format(
+            throw customPrimitiveSerializationMethodCallException(format(
                     "Unexpected error invoking deserialization method %s for serialized custom primitive %s",
-                    this.deserializationMethod,
-                    value),
-                    e);
+                    this.deserializationMethod, value), e);
         }
     }
 }

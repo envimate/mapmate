@@ -30,16 +30,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import static com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializationMethodCallException.customPrimitiveSerializationMethodCallException;
 import static com.envimate.mapmate.builder.detection.customprimitive.IncompatibleCustomPrimitiveException.incompatibleCustomPrimitiveException;
+import static com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializationMethodCallException.customPrimitiveSerializationMethodCallException;
+import static java.lang.String.format;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class MethodCustomPrimitiveSerializer implements CustomPrimitiveSerializer<Object> {
+public final class MethodCustomPrimitiveSerializer implements CustomPrimitiveSerializer {
     private final Method serializationMethod;
 
-    public static CustomPrimitiveSerializer<?> createSerializer(final Class<?> type,
+    public static CustomPrimitiveSerializer createSerializer(final Class<?> type,
                                                                 final Method serializationMethod) {
         final int serializationMethodModifiers = serializationMethod.getModifiers();
         if (!Modifier.isPublic(serializationMethodModifiers)) {
@@ -86,16 +87,13 @@ public final class MethodCustomPrimitiveSerializer implements CustomPrimitiveSer
         try {
             return (String) this.serializationMethod.invoke(object);
         } catch (final IllegalAccessException e) {
-            throw customPrimitiveSerializationMethodCallException(String.format(
+            throw customPrimitiveSerializationMethodCallException(format(
                     "This should never happen. Called serialization method %s for custom type %s on instance %s",
-                    this.serializationMethod,
-                    object.getClass(),
-                    object), e);
+                    this.serializationMethod, object.getClass(), object), e);
         } catch (final InvocationTargetException e) {
-            throw customPrimitiveSerializationMethodCallException(String.format(
+            throw customPrimitiveSerializationMethodCallException(format(
                     "Got exception calling serialization method %s for custom type %s on instance %s",
-                    this.serializationMethod, object.getClass(), object),
-                    e);
+                    this.serializationMethod, object.getClass(), object), e);
         }
     }
 }

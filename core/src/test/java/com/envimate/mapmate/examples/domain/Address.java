@@ -23,6 +23,8 @@ package com.envimate.mapmate.examples.domain;
 
 import java.util.Objects;
 
+import static java.lang.String.format;
+
 @SuppressWarnings({"WeakerAccess", "ConstructorWithTooManyParameters"})
 public final class Address {
     public final StreetName streetName;
@@ -76,7 +78,7 @@ public final class Address {
     }
 
     public String textual() {
-        return String.format("%s %s - %s %s - %s - %s",
+        return format("%s %s - %s %s - %s - %s",
                 this.streetName.stringValue(),
                 this.houseNumber.stringValue(),
                 this.zipCode.stringValue(),

@@ -50,7 +50,7 @@ public final class MethodNameBasedCustomPrimitiveSerializationDetector implement
     }
 
     @Override
-    public Optional<CustomPrimitiveSerializer<?>> detect(final CachedReflectionType type) {
+    public Optional<CustomPrimitiveSerializer> detect(final CachedReflectionType type) {
         return findSerializerMethod(type.methods(), this.serializationMethodName)
                 .map(method -> createSerializer(type.type(), method));
     }

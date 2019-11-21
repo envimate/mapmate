@@ -43,14 +43,14 @@ import java.util.function.Function;
 import static com.envimate.mapmate.builder.detection.serializedobject.fields.ModifierFieldDetector.modifierBased;
 import static com.envimate.mapmate.definitions.CustomPrimitiveDefinition.customPrimitiveDefinition;
 import static com.envimate.mapmate.definitions.SerializedObjectDefinition.serializedObjectDefinition;
-import static com.envimate.mapmate.definitions.hub.FullType.type;
+import static com.envimate.mapmate.definitions.types.FullType.fullType;
 import static com.envimate.mapmate.deserialization.deserializers.serializedobjects.MethodSerializedObjectDeserializer.methodNameDeserializer;
 import static com.envimate.mapmate.serialization.serializers.serializedobject.SerializedObjectSerializer.serializedObjectSerializer;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 
-// TODO not necessary
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -65,22 +65,21 @@ public final class ManualRegistry implements Recipe {
         return new ManualRegistry();
     }
 
+    @SuppressWarnings("unchecked")
     public <T> ManualRegistry withCustomPrimitive(final Class<T> type,
                                                   final Function<T, String> serializationMethod,
                                                   final Function<String, T> deserializationMethod) {
         return this.withCustomPrimitive(customPrimitiveDefinition(
-                type(type),
-                serializationMethod::apply,
+                fullType(type),
+                object -> serializationMethod.apply((T) object),
                 deserializationMethod::apply
         ));
     }
 
     public ManualRegistry withCustomPrimitive(final CustomPrimitiveDefinition customPrimitive) {
         if (this.definitions.contains(customPrimitive)) {
-            throw new UnsupportedOperationException(String.format(
-                    "The customPrimitive %s has already been added for type %s",
-                    customPrimitive,
-                    customPrimitive.type().description()));
+            throw new UnsupportedOperationException(format(
+                    "The customPrimitive %s has already been added for type %s", customPrimitive, customPrimitive.type().description()));
         }
         this.definitions.add(customPrimitive);
 
@@ -95,10 +94,8 @@ public final class ManualRegistry implements Recipe {
 
     public ManualRegistry withSerializedObject(final SerializedObjectDefinition serializedObject) {
         if (this.definitions.contains(serializedObject)) {
-            throw new UnsupportedOperationException(String.format(
-                    "The serializedObject %s has already been added for type %s",
-                    serializedObject,
-                    serializedObject.type().description()));
+            throw new UnsupportedOperationException(format("The serializedObject %s has already been added for type %s",
+                    serializedObject, serializedObject.type().description()));
         }
         this.definitions.add(serializedObject);
         return this;
@@ -107,10 +104,10 @@ public final class ManualRegistry implements Recipe {
     public ManualRegistry withSerializedObject(final Class<?> type,
                                                final Field[] serializedFields,
                                                final String deserializationMethodName) {
-        final SerializedObjectDeserializer deserializer = methodNameDeserializer(type(type), deserializationMethodName, serializedFields);
-        final SerializationFields serializationFields = FIELD_DETECTOR.detect(type(type));
-        final SerializedObjectSerializer serializer = serializedObjectSerializer(type(type), serializationFields);
-        final SerializedObjectDefinition serializedObject = serializedObjectDefinition(type(type), serializer, deserializer);
+        final SerializedObjectDeserializer deserializer = methodNameDeserializer(fullType(type), deserializationMethodName, serializedFields);
+        final SerializationFields serializationFields = FIELD_DETECTOR.detect(fullType(type));
+        final SerializedObjectSerializer serializer = serializedObjectSerializer(fullType(type), serializationFields);
+        final SerializedObjectDefinition serializedObject = serializedObjectDefinition(fullType(type), serializer, deserializer);
         return this.withSerializedObject(serializedObject);
     }
 

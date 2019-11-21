@@ -54,7 +54,7 @@ public final class MethodAnnotationBasedCustomPrimitiveDeserializationDetector i
     }
 
     @Override
-    public Optional<CustomPrimitiveDeserializer<?>> detect(final CachedReflectionType type) {
+    public Optional<CustomPrimitiveDeserializer> detect(final CachedReflectionType type) {
         final Method[] typeMethods = type.methods();
         final List<Method> deserializerMethods = stream(typeMethods)
                 .filter(method -> method.getAnnotationsByType(this.annotation).length > 0)

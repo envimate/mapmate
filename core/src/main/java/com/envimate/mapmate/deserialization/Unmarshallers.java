@@ -22,8 +22,8 @@
 package com.envimate.mapmate.deserialization;
 
 import com.envimate.mapmate.definitions.*;
-import com.envimate.mapmate.definitions.hub.FullType;
-import com.envimate.mapmate.definitions.hub.universal.*;
+import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.universal.UniversalType;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.marshalling.Unmarshaller;
@@ -37,12 +37,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import static com.envimate.mapmate.definitions.hub.universal.UniversalCollection.universalCollectionFromNativeList;
-import static com.envimate.mapmate.definitions.hub.universal.UniversalNull.universalNull;
-import static com.envimate.mapmate.definitions.hub.universal.UniversalObject.universalObject;
-import static com.envimate.mapmate.definitions.hub.universal.UniversalObject.universalObjectFromNativeMap;
-import static com.envimate.mapmate.definitions.hub.universal.UniversalPrimitive.universalPrimitive;
+import static com.envimate.mapmate.definitions.universal.UniversalCollection.universalCollectionFromNativeList;
+import static com.envimate.mapmate.definitions.universal.UniversalNull.universalNull;
+import static com.envimate.mapmate.definitions.universal.UniversalObject.universalObjectFromNativeMap;
+import static com.envimate.mapmate.definitions.universal.UniversalPrimitive.universalPrimitive;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.lang.String.format;
 
 @ToString
 @EqualsAndHashCode
@@ -70,14 +70,13 @@ final class Unmarshallers {
             return unmarshaller.unmarshal(input, Map.class);
         } catch (final Exception e) {
             throw new UnsupportedOperationException(
-                    String.format(
-                            "Could not unmarshal map from input %s",
-                            input),
+                    format("Could not unmarshal map from input %s", input),
                     e
             );
         }
     }
 
+    @SuppressWarnings({"InstanceofConcreteClass", "unchecked"})
     UniversalType unmarshal(final String input,
                             final FullType targetType,
                             final MarshallingType marshallingType) {
@@ -93,23 +92,13 @@ final class Unmarshallers {
             try {
                 return universalCollectionFromNativeList(unmarshaller.unmarshal(trimmedInput, List.class));
             } catch (final Exception e) {
-                throw new UnsupportedOperationException(
-                        String.format(
-                                "Could not unmarshal list from input %s",
-                                input),
-                        e
-                );
+                throw new UnsupportedOperationException(format("Could not unmarshal list from input %s", input), e);
             }
         } else if (definition instanceof SerializedObjectDefinition) {
             try {
                 return universalObjectFromNativeMap(unmarshaller.unmarshal(trimmedInput, Map.class));
             } catch (final Exception e) {
-                throw new UnsupportedOperationException(
-                        String.format(
-                                "Could not unmarshal map from input %s",
-                                input),
-                        e
-                );
+                throw new UnsupportedOperationException(format("Could not unmarshal map from input %s", input), e);
             }
         } else if (definition instanceof CustomPrimitiveDefinition) {
             return universalPrimitive(PATTERN.matcher(trimmedInput).replaceAll(""));

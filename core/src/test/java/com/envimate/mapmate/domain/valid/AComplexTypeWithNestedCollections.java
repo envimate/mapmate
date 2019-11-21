@@ -19,29 +19,28 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.hub.universal;
+package com.envimate.mapmate.domain.valid;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.util.List;
+
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class UniversalNull implements UniversalType {
+public final class AComplexTypeWithNestedCollections {
+    public final AString[][][][] nestedArray;
+    public final List<List<List<List<ANumber>>>> nestedList;
+    public final List<List<AString>[]>[] nestedMix1;
+    public final List<List<ANumber[]>[]> nestedMix2;
 
-    public static UniversalNull universalNull() {
-        return new UniversalNull();
-    }
-
-    @Override
-    public String nativeJavaTypeName() {
-        return "null";
-    }
-
-    @Override
-    public Object toNativeJava() {
-        return null;
+    public static AComplexTypeWithNestedCollections deserialize(final AString[][][][] nestedArray,
+                                                                final List<List<List<List<ANumber>>>> nestedList,
+                                                                final List<List<AString>[]>[] nestedMix1,
+                                                                final List<List<ANumber[]>[]> nestedMix2) {
+        return new AComplexTypeWithNestedCollections(nestedArray, nestedList, nestedMix1, nestedMix2);
     }
 }

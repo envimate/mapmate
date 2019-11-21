@@ -37,12 +37,12 @@ public final class DefinitionMultiplexer {
     private boolean hasRun = false;
     private final Definition definition;
 
-    // TODO put in Definition
     public static DefinitionMultiplexer multiplex(final Definition definition) {
         validateNotNull(definition, "definition");
         return new DefinitionMultiplexer(definition);
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends Definition> DefinitionMultiplexer forType(final Class<T> type, final Consumer<T> action) {
         if(type.isInstance(this.definition)) {
             action.accept((T) this.definition);

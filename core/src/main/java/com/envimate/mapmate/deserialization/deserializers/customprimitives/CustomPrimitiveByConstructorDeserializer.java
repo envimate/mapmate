@@ -29,19 +29,20 @@ import lombok.ToString;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import static com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializationMethodCallException.customPrimitiveSerializationMethodCallException;
 import static com.envimate.mapmate.builder.detection.customprimitive.IncompatibleCustomPrimitiveException.incompatibleCustomPrimitiveException;
+import static com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializationMethodCallException.customPrimitiveSerializationMethodCallException;
+import static java.lang.String.format;
 import static java.lang.reflect.Modifier.isAbstract;
 import static java.lang.reflect.Modifier.isPublic;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class CustomPrimitiveByConstructorDeserializer implements CustomPrimitiveDeserializer<Object> {
+public final class CustomPrimitiveByConstructorDeserializer implements CustomPrimitiveDeserializer {
     private final Constructor<?> constructor;
 
-    public static CustomPrimitiveDeserializer<?> createDeserializer(final Class<?> type,
-                                                                    final Constructor<?> constructor) {
+    public static CustomPrimitiveDeserializer createDeserializer(final Class<?> type,
+                                                                 final Constructor<?> constructor) {
         final int modifiers = constructor.getModifiers();
         if (!isPublic(modifiers)) {
             throw incompatibleCustomPrimitiveException(
@@ -74,10 +75,9 @@ public final class CustomPrimitiveByConstructorDeserializer implements CustomPri
         try {
             return this.constructor.newInstance(value);
         } catch (final IllegalAccessException e) {
-            throw customPrimitiveSerializationMethodCallException(String.format(
-                    "Unexpected error invoking deserialization constructor %s for serialized custom primitive %s",
-                    this.constructor,
-                    value), e);
+            throw customPrimitiveSerializationMethodCallException(
+                    format("Unexpected error invoking deserialization constructor %s for serialized custom primitive %s",
+                            this.constructor, value), e);
         } catch (final InvocationTargetException e) {
             throw handleInvocationTargetException(e, value);
         }
@@ -88,11 +88,9 @@ public final class CustomPrimitiveByConstructorDeserializer implements CustomPri
         if (targetException instanceof Exception) {
             return (Exception) targetException;
         } else {
-            throw customPrimitiveSerializationMethodCallException(String.format(
-                    "Unexpected error invoking deserialization constructor %s for serialized custom primitive %s",
-                    this.constructor,
-                    value),
-                    e);
+            throw customPrimitiveSerializationMethodCallException(
+                    format("Unexpected error invoking deserialization constructor %s for serialized custom primitive %s",
+                            this.constructor, value), e);
         }
     }
 }

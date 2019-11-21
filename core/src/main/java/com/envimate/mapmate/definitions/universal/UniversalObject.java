@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.hub.universal;
+package com.envimate.mapmate.definitions.universal;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import static com.envimate.mapmate.definitions.hub.universal.UniversalType.fromNativeJava;
+import static com.envimate.mapmate.definitions.universal.UniversalType.fromNativeJava;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -62,11 +62,6 @@ public final class UniversalObject implements UniversalType {
             return empty();
         }
         return of(this.map.get(name));
-    }
-
-    @Override
-    public String nativeJavaTypeName() {
-        return "Map<String, Object>";
     }
 
     @Override

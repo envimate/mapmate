@@ -25,9 +25,11 @@ import com.envimate.mapmate.domain.valid.*;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.givenTheExampleMapMateWithAllMarshallers;
+import static java.util.Collections.singletonList;
 
 public final class SerializerSpecs {
 
@@ -233,6 +235,61 @@ public final class SerializerSpecs {
                         "  \"number2\": \"2\",\n" +
                         "  \"stringA\": \"test\",\n" +
                         "  \"stringB\": \"b\"\n" +
+                        "}");
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Test
+    public void nestedCollectionsCanBeSerialized() {
+        final AString[][][][] nestedArray = {new AString[][][]{new AString[][]{new AString[]{AString.fromStringValue("arrays")}}}};
+        final List<List<List<List<ANumber>>>> nestedList = List.of(List.of(List.of(List.of(ANumber.fromInt(42)))));
+        final List<List<AString>[]>[] nestedMix1 = (List<List<AString>[]>[]) new List[]{singletonList((List<AString>[]) new List[]{singletonList(AString.fromStringValue("mixed"))})};
+        final List<List<ANumber[]>[]> nestedMix2 = singletonList((List<ANumber[]>[]) new List[]{singletonList(new ANumber[]{ANumber.fromInt(43)})});
+        final AComplexTypeWithNestedCollections typeWithNestedCollections = AComplexTypeWithNestedCollections.deserialize(
+                nestedArray, nestedList, nestedMix1, nestedMix2);
+
+        givenTheExampleMapMateWithAllMarshallers()
+                .when().mapMateSerializes(typeWithNestedCollections)
+                .withMarshallingType(json())
+                .noExceptionHasBeenThrown()
+                .theSerializationResultWas("" +
+                        "{\n" +
+                        "  \"nestedList\": [\n" +
+                        "    [\n" +
+                        "      [\n" +
+                        "        [\n" +
+                        "          \"42\"\n" +
+                        "        ]\n" +
+                        "      ]\n" +
+                        "    ]\n" +
+                        "  ],\n" +
+                        "  \"nestedArray\": [\n" +
+                        "    [\n" +
+                        "      [\n" +
+                        "        [\n" +
+                        "          \"arrays\"\n" +
+                        "        ]\n" +
+                        "      ]\n" +
+                        "    ]\n" +
+                        "  ],\n" +
+                        "  \"nestedMix2\": [\n" +
+                        "    [\n" +
+                        "      [\n" +
+                        "        [\n" +
+                        "          \"43\"\n" +
+                        "        ]\n" +
+                        "      ]\n" +
+                        "    ]\n" +
+                        "  ],\n" +
+                        "  \"nestedMix1\": [\n" +
+                        "    [\n" +
+                        "      [\n" +
+                        "        [\n" +
+                        "          \"mixed\"\n" +
+                        "        ]\n" +
+                        "      ]\n" +
+                        "    ]\n" +
+                        "  ]\n" +
                         "}");
     }
 

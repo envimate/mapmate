@@ -25,7 +25,7 @@ import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
 import com.envimate.mapmate.definitions.Definition;
 import com.envimate.mapmate.definitions.Definitions;
 import com.envimate.mapmate.definitions.SerializedObjectDefinition;
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 import com.envimate.mapmate.deserialization.validation.AggregatedValidationException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +33,7 @@ import org.hamcrest.core.StringContains;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import static java.util.Arrays.stream;
 import static java.util.Objects.nonNull;
@@ -52,6 +53,14 @@ public final class Then {
 
     public Then theDeserializedObjectIs(final Object expected) {
         assertThat(this.thenData.getDeserializationResult(), is(expected));
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Then theDeserialiedObjectHas(final Class<T> type, final Predicate<T> predicate) {
+        final Object deserializationResult = this.thenData.getDeserializationResult();
+        assertThat(deserializationResult, instanceOf(type));
+        assertThat(predicate.test((T) deserializationResult), is(true));
         return this;
     }
 
@@ -78,7 +87,7 @@ public final class Then {
     public Then theDefinitionsContainExactlyTheCustomPrimitives(final Class<?>... types) {
         final Definitions definitions = this.thenData.getDefinitions();
         final List<Class<?>> actualTypes = stream(types)
-                .map(FullType::type)
+                .map(FullType::fullType)
                 .map(definitions::getOptionalDefinitionForType)
                 .flatMap(Optional::stream)
                 .filter(definition -> definition instanceof CustomPrimitiveDefinition)
@@ -93,7 +102,7 @@ public final class Then {
     public Then theDefinitionsContainExactlyTheSerializedObjects(final Class<?>... types) {
         final Definitions definitions = this.thenData.getDefinitions();
         final List<Class<?>> actualTypes = stream(types)
-                .map(FullType::type)
+                .map(FullType::fullType)
                 .map(definitions::getOptionalDefinitionForType)
                 .flatMap(Optional::stream)
                 .filter(definition -> definition instanceof SerializedObjectDefinition)

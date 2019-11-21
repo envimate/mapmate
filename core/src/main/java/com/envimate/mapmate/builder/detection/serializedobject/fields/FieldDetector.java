@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.fields;
 
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
 
 public interface FieldDetector {

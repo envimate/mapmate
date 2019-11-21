@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.serialization.serializers.serializedobject;
 
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ import java.lang.reflect.Field;
 import java.util.function.Function;
 
 import static com.envimate.mapmate.builder.detection.serializedobject.IncompatibleSerializedObjectException.incompatibleSerializedObjectException;
-import static com.envimate.mapmate.definitions.hub.FullType.typeOfField;
+import static com.envimate.mapmate.definitions.types.FullType.typeOfField;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.lang.reflect.Modifier.*;
 

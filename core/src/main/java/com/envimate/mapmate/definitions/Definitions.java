@@ -21,21 +21,18 @@
 
 package com.envimate.mapmate.definitions;
 
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static com.envimate.mapmate.definitions.DefinitionMultiplexer.multiplex;
 import static com.envimate.mapmate.definitions.DefinitionNotFoundException.definitionNotFound;
-import static com.envimate.mapmate.definitions.hub.FullType.type;
 import static com.envimate.mapmate.deserialization.UnknownReferenceException.fromType;
+import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 
 @ToString
@@ -45,7 +42,9 @@ public final class Definitions {
     private final Map<FullType, Definition> definitions;
 
     public static Definitions definitions(final Map<FullType, Definition> definitions) {
-        return new Definitions(definitions);
+        final Definitions definitionsObject = new Definitions(definitions);
+        definitionsObject.validateNoUnsupportedOutgoingReferences();
+        return definitionsObject;
     }
 
     public Definition getDefinitionForType(final FullType targetType) {
@@ -60,35 +59,33 @@ public final class Definitions {
         return of(this.definitions.get(targetType));
     }
 
-    // TODO call this
     public void validateNoUnsupportedOutgoingReferences() {
-        final List<FullType> references = this.allReferences();
-        for (final FullType reference : references) {
-            if (this.getOptionalDefinitionForType(reference).isEmpty()) {
-                throw fromType(reference);
+        this.allReferences().forEach((owner, references) -> references.forEach(type -> {
+            if (this.getOptionalDefinitionForType(type).isEmpty()) {
+                throw fromType(owner, type, dump());
             }
-        }
+        }));
     }
 
-    private List<FullType> allReferences() {
-        final List<FullType> allReferences = new LinkedList<>();
-        this.definitions.values().forEach(definition -> {
-            multiplex(definition).forSerializedObject(serializedObject -> {
-                final List<FullType> references = serializedObject.deserializer().fields().referencedTypes();
-                allReferences.addAll(references);
-            });
-        });
+    private Map<FullType, List<FullType>> allReferences() {
+        final Map<FullType, List<FullType>> allReferences = new HashMap<>();
+        this.definitions.values().forEach(definition -> multiplex(definition)
+                .forSerializedObject(serializedObject -> {
+                    final List<FullType> references = new LinkedList<>();
+                    references.addAll(serializedObject.deserializer().fields().referencedTypes());
+                    references.addAll(serializedObject.serializer().fields().typesList());
+                    allReferences.put(serializedObject.type(), references);
+                })
+                .forCollection(collection -> allReferences.put(collection.type(), singletonList(collection.contentType()))));
         return allReferences;
     }
 
-    // TODO remove
     public int countCustomPrimitives() {
         return (int) this.definitions.values().stream()
                 .filter(definition -> definition instanceof CustomPrimitiveDefinition)
                 .count();
     }
 
-    // TODO remove
     public int countSerializedObjects() {
         return (int) this.definitions.values().stream()
                 .filter(definition -> definition instanceof SerializedObjectDefinition)
@@ -103,6 +100,7 @@ public final class Definitions {
                 .filter(definition -> definition instanceof SerializedObjectDefinition)
                 .map(Definition::type)
                 .map(FullType::description)
+                .sorted()
                 .forEach(type -> stringBuilder.append(type).append("\n"));
         stringBuilder.append("------------------------------\n");
         stringBuilder.append("Custom Primitives:\n");
@@ -110,6 +108,7 @@ public final class Definitions {
                 .filter(definition -> definition instanceof CustomPrimitiveDefinition)
                 .map(Definition::type)
                 .map(FullType::description)
+                .sorted()
                 .forEach(type -> stringBuilder.append(type).append("\n"));
         stringBuilder.append("------------------------------\n");
         stringBuilder.append("Collections:\n");
@@ -117,6 +116,7 @@ public final class Definitions {
                 .filter(definition -> definition instanceof CollectionDefinition)
                 .map(Definition::type)
                 .map(FullType::description)
+                .sorted()
                 .forEach(type -> stringBuilder.append(type).append("\n"));
         stringBuilder.append("------------------------------\n");
         return stringBuilder.toString();

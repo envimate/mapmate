@@ -22,14 +22,15 @@
 package com.envimate.mapmate.serialization;
 
 import com.envimate.mapmate.definitions.*;
-import com.envimate.mapmate.definitions.hub.FullType;
-import com.envimate.mapmate.definitions.hub.universal.UniversalCollection;
-import com.envimate.mapmate.definitions.hub.universal.UniversalObject;
-import com.envimate.mapmate.definitions.hub.universal.UniversalType;
+import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.universal.UniversalCollection;
+import com.envimate.mapmate.definitions.universal.UniversalObject;
+import com.envimate.mapmate.definitions.universal.UniversalType;
 import com.envimate.mapmate.marshalling.Marshaller;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
+import com.envimate.mapmate.serialization.tracker.SerializationTracker;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -41,13 +42,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import static com.envimate.mapmate.definitions.hub.FullType.typeOfObject;
-import static com.envimate.mapmate.definitions.hub.universal.UniversalCollection.universalCollection;
-import static com.envimate.mapmate.definitions.hub.universal.UniversalNull.universalNull;
-import static com.envimate.mapmate.definitions.hub.universal.UniversalObject.universalObject;
-import static com.envimate.mapmate.definitions.hub.universal.UniversalPrimitive.universalPrimitive;
+import static com.envimate.mapmate.definitions.types.FullType.typeOfObject;
+import static com.envimate.mapmate.definitions.universal.UniversalCollection.universalCollection;
+import static com.envimate.mapmate.definitions.universal.UniversalNull.universalNull;
+import static com.envimate.mapmate.definitions.universal.UniversalObject.universalObject;
+import static com.envimate.mapmate.definitions.universal.UniversalPrimitive.universalPrimitive;
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
+import static com.envimate.mapmate.serialization.tracker.SerializationTracker.serializationTracker;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
@@ -57,13 +60,11 @@ import static java.util.stream.Collectors.toList;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Serializer {
     private final MarshallerRegistry<Marshaller> marshallers;
-    private final CircularReferenceDetector circularReferenceDetector;
     private final Definitions definitions;
 
     public static Serializer theSerializer(final MarshallerRegistry<Marshaller> marshallers,
                                            final Definitions definitions) {
-        final CircularReferenceDetector circularReferenceDetector = new CircularReferenceDetector();
-        return new Serializer(marshallers, circularReferenceDetector, definitions);
+        return new Serializer(marshallers, definitions);
     }
 
     public Set<MarshallingType> supportedMarshallingTypes() {
@@ -92,12 +93,7 @@ public final class Serializer {
         try {
             return marshaller.marshal(normalized);
         } catch (final Exception e) {
-            throw new UnsupportedOperationException(
-                    String.format(
-                            "Could not marshal normalization %s",
-                            normalized),
-                    e
-            );
+            throw new UnsupportedOperationException(format("Could not marshal normalization %s", normalized), e);
         }
     }
 
@@ -107,12 +103,7 @@ public final class Serializer {
         try {
             return marshaller.marshal(map);
         } catch (final Exception e) {
-            throw new UnsupportedOperationException(
-                    String.format(
-                            "Could not marshal from map %s",
-                            map),
-                    e
-            );
+            throw new UnsupportedOperationException(format("Could not marshal from map %s", map), e);
         }
     }
 
@@ -129,42 +120,44 @@ public final class Serializer {
     }
 
     private Object normalize(final Object object) {
-        this.circularReferenceDetector.detect(object); // TODO
-
         if (isNull(object)) {
             return null;
         }
 
         final FullType type = typeOfObject(object);
-        return serializeDefinition(type, object).toNativeJava();
+        return serializeDefinition(type, object, serializationTracker()).toNativeJava();
     }
 
-    private UniversalType serializeDefinition(final FullType type, final Object object) {
+    private UniversalType serializeDefinition(final FullType type,
+                                              final Object object,
+                                              final SerializationTracker tracker) {
         if (isNull(object)) {
             return universalNull();
         }
+        tracker.trackToProhibitCyclicReferences(object);
         final Definition definition = this.definitions.getDefinitionForType(type);
         if (definition instanceof CustomPrimitiveDefinition) {
             final CustomPrimitiveDefinition customPrimitive = (CustomPrimitiveDefinition) definition;
             return universalPrimitive(customPrimitive.serializer().serialize(object));
         }
         if (definition instanceof SerializedObjectDefinition) {
-            return serializeSerializedObject((SerializedObjectDefinition) definition, object);
+            return serializeSerializedObject((SerializedObjectDefinition) definition, object, tracker);
         }
         if (definition instanceof CollectionDefinition) {
-            return serializeCollection((CollectionDefinition) definition, object);
+            return serializeCollection((CollectionDefinition) definition, object, tracker);
         }
         throw new UnsupportedOperationException("This should never happen.");
     }
 
     private UniversalObject serializeSerializedObject(final SerializedObjectDefinition definition,
-                                                      final Object object) {
+                                                      final Object object,
+                                                      final SerializationTracker tracker) {
         final SerializationFields fields = definition.serializer().fields();
         final Map<String, UniversalType> map = new HashMap<>(10);
         fields.fields().forEach(serializationField -> {
             final FullType type = serializationField.type();
             final Object value = ofNullable(object).map(serializationField::query).orElse(null);
-            final UniversalType serializedValue = serializeDefinition(type, value);
+            final UniversalType serializedValue = serializeDefinition(type, value, tracker);
             final String name = serializationField.name();
             map.put(name, serializedValue);
         });
@@ -172,11 +165,12 @@ public final class Serializer {
     }
 
     private UniversalCollection serializeCollection(final CollectionDefinition definition,
-                                                    final Object object) {
+                                                    final Object object,
+                                                    final SerializationTracker tracker) {
         final FullType contentType = definition.contentType();
         final List<UniversalType> list = definition.serializer().serialize(object)
                 .stream()
-                .map(element -> serializeDefinition(contentType, element))
+                .map(element -> serializeDefinition(contentType, element, tracker))
                 .collect(toList());
         return universalCollection(list);
     }

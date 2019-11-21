@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.deserialization.deserializers.serializedobjects;
 
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 import com.envimate.mapmate.deserialization.DeserializationFields;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -29,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Map;
@@ -81,16 +80,12 @@ public final class MethodSerializedObjectDeserializer implements SerializedObjec
     }
 
     @Override
-    public Object deserialize(final Map<String, Object> elements) {
+    public Object deserialize(final Map<String, Object> elements) throws Exception {
         final Object[] arguments = new Object[this.parameterNames.length];
         for (int i = 0; i < arguments.length; i++) {
             arguments[i] = elements.get(this.parameterNames[i]);
         }
-        try {
-            return this.factoryMethod.invoke(null, arguments);
-        } catch (final IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e); // TODO
-        }
+        return this.factoryMethod.invoke(null, arguments);
     }
 
     @Override

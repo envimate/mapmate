@@ -24,8 +24,6 @@ package com.envimate.mapmate.specs;
 import com.envimate.mapmate.domain.valid.*;
 import org.junit.Test;
 
-import java.util.List;
-
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.givenTheExampleMapMateWithAllMarshallers;
 
@@ -168,8 +166,57 @@ public final class DeserializerSpecs {
     @Test
     public void deserializerCanFindFactoryMethodsWithArrays() {
         givenTheExampleMapMateWithAllMarshallers()
-                .when().mapMateDeserializes("{list: [\"1\"]}").as(json()).toTheType(AComplexTypeWithListButArrayConstructor.class)
+                .when().mapMateDeserializes("{array: [\"1\"]}").as(json()).toTheType(AComplexTypeWithListButArrayConstructor.class)
                 .noExceptionHasBeenThrown()
-                .theDeserializedObjectIs(AComplexTypeWithListButArrayConstructor.deserialize(List.of(ANumber.fromInt(1))));
+                .theDeserializedObjectIs(AComplexTypeWithListButArrayConstructor.deserialize(new ANumber[]{ANumber.fromInt(1)}));
+    }
+
+    @Test
+    public void nestedCollectionsCanBeDeserialized() {
+        givenTheExampleMapMateWithAllMarshallers()
+                .when().mapMateDeserializes("" +
+                "{\n" +
+                "  \"nestedList\": [\n" +
+                "    [\n" +
+                "      [\n" +
+                "        [\n" +
+                "          \"42\"\n" +
+                "        ]\n" +
+                "      ]\n" +
+                "    ]\n" +
+                "  ],\n" +
+                "  \"nestedArray\": [\n" +
+                "    [\n" +
+                "      [\n" +
+                "        [\n" +
+                "          \"arrays\"\n" +
+                "        ]\n" +
+                "      ]\n" +
+                "    ]\n" +
+                "  ],\n" +
+                "  \"nestedMix2\": [\n" +
+                "    [\n" +
+                "      [\n" +
+                "        [\n" +
+                "          \"43\"\n" +
+                "        ]\n" +
+                "      ]\n" +
+                "    ]\n" +
+                "  ],\n" +
+                "  \"nestedMix1\": [\n" +
+                "    [\n" +
+                "      [\n" +
+                "        [\n" +
+                "          \"mixed\"\n" +
+                "        ]\n" +
+                "      ]\n" +
+                "    ]\n" +
+                "  ]\n" +
+                "}").as(json()).toTheType(AComplexTypeWithNestedCollections.class)
+                .noExceptionHasBeenThrown()
+                .theDeserialiedObjectHas(AComplexTypeWithNestedCollections.class, result -> result.nestedArray[0][0][0][0].equals(AString.fromStringValue("arrays")))
+                .theDeserialiedObjectHas(AComplexTypeWithNestedCollections.class, result -> result.nestedList.get(0).get(0).get(0).get(0).equals(ANumber.fromInt(42)))
+                .theDeserialiedObjectHas(AComplexTypeWithNestedCollections.class, result -> result.nestedMix1[0].get(0)[0].get(0).equals(AString.fromStringValue("mixed")))
+                .theDeserialiedObjectHas(AComplexTypeWithNestedCollections.class, result -> result.nestedMix2.get(0)[0].get(0)[0].equals(ANumber.fromInt(43)));
     }
 }

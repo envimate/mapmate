@@ -21,6 +21,6 @@
 
 package com.envimate.mapmate.deserialization.deserializers.customprimitives;
 
-public interface CustomPrimitiveDeserializer<T> {
-    T deserialize(String value) throws Exception;
+public interface CustomPrimitiveDeserializer {
+    Object deserialize(String value) throws Exception;
 }

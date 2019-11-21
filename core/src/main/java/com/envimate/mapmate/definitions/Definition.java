@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.definitions;
 
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 
 public interface Definition {
     FullType type();

@@ -26,7 +26,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.envimate.mapmate.builder.recipes.manualregistry.ManualRegistry.manuallyRegisteredTypes;
 import static com.envimate.mapmate.builder.recipes.marshallers.jackson.JacksonMarshaller.jacksonMarshallerJson;
 
 public final class WithPrimitivesBuilderTest {

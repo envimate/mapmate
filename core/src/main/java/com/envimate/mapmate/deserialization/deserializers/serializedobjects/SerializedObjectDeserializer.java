@@ -27,7 +27,7 @@ import java.util.Map;
 
 public interface SerializedObjectDeserializer {
 
-    Object deserialize(Map<String, Object> elements);
+    Object deserialize(Map<String, Object> elements) throws Exception;
 
     DeserializationFields fields();
 }

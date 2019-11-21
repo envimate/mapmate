@@ -43,10 +43,10 @@ public final class Email {
     public final Body body;
 
     @MapMateDeserializationMethod
-    public static Email restore(final EmailAddress sender,
-                                final EmailAddress receiver,
-                                final Subject subject,
-                                final Body body) {
+    public static Email restoreEmail(final EmailAddress sender,
+                                     final EmailAddress receiver,
+                                     final Subject subject,
+                                     final Body body) {
         RequiredParameterValidator.ensureNotNull(sender, "sender");
         RequiredParameterValidator.ensureNotNull(receiver, "receiver");
         RequiredParameterValidator.ensureNotNull(body, "body");

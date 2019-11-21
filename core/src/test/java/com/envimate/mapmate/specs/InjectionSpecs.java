@@ -216,9 +216,4 @@ public final class InjectionSpecs {
                                 new ANumber[]{ANumber.fromInt(42)}
                         ));
     }
-
-    // TODO inject deep into list
-
-    // TODO inject map
-    // TODO inject list
 }

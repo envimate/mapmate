@@ -27,5 +27,5 @@ import com.envimate.mapmate.builder.detection.customprimitive.CachedReflectionTy
 import java.util.Optional;
 
 public interface CustomPrimitiveSerializationDetector {
-    Optional<CustomPrimitiveSerializer<?>> detect(CachedReflectionType type);
+    Optional<CustomPrimitiveSerializer> detect(CachedReflectionType type);
 }

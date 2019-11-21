@@ -21,14 +21,13 @@
 
 package com.envimate.mapmate.specs;
 
-import com.envimate.mapmate.domain.valid.AComplexType;
-import com.envimate.mapmate.domain.valid.ANumber;
-import com.envimate.mapmate.domain.valid.AString;
+import com.envimate.mapmate.domain.valid.*;
 import org.junit.Test;
 
 import static com.envimate.mapmate.MapMate.aMapMate;
-import static com.envimate.mapmate.builder.recipes.manualregistry.ManualRegistry.manuallyRegisteredTypes;
+import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.given;
+import static java.util.Collections.emptyList;
 
 public final class BuilderSpecs {
 
@@ -36,10 +35,7 @@ public final class BuilderSpecs {
     public void givenValidDataTransferObject_whenBuildingWithDataTransferObject_thenReturnsCorrectDeserializer() {
         given(
                 aMapMate()
-                        .usingRecipe(manuallyRegisteredTypes()
-                                .withSerializedObjects(AComplexType.class)
-                                .withCustomPrimitives(AString.class, ANumber.class)
-                        )
+                        .withManuallyAddedTypes(AComplexType.class, AString.class, ANumber.class)
                         .build()
         )
                 .when().theDefinitionsAreQueried()
@@ -50,12 +46,39 @@ public final class BuilderSpecs {
     @Test
     public void givenValidCustomPrimitive_whenBuildingWithCustomPrimitive_thenReturnsCorrectDeserializer() {
         given(
-                aMapMate()
-                        .usingRecipe(manuallyRegisteredTypes().withCustomPrimitives(AString.class))
-                        .build()
+                aMapMate().withManuallyAddedType(AString.class).build()
         )
                 .when().theDefinitionsAreQueried()
                 .theDefinitionsContainExactlyTheCustomPrimitives(AString.class)
                 .theDefinitionsContainExactlyTheSerializedObjects();
+    }
+
+    @Test
+    public void classesWithWildcardGenericsAreIgnored() {
+        given(aMapMate().withManuallyAddedType(AComplexTypeWithTypeWildcards.class).build())
+                .when().mapMateSerializes(AComplexTypeWithTypeWildcards.deserialize(emptyList())).withMarshallingType(json())
+                .anExceptionIsThrownWithAMessageContaining("no definition found for type 'com.envimate.mapmate.domain.valid.AComplexTypeWithTypeWildcards'");
+    }
+
+    @Test
+    public void classesWithTypeVariablesAreIgnored() {
+        given(aMapMate().withManuallyAddedType(AComplexParameterizedType.class).build())
+                .when().mapMateSerializes(AComplexParameterizedType.deserialize(emptyList())).withMarshallingType(json())
+                .anExceptionIsThrownWithAMessageContaining("no definition found for type 'com.envimate.mapmate.domain.valid.AComplexParameterizedType'");
+    }
+
+    @Test
+    public void collectionsWithTypeVariablesAreIgnored() {
+        given(aMapMate().withManuallyAddedType(AComplexTypeWithWildcardedCollection.class).build())
+                .when().mapMateSerializes(AComplexTypeWithWildcardedCollection.deserialize(emptyList())).withMarshallingType(json())
+                .anExceptionIsThrownWithAMessageContaining("no definition found for type 'com.envimate.mapmate.domain.valid.AComplexTypeWithWildcardedCollection'");
+    }
+
+    @Test
+    public void allKnownCollectionsAreSupported() {
+        given(aMapMate().withManuallyAddedType(AComplexTypeWithDifferentCollections.class).build())
+                .when().theDefinitionsAreQueried()
+                .theDefinitionsContainExactlyTheSerializedObjects(AComplexTypeWithDifferentCollections.class)
+                .theDefinitionsContainExactlyTheCustomPrimitives(ANumber.class);
     }
 }

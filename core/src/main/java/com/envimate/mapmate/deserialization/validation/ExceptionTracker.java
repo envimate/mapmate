@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.deserialization.validation;
 
-import com.envimate.mapmate.definitions.hub.universal.UniversalType;
+import com.envimate.mapmate.definitions.universal.UniversalType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -96,9 +96,5 @@ public final class ExceptionTracker {
 
     public String getPosition() {
         return this.position.render();
-    }
-
-    public String getWouldBePosition(final String elementName) {
-        return this.position.next(elementName).render();
     }
 }

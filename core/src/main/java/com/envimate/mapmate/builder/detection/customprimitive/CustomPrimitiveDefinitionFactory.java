@@ -25,7 +25,7 @@ import com.envimate.mapmate.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.builder.detection.customprimitive.deserialization.CustomPrimitiveDeserializationDetector;
 import com.envimate.mapmate.builder.detection.customprimitive.serialization.CustomPrimitiveSerializationDetector;
 import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 import com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
 import com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
 import lombok.AccessLevel;
@@ -61,8 +61,8 @@ public final class CustomPrimitiveDefinitionFactory implements DefinitionFactory
     @Override
     public Optional<Definition> analyze(final FullType type) {
         final CachedReflectionType cachedReflectionType = cachedReflectionType(type.type());
-        final Optional<CustomPrimitiveSerializer<?>> serializer = this.serializationDetector.detect(cachedReflectionType);
-        final Optional<CustomPrimitiveDeserializer<?>> deserializer = this.deserializationDetectors.stream()
+        final Optional<CustomPrimitiveSerializer> serializer = this.serializationDetector.detect(cachedReflectionType);
+        final Optional<CustomPrimitiveDeserializer> deserializer = this.deserializationDetectors.stream()
                 .map(detector -> detector.detect(cachedReflectionType))
                 .flatMap(Optional::stream)
                 .findFirst();

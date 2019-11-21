@@ -22,8 +22,8 @@
 package com.envimate.mapmate.deserialization;
 
 import com.envimate.mapmate.definitions.Definitions;
-import com.envimate.mapmate.definitions.hub.universal.UniversalObject;
-import com.envimate.mapmate.definitions.hub.universal.UniversalType;
+import com.envimate.mapmate.definitions.universal.UniversalObject;
+import com.envimate.mapmate.definitions.universal.UniversalType;
 import com.envimate.mapmate.deserialization.validation.ExceptionTracker;
 import com.envimate.mapmate.deserialization.validation.ValidationErrorsMapping;
 import com.envimate.mapmate.deserialization.validation.ValidationMappings;
@@ -41,8 +41,8 @@ import lombok.ToString;
 import java.util.Map;
 import java.util.Set;
 
-import static com.envimate.mapmate.definitions.hub.FullType.type;
-import static com.envimate.mapmate.definitions.hub.universal.UniversalObject.universalObjectFromNativeMap;
+import static com.envimate.mapmate.definitions.types.FullType.fullType;
+import static com.envimate.mapmate.definitions.universal.UniversalObject.universalObjectFromNativeMap;
 import static com.envimate.mapmate.deserialization.InternalDeserializer.internalDeserializer;
 import static com.envimate.mapmate.deserialization.Unmarshallers.unmarshallers;
 import static com.envimate.mapmate.deserialization.validation.ExceptionTracker.emptyTracker;
@@ -115,7 +115,7 @@ public final class Deserializer {
                              final MarshallingType marshallingType,
                              final InjectorLambda injectorProducer) {
         validateNotNull(input, "input");
-        final UniversalType unmarshalled = this.unmarshallers.unmarshal(input, type(targetType), marshallingType);
+        final UniversalType unmarshalled = this.unmarshallers.unmarshal(input, fullType(targetType), marshallingType);
         return deserialize(unmarshalled, targetType, injectorProducer);
     }
 

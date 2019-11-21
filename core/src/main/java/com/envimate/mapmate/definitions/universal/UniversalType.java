@@ -19,19 +19,37 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.hub.universal;
+package com.envimate.mapmate.definitions.universal;
 
 import java.util.List;
 import java.util.Map;
 
-import static com.envimate.mapmate.definitions.hub.universal.UniversalCollection.universalCollectionFromNativeList;
-import static com.envimate.mapmate.definitions.hub.universal.UniversalNull.universalNull;
-import static com.envimate.mapmate.definitions.hub.universal.UniversalObject.universalObjectFromNativeMap;
-import static com.envimate.mapmate.definitions.hub.universal.UniversalPrimitive.universalPrimitive;
+import static com.envimate.mapmate.definitions.universal.UniversalCollection.universalCollectionFromNativeList;
+import static com.envimate.mapmate.definitions.universal.UniversalNull.universalNull;
+import static com.envimate.mapmate.definitions.universal.UniversalObject.universalObjectFromNativeMap;
+import static com.envimate.mapmate.definitions.universal.UniversalPrimitive.universalPrimitive;
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 
 public interface UniversalType {
+
+    static String describe(final Class<? extends UniversalType> type) {
+        if (type == UniversalObject.class) {
+            return "object";
+        }
+        if (type == UniversalCollection.class) {
+            return "collection";
+        }
+        if (type == UniversalPrimitive.class) {
+            return "string";
+        }
+        if (type == UniversalNull.class) {
+            return "null";
+        }
+        throw new UnsupportedOperationException();
+    }
+
+    @SuppressWarnings("unchecked")
     static UniversalType fromNativeJava(final Object object) {
         if (isNull(object)) {
             return universalNull();
@@ -49,6 +67,4 @@ public interface UniversalType {
     }
 
     Object toNativeJava();
-
-    String nativeJavaTypeName();
 }

@@ -19,21 +19,20 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.hub;
+package com.envimate.mapmate.definitions.types;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.List;
 
+import static com.envimate.mapmate.definitions.types.UnsupportedJvmFeatureInTypeException.unsupportedJvmFeatureInTypeException;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.lang.String.format;
+import static java.lang.reflect.Array.newInstance;
 import static java.util.Arrays.stream;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.joining;
@@ -48,41 +47,70 @@ public final class FullType {
 
     public static FullType typeOfObject(final Object object) {
         validateNotNull(object, "object");
-        return type(object.getClass());
+        return fullType(object.getClass());
     }
 
     public static FullType typeOfParameter(final Parameter parameter) {
         validateNotNull(parameter, "parameter");
         final Type type = parameter.getParameterizedType();
-        if (type instanceof ParameterizedType) {
-            return parameterizedType(parameter.getType(), fromParameterizedType((ParameterizedType) type));
-        } else {
-            return type(parameter.getType());
-        }
+        return fromType(type);
     }
 
     public static FullType typeOfField(final Field field) {
         validateNotNull(field, "field");
         final Type type = field.getGenericType();
-        if (type instanceof ParameterizedType) {
-            return parameterizedType(field.getType(), fromParameterizedType((ParameterizedType) type));
-        } else {
-            return type(field.getType());
+        return fromType(type);
+    }
+
+    private static FullType fromType(final Type type) {
+        validateNotNull(type, "type");
+        if (type instanceof Class) {
+            return fullType((Class<?>) type);
         }
+        if (type instanceof ParameterizedType) {
+            return fromParameterizedType((ParameterizedType) type);
+        }
+        if (type instanceof GenericArrayType) {
+            return fromGenericArrayType((GenericArrayType) type);
+        }
+        if(type instanceof WildcardType) {
+            return fromWildcardType((WildcardType) type);
+        }
+        if(type instanceof TypeVariable) {
+            return fromTypeVariable((TypeVariable<?>) type);
+        }
+        throw unsupportedJvmFeatureInTypeException(format("Unsupported 'Type' implementation by class '%s' on object '%s'", type.getClass(), type));
     }
 
-    private static List<FullType> fromParameterizedType(final ParameterizedType type) {
+    private static FullType fromParameterizedType(final ParameterizedType type) {
         final Type[] actualTypeArguments = type.getActualTypeArguments();
-        return stream(actualTypeArguments)
-                .map(clazz -> type((Class<?>) clazz))
+        final List<FullType> typeParameters = stream(actualTypeArguments)
+                .map(FullType::fromType)
                 .collect(toList());
+        return parameterizedType((Class<?>) type.getRawType(), typeParameters);
     }
 
-    public static FullType type(final Class<?> type) {
+    private static FullType fromGenericArrayType(final GenericArrayType type) {
+        final Type componentType = type.getGenericComponentType();
+        final FullType fullComponentType = fromType(componentType);
+        final Class<?> arrayType = newInstance(fullComponentType.type, 0).getClass();
+        return parameterizedType(arrayType, singletonList(fullComponentType));
+    }
+
+    private static FullType fromWildcardType(final WildcardType type) {
+        throw unsupportedJvmFeatureInTypeException(format("MapMate does not support wildcard generics but found '%s'", type));
+    }
+
+    private static FullType fromTypeVariable(final TypeVariable<?> type) {
+        throw unsupportedJvmFeatureInTypeException(
+                format("MapMate does not support type variables but found '%s'", type.getName()));
+    }
+
+    public static FullType fullType(final Class<?> type) {
         validateNotNull(type, "type");
         final List<FullType> typeParameters;
         if (type.isArray()) {
-            final FullType componentType = type(type.getComponentType());
+            final FullType componentType = fullType(type.getComponentType());
             typeParameters = singletonList(componentType);
         } else {
             typeParameters = emptyList();
@@ -94,8 +122,7 @@ public final class FullType {
         validateNotNull(type, "type");
         validateNotNull(typeParameters, "typeParameters");
         if (type.isArray() && typeParameters.size() != 1) {
-            throw new UnsupportedOperationException(format(
-                    "Arrays need to have exactly one type parameter but found '%s' for array '%s'",
+            throw new UnsupportedOperationException(format("Arrays need to have exactly one type parameter but found '%s' for array '%s'",
                     typeParameters, type));
         }
         return new FullType(type, typeParameters);
@@ -113,7 +140,7 @@ public final class FullType {
         if (this.typeParameters.isEmpty()) {
             return this.type.getName();
         }
-        if(this.type.isArray()) {
+        if (this.type.isArray()) {
             final FullType theSingleTypeParameter = this.typeParameters.get(0);
             return theSingleTypeParameter.description() + "[]";
         }

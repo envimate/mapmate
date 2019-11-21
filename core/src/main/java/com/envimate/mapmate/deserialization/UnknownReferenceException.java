@@ -21,16 +21,21 @@
 
 package com.envimate.mapmate.deserialization;
 
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
+
+import static java.lang.String.format;
 
 public final class UnknownReferenceException extends RuntimeException {
     private UnknownReferenceException(final String msg) {
         super(msg);
     }
 
-    public static UnknownReferenceException fromType(final FullType unknownType) {
-        final String msg = String.format("definitions contain field of unknown type %s",
-                unknownType.description());
+    public static UnknownReferenceException fromType(final FullType owner, final FullType unknownType, final String dump) {
+        final String msg = format(
+                "definition '%s' contains unknown reference of type '%s'. All known definitions:%n%s",
+                owner.description(),
+                unknownType.description(),
+                dump);
         return new UnknownReferenceException(msg);
     }
 }

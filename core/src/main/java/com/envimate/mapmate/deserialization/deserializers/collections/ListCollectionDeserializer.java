@@ -26,20 +26,25 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 
-// TODO different list impls?
+import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ListCollectionDeserializer implements CollectionDeserializer {
+    private final Function<List<Object>, Collection<Object>> mapper;
 
-    public static CollectionDeserializer listDeserializer() {
-        return new ListCollectionDeserializer();
+    public static CollectionDeserializer listDeserializer(final Function<List<Object>, Collection<Object>> mapper) {
+        validateNotNull(mapper, "mapper");
+        return new ListCollectionDeserializer(mapper);
     }
 
     @Override
     public Object deserialize(final List<Object> deserializedElements) {
-        return deserializedElements;
+        return this.mapper.apply(deserializedElements);
     }
 }

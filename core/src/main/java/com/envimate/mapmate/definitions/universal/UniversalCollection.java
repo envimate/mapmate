@@ -19,8 +19,7 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.hub.universal;
-
+package com.envimate.mapmate.definitions.universal;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -54,11 +53,6 @@ public final class UniversalCollection implements UniversalType {
 
     public List<UniversalType> content() {
         return unmodifiableList(this.list);
-    }
-
-    @Override
-    public String nativeJavaTypeName() {
-        return "List";
     }
 
     @Override

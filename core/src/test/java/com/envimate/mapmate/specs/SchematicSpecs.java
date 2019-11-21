@@ -21,6 +21,19 @@
 
 package com.envimate.mapmate.specs;
 
+import com.envimate.mapmate.domain.valid.AComplexTypeWithCollections;
+import org.junit.Test;
+
+import static com.envimate.mapmate.marshalling.MarshallingType.json;
+import static com.envimate.mapmate.specs.givenwhenthen.Given.givenTheExampleMapMateWithAllMarshallers;
+
 public final class SchematicSpecs {
-    // TODO mixed collection
+
+    @Test
+    public void wrongSchemaFormatCausesSensibleException() {
+        givenTheExampleMapMateWithAllMarshallers()
+                .when().mapMateDeserializes("{\"arrayList\": {}, \"array\": []}").as(json()).toTheType(AComplexTypeWithCollections.class)
+                .anExceptionIsThrownWithAMessageContaining("Unrecognized exception deserializing field 'arrayList': " +
+                        "Requiring the input to be an 'collection' but found '{}' at 'arrayList'");
+    }
 }

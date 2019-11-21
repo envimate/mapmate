@@ -55,7 +55,7 @@ public final class ClassAnnotationBasedCustomPrimitiveSerializationDetector<T ex
     }
 
     @Override
-    public Optional<CustomPrimitiveSerializer<?>> detect(final CachedReflectionType cachedReflectionType) {
+    public Optional<CustomPrimitiveSerializer> detect(final CachedReflectionType cachedReflectionType) {
         final Class<?> type = cachedReflectionType.type();
         final T[] annotations = type.getAnnotationsByType(this.annotationType);
         if (annotations.length == 1) {

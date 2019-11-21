@@ -24,6 +24,8 @@ package com.envimate.mapmate.serialization.serializers.customprimitives;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Method;
 
+import static java.lang.String.format;
+
 public final class CustomPrimitiveSerializationMethodCallException extends RuntimeException {
     private CustomPrimitiveSerializationMethodCallException(final String msg, final Throwable exception) {
         super(msg, exception);
@@ -49,7 +51,7 @@ public final class CustomPrimitiveSerializationMethodCallException extends Runti
             final Class<?> type,
             final MethodHandle methodHandle,
             final Object instance) {
-        final String msg = String.format("%s " +
+        final String msg = format("%s " +
                         "type: %s. " +
                         "method: %s. " +
                         "instance: %s.",
@@ -66,14 +68,10 @@ public final class CustomPrimitiveSerializationMethodCallException extends Runti
             final Class<?> type,
             final Method method,
             final Object instance) {
-        final String msg = String.format("%s " +
-                        "type: %s. " +
-                        "method: %s. " +
-                        "instance: %s.",
-                description,
-                type,
-                method,
-                instance);
+        final String msg = format("%s " +
+                "type: %s. " +
+                "method: %s. " +
+                "instance: %s.", description, type, method, instance);
         return customPrimitiveSerializationMethodCallException(msg, exception);
     }
 }

@@ -39,9 +39,10 @@ public final class ListCollectionSerializer implements CollectionSerializer {
         return new ListCollectionSerializer();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<Object> serialize(final Object collection) {
-        final Collection<Object> realCollection = (Collection) collection;
+        final Collection<Object> realCollection = (Collection<Object>) collection;
         return new LinkedList<>(realCollection);
     }
 }

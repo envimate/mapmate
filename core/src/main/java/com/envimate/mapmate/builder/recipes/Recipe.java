@@ -24,5 +24,5 @@ package com.envimate.mapmate.builder.recipes;
 import com.envimate.mapmate.MapMateBuilder;
 
 public interface Recipe {
-    void cook(final MapMateBuilder mapMateBuilder);
+    void cook(MapMateBuilder mapMateBuilder);
 }

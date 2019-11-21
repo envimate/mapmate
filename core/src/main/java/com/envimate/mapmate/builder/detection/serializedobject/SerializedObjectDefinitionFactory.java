@@ -25,7 +25,7 @@ import com.envimate.mapmate.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.builder.detection.serializedobject.deserialization.SerializedObjectDeserializationDetector;
 import com.envimate.mapmate.builder.detection.serializedobject.fields.FieldDetector;
 import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializedObjectSerializer;
 import lombok.AccessLevel;

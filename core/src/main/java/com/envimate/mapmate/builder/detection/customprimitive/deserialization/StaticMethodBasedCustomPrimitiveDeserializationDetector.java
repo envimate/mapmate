@@ -61,7 +61,7 @@ public final class StaticMethodBasedCustomPrimitiveDeserializationDetector imple
     }
 
     @Override
-    public Optional<CustomPrimitiveDeserializer<?>> detect(final CachedReflectionType type) {
+    public Optional<CustomPrimitiveDeserializer> detect(final CachedReflectionType type) {
         return findDeserializerMethod(type, this.deserializationMethodName)
                 .map(method -> createDeserializer(type.type(), method));
     }

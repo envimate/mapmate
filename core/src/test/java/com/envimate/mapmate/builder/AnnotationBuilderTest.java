@@ -41,7 +41,7 @@ public final class AnnotationBuilderTest {
             "\"sender\":\"sender@example.com\"," +
             "\"subject\":\"Hello\"" +
             "}";
-    public static final Email EMAIL = Email.restore(
+    public static final Email EMAIL = Email.restoreEmail(
             emailAddress("sender@example.com"),
             emailAddress("receiver@example.com"),
             subject("Hello"),

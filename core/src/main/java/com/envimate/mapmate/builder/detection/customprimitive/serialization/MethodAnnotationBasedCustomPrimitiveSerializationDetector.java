@@ -54,7 +54,7 @@ public final class MethodAnnotationBasedCustomPrimitiveSerializationDetector imp
     }
 
     @Override
-    public Optional<CustomPrimitiveSerializer<?>> detect(final CachedReflectionType type) {
+    public Optional<CustomPrimitiveSerializer> detect(final CachedReflectionType type) {
         final Method[] typeMethods = type.methods();
         final List<Method> serializerMethods = stream(typeMethods)
                 .filter(method -> method.getAnnotationsByType(MapMatePrimitiveSerializer.class).length > 0)

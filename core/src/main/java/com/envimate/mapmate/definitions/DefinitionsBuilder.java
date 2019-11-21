@@ -22,7 +22,7 @@
 package com.envimate.mapmate.definitions;
 
 import com.envimate.mapmate.builder.detection.Detector;
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;

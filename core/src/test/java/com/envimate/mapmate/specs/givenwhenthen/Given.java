@@ -36,7 +36,6 @@ public final class Given {
     private final MapMate mapMate;
 
     public static Given given(final MapMate mapMate) {
-        System.out.println(mapMate.deserializer().getDefinitions().dump());
         return new Given(mapMate);
     }
 

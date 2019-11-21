@@ -21,8 +21,8 @@
 
 package com.envimate.mapmate.injector;
 
-import com.envimate.mapmate.definitions.hub.FullType;
-import com.envimate.mapmate.definitions.hub.universal.UniversalType;
+import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.universal.UniversalType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +32,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.envimate.mapmate.definitions.hub.FullType.type;
-import static com.envimate.mapmate.definitions.hub.FullType.typeOfObject;
-import static com.envimate.mapmate.definitions.hub.universal.UniversalPrimitive.universalPrimitive;
+import static com.envimate.mapmate.definitions.types.FullType.fullType;
+import static com.envimate.mapmate.definitions.types.FullType.typeOfObject;
+import static com.envimate.mapmate.definitions.universal.UniversalPrimitive.universalPrimitive;
 import static com.envimate.mapmate.injector.NamedDirectInjection.namedDirectInjection;
 import static com.envimate.mapmate.injector.PropertyName.propertyName;
 import static com.envimate.mapmate.injector.TypedDirectInjection.typedDirectInjection;
@@ -67,7 +67,7 @@ public final class Injector {
     }
 
     public Injector put(final Class<?> type, final Object instance) {
-        return put(type(type), instance);
+        return put(fullType(type), instance);
     }
 
     public Injector put(final FullType type, final Object instance) {
@@ -76,7 +76,6 @@ public final class Injector {
     }
 
     public Optional<UniversalType> getUniversalInjectionFor(final String position) {
-        System.out.println("position = " + position);
         final PropertyName propertyName = propertyName(position);
         return this.universalInjections.stream()
                 .filter(injection -> injection.propertyName().equals(propertyName))

@@ -28,7 +28,7 @@ import com.envimate.mapmate.builder.scanning.PackageScanner;
 import com.envimate.mapmate.definitions.Definition;
 import com.envimate.mapmate.definitions.Definitions;
 import com.envimate.mapmate.definitions.DefinitionsBuilder;
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 import com.envimate.mapmate.deserialization.Deserializer;
 import com.envimate.mapmate.deserialization.validation.*;
 import com.envimate.mapmate.injector.InjectorFactory;
@@ -46,7 +46,7 @@ import static com.envimate.mapmate.builder.conventional.ConventionalDetectors.co
 import static com.envimate.mapmate.builder.scanning.DefaultPackageScanner.defaultPackageScanner;
 import static com.envimate.mapmate.builder.scanning.PackageScannerRecipe.packageScannerRecipe;
 import static com.envimate.mapmate.definitions.DefinitionsBuilder.definitionsBuilder;
-import static com.envimate.mapmate.definitions.hub.FullType.type;
+import static com.envimate.mapmate.definitions.types.FullType.fullType;
 import static com.envimate.mapmate.deserialization.Deserializer.theDeserializer;
 import static com.envimate.mapmate.injector.InjectorFactory.injectorFactory;
 import static com.envimate.mapmate.marshalling.MarshallerRegistry.marshallerRegistry;
@@ -99,7 +99,13 @@ public final class MapMateBuilder {
 
     public MapMateBuilder withManuallyAddedType(final Class<?> type) {
         validateNotNull(type, "type");
-        this.addedTypes.add(type(type));
+        this.addedTypes.add(fullType(type));
+        return this;
+    }
+
+    public MapMateBuilder withManuallyAddedTypes(final Class<?>... type) {
+        validateNotNull(type, "type");
+        stream(type).forEach(this::withManuallyAddedType);
         return this;
     }
 

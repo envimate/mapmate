@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.deserialization;
 
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -50,15 +50,6 @@ public final class DeserializationFields {
     public List<FullType> referencedTypes() {
         return this.elements.values()
                 .stream()
-                /*
-                TODO
-                .map(type -> {
-                    if (type.isArray()) {
-                        return type.getComponentType();
-                    }
-                    return type;
-                })
-                 */
                 .distinct()
                 .collect(toList());
     }

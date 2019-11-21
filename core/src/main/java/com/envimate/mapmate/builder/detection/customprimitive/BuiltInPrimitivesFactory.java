@@ -24,7 +24,7 @@ package com.envimate.mapmate.builder.detection.customprimitive;
 import com.envimate.mapmate.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
 import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 import com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.envimate.mapmate.definitions.CustomPrimitiveDefinition.customPrimitiveDefinition;
-import static com.envimate.mapmate.definitions.hub.FullType.type;
+import static com.envimate.mapmate.definitions.types.FullType.fullType;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.function.Function.identity;
@@ -77,13 +77,13 @@ public final class BuiltInPrimitivesFactory implements DefinitionFactory {
 
     private static <T> CustomPrimitiveDefinition toCustomPrimitiveDefinition(final Class<T> type,
                                                                              final Function<String, T> deserializer) {
-        final CustomPrimitiveSerializer<T> customPrimitiveSerializer = obj -> {
+        final CustomPrimitiveSerializer customPrimitiveSerializer = obj -> {
             if (obj != null) {
                 return String.valueOf(obj);
             } else {
                 return null;
             }
         };
-        return customPrimitiveDefinition(type(type), customPrimitiveSerializer, deserializer::apply);
+        return customPrimitiveDefinition(fullType(type), customPrimitiveSerializer, deserializer::apply);
     }
 }

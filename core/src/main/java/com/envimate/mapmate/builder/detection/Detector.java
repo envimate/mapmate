@@ -22,7 +22,7 @@
 package com.envimate.mapmate.builder.detection;
 
 import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 
 import java.util.Optional;
 

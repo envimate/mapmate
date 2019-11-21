@@ -35,9 +35,9 @@
     <suppress checks="IllegalCatchCheck" files="Unmarshallers.java"/>
     <suppress checks="IllegalCatchCheck" files="Serializer.java"/>
     <suppress checks="IllegalCatchCheck" files="Deserializer|When"/>
-    <suppress checks="MethodLength" files="Deserializer.java"/>
-    <suppress checks="MethodLength" files="MapMateBuilder.java"/>
-    <suppress checks="VisibilityModifier" files="MapMateBuilder.java"/>
+    <suppress checks="MethodLength" files="Deserializer"/>
+    <suppress checks="MethodLength" files="MapMateBuilder"/>
+    <suppress checks="VisibilityModifier" files="MapMateBuilder"/>
     <suppress
             checks="MagicNumber|MethodName|IllegalCatch|LineLength|MethodLength|FinalParameters|LineLength|InnerTypeLast"
             files="Examples|Instances"/>
@@ -45,6 +45,7 @@
     <suppress checks="MethodName|Regex" files="Examples"/>
     <suppress checks="ClassFanOutComplexityCheck" files="MapMateBuilder.java"/>
     <suppress checks="RedundantModifier" files="DefaultPackageScanner.java"/>
-    <suppress checks="MethodName|MagicNumber|LineLength|FileLength" files=".*Specs" />
-
+    <suppress checks="MethodName|MagicNumber|LineLength|FileLength|MethodLength" files=".*Specs"/>
+    <suppress checks="ExplicitInitialization" files=".*"/>
+    <suppress checks="ParameterNumber" files="AComplexTypeWithDifferentCollections" />
 </suppressions>

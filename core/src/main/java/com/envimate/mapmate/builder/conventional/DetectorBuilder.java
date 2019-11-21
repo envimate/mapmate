@@ -35,10 +35,9 @@ import java.util.regex.Pattern;
 import static com.envimate.mapmate.builder.conventional.ConventionalDefinitionFactories.*;
 import static com.envimate.mapmate.builder.detection.SimpleDetector.detector;
 import static com.envimate.mapmate.builder.detection.collection.ArrayCollectionDefinitionFactory.arrayFactory;
-import static com.envimate.mapmate.builder.detection.collection.ListCollectionDefinitionFactory.listFactory;
+import static com.envimate.mapmate.builder.detection.collection.NativeJavaCollectionDefinitionFactory.nativeJavaCollectionsFactory;
 import static com.envimate.mapmate.builder.detection.customprimitive.BuiltInPrimitivesFactory.builtInPrimitivesFactory;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
-import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
@@ -46,11 +45,18 @@ import static java.util.stream.Collectors.toList;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DetectorBuilder {
+    private final List<DefinitionFactory> collectionFactories;
     private final List<DefinitionFactory> customPrimitiveDefinitionFactories;
     private final List<DefinitionFactory> serializedObjectDefinitionFactories;
 
     public static DetectorBuilder detectorBuilder() {
-        return new DetectorBuilder(new LinkedList<>(), new LinkedList<>());
+        return new DetectorBuilder(new LinkedList<>(), new LinkedList<>(), new LinkedList<>());
+    }
+
+    public DetectorBuilder withCollectionFactory(final DefinitionFactory collectionFactory) {
+        validateNotNull(collectionFactory, "collectionFactory");
+        this.collectionFactories.add(collectionFactory);
+        return this;
     }
 
     public DetectorBuilder withNameAndConstructorBasedCustomPrimitiveFactory(final String serializationMethodName,
@@ -95,8 +101,9 @@ public final class DetectorBuilder {
     }
 
     public Detector build() {
-        withCustomPrimitiveFactory(builtInPrimitivesFactory()); // TODO
-        final List<DefinitionFactory> collectionFactories = asList(arrayFactory(), listFactory());
-        return detector(collectionFactories, this.customPrimitiveDefinitionFactories, this.serializedObjectDefinitionFactories);
+        withCustomPrimitiveFactory(builtInPrimitivesFactory());
+        withCollectionFactory(arrayFactory());
+        withCollectionFactory(nativeJavaCollectionsFactory());
+        return detector(this.collectionFactories, this.customPrimitiveDefinitionFactories, this.serializedObjectDefinitionFactories);
     }
 }

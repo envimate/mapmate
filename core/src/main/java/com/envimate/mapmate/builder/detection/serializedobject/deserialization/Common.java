@@ -21,8 +21,7 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.deserialization;
 
-import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.hub.FullType;
+import com.envimate.mapmate.definitions.types.FullType;
 
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
@@ -31,7 +30,6 @@ import java.util.Optional;
 
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
-import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
@@ -76,14 +74,15 @@ public final class Common {
         return ofNullable(deserializationConstructor);
     }
 
-    public static boolean isMethodCompatibleWithFields(final Executable method, final List<FullType> fields) {
-        final List<Class<?>> parameterTypes = asList(method.getParameterTypes());
+    static boolean isMethodCompatibleWithFields(final Executable method, final List<FullType> fields) {
+        final List<FullType> parameterTypes = stream(method.getParameters())
+                .map(FullType::typeOfParameter)
+                .collect(toList());
         if (fields.size() != parameterTypes.size()) {
             return false;
         }
 
         for (final FullType serializedField : fields) {
-            // TODO
             final boolean present = parameterTypes.contains(serializedField);
             if (!present) {
                 return false;

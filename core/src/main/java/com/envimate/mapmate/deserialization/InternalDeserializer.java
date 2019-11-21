@@ -22,8 +22,8 @@
 package com.envimate.mapmate.deserialization;
 
 import com.envimate.mapmate.definitions.*;
-import com.envimate.mapmate.definitions.hub.FullType;
-import com.envimate.mapmate.definitions.hub.universal.*;
+import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.universal.*;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.deserialization.validation.ExceptionTracker;
 import com.envimate.mapmate.deserialization.validation.ValidationErrorsMapping;
@@ -35,8 +35,8 @@ import lombok.RequiredArgsConstructor;
 import java.util.*;
 import java.util.Map.Entry;
 
-import static com.envimate.mapmate.definitions.hub.FullType.type;
-import static com.envimate.mapmate.definitions.hub.universal.UniversalNull.universalNull;
+import static com.envimate.mapmate.definitions.types.FullType.fullType;
+import static com.envimate.mapmate.definitions.universal.UniversalNull.universalNull;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.lang.String.format;
 
@@ -57,7 +57,7 @@ final class InternalDeserializer {
                       final Class<T> targetType,
                       final ExceptionTracker exceptionTracker,
                       final Injector injector) {
-        final T result = (T) this.deserializeRecursive(input, type(targetType), exceptionTracker, injector);
+        final T result = (T) this.deserializeRecursive(input, fullType(targetType), exceptionTracker, injector);
         final ValidationResult validationResult = exceptionTracker.validationResult();
         if (validationResult.hasValidationErrors()) {
             this.onValidationErrors.map(validationResult.validationErrors());
@@ -86,30 +86,34 @@ final class InternalDeserializer {
         }
 
         final Definition definition = this.definitions.getDefinitionForType(targetType);
-        if (definition instanceof SerializedObjectDefinition) {
-            return this.deserializeDataTransferObject(
-                    castSafely(resolved, UniversalObject.class, exceptionTracker),
-                    (SerializedObjectDefinition) definition,
-                    exceptionTracker,
-                    injector);
-        }
-        if (definition instanceof CustomPrimitiveDefinition) {
-            return this.deserializeCustomPrimitive(
-                    castSafely(resolved, UniversalPrimitive.class, exceptionTracker),
-                    (CustomPrimitiveDefinition) definition,
-                    exceptionTracker);
-        }
-        if (definition instanceof CollectionDefinition) {
-            return this.deserializeCollection(
-                    castSafely(resolved, UniversalCollection.class, exceptionTracker),
-                    (CollectionDefinition) definition,
-                    exceptionTracker,
-                    injector);
+        try {
+            if (definition instanceof SerializedObjectDefinition) {
+                return this.deserializeDataTransferObject(
+                        castSafely(resolved, UniversalObject.class, exceptionTracker),
+                        (SerializedObjectDefinition) definition,
+                        exceptionTracker,
+                        injector);
+            }
+            if (definition instanceof CustomPrimitiveDefinition) {
+                return this.deserializeCustomPrimitive(
+                        castSafely(resolved, UniversalPrimitive.class, exceptionTracker),
+                        (CustomPrimitiveDefinition) definition,
+                        exceptionTracker);
+            }
+            if (definition instanceof CollectionDefinition) {
+                return this.deserializeCollection(
+                        castSafely(resolved, UniversalCollection.class, exceptionTracker),
+                        (CollectionDefinition) definition,
+                        exceptionTracker,
+                        injector);
+            }
+        } catch (final WrongInputStructureException e) {
+            exceptionTracker.track(e, e.getMessage());
+            return null;
         }
         throw new UnsupportedOperationException(definition.getClass().getName());
     }
 
-    // TODO what if null?
     private <T> T deserializeDataTransferObject(final UniversalObject input,
                                                 final SerializedObjectDefinition definition,
                                                 final ExceptionTracker exceptionTracker,
@@ -131,15 +135,13 @@ final class InternalDeserializer {
         }
 
         if (exceptionTracker.validationResult().hasValidationErrors()) {
-            return null; // TODO
+            return null;
         } else {
             try {
                 return (T) deserializer.deserialize(elements);
             } catch (final Exception e) {
-                final String message = format(
-                        "Exception calling deserialize(type: %s, elements: %s) on deserializationMethod %s",
-                        definition.type().description(), elements, deserializer
-                );
+                final String message = format("Exception calling deserialize(type: %s, elements: %s) on deserializationMethod %s",
+                        definition.type().description(), elements, deserializer);
                 exceptionTracker.track(e, message);
                 return null;
             }
@@ -152,10 +154,7 @@ final class InternalDeserializer {
         try {
             return (T) definition.deserializer().deserialize(input.stringValue());
         } catch (final Exception e) {
-            final String message = format(
-                    "Exception calling deserialize(input: %s) on definition %s",
-                    input.toNativeJava(), definition
-            );
+            final String message = format("Exception calling deserialize(input: %s) on definition %s", input.toNativeJava(), definition);
             exceptionTracker.track(e, message);
             return null;
         }
@@ -180,11 +179,7 @@ final class InternalDeserializer {
                                                           final Class<T> type,
                                                           final ExceptionTracker exceptionTracker) {
         if (!type.isInstance(universalType)) {
-            throw new UnsupportedOperationException(format(
-                    "Requiring an input of type '%s' but found '%s' at '%s'",
-                    type.getName(),
-                    universalType,
-                    exceptionTracker.getPosition())); // TODO more error description
+            throw WrongInputStructureException.wrongInputStructureException(type, universalType, exceptionTracker.getPosition());
         }
         return (T) universalType;
     }
