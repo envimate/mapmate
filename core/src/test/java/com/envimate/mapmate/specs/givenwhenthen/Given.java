@@ -22,14 +22,10 @@
 package com.envimate.mapmate.specs.givenwhenthen;
 
 import com.envimate.mapmate.MapMate;
-import com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedMarshallerRecipe;
-import com.envimate.mapmate.domain.valid.AnException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
-import static com.envimate.mapmate.MapMate.aMapMate;
-import static com.envimate.mapmate.specs.givenwhenthen.Marshallers.*;
-import static com.envimate.mapmate.specs.givenwhenthen.Unmarshallers.*;
+import static com.envimate.mapmate.specs.givenwhenthen.MapMateInstances.theExampleMapMateWithAllMarshallers;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Given {
@@ -40,14 +36,7 @@ public final class Given {
     }
 
     public static Given givenTheExampleMapMateWithAllMarshallers() {
-        final MapMate mapMate = aMapMate("com.envimate.mapmate.domain.valid")
-                .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
-                .usingXmlMarshaller(xmlMarshaller(), xmlUnmarshaller())
-                .usingYamlMarshaller(yamlMarshaller(), yamlUnmarshaller())
-                .usingRecipe(UrlEncodedMarshallerRecipe.urlEncodedMarshaller())
-                .withExceptionIndicatingValidationError(AnException.class)
-                .build();
-        return given(mapMate);
+        return given(theExampleMapMateWithAllMarshallers());
     }
 
     public When when() {
