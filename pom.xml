@@ -70,4 +70,28 @@
         <developerConnection>scm:git:git@github.com:envimate/mapmate.git</developerConnection>
     </scm>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.envimate</groupId>
+                <artifactId>documaid</artifactId>
+                <version>1.2.4</version>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <files>
+                                <file>docs/UserGuide.md</file>
+                            </files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

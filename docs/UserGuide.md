@@ -1,6 +1,8 @@
 # User Guide
 
-This guide walks you through the features of MapMate, how to configure MapMate, and how to get most out of it.
+This guide walks you through the features of MapMate, how to configure MapMate, and how to get the most out of it.
+
+<!---[Link](docs/QuickStart.md "derp")-->[derp](docs/QuickStart.md)
 
 Check out also our [Quick Start](QuickStart.md) if you only want to get started coding or take a look into the 
 definition of [Custom Primitives](Concepts.md#custom-primitives) and 
@@ -54,7 +56,7 @@ definition of [Custom Primitives](Concepts.md#custom-primitives) and
    * [FAQ](#faq)
 
 ## Prerequisites
-MapMate is designed to be a slave of your code base. Hence it is very customizable and non-invasive and does not come
+MapMate is designed to be a servant of your code base. Hence it is very customizable and non-invasive and does not come
 with many prerequisites. The ones it comes with are explained in this chapter.
 
 ### Dependencies
@@ -62,13 +64,19 @@ To use MapMate, you need to include the core jar as a dependency to your project
 examples of how to include it in the dependency management tool of your choice, can be found in the 
 [Maven Repository](https://maven-badges.herokuapp.com/maven-central/com.envimate.mapmate/core).
 
+```xml
+<dependency>
+    <version><!---[Version]-->1.6.23</version>
+</dependency>
+```
+
 ### Compiler Configuration
 To deserialize a Serialized Object, MapMate needs to know the deserialization method's parameter names so that it can 
 map the input field names to the method parameters. This means you need to compile your code with parameter names. That
-is achieved by passing the `-parameters` flag to the java compiler. More on the flag you can read in
+is achieved by passing the `-parameters` flag to the java compiler. You can find out more about this flag in
 [javac official documentation](https://docs.oracle.com/en/java/javase/12/tools/javac.html).
 
-If your project is built with Maven, you must pass it to the compiler plugin:
+If your project is built with Maven, you must pass the flag to the compiler plugin:
 
 ```xml
 <plugin>
@@ -82,7 +90,7 @@ If your project is built with Maven, you must pass it to the compiler plugin:
 </plugin>
 ```
 
-Also, include this flag in your IDE's javac configuration, and make sure to rebuild your project afterwards the 
+Also, include this flag in your IDE's javac configuration, and make sure to rebuild your project after the 
 configuration changes.
 
 * [Javac configuration in IntelliJ](https://www.jetbrains.com/help/idea/java-compiler.html#javac_eclipse)
@@ -90,61 +98,69 @@ configuration changes.
 
 ### Optionally use Lombok
 [Project Lombok](https://projectlombok.org) is giving the lazy coder a little relieve when coding Custom Primitives and
-Serialized Objects by generating private constructors, `equals` and `hashCode` and `toString`. Check out their website 
+Serialized Objects by generating private constructors as well as `equals`, `hashCode` and `toString` methods. Check out their website 
 for detailed instructions on how to include and use it in your project.  
 
 ## Using MapMate
-Welcome to the most simple chapter of this user guide. Using MapMate is straight forward given that a configured 
-MapMate instance is at your disposal already. The MapMate instance gives you quick access to the most frequently used 
+Welcome to the most simple chapter of this user guide. Using MapMate is straightforward given that a configured 
+MapMate instance is already at your disposal. The MapMate instance gives you quick access to the most frequently used 
 serialization and deserialization methods. It is thread safe, so we encourage you to use a single instance in your 
 application (unless you see a need of separately configured instances). 
  
 ### Minimal Configuration
-
 MapMate needs to know the package where your [Custom Primitives](Concepts.md#custom-primitives) and [Serialized Objects](Concepts.md#serialized-objects) reside. MapMate is also unaware 
 of the chosen format, hence needs to be configured with [(Un)marshaller](Concepts.md#unmarshalling) to deal with the format conversion. 
 
-If you are following the [default conventions](UserGuide.md#default-conventions-explained), and have chosen JSON as format, along with Gson as marshaller, here is the minimal configuration you need to get access to `serializer` and `deserializer` 
+If you are following the [default conventions](UserGuide.md#default-conventions-explained) and have chosen JSON as format along with Gson as marshaller, here is a minimal configuration: 
 
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/DocExample1.java example1)-->
 ```java
 final MapMate mapMate = MapMate.aMapMate(THE_PACKAGE_NAME_TO_SCAN_RECURSIVELY)
-        .usingJsonMarshallers(new Gson()::toJson, new Gson()::fromJson)
+        .usingJsonMarshaller(new Gson()::toJson, new Gson()::fromJson)
         .build();
-```  
+```
 
 Below you can find detailed information about using this builder and configuring MapMate. Once you got hold of a MapMate instance you can then perform:
  
 ### Serializing to JSON
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/DocExample1.java serializeToJson)-->
 ```java
 System.out.println(mapMate.serializeToJson(myObject));
 ``` 
 ### Deserializing from JSON
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/DocExample1.java deserializeJson)-->
 ```java
-MyObject myObject = mapMate.deserializeJson(myObjectAsJson, MyObject.class);
+myObject = mapMate.deserializeJson(myObjectAsJson, Object.class);
 ``` 
 ### Serializing to YAML
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/DocExample1.java serializeToYaml)-->
 ```java
 System.out.println(mapMate.serializeToYaml(myObject));
 ``` 
 ### Deserializing from YAML
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/DocExample1.java deserializeYaml)-->
 ```java
-MyObject myObject = mapMate.deserializeYaml(myObjectAsYaml, MyObject.class);
+myObject = mapMate.deserializeYaml(myObjectAsYaml, Object.class);
 ``` 
 ### Serializing to XML
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/DocExample1.java serializeToXml)-->
 ```java
 System.out.println(mapMate.serializeToXml(myObject));
 ``` 
 ### Deserializing from XML
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/DocExample1.java deserializeXml)-->
 ```java
-MyObject myObject = mapMate.deserializeXml(myObjectAsXml, MyObject.class);
+myObject = mapMate.deserializeXml(myObjectAsXml, Object.class);
 ``` 
 ### Serializing to YOUR_CUSTOM_FORMAT
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/DocExample1.java serializeTo)-->
 ```java
 System.out.println(mapMate.serializeTo(myObject, MarshallingType.marshallingType("YOUR_CUSTOM_FORMAT")));
 ``` 
 ### Deserializing from YOUR_CUSTOM_FORMAT
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/DocExample1.java deserialize)-->
 ```java
-MyObject myObject = mapMate.deserialize(myObjectAsSomething, MyObject.class, MarshallingType.marshallingType("YOUR_CUSTOM_FORMAT"));
+myObject = mapMate.deserialize(myObjectAsSomething, Object.class, MarshallingType.marshallingType("YOUR_CUSTOM_FORMAT"));
 ``` 
 
 ### Beyond MapMate
@@ -171,9 +187,11 @@ identify these special classes. In this section, we describe how to control whic
 
 The builder provides the possibility to register a list of package names, that are scanned _recursively_:
 
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/PackageScannerExample.java config)-->
 ```java
-final MapMateBuilder mapMateBuilder = MapMate.aMapMate(PACKAGE_TO_SCAN_1, PACKAGE_TO_SCAN_2, ...)
-    ...;
+final MapMate mapMate = MapMate.aMapMate(PACKAGE_TO_SCAN_1, PACKAGE_TO_SCAN_2 /* etc.*/)
+        /* further configuration */
+        .build();
 ```
 
 #### PackageScanner
@@ -192,14 +210,15 @@ You might want to control which packages are scanned by MapMate to reduce startu
 [DefaultPackageScanner](../core/src/main/java/com/envimate/mapmate/builder/DefaultPackageScanner.java) provides 
 factory methods that allow to whitelist or blacklist certain packages and/or classes: 
 
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/PackageScannerExample.java api)-->
 ```java
-        MapMate.aMapMate(DefaultPackageScanner.defaultPackageScanner(
-            List.of(THE_PACKAGE_NAMES_TO_SCAN_RECURSIVELY),
-            List.of(THE_LIST_OF_CLASSES_TO_INCLUDE),
-            List.of(THE_PACKAGE_NAMES_TO_BLACKLIST_RECURSIVELY),
-            List.of(THE_LIST_OF_CLASSES_TO_EXCLUDE))
-        )
-        .usingJsonMarshallers(gson::toJson, gson::fromJson)
+MapMate.aMapMate(DefaultPackageScanner.defaultPackageScanner(
+        List.of(THE_PACKAGE_NAMES_TO_SCAN_RECURSIVELY), // TODO
+        List.of(THE_LIST_OF_CLASSES_TO_INCLUDE), // TODO
+        List.of(THE_PACKAGE_NAMES_TO_BLACKLIST_RECURSIVELY), // TODO
+        List.of(THE_LIST_OF_CLASSES_TO_EXCLUDE)) // TODO
+)
+        .usingJsonMarshaller(gson::toJson, gson::fromJson)
         .build();
 ```
 
@@ -215,9 +234,11 @@ There are cases, where classpath scanning is not a desired feature, e.g. high-se
 platforms like AWS Lambda, where cold start costs are an issue. In these cases, just build MapMate without a list
 of packages:
 
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/DocExample1.java withoutPackageScanning)-->
 ```java
-final MapMateBuilder mapMateBuilder = MapMate.aMapMate()
-    ...;
+final MapMate mapMate = MapMate.aMapMate()
+        /* further configuration */
+        .build();
 ```  
 
 With package scanning disabled, you need to either register your types manually or provide a list of classes, from which 
@@ -251,7 +272,7 @@ public, static, returns an instance of the class it is declared in and takes one
 
 Example:
  
- ```java
+```java
 public final class EmailAddress {
     private final String value;
 
@@ -340,17 +361,16 @@ instance of the
 and configure the preferred Custom Primitive serialization/deserialization method names, Serialized Object 
 deserialization method name, and class name patterns to use for Serialized Object.
 
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/DetectorExample.java detector)-->
 ```java
-    public static MapMate mapMate() {
-        return MapMate.aMapMate("com.envimate.examples")
-                .usingJsonMarshaller(new Gson()::toJson, new Gson()::fromJson)
-                .withDetector(ConventionalDetector.conventionalDetector(
-                        "myCustomPrimitiveSerializationMethodName",
-                        "myCustomPrimitiveDeserializationMethodName",
-                        "mySerializedObjectDeserializationMethodName",
-                        ".*Dto"))
-                .build();
-    }
+MapMate.aMapMate("com.envimate.examples")
+        .usingJsonMarshaller(new Gson()::toJson, new Gson()::fromJson)
+        .withDetector(ConventionalDetectors.conventionalDetector(
+                "myCustomPrimitiveSerializationMethodName",
+                "myCustomPrimitiveDeserializationMethodName",
+                "mySerializedObjectDeserializationMethodName",
+                ".*Dto"))
+        .build();
 ```
 
 Please note that all the string values accepted by the `conventionalDetector` factory method support regular 
@@ -418,15 +438,15 @@ a chosen format.
 There are convenience methods to register common Marshalling types, such as JSON, XML, YAML.
 
 ```java
-public MapMateBuilder usingJsonMarshallers(final Marshaller marshaller, final Unmarshaller unmarshaller) {}
+public MapMateBuilder usingJsonMarshallers(final Marshaller marshaller, final Unmarshaller unmarshaller)
 ```
 
 ```java
-public MapMateBuilder usingYamlMarshallers(final Marshaller marshaller, final Unmarshaller unmarshaller) {}
+public MapMateBuilder usingYamlMarshallers(final Marshaller marshaller, final Unmarshaller unmarshaller)
 ```
 
 ```java
-public MapMateBuilder usingXmlMarshallers(final Marshaller marshaller, final Unmarshaller unmarshaller) {}
+public MapMateBuilder usingXmlMarshallers(final Marshaller marshaller, final Unmarshaller unmarshaller)
 ```
 
 The (Un)marshallers can also be registered in the builder, by providing 2 maps with the marshalling type as key and an 
@@ -434,7 +454,7 @@ instance of the corresponding (Un)marshaller as value.
 
 ```java
 public MapMateBuilder usingMarshallers(final Map<MarshallingType, Marshaller> marshallerMap,
-                                       final Map<MarshallingType, Unmarshaller> unmarshallerMap) {}
+                                       final Map<MarshallingType, Unmarshaller> unmarshallerMap)
 ```
 
 In this section, we show the registration of some commonly used marshalling libraries for each of those types. Also,
@@ -443,42 +463,44 @@ check out [Jackson configuration support](#jackson-configuration-support) in the
 ### JSON with GSON
 
 Assuming you have a configured instance of `Gson` class, adding it as a JSON Marshaller for MapMate looks like:
-
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/MarshallingExamples.java jsonWithGson)-->
 ```java
 final Gson gson = new Gson(); // can be further configured depending on your needs.
 final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
-                               .usingJsonMarshallers(gson::toJson, gson::fromJson)
-                               .build();
+        .usingJsonMarshaller(gson::toJson, gson::fromJson)
+        .build();
 ```
 
 ### JSON with ObjectMapper
-
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/MarshallingExamples.java jsonWithObjectMapper)-->
 ```java
-MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
-            .usingJsonMarshallers(objectMapper::writeValueAsString, objectMapper::readValue)
-            .build();
+final ObjectMapper objectMapper = new ObjectMapper();
+final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
+        .usingJsonMarshaller(objectMapper::writeValueAsString, objectMapper::readValue)
+        .build();
 ```
 
 Checkout [ObjectMapperConventionalBuilderTest](../core/src/test/java/com/envimate/mapmate/builder/ObjectMapperConventionalBuilderTest.java) for an example.
 
 ### XML with X-Stream
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/MarshallingExamples.java xmlWithXStream)-->
 ```java
 final XStream xStream = new XStream(new DomDriver());
 xStream.alias("root", Map.class);
 
-MapMate.aMapMate("com.envimate.mapmate.builder.models")
-                .usingJsonMarshallers(xStream::toXML, new Unmarshaller() {
-                    @Override
-                    public <T> T unmarshal(final String input, final Class<T> type) {
-                        return (T) xStream.fromXML(input, type);
-                    }
-                })
-                .build();
+MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
+        .usingJsonMarshaller(xStream::toXML, new Unmarshaller() {
+            @Override
+            public <T> T unmarshal(final String input, final Class<T> type) {
+                return (T) xStream.fromXML(input, type);
+            }
+        })
+        .build();
 ```
 
 Checkout [XmlBuilderTest](../core/src/test/java/com/envimate/mapmate/builder/XmlBuilderTest.java) for an example.
 
-note: If you wish to marshall in/from XML, don't forget to add the appropriate dependency:
+Note: If you wish to marshall in/from XML, don't forget to add the appropriate dependency:
 
 ```xml
 <dependency>
@@ -489,16 +511,16 @@ note: If you wish to marshall in/from XML, don't forget to add the appropriate d
 ```
 
 ### Yaml with ObjectMapper
-
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/MarshallingExamples.java yamlWithObjectMapper)-->
 ```java
 final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
-return MapMate.aMapMate("com.envimate.mapmate.builder.models")
-        .usingYamlMarshallers(objectMapper::writeValueAsString, objectMapper::readValue)
+final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
+        .usingYamlMarshaller(objectMapper::writeValueAsString, objectMapper::readValue)
         .build();
 ```
 
-note: don't forget to add the appropriate dependency to use the YAMLFactory with the ObjectMapper.
+Note: don't forget to add the appropriate dependency to use the YAMLFactory with the ObjectMapper.
 
 ```xml
 <dependency>
@@ -529,9 +551,10 @@ To enable reporting of aggregated messages, MapMate needs to be made aware of th
 class it needs to recognize as validation error). Assuming one has a single ValidationException somewhere in the domain
 that is thrown in the factory methods, in case the input is not valid, the MapMate configuration looks like:
 
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/ExceptionExamples.java aggregateException)-->
 ```java
-MapMate.aMapMate(YOUR_DOMAIN_PACKAGE)
-        .usingJsonMarshallers(MARSHALLER, UNMARSHALLER)
+final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
+        .usingJsonMarshaller(GSON::toJson, GSON::fromJson)
         .withExceptionIndicatingValidationError(ValidationException.class)
         .build();
 ```
@@ -585,12 +608,13 @@ You can further customize the message of this error by giving in a lambda that m
 instance of a 
 [ValidationError](../core/src/main/java/com/envimate/mapmate/deserialization/validation/ValidationError.java):
 
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/ExceptionExamples.java mappedException)-->
 ```java
-MapMate.aMapMate(YOUR_PACKAGE)
-    .usingJsonMarshallers(MARSHALLER, UNMARSHALLER)
-    .withExceptionIndicatingValidationError(ValidationException.class,
-            (exception, propertyPath) -> new ValidationError("This is a custom message we are reporting about "+ exception.getMessage(), propertyPath))
-    .build();
+MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
+        .usingJsonMarshaller(GSON::toJson, GSON::fromJson)
+        .withExceptionIndicatingValidationError(ValidationException.class,
+                (exception, propertyPath) -> new ValidationError("This is a custom message we are reporting about "+ exception.getMessage(), propertyPath))
+        .build();
 ```
 
 will produce:
@@ -633,12 +657,14 @@ with a value of `null`.
 Using the 
 [JacksonMarshaller](../core/src/main/java/com/envimate/mapmate/builder/recipes/marshallers/jackson/JacksonMarshaller.java)
 Recipe is straight forward:
+
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/MarshallingExamples.java jacksonWithRecipe)-->
 ```java
-MapMate.aMapMate()
-    //...
-    .usingRecipe(jacksonMarshallerJson(new ObjectMapper()))
-    //...
-    .build();
+final MapMate mapMate = MapMate.aMapMate()
+        //...
+        .usingRecipe(jacksonMarshallerJson(new ObjectMapper()))
+        //...
+        .build();
 ```
 You can pass a new instance of ObjectMapper like in the example above, pass your applications instance or pass an even
 further customized instance.

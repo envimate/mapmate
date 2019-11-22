@@ -19,10 +19,29 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.scanning;
+package com.envimate.mapmate.docs;
 
-import java.util.List;
+import com.envimate.mapmate.MapMate;
+import com.envimate.mapmate.builder.conventional.ConventionalDetectors;
+import com.google.gson.Gson;
+import org.junit.Test;
 
-public interface PackageScanner {
-    List<Class<?>> scan();
+public final class DetectorExample {
+
+
+    @Test
+    public void test() {
+        // TODO
+
+        //Showcase start detector
+        MapMate.aMapMate("com.envimate.examples")
+                .usingJsonMarshaller(new Gson()::toJson, new Gson()::fromJson)
+                .withDetector(ConventionalDetectors.conventionalDetector(
+                        "myCustomPrimitiveSerializationMethodName",
+                        "myCustomPrimitiveDeserializationMethodName",
+                        "mySerializedObjectDeserializationMethodName",
+                        ".*Dto"))
+                .build();
+        //Showcase end detector
+    }
 }
