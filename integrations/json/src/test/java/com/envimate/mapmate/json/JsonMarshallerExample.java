@@ -22,7 +22,7 @@
 package com.envimate.mapmate.json;
 
 import com.envimate.mapmate.MapMate;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public final class JsonMarshallerExample {
     private static final String PACKAGE_TO_SCAN = "fgerwgfr"; // TODO

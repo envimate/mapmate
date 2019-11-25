@@ -22,7 +22,7 @@
 package com.envimate.mapmate.xml;
 
 import com.envimate.mapmate.MapMate;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public final class XmlMarshallerExample {
     private static final String PACKAGE_TO_SCAN = "fgerwgfr"; // TODO
