@@ -25,11 +25,11 @@ import com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedMar
 import com.envimate.mapmate.domain.valid.AComplexNestedType;
 import com.envimate.mapmate.domain.valid.AComplexType;
 import com.envimate.mapmate.domain.valid.AComplexTypeWithArray;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import static com.envimate.mapmate.marshalling.MarshallingType.*;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.givenTheExampleMapMateWithAllMarshallers;
 import static com.envimate.mapmate.specs.instances.Instances.*;
-import static com.envimate.mapmate.marshalling.MarshallingType.*;
 
 public final class UnmarshallerSpecs {
 

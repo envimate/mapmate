@@ -32,7 +32,7 @@ public final class ComplexPerson {
         this.addresses = addresses;
     }
 
-    public static ComplexPerson person(final List<FirstName> firstNames, final List<Address> addresses) {
+    public static ComplexPerson deserialize(final List<FirstName> firstNames, final List<Address> addresses) {
         return new ComplexPerson(firstNames, addresses);
     }
 

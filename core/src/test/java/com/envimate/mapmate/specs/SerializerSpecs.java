@@ -22,7 +22,7 @@
 package com.envimate.mapmate.specs;
 
 import com.envimate.mapmate.domain.valid.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;

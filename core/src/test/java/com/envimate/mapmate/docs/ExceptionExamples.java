@@ -22,31 +22,66 @@
 package com.envimate.mapmate.docs;
 
 import com.envimate.mapmate.MapMate;
+import com.envimate.mapmate.builder.models.conventional.Email;
+import com.envimate.mapmate.builder.validation.CustomTypeValidationException;
+import com.envimate.mapmate.deserialization.validation.AggregatedValidationException;
 import com.envimate.mapmate.deserialization.validation.ValidationError;
 import com.google.gson.Gson;
+import org.junit.jupiter.api.Test;
 
-import javax.xml.bind.ValidationException;
+import static java.util.Objects.nonNull;
 
 public final class ExceptionExamples {
-    private static final String YOUR_PACKAGE_TO_SCAN = "gfre";
+    private static final String YOUR_PACKAGE_TO_SCAN = Email.class.getPackageName();
     private static final Gson GSON = new Gson();
 
-    public void example() {
+    private static final String JSON = "" +
+            "{\n" +
+            "  \"sender\": \"not-a-valid-sender-value\",\n" +
+            "  \"receiver\": \"not-a-valid-receiver-value\"\n" +
+            "}";
+
+    @Test
+    public void aggregateException() {
         //Showcase start aggregateException
         final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
                 .usingJsonMarshaller(GSON::toJson, GSON::fromJson)
-                .withExceptionIndicatingValidationError(ValidationException.class)
+                .withExceptionIndicatingValidationError(CustomTypeValidationException.class)
                 .build();
         //Showcase end aggregateException
+        String message = null;
+        try {
+            mapMate.deserializeJson(JSON, Email.class);
+        } catch (final AggregatedValidationException e) {
+            e.printStackTrace();
+            message = e.getMessage();
+            assert message.equals("deserialization encountered validation errors. Validation error at 'receiver', " +
+                    "Invalid email address: 'not-a-valid-receiver-value'; " +
+                    "Validation error at 'sender', Invalid email address: 'not-a-valid-sender-value'; ");
+        }
+        assert nonNull(message);
     }
 
+    @Test
     public void mappedExample() {
         //Showcase start mappedException
-        MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
+        final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
                 .usingJsonMarshaller(GSON::toJson, GSON::fromJson)
-                .withExceptionIndicatingValidationError(ValidationException.class,
-                        (exception, propertyPath) -> new ValidationError("This is a custom message we are reporting about "+ exception.getMessage(), propertyPath))
+                .withExceptionIndicatingValidationError(CustomTypeValidationException.class,
+                        (exception, propertyPath) -> new ValidationError("This is a custom message we are reporting about " + exception.getMessage(), propertyPath))
                 .build();
         //Showcase end mappedException
+
+        String message = null;
+        try {
+            mapMate.deserializeJson(JSON, Email.class);
+        } catch (final AggregatedValidationException e) {
+            e.printStackTrace();
+            message = e.getMessage();
+            assert message.equals("deserialization encountered validation errors. Validation error at 'receiver', " +
+                    "This is a custom message we are reporting about Invalid email address: 'not-a-valid-receiver-value'; " +
+                    "Validation error at 'sender', This is a custom message we are reporting about Invalid email address: 'not-a-valid-sender-value'; ");
+        }
+        assert nonNull(message);
     }
 }

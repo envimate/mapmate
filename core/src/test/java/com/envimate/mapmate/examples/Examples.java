@@ -26,8 +26,8 @@ import com.envimate.mapmate.deserialization.validation.AggregatedValidationExcep
 import com.envimate.mapmate.examples.domain.*;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("ALL")
 public final class Examples {
@@ -96,7 +96,7 @@ public final class Examples {
         }
     }
 
-    @Before
+    @BeforeAll
     public void before() {
         this.mapMate = this.injector.getInstance(MapMate.class);
     }

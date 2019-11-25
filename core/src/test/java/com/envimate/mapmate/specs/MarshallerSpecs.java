@@ -21,12 +21,12 @@
 
 package com.envimate.mapmate.specs;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedMarshallerRecipe.urlEncoded;
+import static com.envimate.mapmate.marshalling.MarshallingType.*;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.givenTheExampleMapMateWithAllMarshallers;
 import static com.envimate.mapmate.specs.instances.Instances.*;
-import static com.envimate.mapmate.marshalling.MarshallingType.*;
 
 public final class MarshallerSpecs {
 

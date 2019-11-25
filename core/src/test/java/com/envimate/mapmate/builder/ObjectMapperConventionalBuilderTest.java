@@ -28,8 +28,10 @@ import com.envimate.mapmate.builder.models.conventional.EmailAddress;
 import com.envimate.mapmate.builder.models.conventional.Subject;
 import com.envimate.mapmate.builder.validation.CustomTypeValidationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public final class ObjectMapperConventionalBuilderTest {
 
@@ -58,12 +60,12 @@ public final class ObjectMapperConventionalBuilderTest {
     @Test
     public void testEmailSerialization() {
         final String result = theConventionalMapMateInstanceWithObjectMapper().serializeToJson(EMAIL);
-        Assert.assertEquals(EMAIL_JSON, result);
+        assertThat(result, is(EMAIL_JSON));
     }
 
     @Test
     public void testEmailDeserialization() {
         final Email result = theConventionalMapMateInstanceWithObjectMapper().deserializeJson(EMAIL_JSON, Email.class);
-        Assert.assertEquals(EMAIL, result);
+        assertThat(result, is(EMAIL));
     }
 }

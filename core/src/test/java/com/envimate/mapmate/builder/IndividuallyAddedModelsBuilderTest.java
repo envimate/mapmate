@@ -29,11 +29,12 @@ import com.envimate.mapmate.builder.models.customconvention.Subject;
 import com.envimate.mapmate.builder.validation.CustomTypeValidationException;
 import com.envimate.mapmate.deserialization.Deserializer;
 import com.google.gson.Gson;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.builder.conventional.ConventionalDetectors.conventionalDetector;
 import static com.envimate.mapmate.builder.recipes.manualregistry.ManualRegistry.manuallyRegisteredTypes;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * This test describes 2 ways of adding Custom Primitives and Serialized Objects individually to the MapMate instance.
@@ -129,7 +130,7 @@ public final class IndividuallyAddedModelsBuilderTest {
         final String result = theIndividuallyAddedTypesMapMateConventional()
                 .serializer()
                 .serializeToJson(CONVENTIONAL_EMAIL);
-        Assert.assertEquals(EMAIL_JSON, result);
+        assertThat(result, is(EMAIL_JSON));
     }
 
     @Test
@@ -137,34 +138,32 @@ public final class IndividuallyAddedModelsBuilderTest {
         final com.envimate.mapmate.builder.models.conventional.Email result = theIndividuallyAddedTypesMapMateConventional()
                 .deserializer()
                 .deserializeJson(EMAIL_JSON, com.envimate.mapmate.builder.models.conventional.Email.class);
-        Assert.assertEquals(CONVENTIONAL_EMAIL, result);
+        assertThat(result, is(CONVENTIONAL_EMAIL));
     }
 
     @Test
     public void testEmailSerialization() {
         final String result = theIndividuallyAddedTypesMapMate().serializer().serializeToJson(EMAIL);
-        Assert.assertEquals(EMAIL_JSON, result);
+        assertThat(result, is(EMAIL_JSON));
     }
 
     @Test
     public void testEmailDeserialization() {
         final Deserializer deserializer = theIndividuallyAddedTypesMapMate().deserializer();
-        final Email result = deserializer
-                .deserializeJson(EMAIL_JSON, Email.class);
-        Assert.assertEquals(EMAIL, result);
+        final Email result = deserializer.deserializeJson(EMAIL_JSON, Email.class);
+        assertThat(result, is(EMAIL));
     }
 
     @Test
     public void testEmailSerialization1() {
         final String result = theIndividuallyAddedTypesMapMate1().serializer().serializeToJson(EMAIL);
-        Assert.assertEquals(EMAIL_JSON, result);
+        assertThat(result, is(EMAIL_JSON));
     }
 
     @Test
     public void testEmailDeserialization1() {
         final Deserializer deserializer = theIndividuallyAddedTypesMapMate1().deserializer();
-        final Email result = deserializer
-                .deserializeJson(EMAIL_JSON, Email.class);
-        Assert.assertEquals(EMAIL, result);
+        final Email result = deserializer.deserializeJson(EMAIL_JSON, Email.class);
+        assertThat(result, is(EMAIL));
     }
 }

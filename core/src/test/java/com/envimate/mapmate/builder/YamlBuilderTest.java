@@ -29,8 +29,10 @@ import com.envimate.mapmate.builder.models.conventional.Subject;
 import com.envimate.mapmate.builder.validation.CustomTypeValidationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public final class YamlBuilderTest {
 
@@ -58,12 +60,12 @@ public final class YamlBuilderTest {
     @Test
     public void testEmailSerialization() {
         final String result = theYamlMapMateInstance().serializeToJson(EMAIL);
-        Assert.assertEquals(EMAIL_YAML, result);
+        assertThat(result, is(EMAIL_YAML));
     }
 
     @Test
     public void testEmailDeserialization() {
         final Email result = theYamlMapMateInstance().deserializeJson(EMAIL_YAML, Email.class);
-        Assert.assertEquals(EMAIL, result);
+        assertThat(result, is(EMAIL));
     }
 }

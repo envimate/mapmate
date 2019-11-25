@@ -25,7 +25,7 @@ import com.envimate.mapmate.MapMate;
 import com.envimate.mapmate.domain.valid.AComplexType;
 import com.envimate.mapmate.domain.valid.ANumber;
 import com.envimate.mapmate.domain.valid.AString;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.given;

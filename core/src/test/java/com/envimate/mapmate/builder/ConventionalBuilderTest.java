@@ -31,13 +31,14 @@ import com.envimate.mapmate.builder.models.conventional.Subject;
 import com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.EmailDto;
 import com.envimate.mapmate.builder.validation.CustomTypeValidationException;
 import com.google.gson.Gson;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.Body.body;
 import static com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.EmailAddress.anEmailAddress;
 import static com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.EmailDto.emailDto;
 import static com.envimate.mapmate.builder.models.conventionalwithclassnamefactories.Subject.aSubject;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public final class ConventionalBuilderTest {
 
@@ -89,19 +90,19 @@ public final class ConventionalBuilderTest {
     @Test
     public void testEmailSerialization() {
         final String result = theConventionalMapMateInstance().serializer().serializeToJson(EMAIL);
-        Assert.assertEquals(EMAIL_JSON, result);
+        assertThat(result, is(EMAIL_JSON));
     }
 
     @Test
     public void testEmailDeserialization() {
         final Email result = theConventionalMapMateInstance().deserializer().deserializeJson(EMAIL_JSON, Email.class);
-        Assert.assertEquals(EMAIL, result);
+        assertThat(result, is(EMAIL));
     }
 
     @Test
     public void testEmailSerializationClassNameFactories() {
         final String result = theConventionalMapMateInstance().serializer().serializeToJson(EMAIL_DTO);
-        Assert.assertEquals(EMAIL_JSON, result);
+        assertThat(result, is(EMAIL_JSON));
     }
 
     @Test
@@ -109,19 +110,19 @@ public final class ConventionalBuilderTest {
         final EmailDto result = theConventionalMapMateInstance().deserializer().deserializeJson(
                 EMAIL_JSON, EmailDto.class
         );
-        Assert.assertEquals(EMAIL_DTO, result);
+        assertThat(result, is(EMAIL_DTO));
     }
 
     @Test
     public void testNameDeserialization() {
         final Name result = theConventionalMapMateInstance().deserializer().deserializeJson("bob", Name.class);
-        Assert.assertEquals(new Name("bob"), result);
+        assertThat(result, is(new Name("bob")));
     }
 
     @Test
     public void testGroupTicketDeserialization() {
         final GroupTicketRequest result = theConventionalMapMateInstance().deserializer()
                 .deserializeJson(GROUP_TICKET_REQUEST_JSON, GroupTicketRequest.class);
-        Assert.assertEquals(GROUP_TICKET_REQUEST, result);
+        assertThat(result, is(GROUP_TICKET_REQUEST));
     }
 }

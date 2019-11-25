@@ -31,6 +31,7 @@ import com.envimate.mapmate.builder.models.excluded.Subject;
 import com.envimate.mapmate.builder.validation.CustomTypeValidationException;
 import com.google.gson.Gson;
 import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 

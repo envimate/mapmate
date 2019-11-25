@@ -23,10 +23,11 @@ package com.envimate.mapmate.builder.lowlevel.withPrimitives;
 
 import com.envimate.mapmate.MapMate;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.builder.recipes.marshallers.jackson.JacksonMarshaller.jacksonMarshallerJson;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public final class WithPrimitivesBuilderTest {
     private static final String JSON_WITH_STRING_SERIALIZED_PRIMITIVES = "{" +
@@ -87,7 +88,7 @@ public final class WithPrimitivesBuilderTest {
         final String result = MAP_MATE
                 .serializer()
                 .serializeToJson(SERIALIZED_OBJECT);
-        Assert.assertEquals(JSON_WITH_STRING_SERIALIZED_PRIMITIVES, result);
+        assertThat(result, is(JSON_WITH_STRING_SERIALIZED_PRIMITIVES));
     }
 
     @Test
@@ -95,7 +96,7 @@ public final class WithPrimitivesBuilderTest {
         final SerializedObjectWithPrimitives result = MAP_MATE
                 .deserializer()
                 .deserializeJson(JSON_WITH_STRING_SERIALIZED_PRIMITIVES, SerializedObjectWithPrimitives.class);
-        Assert.assertEquals(SERIALIZED_OBJECT, result);
+        assertThat(result, is(SERIALIZED_OBJECT));
     }
 
     @Test
@@ -103,6 +104,6 @@ public final class WithPrimitivesBuilderTest {
         final SerializedObjectWithPrimitives result = MAP_MATE
                 .deserializer()
                 .deserializeJson(JSON_WITH_SERIALIZED_PRIMITIVES, SerializedObjectWithPrimitives.class);
-        Assert.assertEquals(SERIALIZED_OBJECT, result);
+        assertThat(result, is(SERIALIZED_OBJECT));
     }
 }

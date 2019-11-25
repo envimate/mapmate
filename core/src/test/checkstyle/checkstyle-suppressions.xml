@@ -47,5 +47,8 @@
     <suppress checks="RedundantModifier" files="DefaultPackageScanner.java"/>
     <suppress checks="MethodName|MagicNumber|LineLength|FileLength|MethodLength" files=".*Specs"/>
     <suppress checks="ExplicitInitialization" files=".*"/>
-    <suppress checks="ParameterNumber" files="AComplexTypeWithDifferentCollections" />
+    <suppress checks="ParameterNumber" files="AComplexTypeWithDifferentCollections"/>
+
+    <suppress checks="TrailingComment|Regex|MethodLength"
+              files="PackageScannerExample|MarshallingExamples|DocExample1|DetectorExample|ExceptionExamples"/>
 </suppressions>

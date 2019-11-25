@@ -26,12 +26,13 @@ import com.envimate.mapmate.builder.conventional.ConventionalDetectors;
 import com.envimate.mapmate.builder.models.annotated.Email;
 import com.envimate.mapmate.builder.validation.CustomTypeValidationException;
 import com.google.gson.Gson;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.builder.models.annotated.Body.body;
 import static com.envimate.mapmate.builder.models.annotated.EmailAddress.emailAddress;
 import static com.envimate.mapmate.builder.models.annotated.Subject.subject;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public final class AnnotationBuilderTest {
 
@@ -61,12 +62,12 @@ public final class AnnotationBuilderTest {
     @Test
     public void testEmailSerialization() {
         final String result = theAnnotationBasedMapMateInstance().serializer().serializeToJson(EMAIL);
-        Assert.assertEquals(EMAIL_JSON, result);
+        assertThat(result, is(EMAIL_JSON));
     }
 
     @Test
     public void testEmailDeserialization() {
         final Email result = theAnnotationBasedMapMateInstance().deserializer().deserializeJson(EMAIL_JSON, Email.class);
-        Assert.assertEquals(EMAIL, result);
+        assertThat(result, is(EMAIL));
     }
 }

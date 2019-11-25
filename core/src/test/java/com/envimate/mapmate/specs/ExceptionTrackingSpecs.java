@@ -22,10 +22,10 @@
 package com.envimate.mapmate.specs;
 
 import com.envimate.mapmate.domain.valid.AComplexType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static com.envimate.mapmate.specs.givenwhenthen.Given.givenTheExampleMapMateWithAllMarshallers;
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
+import static com.envimate.mapmate.specs.givenwhenthen.Given.givenTheExampleMapMateWithAllMarshallers;
 
 public final class ExceptionTrackingSpecs {
 

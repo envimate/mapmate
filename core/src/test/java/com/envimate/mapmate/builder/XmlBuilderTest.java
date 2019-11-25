@@ -29,10 +29,12 @@ import com.envimate.mapmate.builder.models.conventional.Subject;
 import com.envimate.mapmate.marshalling.Unmarshaller;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @SuppressWarnings("unchecked")
 public final class XmlBuilderTest {
@@ -79,12 +81,12 @@ public final class XmlBuilderTest {
     @Test
     public void testEmailSerialization() {
         final String result = theXmlMapMateInstance().serializeToJson(EMAIL);
-        Assert.assertEquals(EMAIL_XML, result);
+        assertThat(result, is(EMAIL_XML));
     }
 
     @Test
     public void testEmailDeserialization() {
         final Email result = theXmlMapMateInstance().deserializeJson(EMAIL_XML, Email.class);
-        Assert.assertEquals(EMAIL, result);
+        assertThat(result, is(EMAIL));
     }
 }

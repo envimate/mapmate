@@ -54,7 +54,6 @@ public final class DefaultPackageScanner implements PackageScanner {
                                                        final List<String> blacklistPackages,
                                                        final List<Class<?>> blacklistClasses) {
         validateNotNullOrEmpty(whitelistPackages, "whitelistPackages");
-
         validateNotNull(whitelistClasses, "whitelistClasses");
         validateNotNull(blacklistPackages, "blacklistPackages");
         validateNotNull(blacklistClasses, "blacklistClasses");

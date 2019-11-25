@@ -39,9 +39,10 @@ of the chosen format, hence needs to be configured with [(Un)marshaller](Concept
 
 If you are following the [default conventions](UserGuide.md#default-conventions-explained), and have chosen JSON as format, along with Gson as marshaller, here is the minimal configuration you need to get access to `serializer` and `deserializer` 
 
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/QuickStartExamples.java instance)-->
 ```java
-final MapMate mapMate = MapMate.aMapMate(THE_PACKAGE_NAME_TO_SCAN_RECURSIVELY)
-        .usingJsonMarshallers(new Gson()::toJson, new Gson()::fromJson)
+final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
+        .usingJsonMarshaller(new Gson()::toJson, new Gson()::fromJson)
         .build();
 ```  
 
@@ -49,17 +50,18 @@ Read the [User Guide](UserGuide.md#configuring-mapmate-instance) for detailed de
 
 #### Serialization
 
-now serializing the object
+Now serializing the object
 
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/QuickStartExamples.java serialization)-->
 ```java
-Email EMAIL = Email.deserialize(
-            EmailAddress.fromStringValue("sender@example.com"),
-            EmailAddress.fromStringValue("receiver@example.com"),
-            Subject.fromStringValue("Hello"),
-            Body.fromStringValue("Hello World!!!")
-    );
+final Email email = Email.deserialize(
+        EmailAddress.fromStringValue("sender@example.com"),
+        EmailAddress.fromStringValue("receiver@example.com"),
+        Subject.fromStringValue("Hello"),
+        Body.fromStringValue("Hello World!!!")
+);
 
-mapMate.serializeToJson(EMAIL);
+final String json = mapMate.serializeToJson(email);
 ```
 
 will produce
@@ -77,8 +79,9 @@ will produce
 
 Using same `mapMate` instance
 
+<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/QuickStartExamples.java deserialization)-->
 ```java
-mapMate.deserializeJson(EMAIL_JSON, Email.class);
+final Email deserializedEmail = mapMate.deserializeJson(json, Email.class);
 ```
 
-Will produce an object equal to `EMAIL`.
+will produce an object equal to `email`.

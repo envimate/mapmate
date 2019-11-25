@@ -24,7 +24,7 @@ package com.envimate.mapmate.docs;
 import com.envimate.mapmate.MapMate;
 import com.envimate.mapmate.builder.conventional.ConventionalDetectors;
 import com.google.gson.Gson;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public final class DetectorExample {
 

@@ -28,10 +28,11 @@ import com.envimate.mapmate.builder.models.customconvention.EmailAddress;
 import com.envimate.mapmate.builder.models.customconvention.Subject;
 import com.envimate.mapmate.builder.validation.CustomTypeValidationException;
 import com.google.gson.Gson;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.builder.conventional.ConventionalDetectors.conventionalDetector;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public final class CustomConventionalBuilderTest {
 
@@ -64,12 +65,12 @@ public final class CustomConventionalBuilderTest {
     @Test
     public void testEmailSerialization() {
         final String result = theCustomConventionalMapMateInstance().serializer().serializeToJson(EMAIL);
-        Assert.assertEquals(EMAIL_JSON, result);
+        assertThat(result, is(EMAIL_JSON));
     }
 
     @Test
     public void testEmailDeserialization() {
         final Email result = theCustomConventionalMapMateInstance().deserializer().deserializeJson(EMAIL_JSON, Email.class);
-        Assert.assertEquals(EMAIL, result);
+        assertThat(result, is(EMAIL));
     }
 }
