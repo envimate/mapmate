@@ -74,9 +74,9 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>com.envimate</groupId>
-                <artifactId>documaid</artifactId>
-                <version>1.2.6</version>
+                <groupId>de.quantummaid</groupId>
+                <artifactId>dokumaid</artifactId>
+                <version>1.0</version>
                 <inherited>false</inherited>
                 <executions>
                     <execution>
