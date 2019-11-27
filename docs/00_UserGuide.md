@@ -19,14 +19,13 @@ of the chosen format, hence needs to be configured with [(Un)marshaller](Concept
 
 If you are following the [default conventions](UserGuide.md#default-conventions-explained) and have chosen JSON as format along with Gson as marshaller, here is a minimal configuration: 
 
-<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/UsageExamples.java example1)-->
+<!---[CodeSnippet](example1)-->
 ```java
 final Gson gson = new Gson();
 final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
         .usingMarshaller(MarshallingType.marshallingType("YOUR_CUSTOM_FORMAT"), gson::toJson, gson::fromJson)
         .build();
 ```
-
 Below you can find detailed information about using this builder and configuring MapMate. 
 
 ### Beyond MapMate

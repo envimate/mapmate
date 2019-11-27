@@ -11,7 +11,7 @@ To enable reporting of aggregated messages, MapMate needs to be made aware of th
 class it needs to recognize as validation error). Assuming one has a single ValidationException somewhere in the domain
 that is thrown in the factory methods, in case the input is not valid, the MapMate configuration looks like:
 
-<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/ExceptionExamples.java aggregateException)-->
+<!---[CodeSnippet](aggregateException)-->
 ```java
 final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
         .usingJsonMarshaller(GSON::toJson, GSON::fromJson)
@@ -68,7 +68,7 @@ You can further customize the message of this error by giving in a lambda that m
 instance of a 
 [ValidationError](../core/src/main/java/com/envimate/mapmate/deserialization/validation/ValidationError.java):
 
-<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/ExceptionExamples.java mappedException)-->
+<!---[CodeSnippet](mappedException)-->
 ```java
 final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
         .usingJsonMarshaller(GSON::toJson, GSON::fromJson)

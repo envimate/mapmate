@@ -39,12 +39,12 @@ of the chosen format, hence needs to be configured with [(Un)marshaller](Concept
 
 If you are following the [default conventions](UserGuide.md#default-conventions-explained), and have chosen JSON as format, along with Gson as marshaller, here is the minimal configuration you need to get access to `serializer` and `deserializer` 
 
-<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/QuickStartExamples.java instance)-->
+<!---[CodeSnippet](instance)-->
 ```java
 final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
         .usingJsonMarshaller(new Gson()::toJson, new Gson()::fromJson)
         .build();
-```  
+```
 
 Read the [User Guide](UserGuide.md#configuring-mapmate-instance) for detailed description on how to further configure the MapMate instance.
 
@@ -52,7 +52,7 @@ Read the [User Guide](UserGuide.md#configuring-mapmate-instance) for detailed de
 
 Now serializing the object
 
-<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/QuickStartExamples.java serialization)-->
+<!---[CodeSnippet](serialization)-->
 ```java
 final Email email = Email.deserialize(
         EmailAddress.fromStringValue("sender@example.com"),
@@ -79,7 +79,7 @@ will produce
 
 Using same `mapMate` instance
 
-<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/QuickStartExamples.java deserialization)-->
+<!---[CodeSnippet](deserialization)-->
 ```java
 final Email deserializedEmail = mapMate.deserializeJson(json, Email.class);
 ```

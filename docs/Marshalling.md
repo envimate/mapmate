@@ -24,7 +24,7 @@ MapMate's Json marshaller can be accessed by integrating the following dependenc
 ```
 
 You can tell you MapMate instance to use it like this:
-<!---[CodeSnippet](integrations/json/src/test/java/com/envimate/mapmate/json/JsonMarshallerExample.java json)-->
+<!---[CodeSnippet](json)-->
 ```java
 final MapMate mapMate = MapMate.aMapMate(PACKAGE_TO_SCAN)
         .usingRecipe(JsonRecipe.jsonMarshaller())
@@ -43,7 +43,7 @@ MapMate's XML marshaller can be accessed by integrating the following dependency
 ```
 
 You can tell you MapMate instance to use it like this:
-<!---[CodeSnippet](integrations/xml/src/test/java/com/envimate/mapmate/xml/XmlMarshallerExample.java xml)-->
+<!---[CodeSnippet](xml)-->
 ```java
 final MapMate mapMate = MapMate.aMapMate(PACKAGE_TO_SCAN)
         .usingRecipe(XmlRecipe.xmlMarshaller())
@@ -61,7 +61,7 @@ MapMate's YAML marshaller can be accessed by integrating the following dependenc
 ```
 You can tell you MapMate instance to use it like this:
 
-<!---[CodeSnippet](integrations/yaml/src/test/java/com/envimate/mapmate/yaml/YamlMarshallerExample.java yaml)-->
+<!---[CodeSnippet](yaml)-->
 ```java
 final MapMate mapMate = MapMate.aMapMate(PACKAGE_TO_SCAN)
         .usingRecipe(yamlMarshaller())
@@ -72,18 +72,18 @@ final MapMate mapMate = MapMate.aMapMate(PACKAGE_TO_SCAN)
 ### application/x-www-form-urlencoded
 MapMate's url encoded marshaller is shipped with the `core` package and therefore does not need an additional dependency.
 You can add it to your MapMate configuration like this:
-<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/MarshallingExamples.java urlencoded)-->
+<!---[CodeSnippet](urlencoded)-->
 ```java
 final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
         .usingRecipe(UrlEncodedMarshallerRecipe.urlEncodedMarshaller())
         .build();
 ```
+
 In order to use it, you need to use the corresponding `MarshallingType`:
-<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/MarshallingExamples.java urlencodedusage)-->
+<!---[CodeSnippet](urlencodedusage)-->
 ```java
 final String urlEncoded = mapMate.serializeTo(object, UrlEncodedMarshallerRecipe.urlEncoded());
 ```
-
 
 ## Registering your own marshaller
 If these marshallers do not fit your needs, you can easily provide your own.
@@ -123,7 +123,7 @@ libraries you use.
 ### JSON with GSON
 
 Assuming you have a configured instance of `Gson` class, adding it as a JSON Marshaller for MapMate looks like:
-<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/MarshallingExamples.java jsonWithGson)-->
+<!---[CodeSnippet](jsonWithGson)-->
 ```java
 final Gson gson = new Gson(); // can be further configured depending on your needs.
 final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
@@ -132,7 +132,7 @@ final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
 ```
 
 ### JSON with ObjectMapper
-<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/MarshallingExamples.java jsonWithObjectMapper)-->
+<!---[CodeSnippet](jsonWithObjectMapper)-->
 ```java
 final ObjectMapper objectMapper = new ObjectMapper();
 final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
@@ -141,11 +141,10 @@ final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
 ```
 
 
-
 Checkout [ObjectMapperConventionalBuilderTest](../core/src/test/java/com/envimate/mapmate/builder/ObjectMapperConventionalBuilderTest.java) for an example.
 
 ### XML with X-Stream
-<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/MarshallingExamples.java xmlWithXStream)-->
+<!---[CodeSnippet](xmlWithXStream)-->
 ```java
 final XStream xStream = new XStream(new DomDriver());
 xStream.alias("root", Map.class);
@@ -176,7 +175,7 @@ Note: If you wish to marshall in/from XML, don't forget to add the appropriate d
 
 ### Yaml with ObjectMapper
 
-<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/MarshallingExamples.java yamlWithObjectMapper)-->
+<!---[CodeSnippet](yamlWithObjectMapper)-->
 ```java
 final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
@@ -206,7 +205,7 @@ Using the
 [JacksonMarshaller](../core/src/main/java/com/envimate/mapmate/builder/recipes/marshallers/jackson/JacksonMarshaller.java)
 Recipe is straight forward:
 
-<!---[CodeSnippet](core/src/test/java/com/envimate/mapmate/docs/MarshallingExamples.java jacksonWithRecipe)-->
+<!---[CodeSnippet](jacksonWithRecipe)-->
 ```java
 final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
         //...
@@ -214,5 +213,6 @@ final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
         //...
         .build();
 ```
+
 You can pass a new instance of ObjectMapper like in the example above, pass your applications instance or pass an even
 further customized instance.
