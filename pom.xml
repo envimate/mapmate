@@ -71,6 +71,7 @@
         <developerConnection>scm:git:git@github.com:envimate/mapmate.git</developerConnection>
     </scm>
 
+    <!--
     <build>
         <plugins>
             <plugin>
@@ -98,5 +99,6 @@
             </plugin>
         </plugins>
     </build>
+    -->
 
 </project>

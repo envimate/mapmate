@@ -29,6 +29,7 @@ You can tell you MapMate instance to use it like this:
 final MapMate mapMate = MapMate.aMapMate(PACKAGE_TO_SCAN)
         .usingRecipe(JsonRecipe.jsonMarshaller())
         .build();
+
 ```
 
 ### XML
@@ -176,13 +177,7 @@ Note: If you wish to marshall in/from XML, don't forget to add the appropriate d
 ### Yaml with ObjectMapper
 
 <!---[CodeSnippet](yamlWithObjectMapper)-->
-```java
-final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
-final MapMate mapMate = MapMate.aMapMate(YOUR_PACKAGE_TO_SCAN)
-        .usingYamlMarshaller(objectMapper::writeValueAsString, objectMapper::readValue)
-        .build();
-```
 
 Note: don't forget to add the appropriate dependency to use the YAMLFactory with the ObjectMapper.
 ```xml
