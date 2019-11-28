@@ -22,6 +22,7 @@
 package com.envimate.mapmate.builder.detection.customprimitive.deserialization;
 
 import com.envimate.mapmate.builder.detection.customprimitive.CachedReflectionType;
+import com.envimate.mapmate.builder.detection.customprimitive.mapping.CustomPrimitiveMappings;
 import com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -49,35 +50,35 @@ import static java.util.stream.Collectors.toList;
 public final class StaticMethodBasedCustomPrimitiveDeserializationDetector implements CustomPrimitiveDeserializationDetector {
     private static final Pattern MATCH_ALL = compile(".*");
 
+    private final CustomPrimitiveMappings mappings;
     private final Pattern deserializationMethodName;
 
-    public static CustomPrimitiveDeserializationDetector staticMethodBased() {
-        return new StaticMethodBasedCustomPrimitiveDeserializationDetector(MATCH_ALL);
+    public static CustomPrimitiveDeserializationDetector staticMethodBased(final CustomPrimitiveMappings mappings) {
+        return new StaticMethodBasedCustomPrimitiveDeserializationDetector(mappings, MATCH_ALL);
     }
 
-    public static CustomPrimitiveDeserializationDetector staticMethodBased(final String pattern) {
+    public static CustomPrimitiveDeserializationDetector staticMethodBased(final CustomPrimitiveMappings mappings, final String pattern) {
+        validateNotNull(mappings, "mappings");
         validateNotNull(pattern, "pattern");
-        return new StaticMethodBasedCustomPrimitiveDeserializationDetector(compile(pattern));
+        return new StaticMethodBasedCustomPrimitiveDeserializationDetector(mappings, compile(pattern));
     }
 
     @Override
     public Optional<CustomPrimitiveDeserializer> detect(final CachedReflectionType type) {
-        return findDeserializerMethod(type, this.deserializationMethodName)
-                .map(method -> createDeserializer(type.type(), method));
+        return findDeserializerMethod(type).map(method -> createDeserializer(type.type(), method));
     }
 
-    private static Optional<Method> findDeserializerMethod(final CachedReflectionType type,
-                                                           final Pattern methodNamePattern) {
+    private Optional<Method> findDeserializerMethod(final CachedReflectionType type) {
         final List<Method> deserializerMethodCandidates = stream(type.methods())
                 .filter(method -> isStatic(method.getModifiers()))
                 .filter(method -> isPublic(method.getModifiers()))
                 .filter(method -> method.getReturnType().equals(type.type()))
                 .filter(method -> method.getParameterCount() == 1)
-                .filter(method -> method.getParameterTypes()[0].equals(String.class))
+                .filter(method -> this.mappings.isPrimitiveType(method.getParameterTypes()[0]))
                 .collect(toList());
 
         final List<Method> methodsMatchingName = deserializerMethodCandidates.stream()
-                .filter(method -> methodNamePattern.matcher(method.getName()).matches())
+                .filter(method -> this.deserializationMethodName.matcher(method.getName()).matches())
                 .collect(toList());
         if (methodsMatchingName.size() > 0) {
             return of(methodsMatchingName.get(0));

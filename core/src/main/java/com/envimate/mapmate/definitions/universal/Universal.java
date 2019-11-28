@@ -31,9 +31,9 @@ import static com.envimate.mapmate.definitions.universal.UniversalPrimitive.univ
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 
-public interface UniversalType {
+public interface Universal {
 
-    static String describe(final Class<? extends UniversalType> type) {
+    static String describe(final Class<? extends Universal> type) {
         if (type == UniversalObject.class) {
             return "object";
         }
@@ -50,12 +50,18 @@ public interface UniversalType {
     }
 
     @SuppressWarnings("unchecked")
-    static UniversalType fromNativeJava(final Object object) {
+    static Universal fromNativeJava(final Object object) {
         if (isNull(object)) {
             return universalNull();
         }
         if (object instanceof String) {
-            return universalPrimitive((String) object);
+            return universalPrimitive(object);
+        }
+        if (object instanceof Double) {
+            return universalPrimitive(object);
+        }
+        if(object instanceof Boolean) {
+            return universalPrimitive(object);
         }
         if (object instanceof List) {
             return universalCollectionFromNativeList((List<Object>) object);

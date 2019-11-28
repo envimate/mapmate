@@ -22,7 +22,7 @@
 package com.envimate.mapmate.injector;
 
 import com.envimate.mapmate.definitions.types.FullType;
-import com.envimate.mapmate.definitions.universal.UniversalType;
+import com.envimate.mapmate.definitions.universal.Universal;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -75,7 +75,7 @@ public final class Injector {
         return this;
     }
 
-    public Optional<UniversalType> getUniversalInjectionFor(final String position) {
+    public Optional<Universal> getUniversalInjectionFor(final String position) {
         final PropertyName propertyName = propertyName(position);
         return this.universalInjections.stream()
                 .filter(injection -> injection.propertyName().equals(propertyName))

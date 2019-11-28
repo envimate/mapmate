@@ -22,5 +22,9 @@
 package com.envimate.mapmate.deserialization.deserializers.customprimitives;
 
 public interface CustomPrimitiveDeserializer {
-    Object deserialize(String value) throws Exception;
+    default Class<?> baseType() {
+        return String.class;
+    }
+
+    Object deserialize(Object value) throws Exception;
 }

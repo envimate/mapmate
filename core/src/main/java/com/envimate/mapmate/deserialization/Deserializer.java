@@ -21,9 +21,10 @@
 
 package com.envimate.mapmate.deserialization;
 
+import com.envimate.mapmate.builder.detection.customprimitive.mapping.CustomPrimitiveMappings;
 import com.envimate.mapmate.definitions.Definitions;
 import com.envimate.mapmate.definitions.universal.UniversalObject;
-import com.envimate.mapmate.definitions.universal.UniversalType;
+import com.envimate.mapmate.definitions.universal.Universal;
 import com.envimate.mapmate.deserialization.validation.ExceptionTracker;
 import com.envimate.mapmate.deserialization.validation.ValidationErrorsMapping;
 import com.envimate.mapmate.deserialization.validation.ValidationMappings;
@@ -62,17 +63,19 @@ public final class Deserializer {
 
     public static Deserializer theDeserializer(final MarshallerRegistry<Unmarshaller> unmarshallerRegistry,
                                                final Definitions definitions,
+                                               final CustomPrimitiveMappings customPrimitiveMappings,
                                                final ValidationMappings exceptionMapping,
                                                final ValidationErrorsMapping onValidationErrors,
                                                final InjectorFactory injectorFactory) {
         validateNotNull(unmarshallerRegistry, "unmarshallerRegistry");
         validateNotNull(definitions, "definitions");
+        validateNotNull(customPrimitiveMappings, "customPrimitiveMappings");
         validateNotNull(exceptionMapping, "validationMappings");
         validateNotNull(onValidationErrors, "onValidationErrors");
         validateNotNull(injectorFactory, "injectorFactory");
 
         final Unmarshallers unmarshallers = unmarshallers(unmarshallerRegistry, definitions);
-        final InternalDeserializer internalDeserializer = internalDeserializer(definitions, onValidationErrors);
+        final InternalDeserializer internalDeserializer = internalDeserializer(definitions, customPrimitiveMappings, onValidationErrors);
         return new Deserializer(definitions, exceptionMapping, unmarshallers, internalDeserializer, injectorFactory);
     }
 
@@ -115,11 +118,11 @@ public final class Deserializer {
                              final MarshallingType marshallingType,
                              final InjectorLambda injectorProducer) {
         validateNotNull(input, "input");
-        final UniversalType unmarshalled = this.unmarshallers.unmarshal(input, fullType(targetType), marshallingType);
+        final Universal unmarshalled = this.unmarshallers.unmarshal(input, fullType(targetType), marshallingType);
         return deserialize(unmarshalled, targetType, injectorProducer);
     }
 
-    private <T> T deserialize(final UniversalType input,
+    private <T> T deserialize(final Universal input,
                               final Class<T> targetType,
                               final InjectorLambda injectorProducer) {
         validateNotNull(input, "input");

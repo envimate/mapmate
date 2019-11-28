@@ -26,11 +26,12 @@ import com.envimate.mapmate.MapMate;
 import static com.envimate.mapmate.yaml.YamlRecipe.yamlMarshaller;
 
 public final class YamlMarshallerExample {
-    private static final String PACKAGE_TO_SCAN = "fgerwgfr"; // TODO
+    private static final String PACKAGE_TO_SCAN = "fgerwgfr";
+    // TODO
 
     public void yamlMarshallerExample() {
         //Showcase start yaml
-        final MapMate mapMate = MapMate.aMapMate(PACKAGE_TO_SCAN)
+        MapMate.aMapMate(PACKAGE_TO_SCAN)
                 .usingRecipe(yamlMarshaller())
                 .build();
         //Showcase end yaml

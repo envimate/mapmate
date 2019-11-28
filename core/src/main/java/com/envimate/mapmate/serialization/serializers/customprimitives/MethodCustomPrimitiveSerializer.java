@@ -41,7 +41,7 @@ public final class MethodCustomPrimitiveSerializer implements CustomPrimitiveSer
     private final Method serializationMethod;
 
     public static CustomPrimitiveSerializer createSerializer(final Class<?> type,
-                                                                final Method serializationMethod) {
+                                                             final Method serializationMethod) {
         final int serializationMethodModifiers = serializationMethod.getModifiers();
         if (!Modifier.isPublic(serializationMethodModifiers)) {
             throw incompatibleCustomPrimitiveException(
@@ -72,20 +72,13 @@ public final class MethodCustomPrimitiveSerializer implements CustomPrimitiveSer
                     type
             );
         }
-        if (serializationMethod.getReturnType() != String.class) {
-            throw incompatibleCustomPrimitiveException(
-                    "The serialization method %s configured for the custom primitive of type %s must return a String",
-                    serializationMethod,
-                    type
-            );
-        }
         return new MethodCustomPrimitiveSerializer(serializationMethod);
     }
 
     @Override
-    public String serialize(final Object object) {
+    public Object serialize(final Object object) {
         try {
-            return (String) this.serializationMethod.invoke(object);
+            return this.serializationMethod.invoke(object);
         } catch (final IllegalAccessException e) {
             throw customPrimitiveSerializationMethodCallException(format(
                     "This should never happen. Called serialization method %s for custom type %s on instance %s",

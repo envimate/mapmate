@@ -22,6 +22,7 @@
 package com.envimate.mapmate.builder.detection.customprimitive.serialization;
 
 import com.envimate.mapmate.builder.detection.customprimitive.CachedReflectionType;
+import com.envimate.mapmate.builder.detection.customprimitive.mapping.CustomPrimitiveMappings;
 import com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -42,28 +43,30 @@ import static java.util.regex.Pattern.compile;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MethodNameBasedCustomPrimitiveSerializationDetector implements CustomPrimitiveSerializationDetector {
+    private final CustomPrimitiveMappings mappings;
     private final Pattern serializationMethodName;
 
-    public static CustomPrimitiveSerializationDetector methodNameBased(final String pattern) {
+    public static CustomPrimitiveSerializationDetector methodNameBased(final CustomPrimitiveMappings mappings,
+                                                                       final String pattern) {
+        validateNotNull(mappings, "mappings");
         validateNotNull(pattern, "pattern");
-        return new MethodNameBasedCustomPrimitiveSerializationDetector(compile(pattern));
+        return new MethodNameBasedCustomPrimitiveSerializationDetector(mappings, compile(pattern));
     }
 
     @Override
     public Optional<CustomPrimitiveSerializer> detect(final CachedReflectionType type) {
-        return findSerializerMethod(type.methods(), this.serializationMethodName)
+        return findSerializerMethod(type.methods())
                 .map(method -> createSerializer(type.type(), method));
     }
 
-    private static Optional<Method> findSerializerMethod(final Method[] methods,
-                                                         final Pattern methodNamePattern) {
+    private Optional<Method> findSerializerMethod(final Method[] methods) {
         return stream(methods)
                 .filter(method -> !isStatic(method.getModifiers()))
                 .filter(method -> !isAbstract(method.getModifiers()))
                 .filter(method -> isPublic(method.getModifiers()))
-                .filter(method -> method.getReturnType().equals(String.class))
+                .filter(method -> this.mappings.isPrimitiveType(method.getReturnType()))
                 .filter(method -> method.getParameterCount() == 0)
-                .filter(method -> methodNamePattern.matcher(method.getName()).matches())
+                .filter(method -> this.serializationMethodName.matcher(method.getName()).matches())
                 .findFirst();
     }
 }

@@ -163,10 +163,9 @@ public class UsageExamples {
     @Test
     public void showBuilder() {
         //Showcase start withoutPackageScanning
-        final MapMate mapMate = MapMate.aMapMate()
+        MapMate.aMapMate()
                 /* further configuration */
                 .build();
         //Showcase end withoutPackageScanning
-        // TODO
     }
 }

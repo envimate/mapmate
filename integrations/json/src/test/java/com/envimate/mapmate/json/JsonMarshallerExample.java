@@ -25,12 +25,13 @@ import com.envimate.mapmate.MapMate;
 import org.junit.jupiter.api.Test;
 
 public final class JsonMarshallerExample {
-    private static final String PACKAGE_TO_SCAN = "fgerwgfr"; // TODO
+    private static final String PACKAGE_TO_SCAN = "fgerwgfr";
 
+    // TODO
     @Test
     public void jsonMarshallerExample() {
         //Showcase start json
-        final MapMate mapMate = MapMate.aMapMate(PACKAGE_TO_SCAN)
+        MapMate.aMapMate(PACKAGE_TO_SCAN)
                 .usingRecipe(JsonRecipe.jsonMarshaller())
                 .build();
         //Showcase end json

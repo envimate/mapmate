@@ -42,6 +42,7 @@ import com.envimate.mapmate.serialization.Serializer;
 import java.util.*;
 
 import static com.envimate.mapmate.MapMate.mapMate;
+import static com.envimate.mapmate.builder.conventional.ConventionalDefinitionFactories.CUSTOM_PRIMITIVE_MAPPINGS;
 import static com.envimate.mapmate.builder.conventional.ConventionalDetectors.conventionalDetectorWithAnnotations;
 import static com.envimate.mapmate.builder.scanning.DefaultPackageScanner.defaultPackageScanner;
 import static com.envimate.mapmate.builder.scanning.PackageScannerRecipe.packageScannerRecipe;
@@ -198,12 +199,13 @@ public final class MapMateBuilder {
         final Definitions definitions = definitionsBuilder.build();
 
         final MarshallerRegistry<Marshaller> marshallerRegistry = marshallerRegistry(this.marshallerMap);
-        final Serializer serializer = theSerializer(marshallerRegistry, definitions);
+        final Serializer serializer = theSerializer(marshallerRegistry, definitions, CUSTOM_PRIMITIVE_MAPPINGS);
 
         final MarshallerRegistry<Unmarshaller> unmarshallerRegistry = marshallerRegistry(this.unmarshallerMap);
         final Deserializer deserializer = theDeserializer(
                 unmarshallerRegistry,
                 definitions,
+                CUSTOM_PRIMITIVE_MAPPINGS,
                 this.validationMappings,
                 this.validationErrorsMapping,
                 this.injectorFactory

@@ -26,17 +26,21 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class UniversalNull implements Universal {
+public final class UniversalString implements UniversalPrimitive {
+    private final String value;
 
-    public static UniversalNull universalNull() {
-        return new UniversalNull();
+    public static UniversalString universalString(final String value) {
+        validateNotNull(value, "value");
+        return new UniversalString(value);
     }
 
     @Override
     public Object toNativeJava() {
-        return null;
+        return this.value;
     }
 }

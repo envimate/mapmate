@@ -21,30 +21,24 @@
 
 package com.envimate.mapmate.definitions.universal;
 
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
-
+import static com.envimate.mapmate.definitions.universal.UniversalBoolean.universalBoolean;
+import static com.envimate.mapmate.definitions.universal.UniversalNumber.universalNumber;
+import static com.envimate.mapmate.definitions.universal.UniversalString.universalString;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
-@ToString
-@EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class UniversalPrimitive implements UniversalType {
-    private final String value;
+public interface UniversalPrimitive extends Universal {
 
-    public static UniversalPrimitive universalPrimitive(final String value) {
+    static UniversalPrimitive universalPrimitive(final Object value) {
         validateNotNull(value, "value");
-        return new UniversalPrimitive(value);
-    }
-
-    public String stringValue() {
-        return this.value;
-    }
-
-    @Override
-    public Object toNativeJava() {
-        return stringValue();
+        if (value instanceof String) {
+            return universalString((String) value);
+        }
+        if (value instanceof Double) {
+            return universalNumber((Double) value);
+        }
+        if(value instanceof Boolean) {
+            return universalBoolean((Boolean) value);
+        }
+        throw new UnsupportedOperationException();
     }
 }

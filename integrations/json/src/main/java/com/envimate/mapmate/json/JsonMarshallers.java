@@ -28,6 +28,9 @@ import com.google.gson.GsonBuilder;
 
 public final class JsonMarshallers {
 
+    private JsonMarshallers() {
+    }
+
     public static Marshaller jsonMarshaller() {
         final Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson::toJson;

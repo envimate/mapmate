@@ -29,14 +29,15 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class UniversalNull implements Universal {
+public final class UniversalBoolean implements UniversalPrimitive {
+    private final boolean value;
 
-    public static UniversalNull universalNull() {
-        return new UniversalNull();
+    public static UniversalBoolean universalBoolean(final boolean value) {
+        return new UniversalBoolean(value);
     }
 
     @Override
     public Object toNativeJava() {
-        return null;
+        return value;
     }
 }

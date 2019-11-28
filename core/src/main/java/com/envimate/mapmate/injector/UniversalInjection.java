@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.injector;
 
-import com.envimate.mapmate.definitions.universal.UniversalType;
+import com.envimate.mapmate.definitions.universal.Universal;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +34,9 @@ import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UniversalInjection {
     private final PropertyName propertyName;
-    private final UniversalType value;
+    private final Universal value;
 
-    static UniversalInjection universalInjection(final PropertyName propertyName, final UniversalType value) {
+    static UniversalInjection universalInjection(final PropertyName propertyName, final Universal value) {
         validateNotNull(propertyName, "propertyName");
         validateNotNull(value, "value");
         return new UniversalInjection(propertyName, value);
@@ -46,7 +46,7 @@ public final class UniversalInjection {
         return this.propertyName;
     }
 
-    public UniversalType value() {
+    public Universal value() {
         return this.value;
     }
 }

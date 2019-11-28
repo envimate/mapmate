@@ -19,24 +19,22 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.universal;
+package com.envimate.mapmate.domain.valid;
 
-import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 @ToString
 @EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class UniversalNull implements Universal {
+public final class APrimitiveInteger {
+    private final int value;
 
-    public static UniversalNull universalNull() {
-        return new UniversalNull();
+    public APrimitiveInteger(final int value) {
+        this.value = value;
     }
 
-    @Override
-    public Object toNativeJava() {
-        return null;
+    public int stringValue() {
+        return this.value;
     }
 }
+

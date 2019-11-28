@@ -35,30 +35,30 @@ import static java.util.stream.Collectors.toList;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class UniversalCollection implements UniversalType {
-    private final List<UniversalType> list;
+public final class UniversalCollection implements Universal {
+    private final List<Universal> list;
 
     public static UniversalCollection universalCollectionFromNativeList(final List<Object> list) {
         validateNotNull(list, "list");
-        final List<UniversalType> mappedList = list.stream()
-                .map(UniversalType::fromNativeJava)
+        final List<Universal> mappedList = list.stream()
+                .map(Universal::fromNativeJava)
                 .collect(toList());
         return universalCollection(mappedList);
     }
 
-    public static UniversalCollection universalCollection(final List<UniversalType> list) {
+    public static UniversalCollection universalCollection(final List<Universal> list) {
         validateNotNull(list, "list");
         return new UniversalCollection(list);
     }
 
-    public List<UniversalType> content() {
+    public List<Universal> content() {
         return unmodifiableList(this.list);
     }
 
     @Override
     public Object toNativeJava() {
         return this.list.stream()
-                .map(UniversalType::toNativeJava)
+                .map(Universal::toNativeJava)
                 .collect(toList());
     }
 }

@@ -22,5 +22,5 @@
 package com.envimate.mapmate.serialization.serializers.customprimitives;
 
 public interface CustomPrimitiveSerializer {
-    String serialize(Object object);
+    Object serialize(Object object);
 }

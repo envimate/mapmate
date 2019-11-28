@@ -21,11 +21,13 @@
 
 package com.envimate.mapmate.serialization;
 
+import com.envimate.mapmate.builder.detection.customprimitive.mapping.CustomPrimitiveMappings;
 import com.envimate.mapmate.definitions.*;
 import com.envimate.mapmate.definitions.types.FullType;
 import com.envimate.mapmate.definitions.universal.UniversalCollection;
 import com.envimate.mapmate.definitions.universal.UniversalObject;
-import com.envimate.mapmate.definitions.universal.UniversalType;
+import com.envimate.mapmate.definitions.universal.Universal;
+import com.envimate.mapmate.definitions.universal.UniversalPrimitive;
 import com.envimate.mapmate.marshalling.Marshaller;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
@@ -46,7 +48,6 @@ import static com.envimate.mapmate.definitions.types.FullType.typeOfObject;
 import static com.envimate.mapmate.definitions.universal.UniversalCollection.universalCollection;
 import static com.envimate.mapmate.definitions.universal.UniversalNull.universalNull;
 import static com.envimate.mapmate.definitions.universal.UniversalObject.universalObject;
-import static com.envimate.mapmate.definitions.universal.UniversalPrimitive.universalPrimitive;
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.serialization.tracker.SerializationTracker.serializationTracker;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
@@ -61,10 +62,12 @@ import static java.util.stream.Collectors.toList;
 public final class Serializer {
     private final MarshallerRegistry<Marshaller> marshallers;
     private final Definitions definitions;
+    private final CustomPrimitiveMappings customPrimitiveMappings;
 
     public static Serializer theSerializer(final MarshallerRegistry<Marshaller> marshallers,
-                                           final Definitions definitions) {
-        return new Serializer(marshallers, definitions);
+                                           final Definitions definitions,
+                                           final CustomPrimitiveMappings customPrimitiveMappings) {
+        return new Serializer(marshallers, definitions, customPrimitiveMappings);
     }
 
     public Set<MarshallingType> supportedMarshallingTypes() {
@@ -128,17 +131,16 @@ public final class Serializer {
         return serializeDefinition(type, object, serializationTracker()).toNativeJava();
     }
 
-    private UniversalType serializeDefinition(final FullType type,
-                                              final Object object,
-                                              final SerializationTracker tracker) {
+    private Universal serializeDefinition(final FullType type,
+                                          final Object object,
+                                          final SerializationTracker tracker) {
         if (isNull(object)) {
             return universalNull();
         }
         tracker.trackToProhibitCyclicReferences(object);
         final Definition definition = this.definitions.getDefinitionForType(type);
         if (definition instanceof CustomPrimitiveDefinition) {
-            final CustomPrimitiveDefinition customPrimitive = (CustomPrimitiveDefinition) definition;
-            return universalPrimitive(customPrimitive.serializer().serialize(object));
+            return serializeCustomPrimitive((CustomPrimitiveDefinition) definition, object);
         }
         if (definition instanceof SerializedObjectDefinition) {
             return serializeSerializedObject((SerializedObjectDefinition) definition, object, tracker);
@@ -149,15 +151,21 @@ public final class Serializer {
         throw new UnsupportedOperationException("This should never happen.");
     }
 
+    private UniversalPrimitive serializeCustomPrimitive(final CustomPrimitiveDefinition definition,
+                                                        final Object object) {
+        final Object serialized = definition.serializer().serialize(object);
+        return this.customPrimitiveMappings.toUniversal(serialized);
+    }
+
     private UniversalObject serializeSerializedObject(final SerializedObjectDefinition definition,
                                                       final Object object,
                                                       final SerializationTracker tracker) {
         final SerializationFields fields = definition.serializer().fields();
-        final Map<String, UniversalType> map = new HashMap<>(10);
+        final Map<String, Universal> map = new HashMap<>(10);
         fields.fields().forEach(serializationField -> {
             final FullType type = serializationField.type();
             final Object value = ofNullable(object).map(serializationField::query).orElse(null);
-            final UniversalType serializedValue = serializeDefinition(type, value, tracker);
+            final Universal serializedValue = serializeDefinition(type, value, tracker);
             final String name = serializationField.name();
             map.put(name, serializedValue);
         });
@@ -168,7 +176,7 @@ public final class Serializer {
                                                     final Object object,
                                                     final SerializationTracker tracker) {
         final FullType contentType = definition.contentType();
-        final List<UniversalType> list = definition.serializer().serialize(object)
+        final List<Universal> list = definition.serializer().serialize(object)
                 .stream()
                 .map(element -> serializeDefinition(contentType, element, tracker))
                 .collect(toList());

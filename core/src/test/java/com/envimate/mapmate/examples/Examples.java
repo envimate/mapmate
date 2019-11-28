@@ -26,7 +26,6 @@ import com.envimate.mapmate.deserialization.validation.AggregatedValidationExcep
 import com.envimate.mapmate.examples.domain.*;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("ALL")
@@ -36,6 +35,7 @@ public final class Examples {
 
     @Test
     public void example_serializing() {
+        this.mapMate = this.injector.getInstance(MapMate.class);
         final Person queen = Person.deserialize(
                 FullName.deserialize(
                         FirstName.fromStringValue("Beatrix"),
@@ -58,6 +58,7 @@ public final class Examples {
 
     @Test
     public void example_deserializing() {
+        this.mapMate = this.injector.getInstance(MapMate.class);
         final String json = "{\"fullName\":{" +
                 "\"middleNames\":[\"Wilhelmina\", \"Petronella\"]," +
                 "\"firstName\":\"Beatrix\"," +
@@ -79,6 +80,7 @@ public final class Examples {
 
     @Test
     public void example_deserializingWithValidations() {
+        this.mapMate = this.injector.getInstance(MapMate.class);
         final String json = "{\"fullName\":{" +
                 "\"firstName\":\"Be\"}," +
                 "\"address\":{" +
@@ -94,10 +96,5 @@ public final class Examples {
         } catch (AggregatedValidationException e) {
             System.out.println(e.getValidationErrors());
         }
-    }
-
-    @BeforeAll
-    public void before() {
-        this.mapMate = this.injector.getInstance(MapMate.class);
     }
 }

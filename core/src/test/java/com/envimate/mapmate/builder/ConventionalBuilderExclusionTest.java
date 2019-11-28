@@ -28,9 +28,14 @@ import com.envimate.mapmate.builder.models.excluded.EmailAddress;
 import com.envimate.mapmate.builder.models.excluded.Subject;
 import com.envimate.mapmate.builder.scanning.DefaultPackageScanner;
 import com.envimate.mapmate.builder.validation.CustomTypeValidationException;
+import com.envimate.mapmate.definitions.DefinitionNotFoundException;
 import com.google.gson.Gson;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 
 public final class ConventionalBuilderExclusionTest {
 
@@ -61,16 +66,25 @@ public final class ConventionalBuilderExclusionTest {
                 .build();
     }
 
-    /*
-    TODO
-    @Test(expected = DefinitionNotFoundException.class)
+    @Test
     public void testEmailSerialization() {
-        theConventionalMapMateInstance().serializer().serializeToJson(EMAIL);
+        Exception exception = null;
+        try {
+            theConventionalMapMateInstance().serializer().serializeToJson(EMAIL);
+        } catch (final DefinitionNotFoundException e) {
+            exception = e;
+        }
+        assertThat(exception, instanceOf(DefinitionNotFoundException.class));
     }
 
-    @Test(expected = DefinitionNotFoundException.class)
+    @Test
     public void testEmailDeserialization() {
-        theConventionalMapMateInstance().deserializer().deserializeJson(EMAIL_JSON, Email.class);
+        Exception exception = null;
+        try {
+            theConventionalMapMateInstance().deserializer().deserializeJson(EMAIL_JSON, Email.class);
+        } catch (final DefinitionNotFoundException e) {
+            exception = e;
+        }
+        assertThat(exception, instanceOf(DefinitionNotFoundException.class));
     }
-     */
 }

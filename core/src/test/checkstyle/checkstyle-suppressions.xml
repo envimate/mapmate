@@ -45,10 +45,12 @@
     <suppress checks="MethodName|Regex" files="Examples"/>
     <suppress checks="ClassFanOutComplexityCheck" files="MapMateBuilder.java"/>
     <suppress checks="RedundantModifier" files="DefaultPackageScanner.java"/>
-    <suppress checks="MethodName|MagicNumber|LineLength|FileLength|MethodLength" files=".*Specs"/>
+    <suppress checks="MethodName|MagicNumber|LineLength|FileLength|MethodLength|ClassDataAbstractionCoupling" files=".*Specs"/>
     <suppress checks="ExplicitInitialization" files=".*"/>
     <suppress checks="ParameterNumber" files="AComplexTypeWithDifferentCollections"/>
 
     <suppress checks="TrailingComment|Regex|MethodLength"
               files="PackageScannerExample|MarshallingExamples|DocExample1|DetectorExample|ExceptionExamples"/>
+
+    <suppress checks="CommentsIndentation" files="UsageExamples" />
 </suppressions>

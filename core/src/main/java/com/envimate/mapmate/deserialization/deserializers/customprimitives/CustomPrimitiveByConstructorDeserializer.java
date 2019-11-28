@@ -39,6 +39,7 @@ import static java.lang.reflect.Modifier.isPublic;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CustomPrimitiveByConstructorDeserializer implements CustomPrimitiveDeserializer {
+    private final Class<?> baseType;
     private final Constructor<?> constructor;
 
     public static CustomPrimitiveDeserializer createDeserializer(final Class<?> type,
@@ -55,10 +56,10 @@ public final class CustomPrimitiveByConstructorDeserializer implements CustomPri
                     constructor, type);
         }
         final Class<?>[] parameterTypes = constructor.getParameterTypes();
-        if (parameterTypes.length != 1 || !parameterTypes[0].equals(String.class)) {
+        if (parameterTypes.length != 1) {
             throw incompatibleCustomPrimitiveException(
                     "The deserialization constructor %s configured for the custom primitive of type %s must " +
-                            "accept only one parameter of type String",
+                            "only have one parameter",
                     constructor, type);
         }
         if (constructor.getDeclaringClass() != type) {
@@ -67,19 +68,25 @@ public final class CustomPrimitiveByConstructorDeserializer implements CustomPri
                             "the custom primitive", constructor, type);
         }
 
-        return new CustomPrimitiveByConstructorDeserializer(constructor);
+        final Class<?> baseType = constructor.getParameterTypes()[0];
+        return new CustomPrimitiveByConstructorDeserializer(baseType, constructor);
     }
 
     @Override
-    public Object deserialize(final String value) throws Exception {
+    public Class<?> baseType() {
+        return this.baseType;
+    }
+
+    @Override
+    public Object deserialize(final Object value) throws Exception {
         try {
             return this.constructor.newInstance(value);
-        } catch (final IllegalAccessException e) {
+        } catch (final IllegalAccessException | IllegalArgumentException e) {
             throw customPrimitiveSerializationMethodCallException(
                     format("Unexpected error invoking deserialization constructor %s for serialized custom primitive %s",
                             this.constructor, value), e);
         } catch (final InvocationTargetException e) {
-            throw handleInvocationTargetException(e, value);
+            throw handleInvocationTargetException(e, (String) value);
         }
     }
 

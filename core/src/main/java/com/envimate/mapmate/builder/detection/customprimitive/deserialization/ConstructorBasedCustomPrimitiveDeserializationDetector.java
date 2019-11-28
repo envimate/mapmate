@@ -22,32 +22,49 @@
 package com.envimate.mapmate.builder.detection.customprimitive.deserialization;
 
 import com.envimate.mapmate.builder.detection.customprimitive.CachedReflectionType;
+import com.envimate.mapmate.builder.detection.customprimitive.mapping.CustomPrimitiveMappings;
 import com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 import java.lang.reflect.Constructor;
 import java.util.Optional;
 
 import static com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveByConstructorDeserializer.createDeserializer;
+import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ConstructorBasedCustomPrimitiveDeserializationDetector implements CustomPrimitiveDeserializationDetector {
+    private final CustomPrimitiveMappings mappings;
 
-    public static CustomPrimitiveDeserializationDetector constructorBased() {
-        return new ConstructorBasedCustomPrimitiveDeserializationDetector();
+    public static CustomPrimitiveDeserializationDetector constructorBased(final CustomPrimitiveMappings mappings) {
+        validateNotNull(mappings, "mappings");
+        return new ConstructorBasedCustomPrimitiveDeserializationDetector(mappings);
     }
 
     @Override
     public Optional<CustomPrimitiveDeserializer> detect(final CachedReflectionType type) {
-        return stringConstructor(type.type())
+        return fittingConstructor(type.type())
                 .map(constructor -> createDeserializer(type.type(), constructor));
     }
 
-    private static <T> Optional<Constructor<T>> stringConstructor(final Class<T> type) {
-        try {
-            return of(type.getConstructor(String.class));
-        } catch (final NoSuchMethodException e) {
-            return empty();
+    private Optional<Constructor<?>> fittingConstructor(final Class<?> type) {
+        final Constructor<?>[] constructors = type.getConstructors();
+        for (final Constructor<?> constructor : constructors) {
+            if (constructor.getParameterCount() != 1) {
+                continue;
+            }
+            final Class<?> parameterType = constructor.getParameterTypes()[0];
+            if (this.mappings.isPrimitiveType(parameterType)) {
+                return of(constructor);
+            }
         }
+        return empty();
     }
 }

@@ -21,9 +21,9 @@
 
 package com.envimate.mapmate.deserialization;
 
-import com.envimate.mapmate.definitions.universal.UniversalType;
+import com.envimate.mapmate.definitions.universal.Universal;
 
-import static com.envimate.mapmate.definitions.universal.UniversalType.describe;
+import static com.envimate.mapmate.definitions.universal.Universal.describe;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.lang.String.format;
 
@@ -33,8 +33,8 @@ public final class WrongInputStructureException extends RuntimeException {
         super(message);
     }
 
-    public static WrongInputStructureException wrongInputStructureException(final Class<? extends UniversalType> expected,
-                                                                            final UniversalType actual,
+    public static WrongInputStructureException wrongInputStructureException(final Class<? extends Universal> expected,
+                                                                            final Universal actual,
                                                                             final String location) {
         validateNotNull(expected, "expected");
         validateNotNull(actual, "actual");

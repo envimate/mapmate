@@ -38,6 +38,7 @@ import static java.lang.String.format;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CustomPrimitiveByMethodDeserializer implements CustomPrimitiveDeserializer {
+    private final Class<?> baseType;
     private final Method deserializationMethod;
 
     public static CustomPrimitiveDeserializer createDeserializer(final Class<?> type,
@@ -72,11 +73,17 @@ public final class CustomPrimitiveByMethodDeserializer implements CustomPrimitiv
                             "the custom primitive", deserializationMethod, type);
         }
 
-        return new CustomPrimitiveByMethodDeserializer(deserializationMethod);
+        final Class<?> baseType = deserializationMethod.getParameterTypes()[0];
+        return new CustomPrimitiveByMethodDeserializer(baseType, deserializationMethod);
     }
 
     @Override
-    public Object deserialize(final String value) throws Exception {
+    public Class<?> baseType() {
+        return this.baseType;
+    }
+
+    @Override
+    public Object deserialize(final Object value) throws Exception {
         try {
             return this.deserializationMethod.invoke(null, value);
         } catch (final IllegalAccessException e) {
@@ -88,7 +95,7 @@ public final class CustomPrimitiveByMethodDeserializer implements CustomPrimitiv
         }
     }
 
-    private Exception handleInvocationTargetException(final InvocationTargetException e, final String value) {
+    private Exception handleInvocationTargetException(final InvocationTargetException e, final Object value) {
         final Throwable targetException = e.getTargetException();
         if (targetException instanceof Exception) {
             return (Exception) targetException;

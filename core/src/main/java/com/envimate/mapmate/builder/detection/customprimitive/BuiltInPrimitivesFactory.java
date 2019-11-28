@@ -84,6 +84,9 @@ public final class BuiltInPrimitivesFactory implements DefinitionFactory {
                 return null;
             }
         };
-        return customPrimitiveDefinition(fullType(type), customPrimitiveSerializer, deserializer::apply);
+        return customPrimitiveDefinition(
+                fullType(type),
+                customPrimitiveSerializer,
+                value -> deserializer.apply((String) value));
     }
 }

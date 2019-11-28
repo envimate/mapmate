@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.deserialization.validation;
 
-import com.envimate.mapmate.definitions.universal.UniversalType;
+import com.envimate.mapmate.definitions.universal.Universal;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -41,18 +41,18 @@ import static java.lang.String.format;
 public final class ExceptionTracker {
     private final TrackingPosition position;
     private final ValidationMappings validationMappings;
-    private final UniversalType originalInput;
+    private final Universal originalInput;
 
     private final List<ValidationError> validationErrors = new LinkedList<>();
     private final List<ExceptionTracker> children = new LinkedList<>();
 
-    public static ExceptionTracker emptyTracker(final UniversalType originalInput, final ValidationMappings validationMappings) {
+    public static ExceptionTracker emptyTracker(final Universal originalInput, final ValidationMappings validationMappings) {
         return initializedTracker(empty(), validationMappings, originalInput);
     }
 
     private static ExceptionTracker initializedTracker(final TrackingPosition position,
                                                        final ValidationMappings validationMappings,
-                                                       final UniversalType originalInput) {
+                                                       final Universal originalInput) {
         return new ExceptionTracker(position, validationMappings, originalInput);
     }
 

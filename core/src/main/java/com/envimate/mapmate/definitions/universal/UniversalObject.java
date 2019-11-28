@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import static com.envimate.mapmate.definitions.universal.UniversalType.fromNativeJava;
+import static com.envimate.mapmate.definitions.universal.Universal.fromNativeJava;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -40,23 +40,23 @@ import static java.util.stream.Collectors.toMap;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class UniversalObject implements UniversalType {
-    private final Map<String, UniversalType> map;
+public final class UniversalObject implements Universal {
+    private final Map<String, Universal> map;
 
     public static UniversalObject universalObjectFromNativeMap(final Map<String, Object> map) {
         validateNotNull(map, "map");
-        final Map<String, UniversalType> mappedMap = map.entrySet().stream()
+        final Map<String, Universal> mappedMap = map.entrySet().stream()
                 .collect(toMap(Entry::getKey, entry -> fromNativeJava(entry.getValue())));
         return universalObject(mappedMap);
     }
 
-    public static UniversalObject universalObject(final Map<String, UniversalType> map) {
+    public static UniversalObject universalObject(final Map<String, Universal> map) {
         validateNotNull(map, "map");
         map.forEach((key, value) -> validateNotNull(value, key));
         return new UniversalObject(map);
     }
 
-    public Optional<UniversalType> getField(final String name) {
+    public Optional<Universal> getField(final String name) {
         validateNotNull(name, "name");
         if (!this.map.containsKey(name)) {
             return empty();

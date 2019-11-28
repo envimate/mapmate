@@ -42,7 +42,7 @@ public final class PackageScannerExample {
         final Gson gson = new Gson();
 
         //Showcase start config
-        final MapMate mapMate = MapMate.aMapMate(PACKAGE_TO_SCAN_1, PACKAGE_TO_SCAN_2 /* etc.*/)
+        MapMate.aMapMate(PACKAGE_TO_SCAN_1, PACKAGE_TO_SCAN_2 /* etc.*/)
                 /* further configuration */
                 .build();
         //Showcase end config

@@ -21,9 +21,11 @@
 
 package com.envimate.mapmate.deserialization;
 
+import com.envimate.mapmate.builder.detection.customprimitive.mapping.CustomPrimitiveMappings;
 import com.envimate.mapmate.definitions.*;
 import com.envimate.mapmate.definitions.types.FullType;
 import com.envimate.mapmate.definitions.universal.*;
+import com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.deserialization.validation.ExceptionTracker;
 import com.envimate.mapmate.deserialization.validation.ValidationErrorsMapping;
@@ -44,16 +46,19 @@ import static java.lang.String.format;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 final class InternalDeserializer {
     private final Definitions definitions;
+    private final CustomPrimitiveMappings customPrimitiveMappings;
     private final ValidationErrorsMapping onValidationErrors;
 
     static InternalDeserializer internalDeserializer(final Definitions definitions,
+                                                     final CustomPrimitiveMappings customPrimitiveMappings,
                                                      final ValidationErrorsMapping validationErrorsMapping) {
         validateNotNull(definitions, "definitions");
+        validateNotNull(customPrimitiveMappings, "customPrimitiveMappings");
         validateNotNull(validationErrorsMapping, "validationErrorsMapping");
-        return new InternalDeserializer(definitions, validationErrorsMapping);
+        return new InternalDeserializer(definitions, customPrimitiveMappings, validationErrorsMapping);
     }
 
-    <T> T deserialize(final UniversalType input,
+    <T> T deserialize(final Universal input,
                       final Class<T> targetType,
                       final ExceptionTracker exceptionTracker,
                       final Injector injector) {
@@ -65,7 +70,7 @@ final class InternalDeserializer {
         return result;
     }
 
-    private Object deserializeRecursive(final UniversalType input,
+    private Object deserializeRecursive(final Universal input,
                                         final FullType targetType,
                                         final ExceptionTracker exceptionTracker,
                                         final Injector injector) {
@@ -79,7 +84,7 @@ final class InternalDeserializer {
             return typedDirectInjection.get();
         }
 
-        final UniversalType resolved = injector.getUniversalInjectionFor(exceptionTracker.getPosition()).orElse(input);
+        final Universal resolved = injector.getUniversalInjectionFor(exceptionTracker.getPosition()).orElse(input);
 
         if (input instanceof UniversalNull) {
             return null;
@@ -125,7 +130,7 @@ final class InternalDeserializer {
             final String elementName = entry.getKey();
             final FullType elementType = entry.getValue();
 
-            final UniversalType elementInput = input.getField(elementName).orElse(universalNull());
+            final Universal elementInput = input.getField(elementName).orElse(universalNull());
             final Object elementObject = this.deserializeRecursive(
                     elementInput,
                     elementType,
@@ -152,7 +157,10 @@ final class InternalDeserializer {
                                              final CustomPrimitiveDefinition definition,
                                              final ExceptionTracker exceptionTracker) {
         try {
-            return (T) definition.deserializer().deserialize(input.stringValue());
+            final CustomPrimitiveDeserializer deserializer = definition.deserializer();
+            final Class<?> baseType = deserializer.baseType();
+            final Object mapped = this.customPrimitiveMappings.fromUniversal(input, baseType);
+            return (T) deserializer.deserialize(mapped);
         } catch (final Exception e) {
             final String message = format("Exception calling deserialize(input: %s) on definition %s", input.toNativeJava(), definition);
             exceptionTracker.track(e, message);
@@ -167,7 +175,7 @@ final class InternalDeserializer {
         final List deserializedList = new LinkedList();
         final FullType contentType = definition.contentType();
         int index = 0;
-        for (final UniversalType element : input.content()) {
+        for (final Universal element : input.content()) {
             final Object deserialized = deserializeRecursive(element, contentType, exceptionTracker.stepIntoArray(index), injector);
             deserializedList.add(deserialized);
             index = index + 1;
@@ -175,9 +183,9 @@ final class InternalDeserializer {
         return definition.deserializer().deserialize(deserializedList);
     }
 
-    private static <T extends UniversalType> T castSafely(final UniversalType universalType,
-                                                          final Class<T> type,
-                                                          final ExceptionTracker exceptionTracker) {
+    private static <T extends Universal> T castSafely(final Universal universalType,
+                                                      final Class<T> type,
+                                                      final ExceptionTracker exceptionTracker) {
         if (!type.isInstance(universalType)) {
             throw WrongInputStructureException.wrongInputStructureException(type, universalType, exceptionTracker.getPosition());
         }

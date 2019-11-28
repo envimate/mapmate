@@ -24,11 +24,15 @@ package com.envimate.mapmate.builder.conventional;
 import com.envimate.mapmate.builder.conventional.annotations.*;
 import com.envimate.mapmate.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.builder.detection.customprimitive.deserialization.CustomPrimitiveDeserializationDetector;
+import com.envimate.mapmate.builder.detection.customprimitive.mapping.CustomPrimitiveMappings;
 import com.envimate.mapmate.builder.detection.customprimitive.serialization.CustomPrimitiveSerializationDetector;
 import com.envimate.mapmate.builder.detection.serializedobject.ClassFilter;
 import com.envimate.mapmate.builder.detection.serializedobject.deserialization.ConstructorBasedDeserializationDetector;
 import com.envimate.mapmate.builder.detection.serializedobject.deserialization.SerializedObjectDeserializationDetector;
 import com.envimate.mapmate.builder.detection.serializedobject.fields.FieldDetector;
+import com.envimate.mapmate.definitions.universal.UniversalBoolean;
+import com.envimate.mapmate.definitions.universal.UniversalNumber;
+import com.envimate.mapmate.definitions.universal.UniversalString;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -38,6 +42,8 @@ import static com.envimate.mapmate.builder.detection.customprimitive.deserializa
 import static com.envimate.mapmate.builder.detection.customprimitive.deserialization.ConstructorBasedCustomPrimitiveDeserializationDetector.constructorBased;
 import static com.envimate.mapmate.builder.detection.customprimitive.deserialization.MethodAnnotationBasedCustomPrimitiveDeserializationDetector.annotationBasedDeserializer;
 import static com.envimate.mapmate.builder.detection.customprimitive.deserialization.StaticMethodBasedCustomPrimitiveDeserializationDetector.staticMethodBased;
+import static com.envimate.mapmate.builder.detection.customprimitive.mapping.CustomPrimitiveMappings.customPrimitiveMappings;
+import static com.envimate.mapmate.builder.detection.customprimitive.mapping.UniversalTypeMapper.universalTypeMapper;
 import static com.envimate.mapmate.builder.detection.customprimitive.serialization.ClassAnnotationBasedCustomPrimitiveSerializationDetector.classAnnotationBasedSerializer;
 import static com.envimate.mapmate.builder.detection.customprimitive.serialization.MethodAnnotationBasedCustomPrimitiveSerializationDetector.annotationBasedSerializer;
 import static com.envimate.mapmate.builder.detection.customprimitive.serialization.MethodNameBasedCustomPrimitiveSerializationDetector.methodNameBased;
@@ -49,8 +55,23 @@ import static com.envimate.mapmate.builder.detection.serializedobject.deserializ
 import static com.envimate.mapmate.builder.detection.serializedobject.deserialization.NamedMethodDeserializationDetector.namedMethodBased;
 import static com.envimate.mapmate.builder.detection.serializedobject.deserialization.SingleMethodDeserializationDetector.singleMethodBased;
 import static com.envimate.mapmate.builder.detection.serializedobject.fields.AnnotationFieldDetector.annotationBased;
+import static com.envimate.mapmate.definitions.universal.UniversalNumber.universalNumber;
 
 public final class ConventionalDefinitionFactories {
+
+    public static final CustomPrimitiveMappings CUSTOM_PRIMITIVE_MAPPINGS = customPrimitiveMappings(
+            universalTypeMapper(String.class, UniversalString.class),
+            universalTypeMapper(double.class, UniversalNumber.class),
+            universalTypeMapper(Double.class, UniversalNumber.class),
+            universalTypeMapper(boolean.class, UniversalBoolean.class),
+            universalTypeMapper(Boolean.class, UniversalBoolean.class),
+            universalTypeMapper(int.class, UniversalNumber.class,
+                    integer -> universalNumber(Double.valueOf(integer)),
+                    universalNumber -> ((Double) universalNumber.toNativeJava()).intValue()),
+            universalTypeMapper(Integer.class, UniversalNumber.class,
+                    integer -> universalNumber(Double.valueOf(integer)),
+                    universalNumber -> ((Double) universalNumber.toNativeJava()).intValue())
+    );
 
     private ConventionalDefinitionFactories() {
     }
@@ -58,16 +79,19 @@ public final class ConventionalDefinitionFactories {
     public static DefinitionFactory nameAndConstructorBasedCustomPrimitiveDefinitionFactory(
             final String serializationMethodName,
             final String deserializationMethodName) {
-        return customPrimitiveFactory(methodNameBased(serializationMethodName),
-                staticMethodBased(deserializationMethodName),
-                constructorBased());
+        return customPrimitiveFactory(
+                methodNameBased(CUSTOM_PRIMITIVE_MAPPINGS, serializationMethodName),
+                staticMethodBased(CUSTOM_PRIMITIVE_MAPPINGS, deserializationMethodName),
+                constructorBased(CUSTOM_PRIMITIVE_MAPPINGS)
+        );
     }
 
     public static DefinitionFactory nameBasedCustomPrimitiveDefinitionFactory(
             final String serializationMethodName,
             final String deserializationMethodName) {
-        return customPrimitiveFactory(methodNameBased(serializationMethodName),
-                staticMethodBased(deserializationMethodName));
+        return customPrimitiveFactory(
+                methodNameBased(CUSTOM_PRIMITIVE_MAPPINGS, serializationMethodName),
+                staticMethodBased(CUSTOM_PRIMITIVE_MAPPINGS, deserializationMethodName));
     }
 
     public static DefinitionFactory customPrimitiveMethodAnnotationFactory() {
