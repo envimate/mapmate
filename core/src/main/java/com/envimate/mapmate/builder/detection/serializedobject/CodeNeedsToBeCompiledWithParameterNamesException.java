@@ -25,6 +25,7 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
 
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.lang.reflect.Modifier.isPublic;
 import static java.util.Arrays.stream;
 
 public final class CodeNeedsToBeCompiledWithParameterNamesException extends RuntimeException {
@@ -35,6 +36,7 @@ public final class CodeNeedsToBeCompiledWithParameterNamesException extends Runt
 
     public static void validateParameterNamesArePresent(final Class<?> type) {
         stream(type.getDeclaredMethods())
+                .filter(method -> isPublic(method.getModifiers()))
                 .forEach(CodeNeedsToBeCompiledWithParameterNamesException::validateParameterNamesArePresent);
     }
 
