@@ -97,6 +97,6 @@ public final class BuilderSpecs {
         )
                 .when().theDefinitionsAreQueried()
                 .theDefinitionsContainExactlyTheSerializedObjects()
-                .theDefinitionsContainExactlyTheCustomPrimitives(AString.class, AWrapperInteger.class, APrimitiveBoolean.class, APrimitiveInteger.class);
+                .theDefinitionsContainExactlyTheCustomPrimitives(APrimitiveBoolean.class, APrimitiveInteger.class);
     }
 }

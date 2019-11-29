@@ -29,8 +29,7 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.lang.reflect.Executable;
-import java.util.Arrays;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,11 +39,16 @@ import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ClassScannerRecipe implements Recipe {
+    private static final List<String> OBJECT_METHODS = stream(Object.class.getMethods())
+            .map(Method::getName)
+            .collect(toList());
+
     private final List<Class<?>> classes;
 
     public static ClassScannerRecipe addAllReferencesClassesIs(final Class<?>... classes) {
@@ -62,24 +66,15 @@ public final class ClassScannerRecipe implements Recipe {
 
     private static List<FullType> referencesIn(final Class<?> clazz) {
         final List<FullType> classes = new LinkedList<>();
-        stream(clazz.getFields())
-                .filter(field -> isPublic(field.getModifiers()))
-                .map(FullType::typeOfField)
-                .forEach(classes::add);
         stream(clazz.getDeclaredMethods())
-                .filter(field -> isPublic(field.getModifiers()))
+                .filter(method -> isPublic(method.getModifiers()))
+                .filter(method -> !OBJECT_METHODS.contains(method.getName()))
                 .forEach(method -> {
                     classes.add(fromType(method.getGenericReturnType()));
                     stream(method.getParameters())
                             .map(FullType::typeOfParameter)
                             .forEach(classes::add);
                 });
-        stream(clazz.getConstructors())
-                .filter(field -> isPublic(field.getModifiers()))
-                .map(Executable::getParameters)
-                .flatMap(Arrays::stream)
-                .map(FullType::typeOfParameter)
-                .forEach(classes::add);
         return classes;
     }
 }
