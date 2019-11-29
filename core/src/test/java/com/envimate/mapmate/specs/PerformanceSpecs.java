@@ -25,7 +25,6 @@ import com.envimate.mapmate.MapMate;
 import com.envimate.mapmate.domain.valid.AComplexType;
 import com.envimate.mapmate.domain.valid.ANumber;
 import com.envimate.mapmate.domain.valid.AString;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
@@ -34,7 +33,6 @@ import static com.envimate.mapmate.specs.givenwhenthen.MapMateInstances.theExamp
 
 public final class PerformanceSpecs {
 
-    @Disabled
     @Test
     public void aLotOfSerializationsDoNotCauseProblems() {
         final MapMate mapMate = theExampleMapMateWithAllMarshallers();
@@ -58,7 +56,6 @@ public final class PerformanceSpecs {
         }
     }
 
-    @Disabled
     @Test
     public void aLotOfDeserializationsDoNotCauseProblems() {
         final MapMate mapMate = theExampleMapMateWithAllMarshallers();
