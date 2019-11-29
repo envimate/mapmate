@@ -69,6 +69,10 @@ public final class UniversalTypeMapper {
         return this.normalType;
     }
 
+    public Class<? extends UniversalPrimitive> universalType() {
+        return this.universalType;
+    }
+
     public UniversalPrimitive toUniversal(final Object object) {
         return this.toUniversal.apply(object);
     }

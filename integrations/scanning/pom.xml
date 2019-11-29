@@ -27,20 +27,38 @@
 
     <parent>
         <groupId>com.envimate.mapmate</groupId>
-        <artifactId>mapmate-parent</artifactId>
+        <artifactId>integrations-parent</artifactId>
         <version>1.6.23</version>
     </parent>
 
-    <packaging>pom</packaging>
+    <groupId>com.envimate.mapmate.integrations</groupId>
+    <artifactId>mapmate-scanning</artifactId>
 
-    <artifactId>integrations-parent</artifactId>
+    <name>MapMate - Integrations - Scanning</name>
 
-    <name>MapMate - integrations</name>
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.10</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.envimate.mapmate</groupId>
+            <artifactId>core</artifactId>
+            <version>1.6.23</version>
+        </dependency>
 
-    <modules>
-        <module>scanning</module>
-        <module>json</module>
-        <module>xml</module>
-        <module>yaml</module>
-    </modules>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.5.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.5.2</version>
+        </dependency>
+    </dependencies>
 </project>

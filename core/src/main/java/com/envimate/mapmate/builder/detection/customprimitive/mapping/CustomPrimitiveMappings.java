@@ -21,7 +21,10 @@
 
 package com.envimate.mapmate.builder.detection.customprimitive.mapping;
 
+import com.envimate.mapmate.definitions.universal.UniversalBoolean;
+import com.envimate.mapmate.definitions.universal.UniversalNumber;
 import com.envimate.mapmate.definitions.universal.UniversalPrimitive;
+import com.envimate.mapmate.definitions.universal.UniversalString;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +34,12 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.envimate.mapmate.builder.detection.customprimitive.mapping.BooleanFormatException.booleanFormatException;
+import static com.envimate.mapmate.builder.detection.customprimitive.mapping.Mapping.mapping;
+import static com.envimate.mapmate.builder.detection.customprimitive.mapping.TypeMappings.typeMappings;
+import static com.envimate.mapmate.definitions.universal.UniversalBoolean.universalBoolean;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.lang.Double.parseDouble;
 import static java.lang.String.format;
 import static java.util.Optional.empty;
 import static java.util.function.Function.identity;
@@ -42,6 +50,24 @@ import static java.util.stream.Collectors.toMap;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CustomPrimitiveMappings {
     private final Map<Class<?>, UniversalTypeMapper> mappings;
+    private final TypeMappings typeMappings = typeMappings(
+            mapping(UniversalNumber.class, UniversalNumber.class, identity()),
+            mapping(UniversalString.class, UniversalString.class, identity()),
+            mapping(UniversalBoolean.class, UniversalBoolean.class, identity()),
+            mapping(UniversalString.class, UniversalNumber.class, universalString -> {
+                final String stringValue = (String) universalString.toNativeJava();
+                final Double doubleValue = parseDouble(stringValue);
+                return UniversalNumber.universalNumber(doubleValue);
+            }),
+            mapping(UniversalString.class, UniversalBoolean.class, universalString -> {
+                final String stringValue = (String) universalString.toNativeJava();
+                switch (stringValue) {
+                    case "true": return universalBoolean(true);
+                    case "false": return universalBoolean(false);
+                    default: throw booleanFormatException(stringValue);
+                }
+            })
+    );
 
     public static CustomPrimitiveMappings customPrimitiveMappings(final UniversalTypeMapper... mappings) {
         validateNotNull(mappings, "mappings");
@@ -65,7 +91,7 @@ public final class CustomPrimitiveMappings {
 
     public UniversalPrimitive toUniversal(final Object object) {
         validateNotNull(object, "object");
-        if(!this.mappings.containsKey(object.getClass())) {
+        if (!this.mappings.containsKey(object.getClass())) {
             throw new UnsupportedOperationException(format("Type '%s' is not registered as a primitive", object.getClass()));
         }
         final UniversalTypeMapper universalTypeMapper = this.mappings.get(object.getClass());
@@ -75,10 +101,12 @@ public final class CustomPrimitiveMappings {
     public Object fromUniversal(final UniversalPrimitive universal, final Class<?> type) {
         validateNotNull(universal, "universal");
         validateNotNull(type, "type");
-        if(!this.mappings.containsKey(type)) {
+        if (!this.mappings.containsKey(type)) {
             throw new UnsupportedOperationException(format("Type '%s' is not registered as a primitive", type));
         }
         final UniversalTypeMapper universalTypeMapper = this.mappings.get(type);
-        return universalTypeMapper.fromUniversal(universal);
+        final Class<? extends UniversalPrimitive> requiredUniversalType = universalTypeMapper.universalType();
+        final UniversalPrimitive universalPrimitive = this.typeMappings.map(universal, requiredUniversalType).orElseThrow();
+        return universalTypeMapper.fromUniversal(universalPrimitive);
     }
 }

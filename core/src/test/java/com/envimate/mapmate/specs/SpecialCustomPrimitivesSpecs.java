@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.specs;
 
+import com.envimate.mapmate.builder.detection.customprimitive.mapping.BooleanFormatException;
 import com.envimate.mapmate.domain.valid.*;
 import org.junit.jupiter.api.Test;
 
@@ -43,6 +44,32 @@ public final class SpecialCustomPrimitivesSpecs {
                 .when().mapMateDeserializes("{\"doubleA\": 1, \"doubleB\": 2}").as(json()).toTheType(AComplexTypeWithDoublesDto.class)
                 .noExceptionHasBeenThrown()
                 .theDeserializedObjectIs(new AComplexTypeWithDoublesDto(new APrimitiveDouble(1.0), new AWrapperDouble(2.0)));
+    }
+
+    @Test
+    public void doubleBasedCustomPrimitivesCanBeDeserializedWithStrings() {
+        given(
+                aMapMate()
+                        .withManuallyAddedTypes(AComplexTypeWithDoublesDto.class)
+                        .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
+                        .build()
+        )
+                .when().mapMateDeserializes("{\"doubleA\": \"1\", \"doubleB\": \"2\"}").as(json()).toTheType(AComplexTypeWithDoublesDto.class)
+                .noExceptionHasBeenThrown()
+                .theDeserializedObjectIs(new AComplexTypeWithDoublesDto(new APrimitiveDouble(1.0), new AWrapperDouble(2.0)));
+    }
+
+    @Test
+    public void doubleBasedCustomPrimitivesCanNotBeDeserializedWithWrongStrings() {
+        given(
+                aMapMate()
+                        .withManuallyAddedTypes(AComplexTypeWithDoublesDto.class)
+                        .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
+                        .withExceptionIndicatingValidationError(NumberFormatException.class)
+                        .build()
+        )
+                .when().mapMateDeserializes("{\"doubleA\": \"foo\", \"doubleB\": \"bar\"}").as(json()).toTheType(AComplexTypeWithDoublesDto.class)
+                .anAggregatedExceptionHasBeenThrownWithNumberOfErrors(2);
     }
 
     @Test
@@ -77,6 +104,32 @@ public final class SpecialCustomPrimitivesSpecs {
     }
 
     @Test
+    public void booleanBasedCustomPrimitivesCanBeDeserializedWithStrings() {
+        given(
+                aMapMate()
+                        .withManuallyAddedTypes(AComplexTypeWithBooleansDto.class)
+                        .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
+                        .build()
+        )
+                .when().mapMateDeserializes("{\"booleanA\": \"true\", \"booleanB\": \"false\"}").as(json()).toTheType(AComplexTypeWithBooleansDto.class)
+                .noExceptionHasBeenThrown()
+                .theDeserializedObjectIs(new AComplexTypeWithBooleansDto(new APrimitiveBoolean(true), new AWrapperBoolean(false)));
+    }
+
+    @Test
+    public void booleanBasedCustomPrimitivesCanNotBeDeserializedWithWrongStrings() {
+        given(
+                aMapMate()
+                        .withManuallyAddedTypes(AComplexTypeWithBooleansDto.class)
+                        .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
+                        .withExceptionIndicatingValidationError(BooleanFormatException.class)
+                        .build()
+        )
+                .when().mapMateDeserializes("{\"booleanA\": \"foo\", \"booleanB\": \"bar\"}").as(json()).toTheType(AComplexTypeWithBooleansDto.class)
+                .anAggregatedExceptionHasBeenThrownWithNumberOfErrors(2);
+    }
+
+    @Test
     public void booleanBasedCustomPrimitivesCanBeSerialized() {
         given(
                 aMapMate()
@@ -103,6 +156,19 @@ public final class SpecialCustomPrimitivesSpecs {
                         .build()
         )
                 .when().mapMateDeserializes("{\"intA\": 1, \"intB\": 2}").as(json()).toTheType(AComplexTypeWithIntegersDto.class)
+                .noExceptionHasBeenThrown()
+                .theDeserializedObjectIs(new AComplexTypeWithIntegersDto(new APrimitiveInteger(1), new AWrapperInteger(2)));
+    }
+
+    @Test
+    public void integerBasedCustomPrimitivesCanBeDeserializedWithStrings() {
+        given(
+                aMapMate()
+                        .withManuallyAddedTypes(AComplexTypeWithIntegersDto.class)
+                        .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
+                        .build()
+        )
+                .when().mapMateDeserializes("{\"intA\": \"1\", \"intB\": \"2\"}").as(json()).toTheType(AComplexTypeWithIntegersDto.class)
                 .noExceptionHasBeenThrown()
                 .theDeserializedObjectIs(new AComplexTypeWithIntegersDto(new APrimitiveInteger(1), new AWrapperInteger(2)));
     }
