@@ -62,7 +62,7 @@ public final class FullType {
         return fromType(type);
     }
 
-    private static FullType fromType(final Type type) {
+    public static FullType fromType(final Type type) {
         validateNotNull(type, "type");
         if (type instanceof Class) {
             return fullType((Class<?>) type);

@@ -100,7 +100,12 @@ public final class MapMateBuilder {
 
     public MapMateBuilder withManuallyAddedType(final Class<?> type) {
         validateNotNull(type, "type");
-        this.addedTypes.add(fullType(type));
+        return withManuallyAddedType(fullType(type));
+    }
+
+    public MapMateBuilder withManuallyAddedType(final FullType type) {
+        validateNotNull(type, "type");
+        this.addedTypes.add(type);
         return this;
     }
 

@@ -21,10 +21,12 @@
 
 package com.envimate.mapmate.specs;
 
+import com.envimate.mapmate.domain.repositories.MyRepository;
 import com.envimate.mapmate.domain.valid.*;
 import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.MapMate.aMapMate;
+import static com.envimate.mapmate.builder.recipes.scanner.ClassScannerRecipe.addAllReferencesClassesIs;
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.given;
 import static java.util.Collections.emptyList;
@@ -76,9 +78,25 @@ public final class BuilderSpecs {
 
     @Test
     public void allKnownCollectionsAreSupported() {
-        given(aMapMate().withManuallyAddedType(AComplexTypeWithDifferentCollections.class).build())
+        given(
+                aMapMate()
+                        .withManuallyAddedType(AComplexTypeWithDifferentCollections.class)
+                        .build()
+        )
                 .when().theDefinitionsAreQueried()
                 .theDefinitionsContainExactlyTheSerializedObjects(AComplexTypeWithDifferentCollections.class)
                 .theDefinitionsContainExactlyTheCustomPrimitives(ANumber.class);
+    }
+
+    @Test
+    public void referencesInClassesCanBeScanned() {
+        given(
+                aMapMate()
+                        .usingRecipe(addAllReferencesClassesIs(MyRepository.class))
+                        .build()
+        )
+                .when().theDefinitionsAreQueried()
+                .theDefinitionsContainExactlyTheSerializedObjects()
+                .theDefinitionsContainExactlyTheCustomPrimitives(AString.class, AWrapperInteger.class, APrimitiveBoolean.class, APrimitiveInteger.class);
     }
 }
