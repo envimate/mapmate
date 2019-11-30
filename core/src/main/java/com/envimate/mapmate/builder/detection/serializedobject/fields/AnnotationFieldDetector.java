@@ -32,11 +32,10 @@ import lombok.ToString;
 import java.lang.annotation.Annotation;
 import java.util.List;
 
+import static com.envimate.mapmate.definitions.types.resolver.ResolvedField.resolvedPublicFields;
 import static com.envimate.mapmate.serialization.serializers.serializedobject.SerializationField.fromPublicField;
 import static com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields.serializationFields;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
-import static java.lang.reflect.Modifier.*;
-import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
 @ToString
@@ -52,12 +51,9 @@ public final class AnnotationFieldDetector implements FieldDetector {
 
     @Override
     public SerializationFields detect(final FullType type) {
-        final List<SerializationField> list = stream(type.type().getFields())
-                .filter(field -> isPublic(field.getModifiers()))
-                .filter(field -> !isStatic(field.getModifiers()))
-                .filter(field -> !isTransient(field.getModifiers()))
-                .filter(field -> field.isAnnotationPresent(this.annotation))
-                .map(field -> fromPublicField(type, field))
+        final List<SerializationField> list = resolvedPublicFields(type).stream()
+                .filter(field -> field.field().isAnnotationPresent(this.annotation))
+                .map(resolvedField -> fromPublicField(type, resolvedField))
                 .collect(toList());
         return serializationFields(list);
     }

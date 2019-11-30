@@ -19,37 +19,47 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.detection.serializedobject.fields;
+package com.envimate.mapmate.definitions.types;
 
-import com.envimate.mapmate.definitions.types.FullType;
-import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationField;
-import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.lang.reflect.TypeVariable;
 import java.util.List;
 
-import static com.envimate.mapmate.definitions.types.resolver.ResolvedField.resolvedPublicFields;
-import static com.envimate.mapmate.serialization.serializers.serializedobject.SerializationField.fromPublicField;
-import static com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields.serializationFields;
+import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class ModifierFieldDetector implements FieldDetector {
+public final class TypeVariableName {
+    private final String name;
 
-    public static FieldDetector modifierBased() {
-        return new ModifierFieldDetector();
+    public static TypeVariableName typeVariableName(final String name) {
+        validateNotNull(name, "name");
+        return new TypeVariableName(name);
     }
 
-    @Override
-    public SerializationFields detect(final FullType type) {
-        final List<SerializationField> list = resolvedPublicFields(type).stream()
-                .map(resolvedField -> fromPublicField(type, resolvedField))
+    public static TypeVariableName typeVariableName(final TypeVariable<?> typeVariable) {
+        validateNotNull(typeVariable, "typeVariable");
+        return typeVariableName(typeVariable.getName());
+    }
+
+    public static TypeVariableName arrayComponentName() {
+        return typeVariableName("C");
+    }
+
+    public static List<TypeVariableName> typeVariableNamesOf(final Class<?> type) {
+        return stream(type.getTypeParameters())
+                .map(TypeVariableName::typeVariableName)
                 .collect(toList());
-        return serializationFields(list);
+    }
+
+    public String name() {
+        return this.name;
     }
 }

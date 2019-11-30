@@ -22,6 +22,7 @@
 package com.envimate.mapmate.builder.detection.serializedobject.deserialization;
 
 import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.resolver.ResolvedMethod;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
 import lombok.AccessLevel;
@@ -29,7 +30,6 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -54,23 +54,23 @@ public final class MatchingMethodDeserializationDetector implements SerializedOb
 
     @Override
     public Optional<SerializedObjectDeserializer> detect(final FullType type, final SerializationFields fields) {
-        final List<Method> deserializerCandidates = detectDeserializerMethods(type);
+        final List<ResolvedMethod> deserializerCandidates = detectDeserializerMethods(type);
         return chooseDeserializer(deserializerCandidates, fields, type)
                 .map(method -> methodDeserializer(type, method));
     }
 
-    private Optional<Method> chooseDeserializer(final List<Method> deserializerCandidates,
-                                                final SerializationFields serializedFields,
-                                                final FullType type) {
-        Method deserializerMethod = null;
+    private Optional<ResolvedMethod> chooseDeserializer(final List<ResolvedMethod> deserializerCandidates,
+                                                        final SerializationFields serializedFields,
+                                                        final FullType type) {
+        ResolvedMethod deserializerMethod = null;
         if (deserializerCandidates.size() > 1) {
-            final Optional<Method> byNamePattern = this.detectByNamePattern(deserializerCandidates, serializedFields);
+            final Optional<ResolvedMethod> byNamePattern = this.detectByNamePattern(deserializerCandidates, serializedFields);
             if (byNamePattern.isPresent()) {
                 deserializerMethod = byNamePattern.get();
             } else {
                 final String typeSimpleNameLowerCased = type.type().getSimpleName().toLowerCase();
-                final Optional<Method> byTypeName = deserializerCandidates.stream()
-                        .filter(method -> method.getName().toLowerCase().contains(typeSimpleNameLowerCased))
+                final Optional<ResolvedMethod> byTypeName = deserializerCandidates.stream()
+                        .filter(method -> method.method().getName().toLowerCase().contains(typeSimpleNameLowerCased))
                         .findFirst();
                 if (byTypeName.isPresent()) {
                     deserializerMethod = byTypeName.get();
@@ -81,16 +81,16 @@ public final class MatchingMethodDeserializationDetector implements SerializedOb
         return ofNullable(deserializerMethod);
     }
 
-    private Optional<Method> detectByNamePattern(final List<Method> deserializerCandidates,
-                                                 final SerializationFields serializedFields) {
-        final List<Method> withMatchingName = deserializerCandidates.stream()
-                .filter(method -> this.deserializationMethodNamePattern.matcher(method.getName()).matches())
+    private Optional<ResolvedMethod> detectByNamePattern(final List<ResolvedMethod> deserializerCandidates,
+                                                         final SerializationFields serializedFields) {
+        final List<ResolvedMethod> withMatchingName = deserializerCandidates.stream()
+                .filter(method -> this.deserializationMethodNamePattern.matcher(method.method().getName()).matches())
                 .collect(toList());
         if (withMatchingName.size() == 1) {
             return Optional.of(deserializerCandidates.get(0));
         } else if (withMatchingName.size() > 1) {
             return deserializerCandidates.stream()
-                    .filter(method -> isMethodCompatibleWithFields(method, serializedFields.typesList()))
+                    .filter(method -> isMethodCompatibleWithFields(method.parameters(), serializedFields.typesList()))
                     .findFirst();
         }
         return empty();

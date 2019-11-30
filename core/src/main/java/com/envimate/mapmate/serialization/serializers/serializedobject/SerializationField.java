@@ -22,6 +22,7 @@
 package com.envimate.mapmate.serialization.serializers.serializedobject;
 
 import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.resolver.ResolvedField;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,6 @@ import java.lang.reflect.Field;
 import java.util.function.Function;
 
 import static com.envimate.mapmate.builder.detection.serializedobject.IncompatibleSerializedObjectException.incompatibleSerializedObjectException;
-import static com.envimate.mapmate.definitions.types.FullType.typeOfField;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.lang.reflect.Modifier.*;
 
@@ -53,13 +53,13 @@ public final class SerializationField {
     }
 
     public static SerializationField fromPublicField(final FullType declaringType,
-                                                     final Field field) {
+                                                     final ResolvedField field) {
         validateNotNull(declaringType, "declaringType");
         validateNotNull(field, "field");
-        validateFieldModifiers(declaringType, field);
-        final FullType fullType = typeOfField(field);
-        final String name = field.getName();
-        final Function<Object, Object> query = object -> readField(object, field);
+        validateFieldModifiers(declaringType, field.field());
+        final FullType fullType = field.type();
+        final String name = field.name();
+        final Function<Object, Object> query = object -> readField(object, field.field());
         return serializationField(fullType, name, query);
     }
 

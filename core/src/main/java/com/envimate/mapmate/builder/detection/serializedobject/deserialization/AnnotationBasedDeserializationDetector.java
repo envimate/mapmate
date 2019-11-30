@@ -22,6 +22,7 @@
 package com.envimate.mapmate.builder.detection.serializedobject.deserialization;
 
 import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.resolver.ResolvedMethod;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
 import lombok.AccessLevel;
@@ -30,14 +31,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 
 import static com.envimate.mapmate.builder.detection.serializedobject.IncompatibleSerializedObjectException.incompatibleSerializedObjectException;
+import static com.envimate.mapmate.definitions.types.resolver.ResolvedMethod.resolvePublicMethods;
 import static com.envimate.mapmate.deserialization.deserializers.serializedobjects.MethodSerializedObjectDeserializer.methodDeserializer;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
-import static java.util.Arrays.stream;
+import static java.lang.reflect.Modifier.isStatic;
 import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toList;
 
@@ -55,11 +56,9 @@ public final class AnnotationBasedDeserializationDetector implements SerializedO
 
     @Override
     public Optional<SerializedObjectDeserializer> detect(final FullType type, final SerializationFields fields) {
-        final List<Method> annotatedDeserializationMethods = stream(type.type().getMethods())
-                .filter(method -> {
-                    final Annotation[] annotations = method.getAnnotationsByType(this.annotation);
-                    return annotations.length > 0;
-                })
+        final List<ResolvedMethod> annotatedDeserializationMethods = resolvePublicMethods(type).stream()
+                .filter(resolvedMethod -> isStatic(resolvedMethod.method().getModifiers()))
+                .filter(method -> method.method().getAnnotationsByType(this.annotation).length > 0)
                 .collect(toList());
 
         if (annotatedDeserializationMethods.isEmpty()) {
@@ -75,7 +74,7 @@ public final class AnnotationBasedDeserializationDetector implements SerializedO
                     annotatedDeserializationMethods
             );
         }
-        final Method deserializationMethod = annotatedDeserializationMethods.get(0);
+        final ResolvedMethod deserializationMethod = annotatedDeserializationMethods.get(0);
         return Optional.of(methodDeserializer(type, deserializationMethod));
     }
 }

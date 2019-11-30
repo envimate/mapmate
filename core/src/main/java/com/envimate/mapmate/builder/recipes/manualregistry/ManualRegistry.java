@@ -27,6 +27,8 @@ import com.envimate.mapmate.builder.recipes.Recipe;
 import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
 import com.envimate.mapmate.definitions.Definition;
 import com.envimate.mapmate.definitions.SerializedObjectDefinition;
+import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.resolver.ResolvedField;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializedObjectSerializer;
@@ -44,6 +46,7 @@ import static com.envimate.mapmate.builder.detection.serializedobject.fields.Mod
 import static com.envimate.mapmate.definitions.CustomPrimitiveDefinition.customPrimitiveDefinition;
 import static com.envimate.mapmate.definitions.SerializedObjectDefinition.serializedObjectDefinition;
 import static com.envimate.mapmate.definitions.types.FullType.fullType;
+import static com.envimate.mapmate.definitions.types.resolver.ResolvedField.resolvedPublicFields;
 import static com.envimate.mapmate.deserialization.deserializers.serializedobjects.MethodSerializedObjectDeserializer.methodNameDeserializer;
 import static com.envimate.mapmate.serialization.serializers.serializedobject.SerializedObjectSerializer.serializedObjectSerializer;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
@@ -103,10 +106,12 @@ public final class ManualRegistry implements Recipe {
     public ManualRegistry withSerializedObject(final Class<?> type,
                                                final Field[] serializedFields,
                                                final String deserializationMethodName) {
-        final SerializedObjectDeserializer deserializer = methodNameDeserializer(fullType(type), deserializationMethodName, serializedFields);
-        final SerializationFields serializationFields = FIELD_DETECTOR.detect(fullType(type));
-        final SerializedObjectSerializer serializer = serializedObjectSerializer(fullType(type), serializationFields);
-        final SerializedObjectDefinition serializedObject = serializedObjectDefinition(fullType(type), serializer, deserializer);
+        final FullType fullType = fullType(type);
+        final List<ResolvedField> resolvedFields = resolvedPublicFields(fullType);
+        final SerializedObjectDeserializer deserializer = methodNameDeserializer(fullType, deserializationMethodName, resolvedFields);
+        final SerializationFields serializationFields = FIELD_DETECTOR.detect(fullType);
+        final SerializedObjectSerializer serializer = serializedObjectSerializer(fullType, serializationFields);
+        final SerializedObjectDefinition serializedObject = serializedObjectDefinition(fullType, serializer, deserializer);
         return this.withSerializedObject(serializedObject);
     }
 

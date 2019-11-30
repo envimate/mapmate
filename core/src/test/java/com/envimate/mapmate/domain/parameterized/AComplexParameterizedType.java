@@ -19,17 +19,20 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions;
+package com.envimate.mapmate.domain.parameterized;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-public final class DefinitionNotFoundException extends RuntimeException {
-    private DefinitionNotFoundException(final String msg) {
-        super(msg);
-    }
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class AComplexParameterizedType<T> {
+    public final T value;
 
-    public static DefinitionNotFoundException definitionNotFound(final FullType targetType, final String dump) {
-        final String msg = String.format("no definition found for type '%s'. Known definitions are: %n%s", targetType.description(), dump);
-        return new DefinitionNotFoundException(msg);
+    public static <T> AComplexParameterizedType<T> deserialize(final T value) {
+        return new AComplexParameterizedType<>(value);
     }
 }

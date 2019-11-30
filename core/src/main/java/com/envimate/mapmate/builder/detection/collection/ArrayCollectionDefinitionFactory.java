@@ -34,6 +34,7 @@ import lombok.ToString;
 import java.util.Optional;
 
 import static com.envimate.mapmate.definitions.CollectionDefinition.collectionDefinition;
+import static com.envimate.mapmate.definitions.types.TypeVariableName.arrayComponentName;
 import static com.envimate.mapmate.deserialization.deserializers.collections.ArrayCollectionDeserializer.arrayDeserializer;
 import static com.envimate.mapmate.serialization.serializers.collections.ArrayCollectionSerializer.arraySerializer;
 import static java.lang.String.format;
@@ -59,7 +60,7 @@ public final class ArrayCollectionDefinitionFactory implements DefinitionFactory
             throw new UnsupportedOperationException(format(
                     "This should never happen. An array of type '%s' has more than one type parameter", type.description()));
         }
-        final FullType genericType = type.typeParameters().get(0);
+        final FullType genericType = type.typeParameters().get(arrayComponentName());
 
         final CollectionSerializer serializer = arraySerializer();
         final CollectionDeserializer deserializer = arrayDeserializer(genericType.type());

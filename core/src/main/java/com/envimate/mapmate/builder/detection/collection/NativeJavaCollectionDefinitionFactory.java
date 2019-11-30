@@ -33,11 +33,11 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Function;
 
 import static com.envimate.mapmate.definitions.CollectionDefinition.collectionDefinition;
-import static com.envimate.mapmate.definitions.types.FullType.parameterizedType;
+import static com.envimate.mapmate.definitions.types.TypeVariableName.typeVariableName;
+import static com.envimate.mapmate.definitions.types.unresolved.UnresolvedType.unresolvedType;
 import static com.envimate.mapmate.deserialization.deserializers.collections.ListCollectionDeserializer.listDeserializer;
 import static com.envimate.mapmate.serialization.serializers.collections.ListCollectionSerializer.listSerializer;
 import static java.lang.String.format;
-import static java.util.Collections.singletonList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
@@ -79,7 +79,7 @@ public final class NativeJavaCollectionDefinitionFactory implements DefinitionFa
             throw new UnsupportedOperationException(format(
                     "This should never happen. A collection of type '%s' has more than one type parameter", type.description()));
         }
-        final FullType genericType = type.typeParameters().get(0);
+        final FullType genericType = type.typeParameters().get(typeVariableName("E"));
         final Definition definition = FACTORIES.get(type.type()).apply(genericType);
         return of(definition);
     }
@@ -90,7 +90,7 @@ public final class NativeJavaCollectionDefinitionFactory implements DefinitionFa
         final Function<FullType, Definition> factory = genericType -> {
             final CollectionSerializer serializer = listSerializer();
             final CollectionDeserializer deserializer = listDeserializer(mapper);
-            final FullType fullType = parameterizedType(collectionType, singletonList(genericType));
+            final FullType fullType = unresolvedType(collectionType).resolve(genericType);
             return collectionDefinition(fullType, genericType, serializer, deserializer);
         };
         FACTORIES.put(collectionType, factory);

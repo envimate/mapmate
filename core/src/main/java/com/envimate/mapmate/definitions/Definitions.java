@@ -49,7 +49,7 @@ public final class Definitions {
 
     public Definition getDefinitionForType(final FullType targetType) {
         return getOptionalDefinitionForType(targetType)
-                .orElseThrow(() -> definitionNotFound(targetType));
+                .orElseThrow(() -> definitionNotFound(targetType, dump()));
     }
 
     public Optional<Definition> getOptionalDefinitionForType(final FullType targetType) {

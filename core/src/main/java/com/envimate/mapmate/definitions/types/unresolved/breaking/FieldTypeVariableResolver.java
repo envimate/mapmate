@@ -19,37 +19,37 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.detection.serializedobject.fields;
+package com.envimate.mapmate.definitions.types.unresolved.breaking;
 
 import com.envimate.mapmate.definitions.types.FullType;
-import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationField;
-import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.List;
+import java.lang.reflect.Field;
 
-import static com.envimate.mapmate.definitions.types.resolver.ResolvedField.resolvedPublicFields;
-import static com.envimate.mapmate.serialization.serializers.serializedobject.SerializationField.fromPublicField;
-import static com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields.serializationFields;
-import static java.util.stream.Collectors.toList;
+import static com.envimate.mapmate.definitions.types.FullType.typeOfObject;
+import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class ModifierFieldDetector implements FieldDetector {
+public final class FieldTypeVariableResolver implements TypeVariableResolver {
+    private final Field field;
 
-    public static FieldDetector modifierBased() {
-        return new ModifierFieldDetector();
+    public static TypeVariableResolver fieldTypeVariableResolver(final Field field) {
+        validateNotNull(field, "field");
+        return new FieldTypeVariableResolver(field);
     }
 
     @Override
-    public SerializationFields detect(final FullType type) {
-        final List<SerializationField> list = resolvedPublicFields(type).stream()
-                .map(resolvedField -> fromPublicField(type, resolvedField))
-                .collect(toList());
-        return serializationFields(list);
+    public FullType resolve(final Object object) {
+        try {
+            final Object value = this.field.get(object);
+            return typeOfObject(value);
+        } catch (final IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

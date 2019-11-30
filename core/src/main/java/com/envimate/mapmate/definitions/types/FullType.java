@@ -26,99 +26,42 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.lang.reflect.*;
-import java.util.List;
+import java.util.Map;
 
-import static com.envimate.mapmate.definitions.types.UnsupportedJvmFeatureInTypeException.unsupportedJvmFeatureInTypeException;
+import static com.envimate.mapmate.definitions.types.TypeVariableName.arrayComponentName;
+import static com.envimate.mapmate.definitions.types.unresolved.UnresolvedType.unresolvedType;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.lang.String.format;
-import static java.lang.reflect.Array.newInstance;
-import static java.util.Arrays.stream;
-import static java.util.Collections.*;
+import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class FullType {
     private final Class<?> type;
-    private final List<FullType> typeParameters;
+    private final Map<TypeVariableName, FullType> typeParameters;
 
     public static FullType typeOfObject(final Object object) {
         validateNotNull(object, "object");
-        return fullType(object.getClass());
-    }
-
-    public static FullType typeOfParameter(final Parameter parameter) {
-        validateNotNull(parameter, "parameter");
-        final Type type = parameter.getParameterizedType();
-        return fromType(type);
-    }
-
-    public static FullType typeOfField(final Field field) {
-        validateNotNull(field, "field");
-        final Type type = field.getGenericType();
-        return fromType(type);
-    }
-
-    public static FullType fromType(final Type type) {
-        validateNotNull(type, "type");
-        if (type instanceof Class) {
-            return fullType((Class<?>) type);
-        }
-        if (type instanceof ParameterizedType) {
-            return fromParameterizedType((ParameterizedType) type);
-        }
-        if (type instanceof GenericArrayType) {
-            return fromGenericArrayType((GenericArrayType) type);
-        }
-        if(type instanceof WildcardType) {
-            return fromWildcardType((WildcardType) type);
-        }
-        if(type instanceof TypeVariable) {
-            return fromTypeVariable((TypeVariable<?>) type);
-        }
-        throw unsupportedJvmFeatureInTypeException(format("Unsupported 'Type' implementation by class '%s' on object '%s'", type.getClass(), type));
-    }
-
-    private static FullType fromParameterizedType(final ParameterizedType type) {
-        final Type[] actualTypeArguments = type.getActualTypeArguments();
-        final List<FullType> typeParameters = stream(actualTypeArguments)
-                .map(FullType::fromType)
-                .collect(toList());
-        return parameterizedType((Class<?>) type.getRawType(), typeParameters);
-    }
-
-    private static FullType fromGenericArrayType(final GenericArrayType type) {
-        final Type componentType = type.getGenericComponentType();
-        final FullType fullComponentType = fromType(componentType);
-        final Class<?> arrayType = newInstance(fullComponentType.type, 0).getClass();
-        return parameterizedType(arrayType, singletonList(fullComponentType));
-    }
-
-    private static FullType fromWildcardType(final WildcardType type) {
-        throw unsupportedJvmFeatureInTypeException(format("MapMate does not support wildcard generics but found '%s'", type));
-    }
-
-    private static FullType fromTypeVariable(final TypeVariable<?> type) {
-        throw unsupportedJvmFeatureInTypeException(
-                format("MapMate does not support type variables but found '%s'", type.getName()));
+        return unresolvedType(object.getClass()).resolveFromObject(object);
     }
 
     public static FullType fullType(final Class<?> type) {
         validateNotNull(type, "type");
-        final List<FullType> typeParameters;
+        final Map<TypeVariableName, FullType> typeParameters;
         if (type.isArray()) {
             final FullType componentType = fullType(type.getComponentType());
-            typeParameters = singletonList(componentType);
+            typeParameters = Map.of(arrayComponentName(), componentType);
+        } else if(type.getTypeParameters().length == 0) {
+            typeParameters = Map.of();
         } else {
-            typeParameters = emptyList();
+            throw new UnsupportedOperationException(format("Type variables of '%s' cannot be resolved", type.getName()));
         }
         return parameterizedType(type, typeParameters);
     }
 
-    public static FullType parameterizedType(final Class<?> type, final List<FullType> typeParameters) {
+    public static FullType parameterizedType(final Class<?> type, final Map<TypeVariableName, FullType> typeParameters) {
         validateNotNull(type, "type");
         validateNotNull(typeParameters, "typeParameters");
         if (type.isArray() && typeParameters.size() != 1) {
@@ -132,8 +75,15 @@ public final class FullType {
         return this.type;
     }
 
-    public List<FullType> typeParameters() {
-        return unmodifiableList(this.typeParameters);
+    public Map<TypeVariableName, FullType> typeParameters() {
+        return unmodifiableMap(this.typeParameters);
+    }
+
+    public FullType resolveTypeVariable(final TypeVariableName name) {
+        if(!this.typeParameters.containsKey(name)) {
+            throw new UnsupportedOperationException(format("No type variable with name '%s'", name.name()));
+        }
+        return this.typeParameters.get(name);
     }
 
     public String description() {
@@ -141,10 +91,10 @@ public final class FullType {
             return this.type.getName();
         }
         if (this.type.isArray()) {
-            final FullType theSingleTypeParameter = this.typeParameters.get(0);
-            return theSingleTypeParameter.description() + "[]";
+            final FullType componentType = this.typeParameters.get(arrayComponentName());
+            return componentType.description() + "[]";
         }
-        final String parametersString = this.typeParameters.stream()
+        final String parametersString = this.typeParameters().values().stream()
                 .map(FullType::description)
                 .collect(joining(", ", "<", ">"));
         return this.type.getName() + parametersString;

@@ -19,20 +19,10 @@
  * under the License.
  */
 
-package com.envimate.mapmate.domain.valid;
+package com.envimate.mapmate.definitions.types.unresolved.breaking;
 
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import com.envimate.mapmate.definitions.types.FullType;
 
-@ToString
-@EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class AComplexParameterizedType<T> {
-    public final T value;
-
-    public static <T> AComplexParameterizedType<T> deserialize(final T value) {
-        return new AComplexParameterizedType<>(value);
-    }
+public interface TypeVariableResolver {
+    FullType resolve(Object object);
 }

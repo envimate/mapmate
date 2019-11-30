@@ -22,6 +22,7 @@
 package com.envimate.mapmate.builder.detection.serializedobject.deserialization;
 
 import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.resolver.ResolvedConstructor;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
 import lombok.AccessLevel;
@@ -29,15 +30,12 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Optional;
 
 import static com.envimate.mapmate.builder.detection.serializedobject.deserialization.Common.findMatchingMethod;
+import static com.envimate.mapmate.definitions.types.resolver.ResolvedConstructor.resolvePublicConstructors;
 import static com.envimate.mapmate.deserialization.deserializers.serializedobjects.ConstructorSerializedObjectDeserializer.createDeserializer;
-import static java.lang.reflect.Modifier.isPublic;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toList;
 
 @ToString
 @EqualsAndHashCode
@@ -50,11 +48,8 @@ public final class ConstructorBasedDeserializationDetector implements Serialized
 
     @Override
     public Optional<SerializedObjectDeserializer> detect(final FullType type, final SerializationFields fields) {
-        final Constructor<?>[] constructors = type.type().getConstructors();
-        final List<Constructor<?>> deserializerConstructors = stream(constructors)
-                .filter(constructor -> isPublic(constructor.getModifiers()))
-                .collect(toList());
-        return findMatchingMethod(fields.typesList(), deserializerConstructors)
+        final List<ResolvedConstructor> constructors = resolvePublicConstructors(type);
+        return findMatchingMethod(fields.typesList(), constructors, ResolvedConstructor::parameters)
                 .map(constructor -> createDeserializer(type, constructor));
     }
 }

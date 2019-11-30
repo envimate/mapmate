@@ -30,11 +30,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
-import static com.envimate.mapmate.definitions.types.FullType.fromType;
+import static com.envimate.mapmate.definitions.types.resolver.TypeResolver.resolveType;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.util.Arrays.asList;
@@ -65,14 +67,17 @@ public final class ClassScannerRecipe implements Recipe {
     }
 
     private static List<FullType> referencesIn(final Class<?> clazz) {
+        final FullType fullType = FullType.fullType(clazz);
         final List<FullType> classes = new LinkedList<>();
         stream(clazz.getDeclaredMethods())
                 .filter(method -> isPublic(method.getModifiers()))
                 .filter(method -> !OBJECT_METHODS.contains(method.getName()))
                 .forEach(method -> {
-                    classes.add(fromType(method.getGenericReturnType()));
+                    resolveType(method.getGenericReturnType(), fullType).ifPresent(classes::add);
                     stream(method.getParameters())
-                            .map(FullType::typeOfParameter)
+                            .map(Parameter::getParameterizedType)
+                            .map(type -> resolveType(type, fullType))
+                            .flatMap(Optional::stream)
                             .forEach(classes::add);
                 });
         return classes;

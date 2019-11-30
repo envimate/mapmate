@@ -22,17 +22,17 @@
 package com.envimate.mapmate.builder.detection.serializedobject.deserialization;
 
 import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.resolver.ResolvedMethod;
+import com.envimate.mapmate.definitions.types.resolver.ResolvedParameter;
 
-import java.lang.reflect.Executable;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
-import static java.lang.reflect.Modifier.isPublic;
+import static com.envimate.mapmate.definitions.types.resolver.ResolvedMethod.resolvePublicMethods;
 import static java.lang.reflect.Modifier.isStatic;
-import static java.util.Arrays.stream;
 import static java.util.Optional.empty;
-import static java.util.Optional.ofNullable;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 
 public final class Common {
@@ -40,43 +40,47 @@ public final class Common {
     private Common() {
     }
 
-    public static List<Method> detectDeserializerMethods(final FullType type) {
-        final Method[] methods = type.type().getMethods();
-        return stream(methods)
-                .filter(method -> isStatic(method.getModifiers()))
-                .filter(method -> isPublic(method.getModifiers()))
-                .filter(method -> method.getReturnType().equals(type.type()))
-                .filter(method -> method.getParameterCount() > 0)
+    public static List<ResolvedMethod> detectDeserializerMethods(final FullType type) {
+        return resolvePublicMethods(type).stream()
+                .filter(resolvedMethod -> isStatic(resolvedMethod.method().getModifiers()))
+                .filter(resolvedMethod -> resolvedMethod.returnType().equals(type))
+                .filter(resolvedMethod -> resolvedMethod.parameters().size() > 0)
                 .collect(toList());
     }
 
-    public static <T extends Executable> Optional<T> findMatchingMethod(final List<FullType> serializedFields, final List<T> methods) {
+    public static <T> Optional<T> findMatchingMethod(final List<FullType> serializedFields,
+                                                     final List<T> candidates,
+                                                     final Function<T, List<ResolvedParameter>> parameterQuery) {
         if (serializedFields.isEmpty()) {
             return empty();
         }
 
-        T deserializationConstructor = null;
-        if (methods.size() == 1) {
-            deserializationConstructor = methods.get(0);
+        T match = null;
+        if (candidates.size() == 1) {
+            match = candidates.get(0);
         } else {
-            final Optional<T> firstCompatibleDeserializerConstructor = methods.stream()
-                    .filter(constructor -> isMethodCompatibleWithFields(constructor, serializedFields))
+            final Optional<T> firstCompatibleDeserializerConstructor = candidates.stream()
+                    .filter(candidate -> isMethodCompatibleWithFields(parameterQuery.apply(candidate), serializedFields))
                     .findFirst();
             if (firstCompatibleDeserializerConstructor.isPresent()) {
-                deserializationConstructor = firstCompatibleDeserializerConstructor.get();
+                match = firstCompatibleDeserializerConstructor.get();
             }
         }
 
-        if (isMostLikelyACustomPrimitive(serializedFields, deserializationConstructor)) {
+        if(match == null) {
             return empty();
         }
 
-        return ofNullable(deserializationConstructor);
+        if (isMostLikelyACustomPrimitive(serializedFields, parameterQuery.apply(match))) {
+            return empty();
+        }
+
+        return of(match);
     }
 
-    static boolean isMethodCompatibleWithFields(final Executable method, final List<FullType> fields) {
-        final List<FullType> parameterTypes = stream(method.getParameters())
-                .map(FullType::typeOfParameter)
+    static boolean isMethodCompatibleWithFields(final List<ResolvedParameter> parameters, final List<FullType> fields) {
+        final List<FullType> parameterTypes = parameters.stream()
+                .map(ResolvedParameter::type)
                 .collect(toList());
         if (fields.size() != parameterTypes.size()) {
             return false;
@@ -91,10 +95,10 @@ public final class Common {
         return true;
     }
 
-    private static boolean isMostLikelyACustomPrimitive(final List<FullType> fields, final Executable executable) {
+    private static boolean isMostLikelyACustomPrimitive(final List<FullType> fields, final List<ResolvedParameter> parameters) {
         final boolean isMostLikelyACustomPrimitive = fields.isEmpty() &&
-                executable.getParameterCount() == 1 &&
-                executable.getParameterTypes()[0] == String.class;
+                parameters.size() == 1 &&
+                parameters.get(0).parameter().getType() == String.class;
         return isMostLikelyACustomPrimitive;
     }
 }

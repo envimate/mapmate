@@ -63,13 +63,6 @@ public final class BuilderSpecs {
     }
 
     @Test
-    public void classesWithTypeVariablesAreIgnored() {
-        given(aMapMate().withManuallyAddedType(AComplexParameterizedType.class).build())
-                .when().mapMateSerializes(AComplexParameterizedType.deserialize(emptyList())).withMarshallingType(json())
-                .anExceptionIsThrownWithAMessageContaining("no definition found for type 'com.envimate.mapmate.domain.valid.AComplexParameterizedType'");
-    }
-
-    @Test
     public void collectionsWithTypeVariablesAreIgnored() {
         given(aMapMate().withManuallyAddedType(AComplexTypeWithWildcardedCollection.class).build())
                 .when().mapMateSerializes(AComplexTypeWithWildcardedCollection.deserialize(emptyList())).withMarshallingType(json())

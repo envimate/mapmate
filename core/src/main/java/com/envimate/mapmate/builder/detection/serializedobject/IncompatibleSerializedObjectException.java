@@ -26,19 +26,8 @@ public final class IncompatibleSerializedObjectException extends RuntimeExceptio
         super(message);
     }
 
-    private IncompatibleSerializedObjectException(final String message, final Exception cause) {
-        super(message, cause);
-    }
-
     public static IncompatibleSerializedObjectException incompatibleSerializedObjectException(final String messageFormat,
                                                                                               final Object... args) {
         return new IncompatibleSerializedObjectException(String.format(messageFormat, args));
     }
-
-    public static IncompatibleSerializedObjectException incompatibleserializedObjectException(final Exception cause,
-                                                                                              final String messageFormat,
-                                                                                              final Object... args) {
-        return new IncompatibleSerializedObjectException(String.format(messageFormat, args), cause);
-    }
-
 }
