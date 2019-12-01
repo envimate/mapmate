@@ -21,7 +21,8 @@
 
 package com.envimate.mapmate.definitions.types.resolver;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +30,8 @@ import lombok.ToString;
 
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Optional;
 
-import static com.envimate.mapmate.definitions.types.resolver.TypeResolver.resolveType;
+import static com.envimate.mapmate.definitions.types.TypeResolver.resolveType;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.lang.reflect.Modifier.*;
 import static java.util.Arrays.stream;
@@ -42,22 +42,23 @@ import static java.util.stream.Collectors.toList;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ResolvedField {
     private final String name;
-    private final FullType type;
+    private final ResolvedType type;
     private final Field field;
 
-    public static List<ResolvedField> resolvedPublicFields(final FullType fullType) {
-        final Class<?> type = fullType.type();
+    public static List<ResolvedField> resolvedPublicFields(final ClassType fullType) {
+        final Class<?> type = fullType.assignableType();
         return stream(type.getFields())
                 .filter(field -> isPublic(field.getModifiers()))
                 .filter(field -> !isStatic(field.getModifiers()))
                 .filter(field -> !isTransient(field.getModifiers()))
-                .map(field -> resolveType(field.getGenericType(), fullType)
-                        .map(resolved -> resolvedField(field.getName(), resolved, field)))
-                .flatMap(Optional::stream)
+                .map(field -> {
+                    final ResolvedType resolved = resolveType(field.getGenericType(), fullType);
+                    return resolvedField(field.getName(), resolved, field);
+                })
                 .collect(toList());
     }
 
-    public static ResolvedField resolvedField(final String name, final FullType type, final Field field) {
+    public static ResolvedField resolvedField(final String name, final ResolvedType type, final Field field) {
         validateNotNull(name, "name");
         validateNotNull(type, "type");
         validateNotNull(field, "field");
@@ -68,7 +69,7 @@ public final class ResolvedField {
         return this.name;
     }
 
-    public FullType type() {
+    public ResolvedType type() {
         return this.type;
     }
 

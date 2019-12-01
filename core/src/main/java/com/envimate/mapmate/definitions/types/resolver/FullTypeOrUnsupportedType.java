@@ -19,17 +19,13 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.detection;
+package com.envimate.mapmate.definitions.types.resolver;
 
-import com.envimate.mapmate.builder.DefinitionSeed;
-import com.envimate.mapmate.builder.RequiredCapabilities;
-import com.envimate.mapmate.builder.SeedReason;
-import com.envimate.mapmate.definitions.Definition;
 import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.ResolvedType;
+import lombok.RequiredArgsConstructor;
 
-import java.util.Optional;
-
-public interface DefinitionFactory {
-    Optional<Definition> analyze(DefinitionSeed context, ResolvedType type, RequiredCapabilities capabilities);
+@RequiredArgsConstructor
+public final class FullTypeOrUnsupportedType {
+    private final ClassType fullType;
+    private final String unsupportedType;
 }

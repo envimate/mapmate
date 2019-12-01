@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.definitions.types.resolver;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,6 @@ import lombok.ToString;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
-import java.util.Optional;
 
 import static com.envimate.mapmate.definitions.types.resolver.ResolvedParameter.resolveParameters;
 import static java.lang.reflect.Modifier.isPublic;
@@ -44,18 +43,17 @@ public final class ResolvedConstructor {
     private final List<ResolvedParameter> parameters;
     private final Constructor<?> constructor;
 
-    public static List<ResolvedConstructor> resolvePublicConstructors(final FullType fullType) {
-        return stream(fullType.type().getConstructors())
+    public static List<ResolvedConstructor> resolvePublicConstructors(final ClassType fullType) {
+        return stream(fullType.assignableType().getConstructors())
                 .filter(constructor -> isPublic(constructor.getModifiers()))
                 .map(constructor -> resolveConstructor(constructor, fullType))
-                .flatMap(Optional::stream)
                 .collect(toList());
     }
 
-    public static Optional<ResolvedConstructor> resolveConstructor(final Constructor<?> constructor,
-                                                                   final FullType fullType) {
-        return resolveParameters(constructor, fullType)
-                .map(parameters -> new ResolvedConstructor(parameters, constructor));
+    public static ResolvedConstructor resolveConstructor(final Constructor<?> constructor,
+                                                                   final ClassType fullType) {
+        final List<ResolvedParameter> parameters = resolveParameters(constructor, fullType);
+        return new ResolvedConstructor(parameters, constructor);
     }
 
     public List<ResolvedParameter> parameters() {

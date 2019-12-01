@@ -21,14 +21,14 @@
 
 package com.envimate.mapmate.specs.givenwhenthen;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
 
-import static com.envimate.mapmate.definitions.types.FullType.fullType;
+import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithoutGenerics;
 
 public interface ToStage {
     default Then toTheType(Class<?> type) {
-        return toTheType(fullType(type));
+        return toTheType(fromClassWithoutGenerics(type));
     }
 
-    Then toTheType(FullType fullType);
+    Then toTheType(ClassType fullType);
 }

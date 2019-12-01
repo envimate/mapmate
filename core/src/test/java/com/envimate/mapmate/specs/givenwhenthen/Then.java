@@ -25,7 +25,8 @@ import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
 import com.envimate.mapmate.definitions.Definition;
 import com.envimate.mapmate.definitions.Definitions;
 import com.envimate.mapmate.definitions.SerializedObjectDefinition;
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import com.envimate.mapmate.deserialization.validation.AggregatedValidationException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -87,12 +88,12 @@ public final class Then {
     public Then theDefinitionsContainExactlyTheCustomPrimitives(final Class<?>... types) {
         final Definitions definitions = this.thenData.getDefinitions();
         final List<Class<?>> actualTypes = stream(types)
-                .map(FullType::fullType)
+                .map(ClassType::fromClassWithoutGenerics)
                 .map(definitions::getOptionalDefinitionForType)
                 .flatMap(Optional::stream)
                 .filter(definition -> definition instanceof CustomPrimitiveDefinition)
                 .map(Definition::type)
-                .map(FullType::type)
+                .map(ResolvedType::assignableType)
                 .collect(toList());
         assertThat(actualTypes, containsInAnyOrder(types));
         assertThat(definitions.countCustomPrimitives(), is(types.length));
@@ -102,12 +103,12 @@ public final class Then {
     public Then theDefinitionsContainExactlyTheSerializedObjects(final Class<?>... types) {
         final Definitions definitions = this.thenData.getDefinitions();
         final List<Class<?>> actualTypes = stream(types)
-                .map(FullType::fullType)
+                .map(ClassType::fromClassWithoutGenerics)
                 .map(definitions::getOptionalDefinitionForType)
                 .flatMap(Optional::stream)
                 .filter(definition -> definition instanceof SerializedObjectDefinition)
                 .map(Definition::type)
-                .map(FullType::type)
+                .map(ResolvedType::assignableType)
                 .collect(toList());
         assertThat(actualTypes, containsInAnyOrder(types));
         assertThat(definitions.countSerializedObjects(), is(types.length));

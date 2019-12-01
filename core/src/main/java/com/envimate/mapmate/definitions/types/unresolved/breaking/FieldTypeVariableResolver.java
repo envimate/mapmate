@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.definitions.types.unresolved.breaking;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ import lombok.ToString;
 
 import java.lang.reflect.Field;
 
-import static com.envimate.mapmate.definitions.types.FullType.typeOfObject;
+import static com.envimate.mapmate.definitions.types.ClassType.typeOfObject;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
 @ToString
@@ -44,7 +44,7 @@ public final class FieldTypeVariableResolver implements TypeVariableResolver {
     }
 
     @Override
-    public FullType resolve(final Object object) {
+    public ClassType resolve(final Object object) {
         try {
             final Object value = this.field.get(object);
             return typeOfObject(value);

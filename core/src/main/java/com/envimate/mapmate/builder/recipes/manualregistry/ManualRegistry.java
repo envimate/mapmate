@@ -22,13 +22,14 @@
 package com.envimate.mapmate.builder.recipes.manualregistry;
 
 import com.envimate.mapmate.MapMateBuilder;
+import com.envimate.mapmate.builder.DefinitionSeed;
 import com.envimate.mapmate.builder.SeedReason;
 import com.envimate.mapmate.builder.detection.serializedobject.fields.FieldDetector;
 import com.envimate.mapmate.builder.recipes.Recipe;
 import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
 import com.envimate.mapmate.definitions.Definition;
 import com.envimate.mapmate.definitions.SerializedObjectDefinition;
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
 import com.envimate.mapmate.definitions.types.resolver.ResolvedField;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
@@ -43,11 +44,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
+import static com.envimate.mapmate.builder.DefinitionSeed.definitionSeed;
+import static com.envimate.mapmate.builder.RequiredCapabilities.all;
 import static com.envimate.mapmate.builder.SeedReason.manuallyAddedIn;
 import static com.envimate.mapmate.builder.detection.serializedobject.fields.ModifierFieldDetector.modifierBased;
 import static com.envimate.mapmate.definitions.CustomPrimitiveDefinition.customPrimitiveDefinition;
 import static com.envimate.mapmate.definitions.SerializedObjectDefinition.serializedObjectDefinition;
-import static com.envimate.mapmate.definitions.types.FullType.fullType;
+import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithoutGenerics;
 import static com.envimate.mapmate.definitions.types.resolver.ResolvedField.resolvedPublicFields;
 import static com.envimate.mapmate.deserialization.deserializers.serializedobjects.MethodSerializedObjectDeserializer.methodNameDeserializer;
 import static com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields.serializationFields;
@@ -74,9 +77,10 @@ public final class ManualRegistry implements Recipe {
     public <T> ManualRegistry withCustomPrimitive(final Class<T> type,
                                                   final Function<T, String> serializationMethod,
                                                   final Function<String, T> deserializationMethod) {
+        final DefinitionSeed seed = definitionSeed(fromClassWithoutGenerics(type)).withCapability(all(), manuallyAddedIn(ManualRegistry.class, "withCustomPrimitive"));
         return this.withCustomPrimitive(customPrimitiveDefinition(
-                manuallyAddedIn(ManualRegistry.class, "withCustomPrimitive"),
-                fullType(type),
+                seed,
+                fromClassWithoutGenerics(type),
                 object -> serializationMethod.apply((T) object),
                 value -> deserializationMethod.apply((String) value)));
     }
@@ -109,14 +113,16 @@ public final class ManualRegistry implements Recipe {
     public ManualRegistry withSerializedObject(final Class<?> type,
                                                final Field[] serializedFields,
                                                final String deserializationMethodName) {
-        final FullType fullType = fullType(type);
+        final ClassType fullType = fromClassWithoutGenerics(type);
         final List<ResolvedField> resolvedFields = resolvedPublicFields(fullType);
         final SerializedObjectDeserializer deserializer = methodNameDeserializer(fullType, deserializationMethodName, resolvedFields);
         final SerializationFields serializationFields = serializationFields(FIELD_DETECTOR.detect(fullType));
-        final SerializedObjectSerializer serializer = serializedObjectSerializer(fullType, serializationFields).orElseThrow();
+        final SerializedObjectSerializer serializer = serializedObjectSerializer(serializationFields).orElseThrow();
         final SeedReason reason = manuallyAddedIn(ManualRegistry.class, "withSerializedObject");
+
+        final DefinitionSeed definitionSeed = definitionSeed(fullType).withCapability(all(), reason);
         final SerializedObjectDefinition serializedObject = serializedObjectDefinition(
-                reason, fullType, serializer, deserializer
+                definitionSeed, fullType, serializer, deserializer
         );
         return this.withSerializedObject(serializedObject);
     }

@@ -21,9 +21,8 @@
 
 package com.envimate.mapmate.builder.detection;
 
-import com.envimate.mapmate.builder.RequiredCapabilities;
+import com.envimate.mapmate.builder.DefinitionSeed;
 import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.types.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -53,39 +52,35 @@ public final class SimpleDetector implements Detector {
     }
 
     @Override
-    public Optional<? extends Definition> detect(final FullType type, final RequiredCapabilities capabilities) {
-        final Optional<? extends Definition> collection = detectCollectionDefinition(type, capabilities);
+    public Optional<? extends Definition> detect(final DefinitionSeed context) {
+        final Optional<? extends Definition> collection = detectCollectionDefinition(context);
         if (collection.isPresent()) {
             return collection;
         }
 
-        final Optional<? extends Definition> customPrimitive = detectCustomPrimitive(type, capabilities);
+        final Optional<? extends Definition> customPrimitive = detectCustomPrimitive(context);
         if (customPrimitive.isPresent()) {
             return customPrimitive;
         }
-        return detectSerializedObject(type, capabilities);
+        return detectSerializedObject(context);
     }
 
-    private Optional<Definition> detectCollectionDefinition(final FullType type,
-                                                            final RequiredCapabilities capabilities) {
-        return detectIn(type, this.collectionDefinitionFactories, capabilities);
+    private Optional<Definition> detectCollectionDefinition(final DefinitionSeed context) {
+        return detectIn(context, this.collectionDefinitionFactories);
     }
 
-    private Optional<Definition> detectCustomPrimitive(final FullType type,
-                                                       final RequiredCapabilities capabilities) {
-        return detectIn(type, this.customPrimitiveDefinitionFactories, capabilities);
+    private Optional<Definition> detectCustomPrimitive(final DefinitionSeed context) {
+        return detectIn(context, this.customPrimitiveDefinitionFactories);
     }
 
-    private Optional<Definition> detectSerializedObject(final FullType type,
-                                                        final RequiredCapabilities capabilities) {
-        return detectIn(type, this.serializedObjectDefinitionFactories, capabilities);
+    private Optional<Definition> detectSerializedObject(final DefinitionSeed context) {
+        return detectIn(context, this.serializedObjectDefinitionFactories);
     }
 
-    private static Optional<Definition> detectIn(final FullType type,
-                                                 final List<DefinitionFactory> factories,
-                                                 final RequiredCapabilities capabilities) {
+    private static Optional<Definition> detectIn(final DefinitionSeed context,
+                                                 final List<DefinitionFactory> factories) {
         for (final DefinitionFactory factory : factories) {
-            final Optional<Definition> analyzedClass = factory.analyze(type, capabilities);
+            final Optional<Definition> analyzedClass = factory.analyze(context, context.type(), context.requiredCapabilities());
             if (analyzedClass.isPresent()) {
                 return analyzedClass;
             }

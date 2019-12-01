@@ -21,24 +21,32 @@
 
 package com.envimate.mapmate.builder;
 
-import com.envimate.mapmate.MapMateBuilder;
 import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.types.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.lang.reflect.Method;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SeedReason {
+    private final List<SeedReason> causes = new LinkedList<>();
     private final String description;
 
-    public static SeedReason becauseSerializedChildOf(final Definition definition) {
-        return new SeedReason("Serialization Child of " + definition);
+    public static SeedReason combinedSeedReason(final Set<SeedReason> reasons) {
+        final SeedReason reason = new SeedReason("Combination of other reasons");
+        reason.causes.addAll(reasons);
+        return reason;
+    }
+
+    public static SeedReason becauseChildOf(final DefinitionSeed parent) {
+        return new SeedReason("Serialization Child of " + parent);
     }
 
     public static SeedReason becauseDeserializationParameterOf(final Definition definition) {

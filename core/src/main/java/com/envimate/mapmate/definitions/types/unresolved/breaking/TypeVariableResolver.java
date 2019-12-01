@@ -21,8 +21,8 @@
 
 package com.envimate.mapmate.definitions.types.unresolved.breaking;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 
 public interface TypeVariableResolver {
-    FullType resolve(Object object);
+    ResolvedType resolve(Object object);
 }

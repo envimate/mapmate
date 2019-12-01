@@ -21,9 +21,7 @@
 
 package com.envimate.mapmate;
 
-import com.envimate.mapmate.builder.DefinitionSeeds;
-import com.envimate.mapmate.builder.RequiredCapabilities;
-import com.envimate.mapmate.builder.SeedReason;
+import com.envimate.mapmate.builder.*;
 import com.envimate.mapmate.builder.conventional.DetectorBuilder;
 import com.envimate.mapmate.builder.detection.Detector;
 import com.envimate.mapmate.builder.recipes.Recipe;
@@ -31,7 +29,7 @@ import com.envimate.mapmate.builder.scanning.PackageScanner;
 import com.envimate.mapmate.definitions.Definition;
 import com.envimate.mapmate.definitions.Definitions;
 import com.envimate.mapmate.definitions.DefinitionsBuilder;
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
 import com.envimate.mapmate.deserialization.Deserializer;
 import com.envimate.mapmate.deserialization.validation.*;
 import com.envimate.mapmate.injector.InjectorFactory;
@@ -45,6 +43,7 @@ import com.envimate.mapmate.serialization.Serializer;
 import java.util.*;
 
 import static com.envimate.mapmate.MapMate.mapMate;
+import static com.envimate.mapmate.builder.DefinitionSeed.definitionSeed;
 import static com.envimate.mapmate.builder.DefinitionSeeds.definitionSeeds;
 import static com.envimate.mapmate.builder.RequiredCapabilities.all;
 import static com.envimate.mapmate.builder.conventional.ConventionalDefinitionFactories.CUSTOM_PRIMITIVE_MAPPINGS;
@@ -52,7 +51,7 @@ import static com.envimate.mapmate.builder.conventional.ConventionalDetectors.co
 import static com.envimate.mapmate.builder.scanning.DefaultPackageScanner.defaultPackageScanner;
 import static com.envimate.mapmate.builder.scanning.PackageScannerRecipe.packageScannerRecipe;
 import static com.envimate.mapmate.definitions.DefinitionsBuilder.definitionsBuilder;
-import static com.envimate.mapmate.definitions.types.FullType.fullType;
+import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithoutGenerics;
 import static com.envimate.mapmate.deserialization.Deserializer.theDeserializer;
 import static com.envimate.mapmate.injector.InjectorFactory.injectorFactory;
 import static com.envimate.mapmate.marshalling.MarshallerRegistry.marshallerRegistry;
@@ -107,24 +106,30 @@ public final class MapMateBuilder {
                                                 final RequiredCapabilities capabilities) {
         validateNotNull(type, "type");
         final SeedReason reason = SeedReason.manuallyAddedIn(this.getClass(), "withManuallyAddedType");
-        final FullType fullType = fullType(type);
+        final ClassType fullType = fromClassWithoutGenerics(type);
         return withManuallyAddedType(reason, fullType, capabilities);
     }
 
     public MapMateBuilder withManuallyAddedType(final Class<?> type) {
         validateNotNull(type, "type");
-        return withManuallyAddedType(fullType(type));
+        return withManuallyAddedType(fromClassWithoutGenerics(type));
     }
 
-    public MapMateBuilder withManuallyAddedType(final SeedReason seedReason,
-                                                final FullType type,
-                                                final RequiredCapabilities capabilities) {
-        validateNotNull(type, "type");
-        this.definitionSeeds.add(seedReason, type, capabilities);
+    public MapMateBuilder withManuallyAddedSeed(final DefinitionSeed seed) {
+        validateNotNull(seed, "seed");
+        this.definitionSeeds.add(seed);
         return this;
     }
 
-    public MapMateBuilder withManuallyAddedType(final FullType type) {
+    public MapMateBuilder withManuallyAddedType(final SeedReason seedReason,
+                                                final ClassType type,
+                                                final RequiredCapabilities capabilities) {
+        validateNotNull(type, "type");
+        final DefinitionSeed seed = definitionSeed(type).withCapability(capabilities, seedReason);
+        return withManuallyAddedSeed(seed);
+    }
+
+    public MapMateBuilder withManuallyAddedType(final ClassType type) {
         return withManuallyAddedType(SeedReason.manuallyAdded(), type, all());
     }
 

@@ -21,8 +21,8 @@
 
 package com.envimate.mapmate.definitions;
 
-import com.envimate.mapmate.builder.SeedReason;
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.builder.DefinitionSeed;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import com.envimate.mapmate.definitions.universal.Universal;
 import com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
 import com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
@@ -40,28 +40,28 @@ import static java.util.Optional.ofNullable;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CustomPrimitiveDefinition implements Definition {
-    private final SeedReason reason;
-    private final FullType type;
+    private final DefinitionSeed context;
+    private final ResolvedType type;
     private final CustomPrimitiveSerializer serializer;
     private final CustomPrimitiveDeserializer deserializer;
 
     public static <T, U extends Universal> CustomPrimitiveDefinition customPrimitiveDefinition(
-            final SeedReason reason,
-            final FullType type,
+            final DefinitionSeed context,
+            final ResolvedType type,
             final CustomPrimitiveSerializer serializer,
             final CustomPrimitiveDeserializer deserializer
     ) {
-        return untypedCustomPrimitiveDefinition(reason, type, serializer, deserializer);
+        return untypedCustomPrimitiveDefinition(context, type, serializer, deserializer);
     }
 
     public static CustomPrimitiveDefinition untypedCustomPrimitiveDefinition(
-            final SeedReason reason,
-            final FullType type,
+            final DefinitionSeed context,
+            final ResolvedType type,
             final CustomPrimitiveSerializer serializer,
             final CustomPrimitiveDeserializer deserializer) {
-        validateNotNull(reason, "reason");
+        validateNotNull(context, "context");
         validateNotNull(type, "type");
-        return new CustomPrimitiveDefinition(reason, type, serializer, deserializer);
+        return new CustomPrimitiveDefinition(context, type, serializer, deserializer);
     }
 
     public Optional<CustomPrimitiveDeserializer> deserializer() {
@@ -73,12 +73,12 @@ public final class CustomPrimitiveDefinition implements Definition {
     }
 
     @Override
-    public FullType type() {
+    public ResolvedType type() {
         return this.type;
     }
 
     @Override
-    public SeedReason reason() {
-        return this.reason;
+    public DefinitionSeed context() {
+        return null;
     }
 }

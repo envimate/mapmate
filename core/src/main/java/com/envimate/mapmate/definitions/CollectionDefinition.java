@@ -21,8 +21,8 @@
 
 package com.envimate.mapmate.definitions;
 
-import com.envimate.mapmate.builder.SeedReason;
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.builder.DefinitionSeed;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import com.envimate.mapmate.deserialization.deserializers.collections.CollectionDeserializer;
 import com.envimate.mapmate.serialization.serializers.collections.CollectionSerializer;
 import lombok.AccessLevel;
@@ -36,26 +36,26 @@ import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CollectionDefinition implements Definition {
-    private final SeedReason reason;
-    private final FullType type;
-    private final FullType contentType;
+    private final DefinitionSeed context;
+    private final ResolvedType type;
+    private final ResolvedType contentType;
     private final CollectionSerializer serializer;
     private final CollectionDeserializer deserializer;
 
-    public static CollectionDefinition collectionDefinition(final SeedReason reason,
-                                                            final FullType type,
-                                                            final FullType contentType,
+    public static CollectionDefinition collectionDefinition(final DefinitionSeed context,
+                                                            final ResolvedType type,
+                                                            final ResolvedType contentType,
                                                             final CollectionSerializer serializer,
                                                             final CollectionDeserializer deserializer) {
-        validateNotNull(reason, "reason");
+        validateNotNull(context, "context");
         validateNotNull(type, "type");
         validateNotNull(contentType, "contentType");
         validateNotNull(serializer, "serializer");
         validateNotNull(deserializer, "deserializer");
-        return new CollectionDefinition(reason, type, contentType, serializer, deserializer);
+        return new CollectionDefinition(context, type, contentType, serializer, deserializer);
     }
 
-    public FullType contentType() {
+    public ResolvedType contentType() {
         return this.contentType;
     }
 
@@ -68,12 +68,12 @@ public final class CollectionDefinition implements Definition {
     }
 
     @Override
-    public FullType type() {
+    public ResolvedType type() {
         return this.type;
     }
 
     @Override
-    public SeedReason reason() {
-        return this.reason;
+    public DefinitionSeed context() {
+        return this.context;
     }
 }

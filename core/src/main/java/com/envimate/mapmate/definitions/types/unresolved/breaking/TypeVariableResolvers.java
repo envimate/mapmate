@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.definitions.types.unresolved.breaking;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -72,12 +72,11 @@ public final class TypeVariableResolvers {
         return new TypeVariableResolvers(relevantTypeVariables, resolverMap);
     }
 
-    public List<FullType> resolve(final Object object) {
-        final List<FullType> parameters = this.relevantTypeVariables.stream()
+    public List<ResolvedType> resolve(final Object object) {
+        return this.relevantTypeVariables.stream()
                 .map(this.typeVariableResolvers::get)
                 .map(resolver -> resolver.orElseThrow(UnsupportedOperationException::new))
                 .map(resolver -> resolver.resolve(object))
                 .collect(toList());
-        return parameters;
     }
 }

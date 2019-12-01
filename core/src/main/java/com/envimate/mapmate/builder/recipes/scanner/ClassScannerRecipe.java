@@ -22,27 +22,24 @@
 package com.envimate.mapmate.builder.recipes.scanner;
 
 import com.envimate.mapmate.MapMateBuilder;
-import com.envimate.mapmate.builder.SeedReason;
+import com.envimate.mapmate.builder.DefinitionSeed;
 import com.envimate.mapmate.builder.recipes.Recipe;
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.mapmate.definitions.types.resolver.ResolvedParameter;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.envimate.mapmate.builder.RequiredCapabilities.deserializationOnly;
 import static com.envimate.mapmate.builder.RequiredCapabilities.serializationOnly;
 import static com.envimate.mapmate.builder.SeedReason.becauseParameterTypeOfUseCaseMethod;
 import static com.envimate.mapmate.builder.SeedReason.becauseReturnTypeOfUseCaseMethod;
-import static com.envimate.mapmate.definitions.types.resolver.TypeResolver.resolveType;
+import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithoutGenerics;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
-import static java.lang.reflect.Modifier.isPublic;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
@@ -68,27 +65,18 @@ public final class ClassScannerRecipe implements Recipe {
     }
 
     private static void addReferencesIn(final Class<?> clazz, final MapMateBuilder builder) {
-        final FullType fullType = FullType.fullType(clazz);
-
-        final List<Method> useCaseMethodCandidates = stream(clazz.getDeclaredMethods())
-                .filter(method -> isPublic(method.getModifiers()))
-                .filter(method -> !OBJECT_METHODS.contains(method.getName()))
-                .collect(toList());
-
-        useCaseMethodCandidates.forEach(method -> {
-            if (method.getReturnType() != Void.TYPE) {
-                resolveType(method.getGenericReturnType(), fullType)
-                        .ifPresent(returnType -> builder.withManuallyAddedType(
-                                becauseReturnTypeOfUseCaseMethod(method), returnType, serializationOnly())
-                        );
-            }
-            stream(method.getParameters())
-                    .map(Parameter::getParameterizedType)
-                    .map(type -> resolveType(type, fullType))
-                    .flatMap(Optional::stream)
-                    .forEach(parameterType -> builder.withManuallyAddedType(
-                            becauseParameterTypeOfUseCaseMethod(method),parameterType, deserializationOnly())
-                    );
-        });
+        final ClassType fullType = fromClassWithoutGenerics(clazz);
+        fullType.publicMethods().stream()
+                .filter(method -> !OBJECT_METHODS.contains(method.method().getName()))
+                .forEach(method -> {
+                    method.returnType().map(DefinitionSeed::definitionSeed)
+                            .map(seed -> seed.withCapability(deserializationOnly(), becauseReturnTypeOfUseCaseMethod(method.method())))
+                            .ifPresent(builder::withManuallyAddedSeed);
+                    method.parameters().stream()
+                            .map(ResolvedParameter::type)
+                            .map(DefinitionSeed::definitionSeed)
+                            .map(seed -> seed.withCapability(serializationOnly(), becauseParameterTypeOfUseCaseMethod(method.method())))
+                            .forEach(builder::withManuallyAddedSeed);
+                });
     }
 }

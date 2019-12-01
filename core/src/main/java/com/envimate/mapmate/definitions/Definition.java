@@ -21,11 +21,12 @@
 
 package com.envimate.mapmate.definitions;
 
-import com.envimate.mapmate.builder.SeedReason;
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.builder.DefinitionSeed;
+import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 
 public interface Definition {
-    FullType type();
+    ResolvedType type();
 
-    SeedReason reason();
+    DefinitionSeed context();
 }

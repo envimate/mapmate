@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.deserialization;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
 import com.envimate.mapmate.definitions.types.resolver.ResolvedMethod;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
@@ -51,7 +51,7 @@ public final class NamedMethodDeserializationDetector implements SerializedObjec
     }
 
     @Override
-    public Optional<SerializedObjectDeserializer> detect(final FullType type, final SerializationFields fields) {
+    public Optional<SerializedObjectDeserializer> detect(final ClassType type, final SerializationFields fields) {
         final List<ResolvedMethod> resolvedMethods = detectDeserializerMethods(type);
         final List<ResolvedMethod> deserializerMethods = resolvedMethods.stream()
                 .filter(method -> method.method().getName().equals(this.deserializationMethodName))

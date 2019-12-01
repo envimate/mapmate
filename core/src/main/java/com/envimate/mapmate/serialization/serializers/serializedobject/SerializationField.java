@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.serialization.serializers.serializedobject;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import com.envimate.mapmate.definitions.types.resolver.ResolvedField;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -39,11 +39,11 @@ import static java.lang.reflect.Modifier.*;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SerializationField {
-    private final FullType type;
+    private final ResolvedType type;
     private final String name;
     private final Function<Object, Object> query;
 
-    public static SerializationField serializationField(final FullType type,
+    public static SerializationField serializationField(final ResolvedType type,
                                                         final String name,
                                                         final Function<Object, Object> query) {
         validateNotNull(type, "type");
@@ -52,18 +52,18 @@ public final class SerializationField {
         return new SerializationField(type, name, query);
     }
 
-    public static SerializationField fromPublicField(final FullType declaringType,
+    public static SerializationField fromPublicField(final ResolvedType declaringType,
                                                      final ResolvedField field) {
         validateNotNull(declaringType, "declaringType");
         validateNotNull(field, "field");
         validateFieldModifiers(declaringType, field.field());
-        final FullType fullType = field.type();
+        final ResolvedType fullType = field.type();
         final String name = field.name();
         final Function<Object, Object> query = object -> readField(object, field.field());
         return serializationField(fullType, name, query);
     }
 
-    public FullType type() {
+    public ResolvedType type() {
         return this.type;
     }
 
@@ -84,7 +84,7 @@ public final class SerializationField {
         }
     }
 
-    private static void validateFieldModifiers(final FullType type, final Field field) {
+    private static void validateFieldModifiers(final ResolvedType type, final Field field) {
         final int fieldModifiers = field.getModifiers();
 
         if (!isPublic(fieldModifiers)) {

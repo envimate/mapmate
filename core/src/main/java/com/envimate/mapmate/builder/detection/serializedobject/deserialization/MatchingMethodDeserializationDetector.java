@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.deserialization;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
 import com.envimate.mapmate.definitions.types.resolver.ResolvedMethod;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
@@ -53,7 +53,7 @@ public final class MatchingMethodDeserializationDetector implements SerializedOb
     }
 
     @Override
-    public Optional<SerializedObjectDeserializer> detect(final FullType type, final SerializationFields fields) {
+    public Optional<SerializedObjectDeserializer> detect(final ClassType type, final SerializationFields fields) {
         final List<ResolvedMethod> deserializerCandidates = detectDeserializerMethods(type);
         return chooseDeserializer(deserializerCandidates, fields, type)
                 .map(method -> methodDeserializer(type, method));
@@ -61,14 +61,14 @@ public final class MatchingMethodDeserializationDetector implements SerializedOb
 
     private Optional<ResolvedMethod> chooseDeserializer(final List<ResolvedMethod> deserializerCandidates,
                                                         final SerializationFields serializedFields,
-                                                        final FullType type) {
+                                                        final ClassType type) {
         ResolvedMethod deserializerMethod = null;
         if (deserializerCandidates.size() > 1) {
             final Optional<ResolvedMethod> byNamePattern = this.detectByNamePattern(deserializerCandidates, serializedFields);
             if (byNamePattern.isPresent()) {
                 deserializerMethod = byNamePattern.get();
             } else {
-                final String typeSimpleNameLowerCased = type.type().getSimpleName().toLowerCase();
+                final String typeSimpleNameLowerCased = type.assignableType().getSimpleName().toLowerCase();
                 final Optional<ResolvedMethod> byTypeName = deserializerCandidates.stream()
                         .filter(method -> method.method().getName().toLowerCase().contains(typeSimpleNameLowerCased))
                         .findFirst();

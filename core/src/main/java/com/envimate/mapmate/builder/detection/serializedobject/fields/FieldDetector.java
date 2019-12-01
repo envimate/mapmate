@@ -21,11 +21,11 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.fields;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationField;
 
 import java.util.List;
 
 public interface FieldDetector {
-    List<SerializationField> detect(FullType type);
+    List<SerializationField> detect(ClassType type);
 }

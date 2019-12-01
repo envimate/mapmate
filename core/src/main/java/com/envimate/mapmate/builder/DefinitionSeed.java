@@ -21,42 +21,54 @@
 
 package com.envimate.mapmate.builder;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import static com.envimate.mapmate.builder.MultiMap.multiMap;
 import static com.envimate.mapmate.builder.RequiredCapabilities.none;
+import static com.envimate.mapmate.builder.SeedReason.becauseChildOf;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DefinitionSeed {
-    private static final int INITIAL_CAPACITY = 50;
-    private final FullType fullType;
-    private final Map<SeedReason, RequiredCapabilities> requiredCapabilities;
+    private static final int INITIAL_CAPACITY = 5;
 
-    public static DefinitionSeed definitionSeed(final FullType fullType) {
+    private final ResolvedType type;
+    private final MultiMap<RequiredCapabilities, SeedReason> capabilities;
+
+    public static DefinitionSeed definitionSeed(final ResolvedType fullType) {
         validateNotNull(fullType, "fullType");
-        return new DefinitionSeed(fullType, new HashMap<>(INITIAL_CAPACITY));
+        return new DefinitionSeed(fullType, multiMap(INITIAL_CAPACITY));
     }
 
-    public void addRequirements(final SeedReason reason, final RequiredCapabilities requiredCapabilities) {
-        this.requiredCapabilities.put(reason, requiredCapabilities);
+    public DefinitionSeed childForType(final ResolvedType childType) {
+        return definitionSeed(childType).withCapability(requiredCapabilities(), becauseChildOf(this));
     }
 
-    public FullType fullType() {
-        return this.fullType;
+    public void merge(final DefinitionSeed other) {
+        if (!other.type.equals(this.type)) {
+            throw new IllegalArgumentException("Cannot merge with different type");
+        }
+        this.capabilities.putAll(other.capabilities);
+    }
+
+    public DefinitionSeed withCapability(final RequiredCapabilities capability, final SeedReason reason) {
+        this.capabilities.put(capability, reason);
+        return this;
+    }
+
+    public ResolvedType type() {
+        return this.type;
     }
 
     public RequiredCapabilities requiredCapabilities() {
         final RequiredCapabilities requiredCapabilities = none();
-        this.requiredCapabilities.values().forEach(requiredCapabilities::add);
+        this.capabilities.keys().forEach(requiredCapabilities::add);
         return requiredCapabilities;
     }
 }

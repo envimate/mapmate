@@ -21,13 +21,14 @@
 
 package com.envimate.mapmate.builder.detection.customprimitive;
 
+import com.envimate.mapmate.builder.DefinitionSeed;
 import com.envimate.mapmate.builder.RequiredCapabilities;
-import com.envimate.mapmate.builder.SeedReason;
 import com.envimate.mapmate.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.builder.detection.customprimitive.deserialization.CustomPrimitiveDeserializationDetector;
 import com.envimate.mapmate.builder.detection.customprimitive.serialization.CustomPrimitiveSerializationDetector;
 import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
 import com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
 import lombok.AccessLevel;
@@ -61,10 +62,10 @@ public final class CustomPrimitiveDefinitionFactory implements DefinitionFactory
     }
 
     @Override
-    public Optional<Definition> analyze(final SeedReason reason,
-                                        final FullType type,
+    public Optional<Definition> analyze(final DefinitionSeed context,
+                                        final ResolvedType type,
                                         final RequiredCapabilities capabilities) {
-        final CachedReflectionType cachedReflectionType = cachedReflectionType(type.type());
+        final CachedReflectionType cachedReflectionType = cachedReflectionType(type.assignableType());
 
         final Optional<CustomPrimitiveSerializer> serializer;
         if (capabilities.hasSerialization()) {
@@ -85,7 +86,7 @@ public final class CustomPrimitiveDefinitionFactory implements DefinitionFactory
 
         if (serializer.isPresent() || deserializer.isPresent()) {
             return of(untypedCustomPrimitiveDefinition(
-                    reason, type, serializer.orElse(null), deserializer.orElse(null))
+                    context, type, serializer.orElse(null), deserializer.orElse(null))
             );
         }
         return empty();

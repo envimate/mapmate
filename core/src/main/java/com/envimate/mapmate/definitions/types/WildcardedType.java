@@ -19,38 +19,53 @@
  * under the License.
  */
 
-package com.envimate.mapmate.deserialization;
+package com.envimate.mapmate.definitions.types;
 
-import com.envimate.mapmate.definitions.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.util.List;
-import java.util.Map;
 
-import static java.util.Collections.unmodifiableMap;
-import static java.util.stream.Collectors.toList;
+import static java.util.Collections.emptyList;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class DeserializationFields {
-    private final Map<String, ResolvedType> elements;
+public final class WildcardedType implements ResolvedType {
 
-    public static DeserializationFields deserializationFields(final Map<String, ResolvedType> elements) {
-        return new DeserializationFields(elements);
+    public static WildcardedType wildcardType() {
+        return new WildcardedType();
     }
 
-    public Map<String, ResolvedType> fields() {
-        return unmodifiableMap(this.elements);
+    @Override
+    public List<ResolvedType> typeParameters() {
+        return emptyList();
     }
 
-    public List<ResolvedType> referencedTypes() {
-        return this.elements.values()
-                .stream()
-                .distinct()
-                .collect(toList());
+    @Override
+    public boolean isAbstract() {
+        return false;
+    }
+
+    @Override
+    public boolean isInterface() {
+        return false;
+    }
+
+    @Override
+    public boolean isWildcard() {
+        return true;
+    }
+
+    @Override
+    public String description() {
+        return "?";
+    }
+
+    @Override
+    public Class<?> assignableType() {
+        return Object.class;
     }
 }

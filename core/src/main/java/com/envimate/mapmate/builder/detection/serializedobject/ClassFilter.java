@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -37,10 +37,10 @@ public interface ClassFilter {
     static ClassFilter patternFilter(final List<Pattern> patterns) {
         validateNotNull(patterns, "patterns");
         return type -> {
-            final String typeName = type.type().getName();
+            final String typeName = type.assignableType().getName();
             return patterns.stream().anyMatch(pattern -> pattern.matcher(typeName).matches());
         };
     }
 
-    boolean filter(FullType type);
+    boolean filter(ResolvedType type);
 }

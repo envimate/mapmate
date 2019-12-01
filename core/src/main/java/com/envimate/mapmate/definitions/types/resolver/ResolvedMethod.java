@@ -21,7 +21,8 @@
 
 package com.envimate.mapmate.definitions.types.resolver;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -32,43 +33,48 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
 
+import static com.envimate.mapmate.definitions.types.TypeResolver.resolveType;
 import static com.envimate.mapmate.definitions.types.resolver.ResolvedParameter.resolveParameters;
-import static com.envimate.mapmate.definitions.types.resolver.TypeResolver.resolveType;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.util.Arrays.stream;
 import static java.util.Collections.unmodifiableList;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ResolvedMethod {
-    private final FullType returnType;
+    private final ResolvedType returnType;
     private final List<ResolvedParameter> parameters;
     private final Method method;
 
-    public static List<ResolvedMethod> resolvePublicMethods(final FullType fullType) {
-        final Class<?> type = fullType.type();
+    public static List<ResolvedMethod> resolvePublicMethods(final ClassType fullType) {
+        final Class<?> type = fullType.assignableType();
         final Method[] declaredMethods = type.getDeclaredMethods();
         return stream(declaredMethods)
                 .filter(method -> isPublic(method.getModifiers()))
                 .map(method -> resolveMethod(method, fullType))
-                .flatMap(Optional::stream)
                 .collect(toList());
     }
 
-    public static Optional<ResolvedMethod> resolveMethod(final Method method, final FullType fullType) {
+    public static ResolvedMethod resolveMethod(final Method method, final ClassType context) {
         final Type genericReturnType = method.getGenericReturnType();
-        return resolveType(genericReturnType, fullType)
-                .flatMap(returnType -> resolveParameters(method, fullType)
-                        .map(parameters -> new ResolvedMethod(returnType, parameters, method)));
+        final ResolvedType returnType;
+        if (genericReturnType == Void.TYPE) {
+            returnType = resolveType(genericReturnType, context);
+        } else {
+            returnType = null;
+        }
+        final List<ResolvedParameter> parameters = resolveParameters(method, context);
+        return new ResolvedMethod(returnType, parameters, method);
     }
 
-    public FullType returnType() {
-        return this.returnType;
+    public Optional<ResolvedType> returnType() {
+        return ofNullable(this.returnType);
     }
 
-    public boolean hasParameters(final List<FullType> parameters) {
+    public boolean hasParameters(final List<ResolvedType> parameters) {
         if (parameters.size() != this.parameters.size()) {
             return false;
         }

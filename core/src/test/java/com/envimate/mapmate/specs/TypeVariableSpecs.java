@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.MapMate.aMapMate;
 import static com.envimate.mapmate.builder.recipes.scanner.ClassScannerRecipe.addAllReferencedClassesIs;
-import static com.envimate.mapmate.definitions.types.FullType.fullType;
+import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithoutGenerics;
 import static com.envimate.mapmate.definitions.types.unresolved.UnresolvedType.unresolvedType;
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.given;
@@ -42,7 +42,7 @@ public final class TypeVariableSpecs {
     public void aSerializedObjectWithTypeVariableFieldsCanBeSerialized() {
         given(
                 aMapMate()
-                        .withManuallyAddedType(unresolvedType(AComplexParameterizedType.class).resolve(fullType(AString.class)))
+                        .withManuallyAddedType(unresolvedType(AComplexParameterizedType.class).resolve(fromClassWithoutGenerics(AString.class)))
                         .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
                         .build()
         )
@@ -59,14 +59,14 @@ public final class TypeVariableSpecs {
     public void aSerializedObjectWithTypeVariableFieldsCanBeDeserialized() {
         given(
                 aMapMate()
-                        .withManuallyAddedType(unresolvedType(AComplexParameterizedType.class).resolve(fullType(AString.class)))
+                        .withManuallyAddedType(unresolvedType(AComplexParameterizedType.class).resolve(fromClassWithoutGenerics(AString.class)))
                         .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
                         .build()
         )
                 .when().mapMateDeserializes("" +
                 "{\n" +
                 "  \"value\": \"foo\"\n" +
-                "}").as(json()).toTheType(unresolvedType(AComplexParameterizedType.class).resolve(fullType(AString.class)))
+                "}").as(json()).toTheType(unresolvedType(AComplexParameterizedType.class).resolve(fromClassWithoutGenerics(AString.class)))
                 .noExceptionHasBeenThrown();
     }
 
@@ -74,8 +74,8 @@ public final class TypeVariableSpecs {
     public void aSerializedObjectWithTypeVariableFieldsCanRegisteredTwice() {
         given(
                 aMapMate()
-                        .withManuallyAddedType(unresolvedType(AComplexParameterizedType.class).resolve(fullType(AString.class)))
-                        .withManuallyAddedType(unresolvedType(AComplexParameterizedType.class).resolve(fullType(ANumber.class)))
+                        .withManuallyAddedType(unresolvedType(AComplexParameterizedType.class).resolve(fromClassWithoutGenerics(AString.class)))
+                        .withManuallyAddedType(unresolvedType(AComplexParameterizedType.class).resolve(fromClassWithoutGenerics(ANumber.class)))
                         .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
                         .build()
         )

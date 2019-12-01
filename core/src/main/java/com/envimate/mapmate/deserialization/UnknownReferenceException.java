@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.deserialization;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
 
 import static java.lang.String.format;
 
@@ -30,7 +30,7 @@ public final class UnknownReferenceException extends RuntimeException {
         super(msg);
     }
 
-    public static UnknownReferenceException fromType(final FullType owner, final FullType unknownType, final String dump) {
+    public static UnknownReferenceException fromType(final ClassType owner, final ClassType unknownType, final String dump) {
         final String msg = format(
                 "definition '%s' contains unknown reference of type '%s'. All known definitions:%n%s",
                 owner.description(),

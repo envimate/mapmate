@@ -21,7 +21,8 @@
 
 package com.envimate.mapmate.definitions.types.resolver;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -31,50 +32,38 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Optional;
 
-import static com.envimate.mapmate.definitions.types.resolver.TypeResolver.resolveType;
+import static com.envimate.mapmate.definitions.types.TypeResolver.resolveType;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.util.Arrays.stream;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ResolvedParameter {
-    private final FullType fullType;
+    private final ResolvedType type;
     private final Parameter parameter;
 
-    public static Optional<List<ResolvedParameter>> resolveParameters(final Executable executable,
-                                                                      final FullType fullType) {
-        final List<Optional<ResolvedParameter>> optionals = stream(executable.getParameters())
+    public static List<ResolvedParameter> resolveParameters(final Executable executable,
+                                                            final ClassType fullType) {
+        return stream(executable.getParameters())
                 .map(parameter -> resolveParameter(fullType, parameter))
                 .collect(toList());
-
-        if (optionals.stream().anyMatch(Optional::isEmpty)) {
-            return empty();
-        }
-
-        final List<ResolvedParameter> parameters = optionals.stream()
-                .flatMap(Optional::stream)
-                .collect(toList());
-        return of(parameters);
     }
 
-    public static Optional<ResolvedParameter> resolveParameter(final FullType declaringType,
-                                                               final Parameter parameter) {
+    public static ResolvedParameter resolveParameter(final ClassType declaringType,
+                                                     final Parameter parameter) {
         validateNotNull(declaringType, "declaringType");
         validateNotNull(parameter, "parameter");
 
         final Type parameterizedType = parameter.getParameterizedType();
-        return resolveType(parameterizedType, declaringType)
-                .map(fullType -> new ResolvedParameter(fullType, parameter));
+        final ResolvedType resolvedType = resolveType(parameterizedType, declaringType);
+        return new ResolvedParameter(resolvedType, parameter);
     }
 
-    public FullType type() {
-        return this.fullType;
+    public ResolvedType type() {
+        return this.type;
     }
 
     public Parameter parameter() {

@@ -21,7 +21,8 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.deserialization;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import com.envimate.mapmate.definitions.types.resolver.ResolvedMethod;
 import com.envimate.mapmate.definitions.types.resolver.ResolvedParameter;
 
@@ -29,7 +30,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static com.envimate.mapmate.definitions.types.resolver.ResolvedMethod.resolvePublicMethods;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -40,15 +40,15 @@ public final class Common {
     private Common() {
     }
 
-    public static List<ResolvedMethod> detectDeserializerMethods(final FullType type) {
-        return resolvePublicMethods(type).stream()
+    public static List<ResolvedMethod> detectDeserializerMethods(final ClassType type) {
+        return type.publicMethods().stream()
                 .filter(resolvedMethod -> isStatic(resolvedMethod.method().getModifiers()))
-                .filter(resolvedMethod -> resolvedMethod.returnType().equals(type))
+                .filter(resolvedMethod -> resolvedMethod.returnType().map(type::equals).orElse(false))
                 .filter(resolvedMethod -> resolvedMethod.parameters().size() > 0)
                 .collect(toList());
     }
 
-    public static <T> Optional<T> findMatchingMethod(final List<FullType> serializedFields,
+    public static <T> Optional<T> findMatchingMethod(final List<ResolvedType> serializedFields,
                                                      final List<T> candidates,
                                                      final Function<T, List<ResolvedParameter>> parameterQuery) {
         if (serializedFields.isEmpty()) {
@@ -67,7 +67,7 @@ public final class Common {
             }
         }
 
-        if(match == null) {
+        if (match == null) {
             return empty();
         }
 
@@ -78,15 +78,15 @@ public final class Common {
         return of(match);
     }
 
-    static boolean isMethodCompatibleWithFields(final List<ResolvedParameter> parameters, final List<FullType> fields) {
-        final List<FullType> parameterTypes = parameters.stream()
+    static boolean isMethodCompatibleWithFields(final List<ResolvedParameter> parameters, final List<ResolvedType> fields) {
+        final List<ResolvedType> parameterTypes = parameters.stream()
                 .map(ResolvedParameter::type)
                 .collect(toList());
         if (fields.size() != parameterTypes.size()) {
             return false;
         }
 
-        for (final FullType serializedField : fields) {
+        for (final ResolvedType serializedField : fields) {
             final boolean present = parameterTypes.contains(serializedField);
             if (!present) {
                 return false;
@@ -95,7 +95,7 @@ public final class Common {
         return true;
     }
 
-    private static boolean isMostLikelyACustomPrimitive(final List<FullType> fields, final List<ResolvedParameter> parameters) {
+    private static boolean isMostLikelyACustomPrimitive(final List<ResolvedType> fields, final List<ResolvedParameter> parameters) {
         final boolean isMostLikelyACustomPrimitive = fields.isEmpty() &&
                 parameters.size() == 1 &&
                 parameters.get(0).parameter().getType() == String.class;

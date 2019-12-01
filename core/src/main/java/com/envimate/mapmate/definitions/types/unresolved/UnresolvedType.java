@@ -21,7 +21,8 @@
 
 package com.envimate.mapmate.definitions.types.unresolved;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import com.envimate.mapmate.definitions.types.TypeVariableName;
 import com.envimate.mapmate.definitions.types.unresolved.breaking.TypeVariableResolvers;
 import lombok.AccessLevel;
@@ -33,7 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.envimate.mapmate.definitions.types.FullType.parameterizedType;
+import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithGenerics;
 import static com.envimate.mapmate.definitions.types.TypeVariableName.typeVariableNamesOf;
 import static com.envimate.mapmate.definitions.types.unresolved.breaking.TypeVariableResolvers.resolversFor;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
@@ -52,21 +53,21 @@ public final class UnresolvedType {
         return new UnresolvedType(type, typeVariableNamesOf(type), resolvers);
     }
 
-    public FullType resolve(final FullType... values) {
+    public ClassType resolve(final ResolvedType... values) {
         if (values.length != this.variables.size()) {
             throw new IllegalArgumentException();
         }
-        final Map<TypeVariableName, FullType> resolvedParameters = new HashMap<>(values.length);
+        final Map<TypeVariableName, ResolvedType> resolvedParameters = new HashMap<>(values.length);
         for (int i = 0; i < this.variables.size(); ++i) {
             final TypeVariableName name = this.variables.get(i);
-            final FullType value = values[i];
+            final ResolvedType value = values[i];
             resolvedParameters.put(name, value);
         }
-        return parameterizedType(this.type, resolvedParameters);
+        return fromClassWithGenerics(this.type, resolvedParameters);
     }
 
-    public FullType resolveFromObject(final Object object) {
-        final List<FullType> typeList = this.resolvers.resolve(object);
-        return resolve(typeList.toArray(FullType[]::new));
+    public ClassType resolveFromObject(final Object object) {
+        final List<ResolvedType> typeList = this.resolvers.resolve(object);
+        return resolve(typeList.toArray(ResolvedType[]::new));
     }
 }

@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.deserialization;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
 import com.envimate.mapmate.definitions.types.resolver.ResolvedMethod;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
@@ -55,7 +55,7 @@ public final class AnnotationBasedDeserializationDetector implements SerializedO
     }
 
     @Override
-    public Optional<SerializedObjectDeserializer> detect(final FullType type, final SerializationFields fields) {
+    public Optional<SerializedObjectDeserializer> detect(final ClassType type, final SerializationFields fields) {
         final List<ResolvedMethod> annotatedDeserializationMethods = resolvePublicMethods(type).stream()
                 .filter(resolvedMethod -> isStatic(resolvedMethod.method().getModifiers()))
                 .filter(method -> method.method().getAnnotationsByType(this.annotation).length > 0)

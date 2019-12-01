@@ -21,11 +21,12 @@
 
 package com.envimate.mapmate.builder.detection.collection;
 
+import com.envimate.mapmate.builder.DefinitionSeed;
 import com.envimate.mapmate.builder.RequiredCapabilities;
-import com.envimate.mapmate.builder.SeedReason;
 import com.envimate.mapmate.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import com.envimate.mapmate.deserialization.deserializers.collections.CollectionDeserializer;
 import com.envimate.mapmate.serialization.serializers.collections.CollectionSerializer;
 
@@ -45,7 +46,7 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 public final class NativeJavaCollectionDefinitionFactory implements DefinitionFactory {
-    private static final Map<Class<?>, BiFunction<SeedReason, FullType, Definition>> FACTORIES = new HashMap<>(20);
+    private static final Map<Class<?>, BiFunction<DefinitionSeed, ResolvedType, Definition>> FACTORIES = new HashMap<>(20);
 
     static {
         addFactory(List.class, objects -> objects);
@@ -74,28 +75,28 @@ public final class NativeJavaCollectionDefinitionFactory implements DefinitionFa
     }
 
     @Override
-    public Optional<Definition> analyze(final SeedReason reason,
-                                        final FullType type,
+    public Optional<Definition> analyze(final DefinitionSeed context,
+                                        final ResolvedType type,
                                         final RequiredCapabilities capabilities) {
-        if (!FACTORIES.containsKey(type.type())) {
+        if (!FACTORIES.containsKey(type.assignableType())) {
             return empty();
         }
         if (type.typeParameters().size() != 1) {
             throw new UnsupportedOperationException(format(
                     "This should never happen. A collection of type '%s' has more than one type parameter", type.description()));
         }
-        final FullType genericType = type.typeParameters().get(typeVariableName("E"));
-        final Definition definition = FACTORIES.get(type.type()).apply(reason, genericType);
+        final ResolvedType genericType = ((ClassType)type).typeParameter(typeVariableName("E"));
+        final Definition definition = FACTORIES.get(type.assignableType()).apply(context, genericType);
         return of(definition);
     }
 
     private static void addFactory(final Class<? extends Collection> collectionType,
                                    final Function<List<Object>, Collection<Object>> mapper) {
-        final BiFunction<SeedReason, FullType, Definition> factory = (reason, genericType) -> {
+        final BiFunction<DefinitionSeed, ResolvedType, Definition> factory = (context, genericType) -> {
             final CollectionSerializer serializer = listSerializer();
             final CollectionDeserializer deserializer = listDeserializer(mapper);
-            final FullType fullType = unresolvedType(collectionType).resolve(genericType);
-            return collectionDefinition(reason, fullType, genericType, serializer, deserializer);
+            final ClassType fullType = unresolvedType(collectionType).resolve(genericType);
+            return collectionDefinition(context, fullType, genericType, serializer, deserializer);
         };
         FACTORIES.put(collectionType, factory);
     }

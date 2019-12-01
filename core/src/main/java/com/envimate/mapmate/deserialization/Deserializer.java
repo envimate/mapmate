@@ -23,7 +23,7 @@ package com.envimate.mapmate.deserialization;
 
 import com.envimate.mapmate.builder.detection.customprimitive.mapping.CustomPrimitiveMappings;
 import com.envimate.mapmate.definitions.Definitions;
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
 import com.envimate.mapmate.definitions.universal.Universal;
 import com.envimate.mapmate.definitions.universal.UniversalObject;
 import com.envimate.mapmate.deserialization.validation.ExceptionTracker;
@@ -43,7 +43,7 @@ import lombok.ToString;
 import java.util.Map;
 import java.util.Set;
 
-import static com.envimate.mapmate.definitions.types.FullType.fullType;
+import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithoutGenerics;
 import static com.envimate.mapmate.definitions.universal.UniversalObject.universalObjectFromNativeMap;
 import static com.envimate.mapmate.deserialization.InternalDeserializer.internalDeserializer;
 import static com.envimate.mapmate.deserialization.Unmarshallers.unmarshallers;
@@ -86,18 +86,18 @@ public final class Deserializer {
     }
 
     public <T> T deserializeFromMap(final Map<String, Object> input,
-                                    final FullType targetType) {
+                                    final ClassType targetType) {
         return deserializeFromMap(input, targetType, noop());
     }
 
     public <T> T deserializeFromMap(final Map<String, Object> input,
                                     final Class<T> targetType,
                                     final InjectorLambda injectorProducer) {
-        return deserializeFromMap(input, fullType(targetType), injectorProducer);
+        return deserializeFromMap(input, fromClassWithoutGenerics(targetType), injectorProducer);
     }
 
     public <T> T deserializeFromMap(final Map<String, Object> input,
-                                    final FullType targetType,
+                                    final ClassType targetType,
                                     final InjectorLambda injectorProducer) {
         final UniversalObject universalObject = universalObjectFromNativeMap(input);
         return deserialize(universalObject, targetType, injectorProducer);
@@ -127,7 +127,7 @@ public final class Deserializer {
 
     @SuppressWarnings("unchecked")
     public <T> T deserialize(final String input,
-                             final FullType targetType,
+                             final ClassType targetType,
                              final MarshallingType marshallingType) {
         return (T) deserialize(input, targetType, marshallingType, noop());
     }
@@ -137,12 +137,12 @@ public final class Deserializer {
                              final MarshallingType marshallingType,
                              final InjectorLambda injectorProducer) {
         validateNotNull(input, "input");
-        final Universal unmarshalled = this.unmarshallers.unmarshal(input, fullType(targetType), marshallingType);
-        return deserialize(unmarshalled, fullType(targetType), injectorProducer);
+        final Universal unmarshalled = this.unmarshallers.unmarshal(input, fromClassWithoutGenerics(targetType), marshallingType);
+        return deserialize(unmarshalled, fromClassWithoutGenerics(targetType), injectorProducer);
     }
 
     public Object deserialize(final String input,
-                              final FullType targetType,
+                              final ClassType targetType,
                               final MarshallingType marshallingType,
                               final InjectorLambda injectorProducer) {
         validateNotNull(input, "input");
@@ -151,7 +151,7 @@ public final class Deserializer {
     }
 
     private <T> T deserialize(final Universal input,
-                              final FullType targetType,
+                              final ClassType targetType,
                               final InjectorLambda injectorProducer) {
         validateNotNull(input, "input");
         validateNotNull(targetType, "targetType");

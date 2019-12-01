@@ -23,10 +23,8 @@ package com.envimate.mapmate.definitions;
 
 import com.envimate.mapmate.builder.DefinitionSeed;
 import com.envimate.mapmate.builder.DefinitionSeeds;
-import com.envimate.mapmate.builder.RequiredCapabilities;
-import com.envimate.mapmate.builder.SeedReason;
 import com.envimate.mapmate.builder.detection.Detector;
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -37,10 +35,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static com.envimate.mapmate.builder.DefinitionSeeds.definitionSeeds;
-import static com.envimate.mapmate.builder.RequiredCapabilities.*;
-import static com.envimate.mapmate.builder.SeedReason.becauseDeserializationParameterOf;
-import static com.envimate.mapmate.builder.SeedReason.becauseSerializedChildOf;
 import static com.envimate.mapmate.definitions.DefinitionMultiplexer.multiplex;
 import static com.envimate.mapmate.definitions.Definitions.definitions;
 
@@ -50,7 +44,7 @@ import static com.envimate.mapmate.definitions.Definitions.definitions;
 public final class DefinitionsBuilder {
     private static final int INITIAL_CAPACITY = 10000;
 
-    private final Map<FullType, Definition> definitions = new HashMap<>(INITIAL_CAPACITY);
+    private final Map<ResolvedType, Definition> definitions = new HashMap<>(INITIAL_CAPACITY);
     private final Detector detector;
 
     public static DefinitionsBuilder definitionsBuilder(final Detector detector) {
@@ -58,17 +52,17 @@ public final class DefinitionsBuilder {
     }
 
     public void detectAndAdd(final DefinitionSeed seed) {
-        if (isPresent(seed.fullType())) {
+        if (isPresent(seed.type())) {
             return;
         }
-        this.detector.detect(seed.fullType(), seed.requiredCapabilities()).ifPresent(this::addDefinition);
+        this.detector.detect(seed).ifPresent(this::addDefinition);
     }
 
     public void addDefinition(final Definition definition) {
         this.definitions.put(definition.type(), definition);
     }
 
-    private boolean isPresent(final FullType detectionCandidate) {
+    private boolean isPresent(final ResolvedType detectionCandidate) {
         return this.definitions.containsKey(detectionCandidate);
     }
 
@@ -77,11 +71,11 @@ public final class DefinitionsBuilder {
         seedDefinitions.forEach(definition -> diveIntoChildren(definition, detector));
     }
 
-    private void recurse(final FullType type, final Detector detector, final RequiredCapabilities capabilities) {
-        if (isPresent(type)) {
+    private void recurse(final DefinitionSeed context, final Detector detector) {
+        if (isPresent(context.type())) {
             return;
         }
-        detector.detect(type, capabilities).ifPresent(definition -> {
+        detector.detect(context).ifPresent(definition -> {
             addDefinition(definition);
             diveIntoChildren(definition, detector);
         });
@@ -90,20 +84,15 @@ public final class DefinitionsBuilder {
     private void diveIntoChildren(final Definition definition, final Detector detector) {
         multiplex(definition)
                 .forSerializedObject(serializedObject -> {
-                    final DefinitionSeeds seeds = definitionSeeds();
                     serializedObject.serializer().ifPresent(serializer ->
-                            serializer.fields().fields().forEach(field -> seeds.add(
-                                    becauseSerializedChildOf(definition), field.type(), serializationOnly())
-                            )
-                    );
+                            serializer.fields().fields()
+                                    .forEach(serializationField -> recurse(definition.context().childForType(serializationField.type()), detector)));
                     serializedObject.deserializer().ifPresent(deserializer -> {
-                        deserializer.fields().referencedTypes().forEach(referencedType -> seeds.add(
-                                becauseDeserializationParameterOf(definition), referencedType, deserializationOnly()
-                        ));
+                        deserializer.fields().referencedTypes()
+                                .forEach(referencedType -> recurse(definition.context().childForType(referencedType), detector));
                     });
-                    seeds.types().forEach(fullType -> recurse(fullType, detector, seeds.capabilitiesFor(fullType)));
                 })
-                .forCollection(collection -> recurse(collection.contentType(), detector, all()));
+                .forCollection(collection -> recurse(definition.context().childForType(collection.contentType()), detector));
     }
 
     public Definitions build(final DefinitionSeeds seeds) {

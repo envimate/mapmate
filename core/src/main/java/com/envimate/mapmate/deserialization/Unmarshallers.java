@@ -22,7 +22,7 @@
 package com.envimate.mapmate.deserialization;
 
 import com.envimate.mapmate.definitions.*;
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
 import com.envimate.mapmate.definitions.universal.Universal;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
@@ -78,7 +78,7 @@ final class Unmarshallers {
 
     @SuppressWarnings({"InstanceofConcreteClass", "unchecked"})
     Universal unmarshal(final String input,
-                        final FullType targetType,
+                        final ClassType targetType,
                         final MarshallingType marshallingType) {
         validateNotNull(input, "input");
         if (input.isEmpty()) {

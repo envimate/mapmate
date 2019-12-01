@@ -21,7 +21,8 @@
 
 package com.envimate.mapmate.injector;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import com.envimate.mapmate.definitions.universal.Universal;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -32,8 +33,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.envimate.mapmate.definitions.types.FullType.fullType;
-import static com.envimate.mapmate.definitions.types.FullType.typeOfObject;
+import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithoutGenerics;
+import static com.envimate.mapmate.definitions.types.ClassType.typeOfObject;
 import static com.envimate.mapmate.definitions.universal.UniversalPrimitive.universalPrimitive;
 import static com.envimate.mapmate.injector.NamedDirectInjection.namedDirectInjection;
 import static com.envimate.mapmate.injector.PropertyName.propertyName;
@@ -67,10 +68,10 @@ public final class Injector {
     }
 
     public Injector put(final Class<?> type, final Object instance) {
-        return put(fullType(type), instance);
+        return put(fromClassWithoutGenerics(type), instance);
     }
 
-    public Injector put(final FullType type, final Object instance) {
+    public Injector put(final ClassType type, final Object instance) {
         this.typedDirectInjections.add(typedDirectInjection(type, instance));
         return this;
     }
@@ -91,10 +92,10 @@ public final class Injector {
                 .map(NamedDirectInjection::value);
     }
 
-    public Optional<Object> getDirectInjectionForType(final FullType type) {
-        final Class<?> clazz = type.type();
+    public Optional<Object> getDirectInjectionForType(final ResolvedType type) {
+        final Class<?> clazz = type.assignableType();
         return this.typedDirectInjections.stream()
-                .filter(injection -> clazz.isAssignableFrom(injection.type().type()))
+                .filter(injection -> clazz.isAssignableFrom(injection.type().assignableType()))
                 .findFirst()
                 .map(TypedDirectInjection::value);
     }

@@ -21,8 +21,8 @@
 
 package com.envimate.mapmate.definitions;
 
-import com.envimate.mapmate.builder.SeedReason;
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.builder.DefinitionSeed;
+import com.envimate.mapmate.definitions.types.ClassType;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializedObjectSerializer;
 import lombok.AccessLevel;
@@ -39,23 +39,23 @@ import static java.util.Optional.ofNullable;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SerializedObjectDefinition implements Definition {
-    private final SeedReason reason;
-    private final FullType type;
+    private final DefinitionSeed context;
+    private final ClassType type;
     private final SerializedObjectSerializer serializer;
     private final SerializedObjectDeserializer deserializer;
 
-    public static SerializedObjectDefinition serializedObjectDefinition(final SeedReason reason,
-                                                                        final FullType type,
+    public static SerializedObjectDefinition serializedObjectDefinition(final DefinitionSeed context,
+                                                                        final ClassType type,
                                                                         final SerializedObjectSerializer serializer,
                                                                         final SerializedObjectDeserializer deserializer) {
-        validateNotNull(reason, "reason");
+        validateNotNull(context, "context");
         validateNotNull(type, "type");
         if (serializer == null) {
             validateNotNull(deserializer, "deserializer");
         } else if (deserializer == null) {
             validateNotNull(serializer, "serializer");
         }
-        return new SerializedObjectDefinition(reason, type, serializer, deserializer);
+        return new SerializedObjectDefinition(context, type, serializer, deserializer);
     }
 
     public Optional<SerializedObjectSerializer> serializer() {
@@ -67,12 +67,12 @@ public final class SerializedObjectDefinition implements Definition {
     }
 
     @Override
-    public FullType type() {
+    public ClassType type() {
         return this.type;
     }
 
     @Override
-    public SeedReason reason() {
-        return this.reason;
+    public DefinitionSeed context() {
+        return this.context;
     }
 }

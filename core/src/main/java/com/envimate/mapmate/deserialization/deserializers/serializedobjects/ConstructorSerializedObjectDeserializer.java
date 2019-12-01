@@ -21,7 +21,8 @@
 
 package com.envimate.mapmate.deserialization.deserializers.serializedobjects;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import com.envimate.mapmate.definitions.types.resolver.ResolvedConstructor;
 import com.envimate.mapmate.definitions.types.resolver.ResolvedParameter;
 import com.envimate.mapmate.deserialization.DeserializationFields;
@@ -49,7 +50,7 @@ public final class ConstructorSerializedObjectDeserializer implements Serialized
     private final ResolvedConstructor factoryConstructor;
     private final List<String> parameterNames;
 
-    public static SerializedObjectDeserializer createDeserializer(final FullType type,
+    public static SerializedObjectDeserializer createDeserializer(final ClassType type,
                                                                   final ResolvedConstructor deserializationConstructor) {
         validateDeserializerModifiers(type, deserializationConstructor);
         return verifiedDeserializationDTOConstructor(deserializationConstructor);
@@ -62,7 +63,7 @@ public final class ConstructorSerializedObjectDeserializer implements Serialized
                 .map(ResolvedParameter::parameter)
                 .map(Parameter::getName)
                 .collect(toList());
-        final Map<String, FullType> parameterFields = parameters.stream()
+        final Map<String, ResolvedType> parameterFields = parameters.stream()
                 .collect(toMap(
                         resolvedParameter -> resolvedParameter.parameter().getName(),
                         ResolvedParameter::type
@@ -84,7 +85,7 @@ public final class ConstructorSerializedObjectDeserializer implements Serialized
         return this.fields;
     }
 
-    private static void validateDeserializerModifiers(final FullType type, final ResolvedConstructor deserializationConstructor) {
+    private static void validateDeserializerModifiers(final ClassType type, final ResolvedConstructor deserializationConstructor) {
         final int deserializationMethodModifiers = deserializationConstructor.constructor().getModifiers();
 
         if (!isPublic(deserializationMethodModifiers)) {
@@ -97,7 +98,7 @@ public final class ConstructorSerializedObjectDeserializer implements Serialized
                     "The deserialization constructor %s configured for the SerializedObject of type %s must not be abstract",
                     deserializationConstructor, type);
         }
-        if (deserializationConstructor.constructor().getDeclaringClass() != type.type()) {
+        if (deserializationConstructor.constructor().getDeclaringClass() != type.assignableType()) {
             throw incompatibleSerializedObjectException(
                     "The deserialization constructor %s configured for the SerializedObject of type %s must return the DTO",
                     deserializationConstructor, type);

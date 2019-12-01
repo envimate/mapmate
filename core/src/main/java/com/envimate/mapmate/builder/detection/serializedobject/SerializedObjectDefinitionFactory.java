@@ -21,13 +21,14 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject;
 
+import com.envimate.mapmate.builder.DefinitionSeed;
 import com.envimate.mapmate.builder.RequiredCapabilities;
-import com.envimate.mapmate.builder.SeedReason;
 import com.envimate.mapmate.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.builder.detection.serializedobject.deserialization.SerializedObjectDeserializationDetector;
 import com.envimate.mapmate.builder.detection.serializedobject.fields.FieldDetector;
 import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationField;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
@@ -87,24 +88,29 @@ public final class SerializedObjectDefinitionFactory implements DefinitionFactor
     }
 
     @Override
-    public Optional<Definition> analyze(final SeedReason reason,
-                                        final FullType type,
+    public Optional<Definition> analyze(final DefinitionSeed context,
+                                        final ResolvedType type,
                                         final RequiredCapabilities capabilities) {
+        if(!(type instanceof ClassType)) {
+            return empty();
+        }
         if (!this.filter.filter(type)) {
             return empty();
         }
-        validateParameterNamesArePresent(type.type());
+        validateParameterNamesArePresent(type.assignableType());
+
+        final ClassType classType = (ClassType) type;
 
         final SerializationFields serializationFields;
         final Optional<SerializedObjectSerializer> serializer;
         if (capabilities.hasSerialization()) {
             final List<SerializationField> serializationFieldsList = this.fieldDetectors.stream()
-                    .map(fieldDetector -> fieldDetector.detect(type))
+                    .map(fieldDetector -> fieldDetector.detect(classType))
                     .flatMap(Collection::stream)
                     .filter(distinctByKey(SerializationField::name))
                     .collect(toList());
             serializationFields = serializationFields(serializationFieldsList);
-            serializer = serializedObjectSerializer(type, serializationFields);
+            serializer = serializedObjectSerializer(serializationFields);
         } else {
             serializationFields = SerializationFields.empty();
             serializer = empty();
@@ -113,14 +119,14 @@ public final class SerializedObjectDefinitionFactory implements DefinitionFactor
         Optional<SerializedObjectDeserializer> deserializer = empty();
         if (capabilities.hasDeserialization()) {
             deserializer = this.detectors.stream()
-                    .map(detector -> detector.detect(type, serializationFields))
+                    .map(detector -> detector.detect(classType, serializationFields))
                     .flatMap(Optional::stream)
                     .findFirst();
         }
 
         if (serializer.isPresent() || deserializer.isPresent()) {
             return of(serializedObjectDefinition(
-                    reason, type, serializer.orElse(null), deserializer.orElse(null))
+                    context, classType, serializer.orElse(null), deserializer.orElse(null))
             );
         }
         return empty();

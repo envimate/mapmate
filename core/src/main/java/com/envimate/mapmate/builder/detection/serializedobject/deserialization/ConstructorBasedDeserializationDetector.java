@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.deserialization;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
 import com.envimate.mapmate.definitions.types.resolver.ResolvedConstructor;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
@@ -47,7 +47,7 @@ public final class ConstructorBasedDeserializationDetector implements Serialized
     }
 
     @Override
-    public Optional<SerializedObjectDeserializer> detect(final FullType type, final SerializationFields fields) {
+    public Optional<SerializedObjectDeserializer> detect(final ClassType type, final SerializationFields fields) {
         final List<ResolvedConstructor> constructors = resolvePublicConstructors(type);
         return findMatchingMethod(fields.typesList(), constructors, ResolvedConstructor::parameters)
                 .map(constructor -> createDeserializer(type, constructor));

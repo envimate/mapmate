@@ -23,10 +23,11 @@ package com.envimate.mapmate.serialization;
 
 import com.envimate.mapmate.builder.detection.customprimitive.mapping.CustomPrimitiveMappings;
 import com.envimate.mapmate.definitions.*;
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
+import com.envimate.mapmate.definitions.universal.Universal;
 import com.envimate.mapmate.definitions.universal.UniversalCollection;
 import com.envimate.mapmate.definitions.universal.UniversalObject;
-import com.envimate.mapmate.definitions.universal.Universal;
 import com.envimate.mapmate.definitions.universal.UniversalPrimitive;
 import com.envimate.mapmate.marshalling.Marshaller;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
@@ -44,7 +45,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import static com.envimate.mapmate.definitions.types.FullType.typeOfObject;
+import static com.envimate.mapmate.definitions.types.ClassType.typeOfObject;
 import static com.envimate.mapmate.definitions.universal.UniversalCollection.universalCollection;
 import static com.envimate.mapmate.definitions.universal.UniversalNull.universalNull;
 import static com.envimate.mapmate.definitions.universal.UniversalObject.universalObject;
@@ -127,11 +128,11 @@ public final class Serializer {
             return null;
         }
 
-        final FullType type = typeOfObject(object);
+        final ClassType type = typeOfObject(object);
         return serializeDefinition(type, object, serializationTracker()).toNativeJava();
     }
 
-    private Universal serializeDefinition(final FullType type,
+    private Universal serializeDefinition(final ResolvedType type,
                                           final Object object,
                                           final SerializationTracker tracker) {
         if (isNull(object)) {
@@ -166,7 +167,7 @@ public final class Serializer {
         final SerializationFields fields = definition.serializer().orElseThrow().fields();
         final Map<String, Universal> map = new HashMap<>(10);
         fields.fields().forEach(serializationField -> {
-            final FullType type = serializationField.type();
+            final ResolvedType type = serializationField.type();
             final Object value = ofNullable(object).map(serializationField::query).orElse(null);
             final Universal serializedValue = serializeDefinition(type, value, tracker);
             final String name = serializationField.name();
@@ -178,7 +179,7 @@ public final class Serializer {
     private UniversalCollection serializeCollection(final CollectionDefinition definition,
                                                     final Object object,
                                                     final SerializationTracker tracker) {
-        final FullType contentType = definition.contentType();
+        final ResolvedType contentType = definition.contentType();
         final List<Universal> list = definition.serializer().serialize(object)
                 .stream()
                 .map(element -> serializeDefinition(contentType, element, tracker))

@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -44,16 +44,14 @@ public final class DefinitionSeeds {
         return new DefinitionSeeds(new LinkedList<>());
     }
 
-    public void add(final SeedReason reason,
-                    final FullType fullType,
-                    final RequiredCapabilities requiredCapabilities) {
-        final DefinitionSeed seed = forType(fullType);
-        seed.addRequirements(reason, requiredCapabilities);
+    public void add(final DefinitionSeed seed) {
+        final DefinitionSeed newOrExistingSeed = forType(seed.type());
+        newOrExistingSeed.merge(seed);
     }
 
-    private DefinitionSeed forType(final FullType fullType) {
+    public DefinitionSeed forType(final ResolvedType fullType) {
         return this.seeds.stream()
-                .filter(definitionSeed -> definitionSeed.fullType().equals(fullType))
+                .filter(definitionSeed -> definitionSeed.type().equals(fullType))
                 .findAny()
                 .orElseGet(() -> {
                     final DefinitionSeed seed = definitionSeed(fullType);
@@ -66,13 +64,9 @@ public final class DefinitionSeeds {
         return unmodifiableList(this.seeds);
     }
 
-    public List<FullType> types() {
+    public List<ResolvedType> types() {
         return this.seeds.stream()
-                .map(DefinitionSeed::fullType)
+                .map(DefinitionSeed::type)
                 .collect(Collectors.toList());
-    }
-
-    public RequiredCapabilities capabilitiesFor(final FullType type) {
-        return forType(type).requiredCapabilities();
     }
 }

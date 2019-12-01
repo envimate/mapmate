@@ -21,14 +21,14 @@
 
 package com.envimate.mapmate.definitions;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 
 public final class DefinitionNotFoundException extends RuntimeException {
     private DefinitionNotFoundException(final String msg) {
         super(msg);
     }
 
-    public static DefinitionNotFoundException definitionNotFound(final FullType targetType, final String dump) {
+    public static DefinitionNotFoundException definitionNotFound(final ResolvedType targetType, final String dump) {
         final String msg = String.format("no definition found for type '%s'. Known definitions are: %n%s", targetType.description(), dump);
         return new DefinitionNotFoundException(msg);
     }

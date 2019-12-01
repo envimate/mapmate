@@ -23,7 +23,8 @@ package com.envimate.mapmate.definitions;
 
 import com.envimate.mapmate.builder.DefinitionSeeds;
 import com.envimate.mapmate.builder.RequiredCapabilities;
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -43,20 +44,20 @@ import static java.util.Optional.of;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Definitions {
-    private final Map<FullType, Definition> definitions;
+    private final Map<ResolvedType, Definition> definitions;
 
-    public static Definitions definitions(final Map<FullType, Definition> definitions, final DefinitionSeeds seeds) {
+    public static Definitions definitions(final Map<ResolvedType, Definition> definitions, final DefinitionSeeds seeds) {
         final Definitions definitionsObject = new Definitions(definitions);
         definitionsObject.validateNoUnsupportedOutgoingReferences(seeds);
         return definitionsObject;
     }
 
-    public Definition getDefinitionForType(final FullType targetType) {
+    public Definition getDefinitionForType(final ResolvedType targetType) {
         return getOptionalDefinitionForType(targetType)
                 .orElseThrow(() -> definitionNotFound(targetType, dump()));
     }
 
-    public Optional<Definition> getOptionalDefinitionForType(final FullType targetType) {
+    public Optional<Definition> getOptionalDefinitionForType(final ResolvedType targetType) {
         if (!this.definitions.containsKey(targetType)) {
             return Optional.empty();
         }
@@ -64,8 +65,8 @@ public final class Definitions {
     }
 
     public void validateNoUnsupportedOutgoingReferences(final DefinitionSeeds seeds) {
-        for (final FullType type : seeds.types()) {
-            final RequiredCapabilities capabilities = seeds.capabilitiesFor(type);
+        for (final ResolvedType type : seeds.types()) {
+            final RequiredCapabilities capabilities = seeds.forType(type).requiredCapabilities();
             if (capabilities.hasDeserialization()) {
                 validateDeserialization(type, type, new LinkedList<>());
             }
@@ -75,7 +76,7 @@ public final class Definitions {
         }
     }
 
-    private void validateDeserialization(final FullType candidate, final FullType reason, final List<FullType> alreadyVisited) {
+    private void validateDeserialization(final ResolvedType candidate, final ResolvedType reason, final List<ResolvedType> alreadyVisited) {
         if (alreadyVisited.contains(candidate)) {
             return;
         }
@@ -106,7 +107,7 @@ public final class Definitions {
                 .forCollection(collection -> validateDeserialization(collection.contentType(), reason, alreadyVisited));
     }
 
-    private void validateSerialization(final FullType candidate, final FullType reason, final List<FullType> alreadyVisited) {
+    private void validateSerialization(final ResolvedType candidate, final ResolvedType reason, final List<ResolvedType> alreadyVisited) {
         if (alreadyVisited.contains(candidate)) {
             return;
         }
@@ -156,7 +157,7 @@ public final class Definitions {
         this.definitions.values().stream()
                 .filter(definition -> definition instanceof SerializedObjectDefinition)
                 .map(Definition::type)
-                .map(FullType::description)
+                .map(ResolvedType::description)
                 .sorted()
                 .forEach(type -> stringBuilder.append(type).append("\n"));
         stringBuilder.append("------------------------------\n");
@@ -164,7 +165,7 @@ public final class Definitions {
         this.definitions.values().stream()
                 .filter(definition -> definition instanceof CustomPrimitiveDefinition)
                 .map(Definition::type)
-                .map(FullType::description)
+                .map(ResolvedType::description)
                 .sorted()
                 .forEach(type -> stringBuilder.append(type).append("\n"));
         stringBuilder.append("------------------------------\n");
@@ -172,7 +173,7 @@ public final class Definitions {
         this.definitions.values().stream()
                 .filter(definition -> definition instanceof CollectionDefinition)
                 .map(Definition::type)
-                .map(FullType::description)
+                .map(ResolvedType::description)
                 .sorted()
                 .forEach(type -> stringBuilder.append(type).append("\n"));
         stringBuilder.append("------------------------------\n");

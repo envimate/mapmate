@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.fields;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationField;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -48,7 +48,7 @@ public final class AnnotationFieldDetector implements FieldDetector {
     }
 
     @Override
-    public List<SerializationField> detect(final FullType type) {
+    public List<SerializationField> detect(final ClassType type) {
         final List<SerializationField> list = resolvedPublicFields(type).stream()
                 .filter(field -> field.field().isAnnotationPresent(this.annotation))
                 .map(resolvedField -> fromPublicField(type, resolvedField))

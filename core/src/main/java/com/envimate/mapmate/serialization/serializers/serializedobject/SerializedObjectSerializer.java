@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.serialization.serializers.serializedobject;
 
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ClassType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +39,7 @@ import static java.util.Optional.of;
 public final class SerializedObjectSerializer {
     private final SerializationFields fields;
 
-    public static Optional<SerializedObjectSerializer> serializedObjectSerializer(final FullType type, final SerializationFields fields) {
+    public static Optional<SerializedObjectSerializer> serializedObjectSerializer(final SerializationFields fields) {
         validateNotNull(fields, "fields");
         if (fields.isEmpty()) {
             return empty();

@@ -19,17 +19,41 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.detection;
+package com.envimate.mapmate.definitions.types;
 
-import com.envimate.mapmate.builder.DefinitionSeed;
-import com.envimate.mapmate.builder.RequiredCapabilities;
-import com.envimate.mapmate.builder.SeedReason;
-import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.ResolvedType;
+import java.lang.reflect.Type;
+import java.util.List;
 
-import java.util.Optional;
+public interface ResolvedType {
 
-public interface DefinitionFactory {
-    Optional<Definition> analyze(DefinitionSeed context, ResolvedType type, RequiredCapabilities capabilities);
+    static ResolvedType resolveType(final Type type, final ClassType fullType) {
+        return TypeResolver.resolveType(type, fullType);
+    }
+
+    Class<?> assignableType();
+
+    List<ResolvedType> typeParameters();
+
+    boolean isAbstract();
+
+    boolean isInterface();
+
+    boolean isWildcard();
+
+    String description();
+
+    // START EXTERNAL
+    public static boolean isSupported(final ResolvedType type) {
+        if (type.isAbstract()) {
+            return false;
+        }
+        if (type.isInterface()) {
+            return false;
+        }
+        if (type.isWildcard()) {
+            return false;
+        }
+        return type.typeParameters().stream()
+                .anyMatch(type1 -> !isSupported(type1));
+    }
 }

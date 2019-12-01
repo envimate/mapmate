@@ -19,17 +19,22 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.detection;
+package com.envimate.mapmate.builder.recipes.scanner;
 
-import com.envimate.mapmate.builder.DefinitionSeed;
-import com.envimate.mapmate.builder.RequiredCapabilities;
-import com.envimate.mapmate.builder.SeedReason;
-import com.envimate.mapmate.definitions.Definition;
 import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.ResolvedType;
 
-import java.util.Optional;
+import java.util.List;
 
-public interface DefinitionFactory {
-    Optional<Definition> analyze(DefinitionSeed context, ResolvedType type, RequiredCapabilities capabilities);
+import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithoutGenerics;
+import static com.envimate.mapmate.definitions.types.unresolved.UnresolvedType.unresolvedType;
+
+public final class ExampleUseCase<T> {
+    public List<? extends List<T>> string;
+
+    public static void main(String[] args) {
+        final ClassType resolve = unresolvedType(ExampleUseCase.class).resolve(fromClassWithoutGenerics(String.class));
+        System.out.println("resolve.description() = " + resolve.description());
+
+        unresolvedType(ExampleUseCase.class).resolveFromObject(new ExampleUseCase<String>());
+    }
 }

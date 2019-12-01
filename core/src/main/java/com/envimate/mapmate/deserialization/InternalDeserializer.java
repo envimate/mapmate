@@ -23,7 +23,7 @@ package com.envimate.mapmate.deserialization;
 
 import com.envimate.mapmate.builder.detection.customprimitive.mapping.CustomPrimitiveMappings;
 import com.envimate.mapmate.definitions.*;
-import com.envimate.mapmate.definitions.types.FullType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import com.envimate.mapmate.definitions.universal.*;
 import com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
@@ -58,7 +58,7 @@ final class InternalDeserializer {
     }
 
     <T> T deserialize(final Universal input,
-                      final FullType targetType,
+                      final ResolvedType targetType,
                       final ExceptionTracker exceptionTracker,
                       final Injector injector) {
         final T result = (T) this.deserializeRecursive(input, targetType, exceptionTracker, injector);
@@ -70,7 +70,7 @@ final class InternalDeserializer {
     }
 
     private Object deserializeRecursive(final Universal input,
-                                        final FullType targetType,
+                                        final ResolvedType targetType,
                                         final ExceptionTracker exceptionTracker,
                                         final Injector injector) {
         final Optional<Object> namedDirectInjection = injector.getDirectInjectionForPropertyPath(exceptionTracker.getPosition());
@@ -126,9 +126,9 @@ final class InternalDeserializer {
                 .orElseThrow(() -> new UnsupportedOperationException(format("No deserializer configured for '%s'", definition.type().description())));
         final DeserializationFields deserializationFields = deserializer.fields();
         final Map<String, Object> elements = new HashMap<>(0);
-        for (final Entry<String, FullType> entry : deserializationFields.fields().entrySet()) {
+        for (final Entry<String, ResolvedType> entry : deserializationFields.fields().entrySet()) {
             final String elementName = entry.getKey();
-            final FullType elementType = entry.getValue();
+            final ResolvedType elementType = entry.getValue();
 
             final Universal elementInput = input.getField(elementName).orElse(universalNull());
             final Object elementObject = this.deserializeRecursive(
@@ -173,7 +173,7 @@ final class InternalDeserializer {
                                          final ExceptionTracker exceptionTracker,
                                          final Injector injector) {
         final List deserializedList = new LinkedList();
-        final FullType contentType = definition.contentType();
+        final ResolvedType contentType = definition.contentType();
         int index = 0;
         for (final Universal element : input.content()) {
             final Object deserialized = deserializeRecursive(element, contentType, exceptionTracker.stepIntoArray(index), injector);

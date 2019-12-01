@@ -19,47 +19,52 @@
  * under the License.
  */
 
-package com.envimate.mapmate.serialization.serializers.serializedobject;
+package com.envimate.mapmate.builder;
 
-import com.envimate.mapmate.definitions.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Stream;
 
-import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
-import static java.util.stream.Collectors.toUnmodifiableList;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class SerializationFields {
-    private final List<SerializationField> fields;
+public final class MultiMap<K, V> {
+    private final Map<K, List<V>> map;
 
-    public static SerializationFields serializationFields(final List<SerializationField> fields) {
-        validateNotNull(fields, "fields");
-        return new SerializationFields(fields);
+    public static <K, V> MultiMap<K, V> multiMap(final int capacity) {
+        return new MultiMap<>(new HashMap<>(capacity));
     }
 
-    public static SerializationFields empty() {
-        return new SerializationFields(emptyList());
+    public List<V> get(final K key) {
+        if (!this.map.containsKey(key)) {
+            throw new IllegalArgumentException();
+        }
+        return unmodifiableList(this.map.get(key));
     }
 
-    public boolean isEmpty() {
-        return this.fields.isEmpty();
+    public void put(final K key, final V value) {
+        this.map.computeIfAbsent(key, k -> new LinkedList<>()).add(value);
     }
 
-    public List<SerializationField> fields() {
-        return unmodifiableList(this.fields);
+    public void putMany(final K key, final Collection<V> values) {
+        this.map.computeIfAbsent(key, k -> new LinkedList<>()).addAll(values);
     }
 
-    public List<ResolvedType> typesList() {
-        return this.fields.stream()
-                .map(SerializationField::type)
-                .collect(toUnmodifiableList());
+    public void putAll(final MultiMap<K, V> other) {
+        other.map.forEach(this::putMany);
+    }
+
+    public Stream<V> flattenedValueStream() {
+        return this.map.values().stream().flatMap(Collection::stream);
+    }
+
+    public Set<K> keys() {
+        return this.map.keySet();
     }
 }

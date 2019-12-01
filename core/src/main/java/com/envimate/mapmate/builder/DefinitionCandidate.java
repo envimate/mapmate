@@ -19,17 +19,22 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.detection;
+package com.envimate.mapmate.builder;
 
-import com.envimate.mapmate.builder.DefinitionSeed;
-import com.envimate.mapmate.builder.RequiredCapabilities;
-import com.envimate.mapmate.builder.SeedReason;
-import com.envimate.mapmate.definitions.Definition;
 import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.ResolvedType;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.Map;
 
-public interface DefinitionFactory {
-    Optional<Definition> analyze(DefinitionSeed context, ResolvedType type, RequiredCapabilities capabilities);
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class DefinitionCandidate {
+    private final ClassType type;
+    private final List<SeedReason> seedReasons;
+    private final Map<RequiredCapabilities, List<SeedReason>> capabilities;
 }

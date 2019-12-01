@@ -21,15 +21,27 @@
 
 package com.envimate.mapmate.builder.detection;
 
-import com.envimate.mapmate.builder.DefinitionSeed;
-import com.envimate.mapmate.builder.RequiredCapabilities;
-import com.envimate.mapmate.builder.SeedReason;
-import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.ResolvedType;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-import java.util.Optional;
+import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
-public interface DefinitionFactory {
-    Optional<Definition> analyze(DefinitionSeed context, ResolvedType type, RequiredCapabilities capabilities);
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class Reasoned<T> {
+    private final T value;
+    private final String reason;
+
+    public static <T> Reasoned<T> reasoned(final T value, final String reason) {
+        validateNotNull(value, "value");
+        validateNotNull(reason, "reason");
+        return new Reasoned<>(value, reason);
+    }
+
+    public T value() {
+        return this.value;
+    }
 }
