@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate;
 
+import com.envimate.mapmate.builder.DefinitionSeeds;
 import com.envimate.mapmate.builder.conventional.DetectorBuilder;
 import com.envimate.mapmate.builder.detection.Detector;
 import com.envimate.mapmate.builder.recipes.Recipe;
@@ -42,6 +43,8 @@ import com.envimate.mapmate.serialization.Serializer;
 import java.util.*;
 
 import static com.envimate.mapmate.MapMate.mapMate;
+import static com.envimate.mapmate.builder.DefinitionSeeds.definitionSeeds;
+import static com.envimate.mapmate.builder.RequiredCapabilities.all;
 import static com.envimate.mapmate.builder.conventional.ConventionalDefinitionFactories.CUSTOM_PRIMITIVE_MAPPINGS;
 import static com.envimate.mapmate.builder.conventional.ConventionalDetectors.conventionalDetectorWithAnnotations;
 import static com.envimate.mapmate.builder.scanning.DefaultPackageScanner.defaultPackageScanner;
@@ -57,7 +60,7 @@ import static java.util.Arrays.stream;
 
 public final class MapMateBuilder {
     private volatile Detector detector = conventionalDetectorWithAnnotations();
-    private final List<FullType> addedTypes = new LinkedList<>();
+    private final DefinitionSeeds definitionSeeds = definitionSeeds();
     private final List<Definition> addedDefinitions = new LinkedList<>();
     private final List<Recipe> recipes = new LinkedList<>();
     private final ValidationMappings validationMappings = ValidationMappings.empty();
@@ -105,7 +108,7 @@ public final class MapMateBuilder {
 
     public MapMateBuilder withManuallyAddedType(final FullType type) {
         validateNotNull(type, "type");
-        this.addedTypes.add(type);
+        this.definitionSeeds.add(type, all());
         return this;
     }
 
@@ -198,7 +201,7 @@ public final class MapMateBuilder {
 
         final DefinitionsBuilder definitionsBuilder = definitionsBuilder(this.detector);
         this.addedDefinitions.forEach(definitionsBuilder::addDefinition);
-        this.addedTypes.forEach(definitionsBuilder::detectAndAdd);
+        this.definitionSeeds.types().forEach(definitionsBuilder::detectAndAdd);
 
         definitionsBuilder.resolveRecursively(this.detector);
         final Definitions definitions = definitionsBuilder.build();

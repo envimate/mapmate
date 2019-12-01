@@ -123,7 +123,8 @@ final class InternalDeserializer {
                                                 final SerializedObjectDefinition definition,
                                                 final ExceptionTracker exceptionTracker,
                                                 final Injector injector) {
-        final SerializedObjectDeserializer deserializer = definition.deserializer();
+        final SerializedObjectDeserializer deserializer = definition.deserializer()
+                .orElseThrow(() -> new UnsupportedOperationException(format("No deserializer configured for '%s'", definition.type().description())));
         final DeserializationFields deserializationFields = deserializer.fields();
         final Map<String, Object> elements = new HashMap<>(0);
         for (final Entry<String, FullType> entry : deserializationFields.fields().entrySet()) {
@@ -157,7 +158,7 @@ final class InternalDeserializer {
                                              final CustomPrimitiveDefinition definition,
                                              final ExceptionTracker exceptionTracker) {
         try {
-            final CustomPrimitiveDeserializer deserializer = definition.deserializer();
+            final CustomPrimitiveDeserializer deserializer = definition.deserializer().orElseThrow();
             final Class<?> baseType = deserializer.baseType();
             final Object mapped = this.customPrimitiveMappings.fromUniversal(input, baseType);
             return (T) deserializer.deserialize(mapped);

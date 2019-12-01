@@ -88,6 +88,7 @@ public final class UnmarshallerSpecs {
         givenTheExampleMapMateWithAllMarshallers()
                 .when().mapMateDeserializes("number1=1&number2=5&stringA=asdf&stringB=qwer")
                 .as(UrlEncodedMarshallerRecipe.urlEncoded()).toTheType(AComplexType.class)
+                .noExceptionHasBeenThrown()
                 .theDeserializedObjectIs(theFullyInitializedExampleDto());
     }
 

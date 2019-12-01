@@ -32,6 +32,7 @@ import java.util.*;
 import static com.envimate.mapmate.definitions.DefinitionMultiplexer.multiplex;
 import static com.envimate.mapmate.definitions.DefinitionNotFoundException.definitionNotFound;
 import static com.envimate.mapmate.deserialization.UnknownReferenceException.fromType;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 
@@ -72,8 +73,8 @@ public final class Definitions {
         this.definitions.values().forEach(definition -> multiplex(definition)
                 .forSerializedObject(serializedObject -> {
                     final List<FullType> references = new LinkedList<>();
-                    references.addAll(serializedObject.deserializer().fields().referencedTypes());
-                    references.addAll(serializedObject.serializer().fields().typesList());
+                    references.addAll(serializedObject.deserializer().map(serializer -> serializer.fields().referencedTypes()).orElse(emptyList()));
+                    references.addAll(serializedObject.serializer().map(deserializer -> deserializer.fields().typesList()).orElse(emptyList()));
                     allReferences.put(serializedObject.type(), references);
                 })
                 .forCollection(collection -> allReferences.put(collection.type(), singletonList(collection.contentType()))));

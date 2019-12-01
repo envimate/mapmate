@@ -55,11 +55,8 @@ public final class ConventionalDetectors {
                                                 final String serializedObjectDeserializationMethodName,
                                                 final String... serializedObjectNameDetectionPatterns) {
         return detectorBuilder()
-                .withNameAndConstructorBasedCustomPrimitiveFactory(
-                        customPrimitiveSerializationMethodName, customPrimitiveDeserializationMethodName)
-                .withMethodNameBasedSerializedObjectFactory(serializedObjectDeserializationMethodName)
-                .withClassNameBasedSerializedObjectFactory(
-                        serializedObjectDeserializationMethodName, serializedObjectNameDetectionPatterns)
+                .withNameAndConstructorBasedCustomPrimitiveFactory(customPrimitiveSerializationMethodName, customPrimitiveDeserializationMethodName)
+                .withSerializedObjectFactory(allSerializedObjectFactory(serializedObjectDeserializationMethodName))
                 .build();
     }
 
@@ -79,12 +76,8 @@ public final class ConventionalDetectors {
         return detectorBuilder()
                 .withCustomPrimitiveFactory(customPrimitiveClassAnnotationFactory())
                 .withCustomPrimitiveFactory(customPrimitiveMethodAnnotationFactory())
-                .withNameAndConstructorBasedCustomPrimitiveFactory(
-                        customPrimitiveSerializationMethodName, customPrimitiveDeserializationMethodName)
-                .withSerializedObjectFactory(serializedObjectClassAnnotationFactory())
-                .withMethodNameBasedSerializedObjectFactory(serializedObjectDeserializationMethodName)
-                .withClassNameBasedSerializedObjectFactory(
-                        serializedObjectDeserializationMethodName, serializedObjectNameDetectionPatterns)
+                .withNameAndConstructorBasedCustomPrimitiveFactory(customPrimitiveSerializationMethodName, customPrimitiveDeserializationMethodName)
+                .withSerializedObjectFactory(allSerializedObjectFactory(serializedObjectDeserializationMethodName))
                 .build();
     }
 }

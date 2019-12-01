@@ -19,35 +19,38 @@
  * under the License.
  */
 
-package com.envimate.mapmate.serialization.serializers.serializedobject;
+package com.envimate.mapmate.builder;
 
-import com.envimate.mapmate.definitions.types.FullType;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-
-import java.util.Optional;
-
-import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 
 @ToString
 @EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class SerializedObjectSerializer {
-    private final SerializationFields fields;
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public final class RequiredCapabilities {
+    private boolean serialization;
+    private boolean deserialization;
 
-    public static Optional<SerializedObjectSerializer> serializedObjectSerializer(final FullType type, final SerializationFields fields) {
-        validateNotNull(fields, "fields");
-        if (fields.isEmpty()) {
-            return empty();
-        }
-        return of(new SerializedObjectSerializer(fields));
+    public static RequiredCapabilities none() {
+        return new RequiredCapabilities(false, false);
     }
 
-    public SerializationFields fields() {
-        return this.fields;
+    public static RequiredCapabilities all() {
+        return new RequiredCapabilities(true, true);
+    }
+
+    public static RequiredCapabilities serializationOnly() {
+        return new RequiredCapabilities(true, false);
+    }
+
+    public static RequiredCapabilities deserializationOnly() {
+        return new RequiredCapabilities(false, true);
+    }
+
+    public void add(final RequiredCapabilities other) {
+        this.serialization = this.serialization || other.serialization;
+        this.deserialization = this.deserialization || other.deserialization;
     }
 }

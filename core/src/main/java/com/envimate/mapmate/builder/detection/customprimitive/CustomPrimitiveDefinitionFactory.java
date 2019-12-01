@@ -66,8 +66,8 @@ public final class CustomPrimitiveDefinitionFactory implements DefinitionFactory
                 .map(detector -> detector.detect(cachedReflectionType))
                 .flatMap(Optional::stream)
                 .findFirst();
-        if (serializer.isPresent() && deserializer.isPresent()) {
-            return of(untypedCustomPrimitiveDefinition(type, serializer.get(), deserializer.get()));
+        if (serializer.isPresent() || deserializer.isPresent()) {
+            return of(untypedCustomPrimitiveDefinition(type, serializer.orElse(null), deserializer.orElse(null)));
         }
         return empty();
     }

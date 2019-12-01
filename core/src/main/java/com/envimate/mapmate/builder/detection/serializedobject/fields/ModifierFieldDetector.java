@@ -23,7 +23,6 @@ package com.envimate.mapmate.builder.detection.serializedobject.fields;
 
 import com.envimate.mapmate.definitions.types.FullType;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationField;
-import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +32,6 @@ import java.util.List;
 
 import static com.envimate.mapmate.definitions.types.resolver.ResolvedField.resolvedPublicFields;
 import static com.envimate.mapmate.serialization.serializers.serializedobject.SerializationField.fromPublicField;
-import static com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields.serializationFields;
 import static java.util.stream.Collectors.toList;
 
 @ToString
@@ -46,10 +44,9 @@ public final class ModifierFieldDetector implements FieldDetector {
     }
 
     @Override
-    public SerializationFields detect(final FullType type) {
-        final List<SerializationField> list = resolvedPublicFields(type).stream()
+    public List<SerializationField> detect(final FullType type) {
+        return resolvedPublicFields(type).stream()
                 .map(resolvedField -> fromPublicField(type, resolvedField))
                 .collect(toList());
-        return serializationFields(list);
     }
 }

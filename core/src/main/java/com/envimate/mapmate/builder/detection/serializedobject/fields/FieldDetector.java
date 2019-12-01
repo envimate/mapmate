@@ -22,8 +22,10 @@
 package com.envimate.mapmate.builder.detection.serializedobject.fields;
 
 import com.envimate.mapmate.definitions.types.FullType;
-import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
+import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationField;
+
+import java.util.List;
 
 public interface FieldDetector {
-    SerializationFields detect(FullType type);
+    List<SerializationField> detect(FullType type);
 }

@@ -19,35 +19,24 @@
  * under the License.
  */
 
-package com.envimate.mapmate.serialization.serializers.serializedobject;
+package com.envimate.mapmate.domain.half;
 
-import com.envimate.mapmate.definitions.types.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.Optional;
-
-import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class SerializedObjectSerializer {
-    private final SerializationFields fields;
+public final class ASerializationOnlyString {
+    private final String value;
 
-    public static Optional<SerializedObjectSerializer> serializedObjectSerializer(final FullType type, final SerializationFields fields) {
-        validateNotNull(fields, "fields");
-        if (fields.isEmpty()) {
-            return empty();
-        }
-        return of(new SerializedObjectSerializer(fields));
+    public static ASerializationOnlyString init() {
+        return new ASerializationOnlyString("theValue");
     }
 
-    public SerializationFields fields() {
-        return this.fields;
+    public String stringValue() {
+        return this.value;
     }
 }

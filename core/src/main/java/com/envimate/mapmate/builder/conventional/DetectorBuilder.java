@@ -30,16 +30,13 @@ import lombok.ToString;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Pattern;
 
-import static com.envimate.mapmate.builder.conventional.ConventionalDefinitionFactories.*;
+import static com.envimate.mapmate.builder.conventional.ConventionalDefinitionFactories.nameAndConstructorBasedCustomPrimitiveDefinitionFactory;
 import static com.envimate.mapmate.builder.detection.SimpleDetector.detector;
 import static com.envimate.mapmate.builder.detection.collection.ArrayCollectionDefinitionFactory.arrayFactory;
 import static com.envimate.mapmate.builder.detection.collection.NativeJavaCollectionDefinitionFactory.nativeJavaCollectionsFactory;
 import static com.envimate.mapmate.builder.detection.customprimitive.BuiltInPrimitivesFactory.builtInPrimitivesFactory;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toList;
 
 @ToString
 @EqualsAndHashCode
@@ -50,7 +47,9 @@ public final class DetectorBuilder {
     private final List<DefinitionFactory> serializedObjectDefinitionFactories;
 
     public static DetectorBuilder detectorBuilder() {
-        return new DetectorBuilder(new LinkedList<>(), new LinkedList<>(), new LinkedList<>());
+        final DetectorBuilder detectorBuilder = new DetectorBuilder(new LinkedList<>(), new LinkedList<>(), new LinkedList<>());
+        detectorBuilder.withCustomPrimitiveFactory(builtInPrimitivesFactory());
+        return detectorBuilder;
     }
 
     public DetectorBuilder withCollectionFactory(final DefinitionFactory collectionFactory) {
@@ -75,25 +74,6 @@ public final class DetectorBuilder {
         return this;
     }
 
-    public DetectorBuilder withMethodNameBasedSerializedObjectFactory(final String deserializationMethodName) {
-        validateNotNull(deserializationMethodName, "deserializationMethodName");
-        final DefinitionFactory factory =
-                deserializerMethodNameBasedSerializedObjectFactory(deserializationMethodName);
-        return withSerializedObjectFactory(factory);
-    }
-
-    public DetectorBuilder withClassNameBasedSerializedObjectFactory(final String deserializationMethodName,
-                                                                     final String... classPatterns) {
-        validateNotNull(deserializationMethodName, "deserializationMethodName");
-        validateNotNull(classPatterns, "classPatterns");
-        final List<Pattern> patterns = stream(classPatterns)
-                .map(Pattern::compile)
-                .collect(toList());
-        final DefinitionFactory factory = nameAndConstructorBasedSerializedObjectFactory(patterns,
-                deserializationMethodName);
-        return withSerializedObjectFactory(factory);
-    }
-
     public DetectorBuilder withSerializedObjectFactory(final DefinitionFactory factory) {
         validateNotNull(factory, "factory");
         this.serializedObjectDefinitionFactories.add(factory);
@@ -101,7 +81,6 @@ public final class DetectorBuilder {
     }
 
     public Detector build() {
-        withCustomPrimitiveFactory(builtInPrimitivesFactory());
         withCollectionFactory(arrayFactory());
         withCollectionFactory(nativeJavaCollectionsFactory());
         return detector(this.collectionFactories, this.customPrimitiveDefinitionFactories, this.serializedObjectDefinitionFactories);

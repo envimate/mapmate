@@ -82,8 +82,10 @@ public final class DefinitionsBuilder {
     private void diveIntoChildren(final Definition definition, final Detector detector) {
         multiplex(definition)
                 .forSerializedObject(serializedObject -> {
-                    serializedObject.serializer().fields().fields().forEach(field -> recurse(field.type(), detector));
-                    serializedObject.deserializer().fields().referencedTypes().forEach(referencedType -> recurse(referencedType, detector));
+                    serializedObject.serializer().ifPresent(serializer ->
+                            serializer.fields().fields().forEach(field -> recurse(field.type(), detector)));
+                    serializedObject.deserializer().ifPresent(deserializer ->
+                            deserializer.fields().referencedTypes().forEach(referencedType -> recurse(referencedType, detector)));
                 })
                 .forCollection(collection -> recurse(collection.contentType(), detector));
     }

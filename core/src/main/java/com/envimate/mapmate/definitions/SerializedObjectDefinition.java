@@ -29,7 +29,10 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.util.Optional;
+
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.util.Optional.ofNullable;
 
 @ToString
 @EqualsAndHashCode
@@ -51,12 +54,12 @@ public final class SerializedObjectDefinition implements Definition {
         return new SerializedObjectDefinition(type, serializer, deserializer);
     }
 
-    public SerializedObjectSerializer serializer() {
-        return this.serializer;
+    public Optional<SerializedObjectSerializer> serializer() {
+        return ofNullable(this.serializer);
     }
 
-    public SerializedObjectDeserializer deserializer() {
-        return this.deserializer;
+    public Optional<SerializedObjectDeserializer> deserializer() {
+        return ofNullable(this.deserializer);
     }
 
     @Override

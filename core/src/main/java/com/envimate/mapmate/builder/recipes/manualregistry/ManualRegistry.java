@@ -48,6 +48,7 @@ import static com.envimate.mapmate.definitions.SerializedObjectDefinition.serial
 import static com.envimate.mapmate.definitions.types.FullType.fullType;
 import static com.envimate.mapmate.definitions.types.resolver.ResolvedField.resolvedPublicFields;
 import static com.envimate.mapmate.deserialization.deserializers.serializedobjects.MethodSerializedObjectDeserializer.methodNameDeserializer;
+import static com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields.serializationFields;
 import static com.envimate.mapmate.serialization.serializers.serializedobject.SerializedObjectSerializer.serializedObjectSerializer;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.lang.String.format;
@@ -109,8 +110,8 @@ public final class ManualRegistry implements Recipe {
         final FullType fullType = fullType(type);
         final List<ResolvedField> resolvedFields = resolvedPublicFields(fullType);
         final SerializedObjectDeserializer deserializer = methodNameDeserializer(fullType, deserializationMethodName, resolvedFields);
-        final SerializationFields serializationFields = FIELD_DETECTOR.detect(fullType);
-        final SerializedObjectSerializer serializer = serializedObjectSerializer(fullType, serializationFields);
+        final SerializationFields serializationFields = serializationFields(FIELD_DETECTOR.detect(fullType));
+        final SerializedObjectSerializer serializer = serializedObjectSerializer(fullType, serializationFields).orElseThrow();
         final SerializedObjectDefinition serializedObject = serializedObjectDefinition(fullType, serializer, deserializer);
         return this.withSerializedObject(serializedObject);
     }

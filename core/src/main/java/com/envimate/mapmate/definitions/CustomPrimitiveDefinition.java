@@ -30,7 +30,10 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.util.Optional;
+
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.util.Optional.ofNullable;
 
 @ToString
 @EqualsAndHashCode
@@ -51,17 +54,15 @@ public final class CustomPrimitiveDefinition implements Definition {
             final CustomPrimitiveSerializer serializer,
             final CustomPrimitiveDeserializer deserializer) {
         validateNotNull(type, "type");
-        validateNotNull(serializer, "serializer");
-        validateNotNull(deserializer, "deserializer");
         return new CustomPrimitiveDefinition(type, serializer, deserializer);
     }
 
-    public CustomPrimitiveDeserializer deserializer() {
-        return this.deserializer;
+    public Optional<CustomPrimitiveDeserializer> deserializer() {
+        return ofNullable(this.deserializer);
     }
 
-    public CustomPrimitiveSerializer serializer() {
-        return this.serializer;
+    public Optional<CustomPrimitiveSerializer> serializer() {
+        return ofNullable(this.serializer);
     }
 
     @Override

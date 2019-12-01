@@ -153,14 +153,17 @@ public final class Serializer {
 
     private UniversalPrimitive serializeCustomPrimitive(final CustomPrimitiveDefinition definition,
                                                         final Object object) {
-        final Object serialized = definition.serializer().serialize(object);
+        final Object serialized = definition.serializer()
+                .orElseThrow(() -> new UnsupportedOperationException(
+                        format("No serializer configured for type '%s'", definition.type().description())))
+                .serialize(object);
         return this.customPrimitiveMappings.toUniversal(serialized);
     }
 
     private UniversalObject serializeSerializedObject(final SerializedObjectDefinition definition,
                                                       final Object object,
                                                       final SerializationTracker tracker) {
-        final SerializationFields fields = definition.serializer().fields();
+        final SerializationFields fields = definition.serializer().orElseThrow().fields();
         final Map<String, Universal> map = new HashMap<>(10);
         fields.fields().forEach(serializationField -> {
             final FullType type = serializationField.type();
