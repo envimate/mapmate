@@ -22,6 +22,7 @@
 package com.envimate.mapmate.builder.recipes.manualregistry;
 
 import com.envimate.mapmate.MapMateBuilder;
+import com.envimate.mapmate.builder.SeedReason;
 import com.envimate.mapmate.builder.detection.serializedobject.fields.FieldDetector;
 import com.envimate.mapmate.builder.recipes.Recipe;
 import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
@@ -42,6 +43,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
+import static com.envimate.mapmate.builder.SeedReason.manuallyAddedIn;
 import static com.envimate.mapmate.builder.detection.serializedobject.fields.ModifierFieldDetector.modifierBased;
 import static com.envimate.mapmate.definitions.CustomPrimitiveDefinition.customPrimitiveDefinition;
 import static com.envimate.mapmate.definitions.SerializedObjectDefinition.serializedObjectDefinition;
@@ -69,11 +71,11 @@ public final class ManualRegistry implements Recipe {
         return new ManualRegistry();
     }
 
-    @SuppressWarnings("unchecked")
     public <T> ManualRegistry withCustomPrimitive(final Class<T> type,
                                                   final Function<T, String> serializationMethod,
                                                   final Function<String, T> deserializationMethod) {
         return this.withCustomPrimitive(customPrimitiveDefinition(
+                manuallyAddedIn(ManualRegistry.class, "withCustomPrimitive"),
                 fullType(type),
                 object -> serializationMethod.apply((T) object),
                 value -> deserializationMethod.apply((String) value)));
@@ -112,7 +114,10 @@ public final class ManualRegistry implements Recipe {
         final SerializedObjectDeserializer deserializer = methodNameDeserializer(fullType, deserializationMethodName, resolvedFields);
         final SerializationFields serializationFields = serializationFields(FIELD_DETECTOR.detect(fullType));
         final SerializedObjectSerializer serializer = serializedObjectSerializer(fullType, serializationFields).orElseThrow();
-        final SerializedObjectDefinition serializedObject = serializedObjectDefinition(fullType, serializer, deserializer);
+        final SeedReason reason = manuallyAddedIn(ManualRegistry.class, "withSerializedObject");
+        final SerializedObjectDefinition serializedObject = serializedObjectDefinition(
+                reason, fullType, serializer, deserializer
+        );
         return this.withSerializedObject(serializedObject);
     }
 

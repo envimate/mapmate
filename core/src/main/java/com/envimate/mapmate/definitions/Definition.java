@@ -21,8 +21,11 @@
 
 package com.envimate.mapmate.definitions;
 
+import com.envimate.mapmate.builder.SeedReason;
 import com.envimate.mapmate.definitions.types.FullType;
 
 public interface Definition {
     FullType type();
+
+    SeedReason reason();
 }

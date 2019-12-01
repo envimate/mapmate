@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.definitions;
 
+import com.envimate.mapmate.builder.SeedReason;
 import com.envimate.mapmate.definitions.types.FullType;
 import com.envimate.mapmate.definitions.universal.Universal;
 import com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
@@ -39,22 +40,28 @@ import static java.util.Optional.ofNullable;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CustomPrimitiveDefinition implements Definition {
+    private final SeedReason reason;
     private final FullType type;
     private final CustomPrimitiveSerializer serializer;
     private final CustomPrimitiveDeserializer deserializer;
 
-    public static <T, U extends Universal> CustomPrimitiveDefinition customPrimitiveDefinition(final FullType type,
-                                                                                               final CustomPrimitiveSerializer serializer,
-                                                                                               final CustomPrimitiveDeserializer deserializer) {
-        return untypedCustomPrimitiveDefinition(type, serializer, deserializer);
+    public static <T, U extends Universal> CustomPrimitiveDefinition customPrimitiveDefinition(
+            final SeedReason reason,
+            final FullType type,
+            final CustomPrimitiveSerializer serializer,
+            final CustomPrimitiveDeserializer deserializer
+    ) {
+        return untypedCustomPrimitiveDefinition(reason, type, serializer, deserializer);
     }
 
     public static CustomPrimitiveDefinition untypedCustomPrimitiveDefinition(
+            final SeedReason reason,
             final FullType type,
             final CustomPrimitiveSerializer serializer,
             final CustomPrimitiveDeserializer deserializer) {
+        validateNotNull(reason, "reason");
         validateNotNull(type, "type");
-        return new CustomPrimitiveDefinition(type, serializer, deserializer);
+        return new CustomPrimitiveDefinition(reason, type, serializer, deserializer);
     }
 
     public Optional<CustomPrimitiveDeserializer> deserializer() {
@@ -68,5 +75,10 @@ public final class CustomPrimitiveDefinition implements Definition {
     @Override
     public FullType type() {
         return this.type;
+    }
+
+    @Override
+    public SeedReason reason() {
+        return this.reason;
     }
 }

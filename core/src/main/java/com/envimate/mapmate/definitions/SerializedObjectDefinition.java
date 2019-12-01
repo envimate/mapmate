@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.definitions;
 
+import com.envimate.mapmate.builder.SeedReason;
 import com.envimate.mapmate.definitions.types.FullType;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializedObjectSerializer;
@@ -38,20 +39,23 @@ import static java.util.Optional.ofNullable;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SerializedObjectDefinition implements Definition {
+    private final SeedReason reason;
     private final FullType type;
     private final SerializedObjectSerializer serializer;
     private final SerializedObjectDeserializer deserializer;
 
-    public static SerializedObjectDefinition serializedObjectDefinition(final FullType type,
+    public static SerializedObjectDefinition serializedObjectDefinition(final SeedReason reason,
+                                                                        final FullType type,
                                                                         final SerializedObjectSerializer serializer,
                                                                         final SerializedObjectDeserializer deserializer) {
+        validateNotNull(reason, "reason");
         validateNotNull(type, "type");
         if (serializer == null) {
             validateNotNull(deserializer, "deserializer");
         } else if (deserializer == null) {
             validateNotNull(serializer, "serializer");
         }
-        return new SerializedObjectDefinition(type, serializer, deserializer);
+        return new SerializedObjectDefinition(reason, type, serializer, deserializer);
     }
 
     public Optional<SerializedObjectSerializer> serializer() {
@@ -65,5 +69,10 @@ public final class SerializedObjectDefinition implements Definition {
     @Override
     public FullType type() {
         return this.type;
+    }
+
+    @Override
+    public SeedReason reason() {
+        return this.reason;
     }
 }

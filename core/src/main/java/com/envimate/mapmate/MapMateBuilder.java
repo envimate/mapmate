@@ -23,6 +23,7 @@ package com.envimate.mapmate;
 
 import com.envimate.mapmate.builder.DefinitionSeeds;
 import com.envimate.mapmate.builder.RequiredCapabilities;
+import com.envimate.mapmate.builder.SeedReason;
 import com.envimate.mapmate.builder.conventional.DetectorBuilder;
 import com.envimate.mapmate.builder.detection.Detector;
 import com.envimate.mapmate.builder.recipes.Recipe;
@@ -102,9 +103,12 @@ public final class MapMateBuilder {
         return this;
     }
 
-    public MapMateBuilder withManuallyAddedType(final Class<?> type, final RequiredCapabilities capabilities) {
+    public MapMateBuilder withManuallyAddedType(final Class<?> type,
+                                                final RequiredCapabilities capabilities) {
         validateNotNull(type, "type");
-        return withManuallyAddedType(fullType(type), capabilities);
+        final SeedReason reason = SeedReason.manuallyAddedIn(this.getClass(), "withManuallyAddedType");
+        final FullType fullType = fullType(type);
+        return withManuallyAddedType(reason, fullType, capabilities);
     }
 
     public MapMateBuilder withManuallyAddedType(final Class<?> type) {
@@ -112,14 +116,16 @@ public final class MapMateBuilder {
         return withManuallyAddedType(fullType(type));
     }
 
-    public MapMateBuilder withManuallyAddedType(final FullType type, final RequiredCapabilities capabilities) {
+    public MapMateBuilder withManuallyAddedType(final SeedReason seedReason,
+                                                final FullType type,
+                                                final RequiredCapabilities capabilities) {
         validateNotNull(type, "type");
-        this.definitionSeeds.add(type, capabilities);
+        this.definitionSeeds.add(seedReason, type, capabilities);
         return this;
     }
 
     public MapMateBuilder withManuallyAddedType(final FullType type) {
-        return withManuallyAddedType(type, all());
+        return withManuallyAddedType(SeedReason.manuallyAdded(), type, all());
     }
 
     public MapMateBuilder withManuallyAddedTypes(final Class<?>... type) {

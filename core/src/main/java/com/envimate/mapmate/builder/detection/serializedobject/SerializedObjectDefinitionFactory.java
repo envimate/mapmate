@@ -22,6 +22,7 @@
 package com.envimate.mapmate.builder.detection.serializedobject;
 
 import com.envimate.mapmate.builder.RequiredCapabilities;
+import com.envimate.mapmate.builder.SeedReason;
 import com.envimate.mapmate.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.builder.detection.serializedobject.deserialization.SerializedObjectDeserializationDetector;
 import com.envimate.mapmate.builder.detection.serializedobject.fields.FieldDetector;
@@ -86,7 +87,9 @@ public final class SerializedObjectDefinitionFactory implements DefinitionFactor
     }
 
     @Override
-    public Optional<Definition> analyze(final FullType type, final RequiredCapabilities capabilities) {
+    public Optional<Definition> analyze(final SeedReason reason,
+                                        final FullType type,
+                                        final RequiredCapabilities capabilities) {
         if (!this.filter.filter(type)) {
             return empty();
         }
@@ -116,7 +119,9 @@ public final class SerializedObjectDefinitionFactory implements DefinitionFactor
         }
 
         if (serializer.isPresent() || deserializer.isPresent()) {
-            return of(serializedObjectDefinition(type, serializer.orElse(null), deserializer.orElse(null)));
+            return of(serializedObjectDefinition(
+                    reason, type, serializer.orElse(null), deserializer.orElse(null))
+            );
         }
         return empty();
     }

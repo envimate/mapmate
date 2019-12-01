@@ -22,6 +22,7 @@
 package com.envimate.mapmate.builder.detection.customprimitive;
 
 import com.envimate.mapmate.builder.RequiredCapabilities;
+import com.envimate.mapmate.builder.SeedReason;
 import com.envimate.mapmate.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
 import com.envimate.mapmate.definitions.Definition;
@@ -69,9 +70,11 @@ public final class BuiltInPrimitivesFactory implements DefinitionFactory {
     }
 
     @Override
-    public Optional<Definition> analyze(final FullType type, final RequiredCapabilities capabilities) {
+    public Optional<Definition> analyze(final SeedReason reason,
+                                        final FullType type,
+                                        final RequiredCapabilities capabilities) {
         if (PRIMITIVE_DEFINITIONS.containsKey(type)) {
-            return of(PRIMITIVE_DEFINITIONS.get(type));
+            return of(PRIMITIVE_DEFINITIONS.get(type).apply(reason));
         }
         return empty();
     }

@@ -21,42 +21,43 @@
 
 package com.envimate.mapmate.builder;
 
+import com.envimate.mapmate.MapMateBuilder;
+import com.envimate.mapmate.definitions.Definition;
 import com.envimate.mapmate.definitions.types.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.envimate.mapmate.builder.RequiredCapabilities.none;
-import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import java.lang.reflect.Method;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class DefinitionSeed {
-    private static final int INITIAL_CAPACITY = 50;
-    private final FullType fullType;
-    private final Map<SeedReason, RequiredCapabilities> requiredCapabilities;
+public final class SeedReason {
+    private final String description;
 
-    public static DefinitionSeed definitionSeed(final FullType fullType) {
-        validateNotNull(fullType, "fullType");
-        return new DefinitionSeed(fullType, new HashMap<>(INITIAL_CAPACITY));
+    public static SeedReason becauseSerializedChildOf(final Definition definition) {
+        return new SeedReason("Serialization Child of " + definition);
     }
 
-    public void addRequirements(final SeedReason reason, final RequiredCapabilities requiredCapabilities) {
-        this.requiredCapabilities.put(reason, requiredCapabilities);
+    public static SeedReason becauseDeserializationParameterOf(final Definition definition) {
+        return new SeedReason("Deserialization Parameter of " + definition);
     }
 
-    public FullType fullType() {
-        return this.fullType;
+    public static SeedReason manuallyAdded() {
+        return new SeedReason("Manually Added");
     }
 
-    public RequiredCapabilities requiredCapabilities() {
-        final RequiredCapabilities requiredCapabilities = none();
-        this.requiredCapabilities.values().forEach(requiredCapabilities::add);
-        return requiredCapabilities;
+    public static SeedReason becauseReturnTypeOfUseCaseMethod(final Method method) {
+        return new SeedReason("Return type of use case method " + method);
+    }
+
+    public static SeedReason becauseParameterTypeOfUseCaseMethod(final Method method) {
+        return new SeedReason("Return parameter of use case method " + method);
+    }
+
+    public static SeedReason manuallyAddedIn(final Class<?> aClass, final String method) {
+        return new SeedReason("Manually added in method " + method + " of class " + aClass);
     }
 }

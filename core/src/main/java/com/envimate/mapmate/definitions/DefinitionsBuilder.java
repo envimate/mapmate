@@ -24,6 +24,7 @@ package com.envimate.mapmate.definitions;
 import com.envimate.mapmate.builder.DefinitionSeed;
 import com.envimate.mapmate.builder.DefinitionSeeds;
 import com.envimate.mapmate.builder.RequiredCapabilities;
+import com.envimate.mapmate.builder.SeedReason;
 import com.envimate.mapmate.builder.detection.Detector;
 import com.envimate.mapmate.definitions.types.FullType;
 import lombok.AccessLevel;
@@ -38,6 +39,8 @@ import java.util.Map;
 
 import static com.envimate.mapmate.builder.DefinitionSeeds.definitionSeeds;
 import static com.envimate.mapmate.builder.RequiredCapabilities.*;
+import static com.envimate.mapmate.builder.SeedReason.becauseDeserializationParameterOf;
+import static com.envimate.mapmate.builder.SeedReason.becauseSerializedChildOf;
 import static com.envimate.mapmate.definitions.DefinitionMultiplexer.multiplex;
 import static com.envimate.mapmate.definitions.Definitions.definitions;
 
@@ -89,9 +92,15 @@ public final class DefinitionsBuilder {
                 .forSerializedObject(serializedObject -> {
                     final DefinitionSeeds seeds = definitionSeeds();
                     serializedObject.serializer().ifPresent(serializer ->
-                            serializer.fields().fields().forEach(field -> seeds.add(field.type(), serializationOnly())));
-                    serializedObject.deserializer().ifPresent(deserializer ->
-                            deserializer.fields().referencedTypes().forEach(referencedType -> seeds.add(referencedType, deserializationOnly())));
+                            serializer.fields().fields().forEach(field -> seeds.add(
+                                    becauseSerializedChildOf(definition), field.type(), serializationOnly())
+                            )
+                    );
+                    serializedObject.deserializer().ifPresent(deserializer -> {
+                        deserializer.fields().referencedTypes().forEach(referencedType -> seeds.add(
+                                becauseDeserializationParameterOf(definition), referencedType, deserializationOnly()
+                        ));
+                    });
                     seeds.types().forEach(fullType -> recurse(fullType, detector, seeds.capabilitiesFor(fullType)));
                 })
                 .forCollection(collection -> recurse(collection.contentType(), detector, all()));

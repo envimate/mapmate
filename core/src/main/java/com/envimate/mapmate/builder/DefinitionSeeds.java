@@ -44,10 +44,11 @@ public final class DefinitionSeeds {
         return new DefinitionSeeds(new LinkedList<>());
     }
 
-    public void add(final FullType fullType,
+    public void add(final SeedReason reason,
+                    final FullType fullType,
                     final RequiredCapabilities requiredCapabilities) {
         final DefinitionSeed seed = forType(fullType);
-        seed.addRequirements(requiredCapabilities);
+        seed.addRequirements(reason, requiredCapabilities);
     }
 
     private DefinitionSeed forType(final FullType fullType) {

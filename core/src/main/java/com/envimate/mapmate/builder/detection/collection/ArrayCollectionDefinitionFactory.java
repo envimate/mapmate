@@ -22,6 +22,7 @@
 package com.envimate.mapmate.builder.detection.collection;
 
 import com.envimate.mapmate.builder.RequiredCapabilities;
+import com.envimate.mapmate.builder.SeedReason;
 import com.envimate.mapmate.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.definitions.Definition;
 import com.envimate.mapmate.definitions.types.FullType;
@@ -52,7 +53,9 @@ public final class ArrayCollectionDefinitionFactory implements DefinitionFactory
     }
 
     @Override
-    public Optional<Definition> analyze(final FullType type, final RequiredCapabilities capabilities) {
+    public Optional<Definition> analyze(final SeedReason reason,
+                                        final FullType type,
+                                        final RequiredCapabilities capabilities) {
         if (!type.type().isArray()) {
             return empty();
         }
@@ -65,6 +68,6 @@ public final class ArrayCollectionDefinitionFactory implements DefinitionFactory
 
         final CollectionSerializer serializer = arraySerializer();
         final CollectionDeserializer deserializer = arrayDeserializer(genericType.type());
-        return of(collectionDefinition(type, genericType, serializer, deserializer));
+        return of(collectionDefinition(reason, type, genericType, serializer, deserializer));
     }
 }
