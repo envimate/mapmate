@@ -22,6 +22,7 @@
 package com.envimate.mapmate;
 
 import com.envimate.mapmate.builder.scanning.PackageScanner;
+import com.envimate.mapmate.definitions.types.FullType;
 import com.envimate.mapmate.deserialization.Deserializer;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.serialization.Serializer;
@@ -86,6 +87,10 @@ public final class MapMate {
     }
 
     public <T> T deserialize(final String json, final Class<T> targetType, final MarshallingType marshallingType) {
+        return this.deserializer.deserialize(json, targetType, marshallingType);
+    }
+
+    public <T> T deserialize(final String json, final FullType targetType, final MarshallingType marshallingType) {
         return this.deserializer.deserialize(json, targetType, marshallingType);
     }
 }

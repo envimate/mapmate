@@ -56,6 +56,21 @@ public final class TypeVariableSpecs {
     }
 
     @Test
+    public void aSerializedObjectWithTypeVariableFieldsCanBeDeserialized() {
+        given(
+                aMapMate()
+                        .withManuallyAddedType(unresolvedType(AComplexParameterizedType.class).resolve(fullType(AString.class)))
+                        .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
+                        .build()
+        )
+                .when().mapMateDeserializes("" +
+                "{\n" +
+                "  \"value\": \"foo\"\n" +
+                "}").as(json()).toTheType(unresolvedType(AComplexParameterizedType.class).resolve(fullType(AString.class)))
+                .noExceptionHasBeenThrown();
+    }
+
+    @Test
     public void aSerializedObjectWithTypeVariableFieldsCanRegisteredTwice() {
         given(
                 aMapMate()

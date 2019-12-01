@@ -37,7 +37,6 @@ import lombok.RequiredArgsConstructor;
 import java.util.*;
 import java.util.Map.Entry;
 
-import static com.envimate.mapmate.definitions.types.FullType.fullType;
 import static com.envimate.mapmate.definitions.universal.UniversalNull.universalNull;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.lang.String.format;
@@ -59,10 +58,10 @@ final class InternalDeserializer {
     }
 
     <T> T deserialize(final Universal input,
-                      final Class<T> targetType,
+                      final FullType targetType,
                       final ExceptionTracker exceptionTracker,
                       final Injector injector) {
-        final T result = (T) this.deserializeRecursive(input, fullType(targetType), exceptionTracker, injector);
+        final T result = (T) this.deserializeRecursive(input, targetType, exceptionTracker, injector);
         final ValidationResult validationResult = exceptionTracker.validationResult();
         if (validationResult.hasValidationErrors()) {
             this.onValidationErrors.map(validationResult.validationErrors());
