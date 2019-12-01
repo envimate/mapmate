@@ -19,34 +19,20 @@
  * under the License.
  */
 
-package com.envimate.mapmate.specs.givenwhenthen;
+package com.envimate.mapmate.domain.half;
 
-import com.envimate.mapmate.MapMate;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-import java.util.function.Supplier;
-
-import static com.envimate.mapmate.specs.givenwhenthen.MapMateInstances.theExampleMapMateWithAllMarshallers;
-import static com.envimate.mapmate.specs.givenwhenthen.When.aWhen;
-
+@ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class Given {
-    private final Supplier<MapMate> mapMate;
+public final class AnUnresolvableSerializationOnlyComplexType {
+    public final ADeserializationOnlyString string;
 
-    public static Given given(final Supplier<MapMate> mapMate) {
-        return new Given(mapMate);
-    }
-
-    public static Given given(final MapMate mapMate) {
-        return given(() -> mapMate);
-    }
-
-    public static Given givenTheExampleMapMateWithAllMarshallers() {
-        return given(theExampleMapMateWithAllMarshallers());
-    }
-
-    public When when() {
-        return aWhen(this.mapMate);
+    public static AnUnresolvableSerializationOnlyComplexType init() {
+        return new AnUnresolvableSerializationOnlyComplexType(ADeserializationOnlyString.fromStringValue("foo"));
     }
 }

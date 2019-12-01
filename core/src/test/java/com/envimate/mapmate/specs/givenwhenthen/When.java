@@ -35,16 +35,29 @@ import java.util.function.Supplier;
 import static com.envimate.mapmate.specs.givenwhenthen.Then.then;
 import static com.envimate.mapmate.specs.givenwhenthen.ThenData.thenData;
 
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class When {
     private final MapMate mapMate;
+    private final ThenData thenData;
 
-    private static Then doDeserialization(final Supplier<Object> deserializer) {
+    static When aWhen(final Supplier<MapMate> mapMateSupplier) {
+        final ThenData thenData = thenData();
+        MapMate mapMate;
+        try {
+            mapMate = mapMateSupplier.get();
+        } catch (final Exception e) {
+            thenData.withException(e);
+            mapMate = null;
+        }
+        return new When(mapMate, thenData);
+    }
+
+    private Then doDeserialization(final Supplier<Object> deserializer) {
         try {
             final Object result = deserializer.get();
-            return then(thenData().withDeserializationResult(result));
+            return then(this.thenData.withDeserializationResult(result));
         } catch (final Exception e) {
-            return then(thenData().withException(e));
+            return then(this.thenData.withException(e));
         }
     }
 
@@ -70,9 +83,9 @@ public final class When {
         return marshallingType -> {
             try {
                 final String serialized = this.mapMate.serializeTo(object, marshallingType);
-                return then(thenData().withSerializationResult(serialized));
+                return then(this.thenData.withSerializationResult(serialized));
             } catch (final Exception e) {
-                return then(thenData().withException(e));
+                return then(this.thenData.withException(e));
             }
         };
     }
@@ -82,15 +95,15 @@ public final class When {
         return marshallingType -> {
             try {
                 final String serialized = this.mapMate.serializer().serialize(object, marshallingType, injector);
-                return then(thenData().withSerializationResult(serialized));
+                return then(this.thenData.withSerializationResult(serialized));
             } catch (final Exception e) {
-                return then(thenData().withException(e));
+                return then(this.thenData.withException(e));
             }
         };
     }
 
     public Then theDefinitionsAreQueried() {
         final Definitions definitions = this.mapMate.deserializer().getDefinitions();
-        return then(thenData().withDefinitions(definitions));
+        return then(this.thenData.withDefinitions(definitions));
     }
 }
