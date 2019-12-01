@@ -30,6 +30,7 @@ import lombok.ToString;
 import java.util.List;
 
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
@@ -42,6 +43,10 @@ public final class SerializationFields {
     public static SerializationFields serializationFields(final List<SerializationField> fields) {
         validateNotNull(fields, "fields");
         return new SerializationFields(fields);
+    }
+
+    public static SerializationFields empty() {
+        return new SerializationFields(emptyList());
     }
 
     public boolean isEmpty() {

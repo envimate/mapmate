@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject;
 
+import com.envimate.mapmate.builder.RequiredCapabilities;
 import com.envimate.mapmate.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.builder.detection.serializedobject.deserialization.SerializedObjectDeserializationDetector;
 import com.envimate.mapmate.builder.detection.serializedobject.fields.FieldDetector;
@@ -85,23 +86,34 @@ public final class SerializedObjectDefinitionFactory implements DefinitionFactor
     }
 
     @Override
-    public Optional<Definition> analyze(final FullType type) {
+    public Optional<Definition> analyze(final FullType type, final RequiredCapabilities capabilities) {
         if (!this.filter.filter(type)) {
             return empty();
         }
         validateParameterNamesArePresent(type.type());
-        final List<SerializationField> serializationFieldsList = this.fieldDetectors.stream()
-                .map(fieldDetector -> fieldDetector.detect(type))
-                .flatMap(Collection::stream)
-                .filter(distinctByKey(SerializationField::name))
-                .collect(toList());
-        final SerializationFields serializationFields = serializationFields(serializationFieldsList);
-        final Optional<SerializedObjectSerializer> serializer = serializedObjectSerializer(type, serializationFields);
 
-        final Optional<SerializedObjectDeserializer> deserializer = this.detectors.stream()
-                .map(detector -> detector.detect(type, serializationFields))
-                .flatMap(Optional::stream)
-                .findFirst();
+        final SerializationFields serializationFields;
+        final Optional<SerializedObjectSerializer> serializer;
+        if (capabilities.hasSerialization()) {
+            final List<SerializationField> serializationFieldsList = this.fieldDetectors.stream()
+                    .map(fieldDetector -> fieldDetector.detect(type))
+                    .flatMap(Collection::stream)
+                    .filter(distinctByKey(SerializationField::name))
+                    .collect(toList());
+            serializationFields = serializationFields(serializationFieldsList);
+            serializer = serializedObjectSerializer(type, serializationFields);
+        } else {
+            serializationFields = SerializationFields.empty();
+            serializer = empty();
+        }
+
+        Optional<SerializedObjectDeserializer> deserializer = empty();
+        if (capabilities.hasDeserialization()) {
+            deserializer = this.detectors.stream()
+                    .map(detector -> detector.detect(type, serializationFields))
+                    .flatMap(Optional::stream)
+                    .findFirst();
+        }
 
         if (serializer.isPresent() || deserializer.isPresent()) {
             return of(serializedObjectDefinition(type, serializer.orElse(null), deserializer.orElse(null)));
@@ -109,7 +121,7 @@ public final class SerializedObjectDefinitionFactory implements DefinitionFactor
         return empty();
     }
 
-    public static <T> Predicate<T> distinctByKey(final Function<T, String> key) {
+    private static <T> Predicate<T> distinctByKey(final Function<T, String> key) {
         final Set<String> alreadySeenKeys = ConcurrentHashMap.newKeySet();
         return element -> alreadySeenKeys.add(key.apply(element));
     }

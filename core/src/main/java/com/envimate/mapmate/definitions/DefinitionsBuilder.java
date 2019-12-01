@@ -21,7 +21,9 @@
 
 package com.envimate.mapmate.definitions;
 
+import com.envimate.mapmate.builder.DefinitionSeed;
 import com.envimate.mapmate.builder.DefinitionSeeds;
+import com.envimate.mapmate.builder.RequiredCapabilities;
 import com.envimate.mapmate.builder.detection.Detector;
 import com.envimate.mapmate.definitions.types.FullType;
 import lombok.AccessLevel;
@@ -34,6 +36,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static com.envimate.mapmate.builder.DefinitionSeeds.definitionSeeds;
+import static com.envimate.mapmate.builder.RequiredCapabilities.*;
 import static com.envimate.mapmate.definitions.DefinitionMultiplexer.multiplex;
 import static com.envimate.mapmate.definitions.Definitions.definitions;
 
@@ -50,11 +54,11 @@ public final class DefinitionsBuilder {
         return new DefinitionsBuilder(detector);
     }
 
-    public void detectAndAdd(final FullType type) {
-        if (isPresent(type)) {
+    public void detectAndAdd(final DefinitionSeed seed) {
+        if (isPresent(seed.fullType())) {
             return;
         }
-        this.detector.detect(type).ifPresent(this::addDefinition);
+        this.detector.detect(seed.fullType(), seed.requiredCapabilities()).ifPresent(this::addDefinition);
     }
 
     public void addDefinition(final Definition definition) {
@@ -70,11 +74,11 @@ public final class DefinitionsBuilder {
         seedDefinitions.forEach(definition -> diveIntoChildren(definition, detector));
     }
 
-    private void recurse(final FullType type, final Detector detector) {
+    private void recurse(final FullType type, final Detector detector, final RequiredCapabilities capabilities) {
         if (isPresent(type)) {
             return;
         }
-        detector.detect(type).ifPresent(definition -> {
+        detector.detect(type, capabilities).ifPresent(definition -> {
             addDefinition(definition);
             diveIntoChildren(definition, detector);
         });
@@ -83,12 +87,14 @@ public final class DefinitionsBuilder {
     private void diveIntoChildren(final Definition definition, final Detector detector) {
         multiplex(definition)
                 .forSerializedObject(serializedObject -> {
+                    final DefinitionSeeds seeds = definitionSeeds();
                     serializedObject.serializer().ifPresent(serializer ->
-                            serializer.fields().fields().forEach(field -> recurse(field.type(), detector)));
+                            serializer.fields().fields().forEach(field -> seeds.add(field.type(), serializationOnly())));
                     serializedObject.deserializer().ifPresent(deserializer ->
-                            deserializer.fields().referencedTypes().forEach(referencedType -> recurse(referencedType, detector)));
+                            deserializer.fields().referencedTypes().forEach(referencedType -> seeds.add(referencedType, deserializationOnly())));
+                    seeds.types().forEach(fullType -> recurse(fullType, detector, seeds.capabilitiesFor(fullType)));
                 })
-                .forCollection(collection -> recurse(collection.contentType(), detector));
+                .forCollection(collection -> recurse(collection.contentType(), detector, all()));
     }
 
     public Definitions build(final DefinitionSeeds seeds) {

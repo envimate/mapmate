@@ -104,8 +104,8 @@ public final class HalfDefinitionsSpecs {
                 .build()
         )
                 .when().mapMateIsInstantiated()
-                .anExceptionIsThrownWithAMessageContaining("Custom primitive 'com.envimate.mapmate.domain.half.ADeserializationOnlyString' " +
-                        "is not serializable but needs to be in order to support serialization of 'com.envimate.mapmate.domain.half.AnUnresolvableSerializationOnlyComplexType'");
+                .anExceptionIsThrownWithAMessageContaining("Type 'com.envimate.mapmate.domain.half.ADeserializationOnlyString' is not registered but " +
+                        "needs to be in order to support serialization of 'com.envimate.mapmate.domain.half.AnUnresolvableSerializationOnlyComplexType'");
     }
 
     @Test
@@ -116,8 +116,8 @@ public final class HalfDefinitionsSpecs {
                 .build()
         )
                 .when().mapMateIsInstantiated()
-                .anExceptionIsThrownWithAMessageContaining("Custom primitive 'com.envimate.mapmate.domain.half.ASerializationOnlyString' is not deserializable but needs to be in order " +
-                        "to support deserialization of 'com.envimate.mapmate.domain.half.AnUnresolvableDeserializationOnlyComplexType'");
+                .anExceptionIsThrownWithAMessageContaining("Type 'com.envimate.mapmate.domain.half.ASerializationOnlyString' is not registered " +
+                        "but needs to be in order to support deserialization of 'com.envimate.mapmate.domain.half.AnUnresolvableDeserializationOnlyComplexType'");
     }
 
     @Test

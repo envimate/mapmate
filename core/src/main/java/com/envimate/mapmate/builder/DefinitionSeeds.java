@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.envimate.mapmate.builder.DefinitionSeed.definitionSeed;
+import static java.util.Collections.unmodifiableList;
 
 @ToString
 @EqualsAndHashCode
@@ -58,6 +59,10 @@ public final class DefinitionSeeds {
                     this.seeds.add(seed);
                     return seed;
                 });
+    }
+
+    public List<DefinitionSeed> seeds() {
+        return unmodifiableList(this.seeds);
     }
 
     public List<FullType> types() {

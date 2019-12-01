@@ -21,11 +21,12 @@
 
 package com.envimate.mapmate.builder.detection;
 
+import com.envimate.mapmate.builder.RequiredCapabilities;
 import com.envimate.mapmate.definitions.Definition;
 import com.envimate.mapmate.definitions.types.FullType;
 
 import java.util.Optional;
 
 public interface DefinitionFactory {
-    Optional<Definition> analyze(FullType type);
+    Optional<Definition> analyze(FullType type, RequiredCapabilities capabilities);
 }

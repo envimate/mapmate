@@ -211,7 +211,7 @@ public final class MapMateBuilder {
 
         final DefinitionsBuilder definitionsBuilder = definitionsBuilder(this.detector);
         this.addedDefinitions.forEach(definitionsBuilder::addDefinition);
-        this.definitionSeeds.types().forEach(definitionsBuilder::detectAndAdd);
+        this.definitionSeeds.seeds().forEach(definitionsBuilder::detectAndAdd);
 
         definitionsBuilder.resolveRecursively(this.detector);
         final Definitions definitions = definitionsBuilder.build(this.definitionSeeds);

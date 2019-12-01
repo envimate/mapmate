@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.builder.detection.customprimitive;
 
+import com.envimate.mapmate.builder.RequiredCapabilities;
 import com.envimate.mapmate.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.builder.detection.customprimitive.deserialization.CustomPrimitiveDeserializationDetector;
 import com.envimate.mapmate.builder.detection.customprimitive.serialization.CustomPrimitiveSerializationDetector;
@@ -59,13 +60,26 @@ public final class CustomPrimitiveDefinitionFactory implements DefinitionFactory
     }
 
     @Override
-    public Optional<Definition> analyze(final FullType type) {
+    public Optional<Definition> analyze(final FullType type, final RequiredCapabilities capabilities) {
         final CachedReflectionType cachedReflectionType = cachedReflectionType(type.type());
-        final Optional<CustomPrimitiveSerializer> serializer = this.serializationDetector.detect(cachedReflectionType);
-        final Optional<CustomPrimitiveDeserializer> deserializer = this.deserializationDetectors.stream()
-                .map(detector -> detector.detect(cachedReflectionType))
-                .flatMap(Optional::stream)
-                .findFirst();
+
+        final Optional<CustomPrimitiveSerializer> serializer;
+        if (capabilities.hasSerialization()) {
+            serializer = this.serializationDetector.detect(cachedReflectionType);
+        } else {
+            serializer = empty();
+        }
+
+        final Optional<CustomPrimitiveDeserializer> deserializer;
+        if (capabilities.hasDeserialization()) {
+            deserializer = this.deserializationDetectors.stream()
+                    .map(detector -> detector.detect(cachedReflectionType))
+                    .flatMap(Optional::stream)
+                    .findFirst();
+        } else {
+            deserializer = empty();
+        }
+
         if (serializer.isPresent() || deserializer.isPresent()) {
             return of(untypedCustomPrimitiveDefinition(type, serializer.orElse(null), deserializer.orElse(null)));
         }
