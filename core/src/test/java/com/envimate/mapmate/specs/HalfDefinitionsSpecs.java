@@ -22,11 +22,14 @@
 package com.envimate.mapmate.specs;
 
 import com.envimate.mapmate.domain.half.*;
+import com.envimate.mapmate.domain.repositories.RepositoryWithDeserializationOnlyType;
+import com.envimate.mapmate.domain.repositories.RepositoryWithSerializationOnlyType;
 import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.MapMate.aMapMate;
 import static com.envimate.mapmate.builder.RequiredCapabilities.deserializationOnly;
 import static com.envimate.mapmate.builder.RequiredCapabilities.serializationOnly;
+import static com.envimate.mapmate.builder.recipes.scanner.ClassScannerRecipe.addAllReferencedClassesIs;
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.given;
 import static com.envimate.mapmate.specs.givenwhenthen.Marshallers.jsonMarshaller;
@@ -103,5 +106,48 @@ public final class HalfDefinitionsSpecs {
                 .when().mapMateIsInstantiated()
                 .anExceptionIsThrownWithAMessageContaining("Custom primitive 'com.envimate.mapmate.domain.half.ADeserializationOnlyString' " +
                         "is not serializable but needs to be in order to support serialization of 'com.envimate.mapmate.domain.half.AnUnresolvableSerializationOnlyComplexType'");
+    }
+
+    @Test
+    public void mapMateCanValidateThatDeserializationWorks() {
+        given(() -> aMapMate()
+                .withManuallyAddedType(AnUnresolvableDeserializationOnlyComplexType.class, deserializationOnly())
+                .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
+                .build()
+        )
+                .when().mapMateIsInstantiated()
+                .anExceptionIsThrownWithAMessageContaining("Custom primitive 'com.envimate.mapmate.domain.half.ASerializationOnlyString' is not deserializable but needs to be in order " +
+                        "to support deserialization of 'com.envimate.mapmate.domain.half.AnUnresolvableDeserializationOnlyComplexType'");
+    }
+
+    @Test
+    public void classScannerRecipeRegistersReturnTypesAsSerializationOnly() {
+        given(aMapMate()
+                .usingRecipe(addAllReferencedClassesIs(RepositoryWithSerializationOnlyType.class))
+                .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
+                .build()
+        )
+                .when().mapMateSerializes(ASerializationOnlyComplexType.init()).withMarshallingType(json())
+                .noExceptionHasBeenThrown()
+                .theSerializationResultWas("" +
+                        "{\n" +
+                        "  \"string\": \"theValue\"\n" +
+                        "}");
+    }
+
+    @Test
+    public void classScannerRecipeRegistersParametersAsDeserializationOnly() {
+        given(aMapMate()
+                .usingRecipe(addAllReferencedClassesIs(RepositoryWithDeserializationOnlyType.class))
+                .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
+                .build()
+        )
+                .when().mapMateDeserializes("" +
+                "{\n" +
+                "  \"string\": \"foo\"\n" +
+                "}")
+                .as(json()).toTheType(ADeserializationOnlyComplexType.class)
+                .noExceptionHasBeenThrown()
+                .theDeserializedObjectIs(ADeserializationOnlyComplexType.deserialize(ADeserializationOnlyString.fromStringValue("foo")));
     }
 }

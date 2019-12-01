@@ -28,7 +28,7 @@ import com.envimate.mapmate.domain.valid.AString;
 import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.MapMate.aMapMate;
-import static com.envimate.mapmate.builder.recipes.scanner.ClassScannerRecipe.addAllReferencesClassesIs;
+import static com.envimate.mapmate.builder.recipes.scanner.ClassScannerRecipe.addAllReferencedClassesIs;
 import static com.envimate.mapmate.definitions.types.FullType.fullType;
 import static com.envimate.mapmate.definitions.types.unresolved.UnresolvedType.unresolvedType;
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
@@ -77,7 +77,7 @@ public final class TypeVariableSpecs {
     public void aSerializedObjectWithTypeVariableCanBeFoundAsAReferenceOfAScannedClass() {
         given(
                 aMapMate()
-                        .usingRecipe(addAllReferencesClassesIs(RepositoryWithTypeVariableReference.class))
+                        .usingRecipe(addAllReferencedClassesIs(RepositoryWithTypeVariableReference.class))
                         .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
                         .build()
         )

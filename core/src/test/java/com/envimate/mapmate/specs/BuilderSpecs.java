@@ -26,7 +26,7 @@ import com.envimate.mapmate.domain.valid.*;
 import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.MapMate.aMapMate;
-import static com.envimate.mapmate.builder.recipes.scanner.ClassScannerRecipe.addAllReferencesClassesIs;
+import static com.envimate.mapmate.builder.recipes.scanner.ClassScannerRecipe.addAllReferencedClassesIs;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.given;
 
 public final class BuilderSpecs {
@@ -69,7 +69,7 @@ public final class BuilderSpecs {
     public void referencesInClassesCanBeScanned() {
         given(
                 aMapMate()
-                        .usingRecipe(addAllReferencesClassesIs(MyRepository.class))
+                        .usingRecipe(addAllReferencedClassesIs(MyRepository.class))
                         .build()
         )
                 .when().theDefinitionsAreQueried()

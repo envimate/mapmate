@@ -31,11 +31,11 @@ import lombok.ToString;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.envimate.mapmate.builder.RequiredCapabilities.deserializationOnly;
+import static com.envimate.mapmate.builder.RequiredCapabilities.serializationOnly;
 import static com.envimate.mapmate.definitions.types.resolver.TypeResolver.resolveType;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.lang.reflect.Modifier.isPublic;
@@ -53,33 +53,31 @@ public final class ClassScannerRecipe implements Recipe {
 
     private final List<Class<?>> classes;
 
-    public static ClassScannerRecipe addAllReferencesClassesIs(final Class<?>... classes) {
+    public static ClassScannerRecipe addAllReferencedClassesIs(final Class<?>... classes) {
         validateNotNull(classes, "classes");
         return new ClassScannerRecipe(asList(classes));
     }
 
     @Override
     public void cook(final MapMateBuilder mapMateBuilder) {
-        this.classes.stream()
-                .map(ClassScannerRecipe::referencesIn)
-                .flatMap(Collection::stream)
-                .forEach(mapMateBuilder::withManuallyAddedType);
+        this.classes.forEach(clazz -> addReferencesIn(clazz, mapMateBuilder));
     }
 
-    private static List<FullType> referencesIn(final Class<?> clazz) {
+    private static void addReferencesIn(final Class<?> clazz, final MapMateBuilder builder) {
         final FullType fullType = FullType.fullType(clazz);
-        final List<FullType> classes = new LinkedList<>();
         stream(clazz.getDeclaredMethods())
                 .filter(method -> isPublic(method.getModifiers()))
                 .filter(method -> !OBJECT_METHODS.contains(method.getName()))
                 .forEach(method -> {
-                    resolveType(method.getGenericReturnType(), fullType).ifPresent(classes::add);
+                    if (method.getReturnType() != Void.TYPE) {
+                        resolveType(method.getGenericReturnType(), fullType)
+                                .ifPresent(returnType -> builder.withManuallyAddedType(returnType, serializationOnly()));
+                    }
                     stream(method.getParameters())
                             .map(Parameter::getParameterizedType)
                             .map(type -> resolveType(type, fullType))
                             .flatMap(Optional::stream)
-                            .forEach(classes::add);
+                            .forEach(parameterType -> builder.withManuallyAddedType(parameterType, deserializationOnly()));
                 });
-        return classes;
     }
 }
