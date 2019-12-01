@@ -28,7 +28,7 @@
     <parent>
         <groupId>com.envimate.mapmate</groupId>
         <artifactId>integrations-parent</artifactId>
-        <version>1.6.25</version>
+        <version>1.6.26</version>
     </parent>
 
     <groupId>com.envimate.mapmate.integrations</groupId>
@@ -46,7 +46,7 @@
         <dependency>
             <groupId>com.envimate.mapmate</groupId>
             <artifactId>core</artifactId>
-            <version>1.6.25</version>
+            <version>1.6.26</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
