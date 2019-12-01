@@ -22,10 +22,13 @@
 package com.envimate.mapmate.specs;
 
 import com.envimate.mapmate.domain.parameterized.AComplexParameterizedType;
+import com.envimate.mapmate.domain.repositories.RepositoryWithTypeVariableReference;
+import com.envimate.mapmate.domain.valid.ANumber;
 import com.envimate.mapmate.domain.valid.AString;
 import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.MapMate.aMapMate;
+import static com.envimate.mapmate.builder.recipes.scanner.ClassScannerRecipe.addAllReferencesClassesIs;
 import static com.envimate.mapmate.definitions.types.FullType.fullType;
 import static com.envimate.mapmate.definitions.types.unresolved.UnresolvedType.unresolvedType;
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
@@ -40,6 +43,41 @@ public final class TypeVariableSpecs {
         given(
                 aMapMate()
                         .withManuallyAddedType(unresolvedType(AComplexParameterizedType.class).resolve(fullType(AString.class)))
+                        .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
+                        .build()
+        )
+                .when().mapMateSerializes(AComplexParameterizedType.deserialize(AString.fromStringValue("foo")))
+                .withMarshallingType(json())
+                .noExceptionHasBeenThrown()
+                .theSerializationResultWas("" +
+                        "{\n" +
+                        "  \"value\": \"foo\"\n" +
+                        "}");
+    }
+
+    @Test
+    public void aSerializedObjectWithTypeVariableFieldsCanRegisteredTwice() {
+        given(
+                aMapMate()
+                        .withManuallyAddedType(unresolvedType(AComplexParameterizedType.class).resolve(fullType(AString.class)))
+                        .withManuallyAddedType(unresolvedType(AComplexParameterizedType.class).resolve(fullType(ANumber.class)))
+                        .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
+                        .build()
+        )
+                .when().mapMateSerializes(AComplexParameterizedType.deserialize(ANumber.fromInt(42)))
+                .withMarshallingType(json())
+                .noExceptionHasBeenThrown()
+                .theSerializationResultWas("" +
+                        "{\n" +
+                        "  \"value\": \"42\"\n" +
+                        "}");
+    }
+
+    @Test
+    public void aSerializedObjectWithTypeVariableCanBeFoundAsAReferenceOfAScannedClass() {
+        given(
+                aMapMate()
+                        .usingRecipe(addAllReferencesClassesIs(RepositoryWithTypeVariableReference.class))
                         .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
                         .build()
         )
