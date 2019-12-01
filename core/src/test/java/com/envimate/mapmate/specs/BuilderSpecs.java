@@ -27,9 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.MapMate.aMapMate;
 import static com.envimate.mapmate.builder.recipes.scanner.ClassScannerRecipe.addAllReferencesClassesIs;
-import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.given;
-import static java.util.Collections.emptyList;
 
 public final class BuilderSpecs {
 
@@ -53,20 +51,6 @@ public final class BuilderSpecs {
                 .when().theDefinitionsAreQueried()
                 .theDefinitionsContainExactlyTheCustomPrimitives(AString.class)
                 .theDefinitionsContainExactlyTheSerializedObjects();
-    }
-
-    @Test
-    public void classesWithWildcardGenericsAreIgnored() {
-        given(aMapMate().withManuallyAddedType(AComplexTypeWithTypeWildcards.class).build())
-                .when().mapMateSerializes(AComplexTypeWithTypeWildcards.deserialize(emptyList())).withMarshallingType(json())
-                .anExceptionIsThrownWithAMessageContaining("no definition found for type 'com.envimate.mapmate.domain.valid.AComplexTypeWithTypeWildcards'");
-    }
-
-    @Test
-    public void collectionsWithTypeVariablesAreIgnored() {
-        given(aMapMate().withManuallyAddedType(AComplexTypeWithWildcardedCollection.class).build())
-                .when().mapMateSerializes(AComplexTypeWithWildcardedCollection.deserialize(emptyList())).withMarshallingType(json())
-                .anExceptionIsThrownWithAMessageContaining("no definition found for type 'com.envimate.mapmate.domain.valid.AComplexTypeWithWildcardedCollection'");
     }
 
     @Test

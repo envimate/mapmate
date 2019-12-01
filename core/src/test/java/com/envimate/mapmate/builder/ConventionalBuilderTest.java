@@ -81,7 +81,9 @@ public final class ConventionalBuilderTest {
 
     public static MapMate theConventionalMapMateInstance() {
         final Gson gson = new Gson();
-        return MapMate.aMapMate("com.envimate.mapmate.builder.models")
+        return MapMate.aMapMate("com.envimate.mapmate.builder.models.conventional",
+                "com.envimate.mapmate.builder.models.conventionalwithclassnamefactories",
+                "com.envimate.mapmate.builder.models.constructor")
                 .usingJsonMarshaller(gson::toJson, gson::fromJson)
                 .withExceptionIndicatingValidationError(CustomTypeValidationException.class)
                 .build();

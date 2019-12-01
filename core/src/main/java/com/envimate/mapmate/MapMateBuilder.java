@@ -22,6 +22,7 @@
 package com.envimate.mapmate;
 
 import com.envimate.mapmate.builder.DefinitionSeeds;
+import com.envimate.mapmate.builder.RequiredCapabilities;
 import com.envimate.mapmate.builder.conventional.DetectorBuilder;
 import com.envimate.mapmate.builder.detection.Detector;
 import com.envimate.mapmate.builder.recipes.Recipe;
@@ -101,15 +102,24 @@ public final class MapMateBuilder {
         return this;
     }
 
+    public MapMateBuilder withManuallyAddedType(final Class<?> type, final RequiredCapabilities capabilities) {
+        validateNotNull(type, "type");
+        return withManuallyAddedType(fullType(type), capabilities);
+    }
+
     public MapMateBuilder withManuallyAddedType(final Class<?> type) {
         validateNotNull(type, "type");
         return withManuallyAddedType(fullType(type));
     }
 
-    public MapMateBuilder withManuallyAddedType(final FullType type) {
+    public MapMateBuilder withManuallyAddedType(final FullType type, final RequiredCapabilities capabilities) {
         validateNotNull(type, "type");
-        this.definitionSeeds.add(type, all());
+        this.definitionSeeds.add(type, capabilities);
         return this;
+    }
+
+    public MapMateBuilder withManuallyAddedType(final FullType type) {
+        return withManuallyAddedType(type, all());
     }
 
     public MapMateBuilder withManuallyAddedTypes(final Class<?>... type) {
@@ -204,7 +214,7 @@ public final class MapMateBuilder {
         this.definitionSeeds.types().forEach(definitionsBuilder::detectAndAdd);
 
         definitionsBuilder.resolveRecursively(this.detector);
-        final Definitions definitions = definitionsBuilder.build();
+        final Definitions definitions = definitionsBuilder.build(this.definitionSeeds);
 
         final MarshallerRegistry<Marshaller> marshallerRegistry = marshallerRegistry(this.marshallerMap);
         final Serializer serializer = theSerializer(marshallerRegistry, definitions, CUSTOM_PRIMITIVE_MAPPINGS);

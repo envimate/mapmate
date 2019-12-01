@@ -51,7 +51,7 @@ public final class YamlBuilderTest {
     public static MapMate theYamlMapMateInstance() {
         final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
-        return MapMate.aMapMate("com.envimate.mapmate.builder.models")
+        return MapMate.aMapMate("com.envimate.mapmate.builder.models.conventional")
                 .usingJsonMarshaller(objectMapper::writeValueAsString, objectMapper::readValue)
                 .withExceptionIndicatingValidationError(CustomTypeValidationException.class)
                 .build();

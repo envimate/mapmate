@@ -53,4 +53,12 @@ public final class RequiredCapabilities {
         this.serialization = this.serialization || other.serialization;
         this.deserialization = this.deserialization || other.deserialization;
     }
+
+    public boolean hasDeserialization() {
+        return this.deserialization;
+    }
+
+    public boolean hasSerialization() {
+        return this.serialization;
+    }
 }

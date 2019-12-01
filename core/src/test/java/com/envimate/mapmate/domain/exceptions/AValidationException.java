@@ -19,14 +19,22 @@
  * under the License.
  */
 
-package com.envimate.mapmate.domain.valid;
+package com.envimate.mapmate.domain.exceptions;
 
-public final class AnException extends RuntimeException {
-    private AnException(final String msg) {
-        super(msg);
+public final class AValidationException extends RuntimeException {
+
+    private final String blamedField;
+
+    private AValidationException(final String message, final String blamedField) {
+        super(message);
+        this.blamedField = blamedField;
     }
 
-    public static AnException anException(final String msg) {
-        return new AnException(msg);
+    public static AValidationException aValidationException(final String message, final String blamedField) {
+        return new AValidationException(message, blamedField);
+    }
+
+    public String getBlamedField() {
+        return this.blamedField;
     }
 }

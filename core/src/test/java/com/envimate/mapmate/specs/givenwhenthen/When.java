@@ -106,4 +106,8 @@ public final class When {
         final Definitions definitions = this.mapMate.deserializer().getDefinitions();
         return then(this.thenData.withDefinitions(definitions));
     }
+
+    public Then mapMateIsInstantiated() {
+        return then(this.thenData);
+    }
 }

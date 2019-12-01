@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.domain.valid;
 
+import com.envimate.mapmate.domain.interfaces.AComplexNestedTypeInterface;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;

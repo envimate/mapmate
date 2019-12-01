@@ -21,13 +21,12 @@
 
 package com.envimate.mapmate.specs;
 
-import com.envimate.mapmate.domain.half.ADeserializationOnlyComplexType;
-import com.envimate.mapmate.domain.half.ADeserializationOnlyString;
-import com.envimate.mapmate.domain.half.ASerializationOnlyComplexType;
-import com.envimate.mapmate.domain.half.ASerializationOnlyString;
+import com.envimate.mapmate.domain.half.*;
 import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.MapMate.aMapMate;
+import static com.envimate.mapmate.builder.RequiredCapabilities.deserializationOnly;
+import static com.envimate.mapmate.builder.RequiredCapabilities.serializationOnly;
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.given;
 import static com.envimate.mapmate.specs.givenwhenthen.Marshallers.jsonMarshaller;
@@ -39,7 +38,7 @@ public final class HalfDefinitionsSpecs {
     public void aCustomPrimitiveCanBeSerializationOnly() {
         given(
                 aMapMate()
-                        .withManuallyAddedType(ASerializationOnlyString.class)
+                        .withManuallyAddedType(ASerializationOnlyString.class, serializationOnly())
                         .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
                         .build()
         )
@@ -52,7 +51,7 @@ public final class HalfDefinitionsSpecs {
     public void aCustomPrimitiveCanBeDeserializationOnly() {
         given(
                 aMapMate()
-                        .withManuallyAddedType(ADeserializationOnlyString.class)
+                        .withManuallyAddedType(ADeserializationOnlyString.class, deserializationOnly())
                         .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
                         .build()
         )
@@ -65,7 +64,7 @@ public final class HalfDefinitionsSpecs {
     public void aSerializedObjectCanBeSerializationOnly() {
         given(
                 aMapMate()
-                        .withManuallyAddedType(ASerializationOnlyComplexType.class)
+                        .withManuallyAddedType(ASerializationOnlyComplexType.class, serializationOnly())
                         .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
                         .build()
         )
@@ -81,7 +80,7 @@ public final class HalfDefinitionsSpecs {
     public void aSerializedObjectCanBeDeserializationOnly() {
         given(
                 aMapMate()
-                        .withManuallyAddedType(ADeserializationOnlyComplexType.class)
+                        .withManuallyAddedType(ADeserializationOnlyComplexType.class, deserializationOnly())
                         .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
                         .build()
         )
@@ -92,5 +91,17 @@ public final class HalfDefinitionsSpecs {
                 .as(json()).toTheType(ADeserializationOnlyComplexType.class)
                 .noExceptionHasBeenThrown()
                 .theDeserializedObjectIs(ADeserializationOnlyComplexType.deserialize(ADeserializationOnlyString.fromStringValue("foo")));
+    }
+
+    @Test
+    public void mapMateCanValidateThatSerializationWorks() {
+        given(() -> aMapMate()
+                .withManuallyAddedType(AnUnresolvableSerializationOnlyComplexType.class, serializationOnly())
+                .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
+                .build()
+        )
+                .when().mapMateIsInstantiated()
+                .anExceptionIsThrownWithAMessageContaining("Custom primitive 'com.envimate.mapmate.domain.half.ADeserializationOnlyString' " +
+                        "is not serializable but needs to be in order to support serialization of 'com.envimate.mapmate.domain.half.AnUnresolvableSerializationOnlyComplexType'");
     }
 }

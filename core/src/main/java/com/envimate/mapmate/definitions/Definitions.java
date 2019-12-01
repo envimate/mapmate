@@ -21,19 +21,22 @@
 
 package com.envimate.mapmate.definitions;
 
+import com.envimate.mapmate.builder.DefinitionSeeds;
+import com.envimate.mapmate.builder.RequiredCapabilities;
 import com.envimate.mapmate.definitions.types.FullType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static com.envimate.mapmate.definitions.DefinitionMultiplexer.multiplex;
 import static com.envimate.mapmate.definitions.DefinitionNotFoundException.definitionNotFound;
-import static com.envimate.mapmate.deserialization.UnknownReferenceException.fromType;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
+import static java.lang.String.format;
 import static java.util.Optional.of;
 
 @ToString
@@ -42,9 +45,9 @@ import static java.util.Optional.of;
 public final class Definitions {
     private final Map<FullType, Definition> definitions;
 
-    public static Definitions definitions(final Map<FullType, Definition> definitions) {
+    public static Definitions definitions(final Map<FullType, Definition> definitions, final DefinitionSeeds seeds) {
         final Definitions definitionsObject = new Definitions(definitions);
-        definitionsObject.validateNoUnsupportedOutgoingReferences();
+        definitionsObject.validateNoUnsupportedOutgoingReferences(seeds);
         return definitionsObject;
     }
 
@@ -60,25 +63,78 @@ public final class Definitions {
         return of(this.definitions.get(targetType));
     }
 
-    public void validateNoUnsupportedOutgoingReferences() {
-        this.allReferences().forEach((owner, references) -> references.forEach(type -> {
-            if (this.getOptionalDefinitionForType(type).isEmpty()) {
-                throw fromType(owner, type, dump());
+    public void validateNoUnsupportedOutgoingReferences(final DefinitionSeeds seeds) {
+        for (final FullType type : seeds.types()) {
+            final RequiredCapabilities capabilities = seeds.capabilitiesFor(type);
+            if (capabilities.hasDeserialization()) {
+                validateDeserialization(type, type, new LinkedList<>());
             }
-        }));
+            if (capabilities.hasSerialization()) {
+                validateSerialization(type, type, new LinkedList<>());
+            }
+        }
     }
 
-    private Map<FullType, List<FullType>> allReferences() {
-        final Map<FullType, List<FullType>> allReferences = new HashMap<>();
-        this.definitions.values().forEach(definition -> multiplex(definition)
-                .forSerializedObject(serializedObject -> {
-                    final List<FullType> references = new LinkedList<>();
-                    references.addAll(serializedObject.deserializer().map(serializer -> serializer.fields().referencedTypes()).orElse(emptyList()));
-                    references.addAll(serializedObject.serializer().map(deserializer -> deserializer.fields().typesList()).orElse(emptyList()));
-                    allReferences.put(serializedObject.type(), references);
+    private void validateDeserialization(final FullType candidate, final FullType reason, final List<FullType> alreadyVisited) {
+        if (alreadyVisited.contains(candidate)) {
+            return;
+        }
+        alreadyVisited.add(candidate);
+        final Definition definition = getOptionalDefinitionForType(candidate).orElseThrow(() ->
+                new UnsupportedOperationException(
+                        format("Type '%s' is not registered but needs to be in order to support deserialization of '%s'",
+                                candidate.description(), reason.description())));
+        multiplex(definition)
+                .forCustomPrimitive(customPrimitive -> {
+                    if (customPrimitive.deserializer().isEmpty()) {
+                        throw new UnsupportedOperationException(
+                                format("Custom primitive '%s' is not deserializable but needs to be in order to support deserialization of '%s'",
+                                        candidate.description(), reason.description()));
+                    }
                 })
-                .forCollection(collection -> allReferences.put(collection.type(), singletonList(collection.contentType()))));
-        return allReferences;
+                .forSerializedObject(serializedObject -> {
+                    if (serializedObject.deserializer().isEmpty()) {
+                        throw new UnsupportedOperationException(
+                                format("Serialized object '%s' is not deserializable but needs to be in order to support deserialization of '%s'",
+                                        candidate.description(), reason.description()));
+                    }
+                    serializedObject.deserializer().orElseThrow()
+                            .fields()
+                            .referencedTypes()
+                            .forEach(reference -> validateDeserialization(reference, reason, alreadyVisited));
+                })
+                .forCollection(collection -> validateDeserialization(collection.contentType(), reason, alreadyVisited));
+    }
+
+    private void validateSerialization(final FullType candidate, final FullType reason, final List<FullType> alreadyVisited) {
+        if (alreadyVisited.contains(candidate)) {
+            return;
+        }
+        alreadyVisited.add(candidate);
+        final Definition definition = getOptionalDefinitionForType(candidate).orElseThrow(() ->
+                new UnsupportedOperationException(
+                        format("Type '%s' is not registered but needs to be in order to support serialization of '%s'",
+                                candidate.description(), reason.description())));
+        multiplex(definition)
+                .forCustomPrimitive(customPrimitive -> {
+                    if (customPrimitive.serializer().isEmpty()) {
+                        throw new UnsupportedOperationException(
+                                format("Custom primitive '%s' is not serializable but needs to be in order to support serialization of '%s'",
+                                        candidate.description(), reason.description()));
+                    }
+                })
+                .forSerializedObject(serializedObject -> {
+                    if (serializedObject.serializer().isEmpty()) {
+                        throw new UnsupportedOperationException(
+                                format("Serialized object '%s' is not serializable but needs to be in order to support serialization of '%s'",
+                                        candidate.description(), reason.description()));
+                    }
+                    serializedObject.serializer().orElseThrow()
+                            .fields()
+                            .typesList()
+                            .forEach(reference -> validateSerialization(reference, reason, alreadyVisited));
+                })
+                .forCollection(collection -> validateSerialization(collection.contentType(), reason, alreadyVisited));
     }
 
     public int countCustomPrimitives() {

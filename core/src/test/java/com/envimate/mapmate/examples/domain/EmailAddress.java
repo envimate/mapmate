@@ -28,11 +28,11 @@ public final class EmailAddress {
         this.value = value;
     }
 
-    public static EmailAddress fromString(final String value) {
+    public static EmailAddress fromStringValue(final String value) {
         return new EmailAddress(value);
     }
 
-    public String internalValue() {
+    public String stringValue() {
         return this.value;
     }
 }

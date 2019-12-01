@@ -52,7 +52,7 @@ public final class CustomConventionalBuilderTest {
     public static MapMate theCustomConventionalMapMateInstance() {
         final Gson gson = new Gson();
 
-        return MapMate.aMapMate("com.envimate.mapmate.builder.models")
+        return MapMate.aMapMate("com.envimate.mapmate.builder.models.customconvention")
                 .withDetector(conventionalDetector("serialize",
                         "deserialize",
                         "restore"

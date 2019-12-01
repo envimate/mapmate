@@ -65,4 +65,8 @@ public final class DefinitionSeeds {
                 .map(DefinitionSeed::fullType)
                 .collect(Collectors.toList());
     }
+
+    public RequiredCapabilities capabilitiesFor(final FullType type) {
+        return forType(type).requiredCapabilities();
+    }
 }

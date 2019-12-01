@@ -68,7 +68,7 @@ public final class XmlBuilderTest {
         final XStream xStream = new XStream(new DomDriver());
         xStream.alias("root", Map.class);
 
-        return MapMate.aMapMate("com.envimate.mapmate.builder.models")
+        return MapMate.aMapMate("com.envimate.mapmate.builder.models.conventional")
                 .usingJsonMarshaller(xStream::toXML, new Unmarshaller() {
                     @Override
                     public <T> T unmarshal(final String input, final Class<T> type) {

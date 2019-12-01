@@ -58,7 +58,10 @@ public final class ConventionalBuilderExclusionTest {
         return MapMate.aMapMate(DefaultPackageScanner.defaultPackageScanner(
                 List.of("com.envimate.mapmate.builder.models"),
                 List.of(),
-                List.of("com.envimate.mapmate.builder.models.excluded"),
+                List.of("com.envimate.mapmate.builder.models.excluded",
+                        "com.envimate.mapmate.builder.models.annotated",
+                        "com.envimate.mapmate.builder.models.constructor",
+                        "com.envimate.mapmate.builder.models.customconvention"),
                 List.of())
         )
                 .usingJsonMarshaller(gson::toJson, gson::fromJson)

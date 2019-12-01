@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.envimate.mapmate.domain.valid;
+package com.envimate.mapmate.domain.wildcards;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;

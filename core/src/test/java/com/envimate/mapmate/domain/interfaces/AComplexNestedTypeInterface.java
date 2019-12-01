@@ -19,22 +19,7 @@
  * under the License.
  */
 
-package com.envimate.mapmate.domain.valid;
+package com.envimate.mapmate.domain.interfaces;
 
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
-
-import java.util.List;
-
-@ToString
-@EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class AComplexTypeWithWildcardedCollection {
-    private final List<?> list;
-
-    public static AComplexTypeWithWildcardedCollection deserialize(final List<?> list) {
-        return new AComplexTypeWithWildcardedCollection(list);
-    }
+public interface AComplexNestedTypeInterface {
 }

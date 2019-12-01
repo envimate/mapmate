@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.definitions;
 
+import com.envimate.mapmate.builder.DefinitionSeeds;
 import com.envimate.mapmate.builder.detection.Detector;
 import com.envimate.mapmate.definitions.types.FullType;
 import lombok.AccessLevel;
@@ -90,7 +91,7 @@ public final class DefinitionsBuilder {
                 .forCollection(collection -> recurse(collection.contentType(), detector));
     }
 
-    public Definitions build() {
-        return definitions(this.definitions);
+    public Definitions build(final DefinitionSeeds seeds) {
+        return definitions(this.definitions, seeds);
     }
 }

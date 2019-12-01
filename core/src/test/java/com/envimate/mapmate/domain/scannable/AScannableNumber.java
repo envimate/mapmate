@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.domain.scannable;
 
-import com.envimate.mapmate.domain.valid.AnException;
+import com.envimate.mapmate.domain.exceptions.AnException;
 
 import java.io.Serializable;
 import java.util.Objects;

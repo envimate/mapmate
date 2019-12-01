@@ -49,4 +49,8 @@ public final class DefinitionSeed {
     public FullType fullType() {
         return this.fullType;
     }
+
+    public RequiredCapabilities requiredCapabilities() {
+        return this.requiredCapabilities;
+    }
 }

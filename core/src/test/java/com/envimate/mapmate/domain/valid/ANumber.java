@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.domain.valid;
 
+import com.envimate.mapmate.domain.exceptions.AnException;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
