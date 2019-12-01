@@ -10,7 +10,7 @@ examples of how to include it in the dependency management tool of your choice, 
 
 ```xml
 <dependency>
-    <version><!---[Version]-->1.6.24</version>
+    <version><!---[Version]-->1.6.25</version>
 </dependency>
 ```
 
