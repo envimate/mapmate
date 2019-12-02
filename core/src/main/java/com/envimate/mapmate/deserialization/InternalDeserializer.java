@@ -157,7 +157,11 @@ final class InternalDeserializer {
                                              final CustomPrimitiveDefinition definition,
                                              final ExceptionTracker exceptionTracker) {
         try {
-            final CustomPrimitiveDeserializer deserializer = definition.deserializer().orElseThrow();
+            final CustomPrimitiveDeserializer deserializer = definition.deserializer().orElseThrow(() ->
+                    new UnsupportedOperationException(String.format(
+                            "Could not find deserializer for definition %s deserializing %s",
+                            definition, input
+                    )));
             final Class<?> baseType = deserializer.baseType();
             final Object mapped = this.customPrimitiveMappings.fromUniversal(input, baseType);
             return (T) deserializer.deserialize(mapped);
