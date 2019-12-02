@@ -73,7 +73,7 @@ public final class ClassType implements ResolvedType {
     }
 
     public ResolvedType typeParameter(final TypeVariableName name) {
-        if(!this.typeParameters.containsKey(name)) {
+        if (!this.typeParameters.containsKey(name)) {
             throw new IllegalArgumentException("No type parameter with the name: " + name.name());
         }
         return this.typeParameters.get(name);
@@ -110,6 +110,9 @@ public final class ClassType implements ResolvedType {
 
     @Override
     public boolean isAbstract() {
+        if (this.clazz.isPrimitive()) {
+            return false;
+        }
         return Modifier.isAbstract(this.clazz.getModifiers());
     }
 

@@ -86,7 +86,7 @@ public final class Definitions {
         alreadyVisited.add(candidate);
         final Definition definition = getOptionalDefinitionForType(candidate).orElseThrow(() ->
                 new UnsupportedOperationException(
-                        format("Type '%s' is not registered but needs to be in order to support deserialization of '%s'. %s",
+                        format("Type '%s' is not registered but needs to be in order to support deserialization of '%s'.%s",
                                 candidate.description(), reason.description(), this.contextLog.summaryFor(candidate))));
         multiplex(definition)
                 .forCustomPrimitive(customPrimitive -> {

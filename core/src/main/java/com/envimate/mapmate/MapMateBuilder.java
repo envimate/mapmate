@@ -119,7 +119,12 @@ public final class MapMateBuilder {
     }
 
     public MapMateBuilder withManuallyAddedType(final Class<?> type) {
+        return withManuallyAddedType(type, this.contextLog);
+    }
+
+    public MapMateBuilder withManuallyAddedType(final Class<?> type, final BuildContextLog contextLog) {
         validateNotNull(type, "type");
+        contextLog.stepInto(MapMateBuilder.class).log(fromClassWithoutGenerics(type), "added");
         return withManuallyAddedType(fromClassWithoutGenerics(type));
     }
 

@@ -37,8 +37,9 @@ public final class TypeWildcardSpecs {
                         .withManuallyAddedType(AComplexTypeWithWildcardedCollection.class)
                         .build())
                 .when().mapMateIsInstantiated()
-                .anExceptionIsThrownWithAMessageContaining("Type 'com.envimate.mapmate.domain.wildcards.AComplexTypeWithWildcardedCollection' is not registered but needs to be " +
-                        "in order to support deserialization of 'com.envimate.mapmate.domain.wildcards.AComplexTypeWithWildcardedCollection'");
+                .anExceptionIsThrownWithAMessageContaining("Type 'java.util.List<?>' is not registered but needs to be in order to support deserialization of 'com.envimate.mapmate.domain.wildcards.AComplexTypeWithWildcardedCollection'.\n" +
+                        "Log entries for 'java.util.List<?>'\n" +
+                        "DefinitionsBuilder -> AComplexTypeWithWildcardedCollection -> SimpleDetector: rejecting 'java.util.List<?>' because: type is not supported because it contains wildcard generics (\"?\")");
     }
 
     @Test
@@ -49,7 +50,8 @@ public final class TypeWildcardSpecs {
                         .build()
         )
                 .when().mapMateIsInstantiated()
-                .anExceptionIsThrownWithAMessageContaining("Type 'com.envimate.mapmate.domain.wildcards.AComplexTypeWithTypeWildcards' is not registered but needs to be in order " +
-                        "to support deserialization of 'com.envimate.mapmate.domain.wildcards.AComplexTypeWithTypeWildcards'");
+                .anExceptionIsThrownWithAMessageContaining("Type 'java.util.List<?>' is not registered but needs to be in order to support deserialization of 'com.envimate.mapmate.domain.wildcards.AComplexTypeWithTypeWildcards'.\n" +
+                        "Log entries for 'java.util.List<?>'\n" +
+                        "DefinitionsBuilder -> AComplexTypeWithTypeWildcards -> SimpleDetector: rejecting 'java.util.List<?>' because: type is not supported because it contains wildcard generics (\"?\")");
     }
 }

@@ -54,7 +54,7 @@ public final class BuildContextLog {
 
     public void logReject(final ResolvedType type,
                           final String message) {
-        log(type, format("rejecting because: %s", message));
+        log(type, format("rejecting '%s' because: %s", type.description(), message));
     }
 
     public void log(final ResolvedType type,
@@ -69,9 +69,9 @@ public final class BuildContextLog {
                 .map(ContextLogEntry::render)
                 .collect(Collectors.toList());
         if (relatedEntries.isEmpty()) {
-            return format("No log entries for %s", resolvedType.description());
+            return format("%nNo log entries for %s", resolvedType.description());
         }
         final String joined = String.join("\n", relatedEntries);
-        return format("Log entries for '%s'%n%s", resolvedType.description(), joined);
+        return format("%nLog entries for '%s'%n%s:", resolvedType.description(), joined);
     }
 }

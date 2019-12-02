@@ -25,12 +25,14 @@ import com.envimate.mapmate.builder.DefinitionSeed;
 import com.envimate.mapmate.builder.DefinitionSeeds;
 import com.envimate.mapmate.builder.contextlog.BuildContextLog;
 import com.envimate.mapmate.builder.detection.Detector;
+import com.envimate.mapmate.definitions.types.ClassType;
 import com.envimate.mapmate.definitions.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,14 +53,14 @@ public final class DefinitionsBuilder {
 
     public static DefinitionsBuilder definitionsBuilder(final Detector detector,
                                                         final BuildContextLog contextLog) {
-        return new DefinitionsBuilder(contextLog, detector);
+        return new DefinitionsBuilder(contextLog.stepInto(DefinitionsBuilder.class), detector);
     }
 
     public void detectAndAdd(final DefinitionSeed seed) {
         if (isPresent(seed.type())) {
             return;
         }
-        this.detector.detect(seed, contextLog).ifPresent(this::addDefinition);
+        this.detector.detect(seed, this.contextLog).ifPresent(this::addDefinition);
     }
 
     public void addDefinition(final Definition definition) {
@@ -71,31 +73,40 @@ public final class DefinitionsBuilder {
 
     public void resolveRecursively(final Detector detector) {
         final List<Definition> seedDefinitions = new LinkedList<>(this.definitions.values());
-        seedDefinitions.forEach(definition -> diveIntoChildren(definition, detector));
+        seedDefinitions.forEach(definition -> diveIntoChildren(definition, detector, this.contextLog.stepInto(definition.type().assignableType())));
     }
 
-    private void recurse(final DefinitionSeed context, final Detector detector) {
-        if (isPresent(context.type())) {
+    private void recurse(final DefinitionSeed seed, final Detector detector, final BuildContextLog contextLog) {
+        if (isPresent(seed.type())) {
             return;
         }
-        detector.detect(context, contextLog).ifPresent(definition -> {
+        detector.detect(seed, contextLog).ifPresent(definition -> {
+            contextLog.log(seed.type(), "added because it is a dependency");
             addDefinition(definition);
-            diveIntoChildren(definition, detector);
+            diveIntoChildren(definition, detector, contextLog.stepInto(seed.type().assignableType()));
         });
     }
 
-    private void diveIntoChildren(final Definition definition, final Detector detector) {
+    private void diveIntoChildren(final Definition definition, final Detector detector, final BuildContextLog contextLog) {
         multiplex(definition)
                 .forSerializedObject(serializedObject -> {
                     serializedObject.serializer().ifPresent(serializer ->
                             serializer.fields().fields()
-                                    .forEach(serializationField -> recurse(definition.context().childForType(serializationField.type()), detector)));
+                                    .forEach(serializationField -> {
+                                        final ResolvedType type = serializationField.type();
+                                        recurse(definition.context().childForType(type), detector, contextLog);
+                                    }));
                     serializedObject.deserializer().ifPresent(deserializer -> {
                         deserializer.fields().referencedTypes()
-                                .forEach(referencedType -> recurse(definition.context().childForType(referencedType), detector));
+                                .forEach(referencedType -> {
+                                    recurse(definition.context().childForType(referencedType), detector, contextLog);
+                                });
                     });
                 })
-                .forCollection(collection -> recurse(definition.context().childForType(collection.contentType()), detector));
+                .forCollection(collection -> {
+                    final ResolvedType contentType = collection.contentType();
+                    recurse(definition.context().childForType(contentType), detector, contextLog);
+                });
     }
 
     public Definitions build(final DefinitionSeeds seeds) {

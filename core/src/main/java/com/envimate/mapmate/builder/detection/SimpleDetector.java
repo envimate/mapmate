@@ -55,8 +55,9 @@ public final class SimpleDetector implements Detector {
 
     @Override
     public Optional<? extends Definition> detect(final DefinitionSeed context,
-                                                 final BuildContextLog contextLog) {
-        final Optional<? extends Definition> collection = detectCollectionDefinition(context, contextLog.stepInto(SimpleDetector.class));
+                                                 final BuildContextLog parentLog) {
+        final BuildContextLog contextLog = parentLog.stepInto(SimpleDetector.class);
+        final Optional<? extends Definition> collection = detectCollectionDefinition(context, contextLog);
         if (collection.isPresent()) {
             return collection;
         }
@@ -87,8 +88,8 @@ public final class SimpleDetector implements Detector {
                                                  final List<DefinitionFactory> factories,
                                                  final BuildContextLog contextLog) {
         final ResolvedType type = context.type();
-        if (!type.isInstantiatable()) {
-            contextLog.logReject(type, "type is not instantiatable");
+        if (!isSupported(type)) {
+            contextLog.logReject(type, "type is not supported because it contains wildcard generics (\"?\")");
             return empty();
         }
         for (final DefinitionFactory factory : factories) {
@@ -99,5 +100,13 @@ public final class SimpleDetector implements Detector {
         }
         contextLog.logReject(type, "do not know how to handle this type");
         return empty();
+    }
+
+    private static boolean isSupported(final ResolvedType resolvedType) {
+        if(resolvedType.isWildcard()) {
+            return false;
+        }
+        return resolvedType.typeParameters().stream()
+                .allMatch(SimpleDetector::isSupported);
     }
 }
