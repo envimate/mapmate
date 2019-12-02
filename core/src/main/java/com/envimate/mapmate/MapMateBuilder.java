@@ -31,7 +31,6 @@ import com.envimate.mapmate.builder.scanning.PackageScanner;
 import com.envimate.mapmate.definitions.Definition;
 import com.envimate.mapmate.definitions.Definitions;
 import com.envimate.mapmate.definitions.DefinitionsBuilder;
-import com.envimate.mapmate.definitions.types.ClassType;
 import com.envimate.mapmate.deserialization.Deserializer;
 import com.envimate.mapmate.deserialization.validation.*;
 import com.envimate.mapmate.injector.InjectorFactory;
@@ -41,6 +40,7 @@ import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.marshalling.Unmarshaller;
 import com.envimate.mapmate.serialization.Serializer;
+import com.envimate.types.ClassType;
 
 import java.util.*;
 
@@ -55,12 +55,12 @@ import static com.envimate.mapmate.builder.conventional.ConventionalDefinitionFa
 import static com.envimate.mapmate.builder.scanning.DefaultPackageScanner.defaultPackageScanner;
 import static com.envimate.mapmate.builder.scanning.PackageScannerRecipe.packageScannerRecipe;
 import static com.envimate.mapmate.definitions.DefinitionsBuilder.definitionsBuilder;
-import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithoutGenerics;
 import static com.envimate.mapmate.deserialization.Deserializer.theDeserializer;
 import static com.envimate.mapmate.injector.InjectorFactory.injectorFactory;
 import static com.envimate.mapmate.marshalling.MarshallerRegistry.marshallerRegistry;
 import static com.envimate.mapmate.serialization.Serializer.theSerializer;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static com.envimate.types.ClassType.fromClassWithoutGenerics;
 import static java.util.Arrays.stream;
 
 public final class MapMateBuilder {

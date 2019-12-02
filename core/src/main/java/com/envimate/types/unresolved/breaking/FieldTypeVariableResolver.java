@@ -19,18 +19,37 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.types;
+package com.envimate.types.unresolved.breaking;
+
+import com.envimate.types.ClassType;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+import java.lang.reflect.Field;
 
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static com.envimate.types.ClassType.typeOfObject;
 
-public final class UnsupportedJvmFeatureInTypeException extends UnsupportedOperationException {
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class FieldTypeVariableResolver implements TypeVariableResolver {
+    private final Field field;
 
-    private UnsupportedJvmFeatureInTypeException(final String message) {
-        super(message);
+    public static TypeVariableResolver fieldTypeVariableResolver(final Field field) {
+        validateNotNull(field, "field");
+        return new FieldTypeVariableResolver(field);
     }
 
-    public static UnsupportedJvmFeatureInTypeException unsupportedJvmFeatureInTypeException(final String message) {
-        validateNotNull(message, "message");
-        return new UnsupportedJvmFeatureInTypeException(message);
+    @Override
+    public ClassType resolve(final Object object) {
+        try {
+            final Object value = this.field.get(object);
+            return typeOfObject(value);
+        } catch (final IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

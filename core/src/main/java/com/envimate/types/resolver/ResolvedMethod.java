@@ -19,10 +19,10 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.types.resolver;
+package com.envimate.types.resolver;
 
-import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.ResolvedType;
+import com.envimate.types.ClassType;
+import com.envimate.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +33,8 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
 
-import static com.envimate.mapmate.definitions.types.TypeResolver.resolveType;
-import static com.envimate.mapmate.definitions.types.resolver.ResolvedParameter.resolveParameters;
+import static com.envimate.types.TypeResolver.resolveType;
+import static com.envimate.types.resolver.ResolvedParameter.resolveParameters;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.util.Arrays.stream;
 import static java.util.Collections.unmodifiableList;

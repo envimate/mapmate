@@ -23,14 +23,12 @@ package com.envimate.mapmate.builder.detection.collection;
 
 import com.envimate.mapmate.builder.DefinitionSeed;
 import com.envimate.mapmate.builder.RequiredCapabilities;
-import com.envimate.mapmate.builder.SeedReason;
 import com.envimate.mapmate.builder.detection.DefinitionFactory;
-import com.envimate.mapmate.definitions.ArrayType;
 import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.ResolvedType;
 import com.envimate.mapmate.deserialization.deserializers.collections.CollectionDeserializer;
 import com.envimate.mapmate.serialization.serializers.collections.CollectionSerializer;
+import com.envimate.types.ArrayType;
+import com.envimate.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -39,10 +37,8 @@ import lombok.ToString;
 import java.util.Optional;
 
 import static com.envimate.mapmate.definitions.CollectionDefinition.collectionDefinition;
-import static com.envimate.mapmate.definitions.types.TypeVariableName.arrayComponentName;
 import static com.envimate.mapmate.deserialization.deserializers.collections.ArrayCollectionDeserializer.arrayDeserializer;
 import static com.envimate.mapmate.serialization.serializers.collections.ArrayCollectionSerializer.arraySerializer;
-import static java.lang.String.format;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 

@@ -21,12 +21,12 @@
 
 package com.envimate.mapmate.deserialization.deserializers.serializedobjects;
 
-import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.ResolvedType;
-import com.envimate.mapmate.definitions.types.resolver.ResolvedField;
-import com.envimate.mapmate.definitions.types.resolver.ResolvedMethod;
-import com.envimate.mapmate.definitions.types.resolver.ResolvedParameter;
 import com.envimate.mapmate.deserialization.DeserializationFields;
+import com.envimate.types.ClassType;
+import com.envimate.types.ResolvedType;
+import com.envimate.types.resolver.ResolvedField;
+import com.envimate.types.resolver.ResolvedMethod;
+import com.envimate.types.resolver.ResolvedParameter;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -38,8 +38,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.envimate.mapmate.builder.detection.serializedobject.IncompatibleSerializedObjectException.incompatibleSerializedObjectException;
-import static com.envimate.mapmate.definitions.types.resolver.ResolvedMethod.resolvePublicMethods;
 import static com.envimate.mapmate.deserialization.DeserializationFields.deserializationFields;
+import static com.envimate.types.resolver.ResolvedMethod.resolvePublicMethods;
 import static java.lang.reflect.Modifier.*;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;

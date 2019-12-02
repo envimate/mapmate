@@ -19,10 +19,18 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.types.unresolved.breaking;
+package com.envimate.types;
 
-import com.envimate.mapmate.definitions.types.ResolvedType;
+import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 
-public interface TypeVariableResolver {
-    ResolvedType resolve(Object object);
+public final class UnsupportedJvmFeatureInTypeException extends UnsupportedOperationException {
+
+    private UnsupportedJvmFeatureInTypeException(final String message) {
+        super(message);
+    }
+
+    public static UnsupportedJvmFeatureInTypeException unsupportedJvmFeatureInTypeException(final String message) {
+        validateNotNull(message, "message");
+        return new UnsupportedJvmFeatureInTypeException(message);
+    }
 }

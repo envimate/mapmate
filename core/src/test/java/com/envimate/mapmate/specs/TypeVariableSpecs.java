@@ -29,12 +29,12 @@ import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.MapMate.aMapMate;
 import static com.envimate.mapmate.builder.recipes.scanner.ClassScannerRecipe.addAllReferencedClassesIs;
-import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithoutGenerics;
-import static com.envimate.mapmate.definitions.types.unresolved.UnresolvedType.unresolvedType;
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.given;
 import static com.envimate.mapmate.specs.givenwhenthen.Marshallers.jsonMarshaller;
 import static com.envimate.mapmate.specs.givenwhenthen.Unmarshallers.jsonUnmarshaller;
+import static com.envimate.types.ClassType.fromClassWithoutGenerics;
+import static com.envimate.types.unresolved.UnresolvedType.unresolvedType;
 
 public final class TypeVariableSpecs {
 

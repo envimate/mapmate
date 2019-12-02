@@ -19,13 +19,10 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.types.resolver;
+package com.envimate.types.unresolved.breaking;
 
-import com.envimate.mapmate.definitions.types.ClassType;
-import lombok.RequiredArgsConstructor;
+import com.envimate.types.ResolvedType;
 
-@RequiredArgsConstructor
-public final class FullTypeOrUnsupportedType {
-    private final ClassType fullType;
-    private final String unsupportedType;
+public interface TypeVariableResolver {
+    ResolvedType resolve(Object object);
 }

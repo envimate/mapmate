@@ -21,17 +21,17 @@
 
 package com.envimate.mapmate.builder.recipes.scanner;
 
-import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.types.ClassType;
 
 import java.util.List;
 
-import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithoutGenerics;
-import static com.envimate.mapmate.definitions.types.unresolved.UnresolvedType.unresolvedType;
+import static com.envimate.types.ClassType.fromClassWithoutGenerics;
+import static com.envimate.types.unresolved.UnresolvedType.unresolvedType;
 
 public final class ExampleUseCase<T> {
     public List<? extends List<T>> string;
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         final ClassType resolve = unresolvedType(ExampleUseCase.class).resolve(fromClassWithoutGenerics(String.class));
         System.out.println("resolve.description() = " + resolve.description());
 

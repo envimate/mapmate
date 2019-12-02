@@ -19,29 +19,47 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.types;
+package com.envimate.types;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.lang.reflect.Array;
 import java.util.List;
 
-import static java.util.Collections.emptyList;
+import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static com.envimate.types.ClassType.fromClassWithoutGenerics;
+import static java.util.Collections.singletonList;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class WildcardedType implements ResolvedType {
+public final class ArrayType implements ResolvedType {
+    private final ResolvedType componentType;
 
-    public static WildcardedType wildcardType() {
-        return new WildcardedType();
+    public static ArrayType fromArrayClass(final Class<?> clazz) {
+        validateNotNull(clazz, "clazz");
+        if (!clazz.isArray()) {
+            throw new UnsupportedOperationException();
+        }
+        final ResolvedType componentType = fromClassWithoutGenerics(clazz.getComponentType());
+        return arrayType(componentType);
+    }
+
+    public static ArrayType arrayType(final ResolvedType componentType) {
+        validateNotNull(componentType, "componentType");
+        return new ArrayType(componentType);
+    }
+
+    public ResolvedType componentType() {
+        return this.componentType;
     }
 
     @Override
-    public List<ResolvedType> typeParameters() {
-        return emptyList();
+    public String description() {
+        return this.componentType.description() + "[]";
     }
 
     @Override
@@ -56,16 +74,16 @@ public final class WildcardedType implements ResolvedType {
 
     @Override
     public boolean isWildcard() {
-        return true;
+        return false;
     }
 
     @Override
-    public String description() {
-        return "?";
+    public List<ResolvedType> typeParameters() {
+        return singletonList(this.componentType);
     }
 
     @Override
     public Class<?> assignableType() {
-        return Object.class;
+        return Array.newInstance(this.componentType.assignableType(), 0).getClass();
     }
 }

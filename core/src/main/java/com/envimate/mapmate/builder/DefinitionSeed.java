@@ -21,19 +21,16 @@
 
 package com.envimate.mapmate.builder;
 
-import com.envimate.mapmate.definitions.types.ResolvedType;
+import com.envimate.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import static com.envimate.mapmate.builder.MultiMap.multiMap;
 import static com.envimate.mapmate.builder.RequiredCapabilities.none;
-import static com.envimate.mapmate.builder.SeedReason.becauseChildOf;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.util.Collections.singletonList;
 

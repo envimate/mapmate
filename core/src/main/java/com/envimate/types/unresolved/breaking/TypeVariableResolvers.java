@@ -19,9 +19,9 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.types.unresolved.breaking;
+package com.envimate.types.unresolved.breaking;
 
-import com.envimate.mapmate.definitions.types.ResolvedType;
+import com.envimate.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;

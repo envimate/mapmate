@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder.contextlog;
 
-import com.envimate.mapmate.definitions.types.ResolvedType;
+import com.envimate.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;

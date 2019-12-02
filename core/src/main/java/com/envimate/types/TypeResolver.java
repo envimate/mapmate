@@ -19,23 +19,21 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.types;
-
-import com.envimate.mapmate.definitions.ArrayType;
+package com.envimate.types;
 
 import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.envimate.mapmate.definitions.ArrayType.arrayType;
-import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithGenerics;
-import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithoutGenerics;
-import static com.envimate.mapmate.definitions.types.TypeVariableName.typeVariableName;
-import static com.envimate.mapmate.definitions.types.TypeVariableName.typeVariableNamesOf;
-import static com.envimate.mapmate.definitions.types.UnsupportedJvmFeatureInTypeException.unsupportedJvmFeatureInTypeException;
-import static com.envimate.mapmate.definitions.types.WildcardedType.wildcardType;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static com.envimate.types.ArrayType.arrayType;
+import static com.envimate.types.ClassType.fromClassWithGenerics;
+import static com.envimate.types.ClassType.fromClassWithoutGenerics;
+import static com.envimate.types.TypeVariableName.typeVariableName;
+import static com.envimate.types.TypeVariableName.typeVariableNamesOf;
+import static com.envimate.types.UnsupportedJvmFeatureInTypeException.unsupportedJvmFeatureInTypeException;
+import static com.envimate.types.WildcardedType.wildcardType;
 import static java.lang.String.format;
 
 public final class TypeResolver {

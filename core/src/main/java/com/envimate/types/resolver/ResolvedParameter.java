@@ -19,61 +19,54 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.types.resolver;
+package com.envimate.types.resolver;
 
-import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.ResolvedType;
+import com.envimate.types.ClassType;
+import com.envimate.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.List;
 
-import static com.envimate.mapmate.definitions.types.TypeResolver.resolveType;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
-import static java.lang.reflect.Modifier.*;
+import static com.envimate.types.TypeResolver.resolveType;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class ResolvedField {
-    private final String name;
+public final class ResolvedParameter {
     private final ResolvedType type;
-    private final Field field;
+    private final Parameter parameter;
 
-    public static List<ResolvedField> resolvedPublicFields(final ClassType fullType) {
-        final Class<?> type = fullType.assignableType();
-        return stream(type.getFields())
-                .filter(field -> isPublic(field.getModifiers()))
-                .filter(field -> !isStatic(field.getModifiers()))
-                .filter(field -> !isTransient(field.getModifiers()))
-                .map(field -> {
-                    final ResolvedType resolved = resolveType(field.getGenericType(), fullType);
-                    return resolvedField(field.getName(), resolved, field);
-                })
+    public static List<ResolvedParameter> resolveParameters(final Executable executable,
+                                                            final ClassType fullType) {
+        return stream(executable.getParameters())
+                .map(parameter -> resolveParameter(fullType, parameter))
                 .collect(toList());
     }
 
-    public static ResolvedField resolvedField(final String name, final ResolvedType type, final Field field) {
-        validateNotNull(name, "name");
-        validateNotNull(type, "type");
-        validateNotNull(field, "field");
-        return new ResolvedField(name, type, field);
-    }
+    public static ResolvedParameter resolveParameter(final ClassType declaringType,
+                                                     final Parameter parameter) {
+        validateNotNull(declaringType, "declaringType");
+        validateNotNull(parameter, "parameter");
 
-    public String name() {
-        return this.name;
+        final Type parameterizedType = parameter.getParameterizedType();
+        final ResolvedType resolvedType = resolveType(parameterizedType, declaringType);
+        return new ResolvedParameter(resolvedType, parameter);
     }
 
     public ResolvedType type() {
         return this.type;
     }
 
-    public Field field() {
-        return this.field;
+    public Parameter parameter() {
+        return this.parameter;
     }
 }

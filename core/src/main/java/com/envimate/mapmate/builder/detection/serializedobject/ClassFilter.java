@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject;
 
-import com.envimate.mapmate.definitions.types.ResolvedType;
+import com.envimate.types.ResolvedType;
 
 import java.util.List;
 import java.util.regex.Pattern;

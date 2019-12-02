@@ -19,12 +19,12 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.types.unresolved;
+package com.envimate.types.unresolved;
 
-import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.ResolvedType;
-import com.envimate.mapmate.definitions.types.TypeVariableName;
-import com.envimate.mapmate.definitions.types.unresolved.breaking.TypeVariableResolvers;
+import com.envimate.types.ClassType;
+import com.envimate.types.ResolvedType;
+import com.envimate.types.TypeVariableName;
+import com.envimate.types.unresolved.breaking.TypeVariableResolvers;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -34,10 +34,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithGenerics;
-import static com.envimate.mapmate.definitions.types.TypeVariableName.typeVariableNamesOf;
-import static com.envimate.mapmate.definitions.types.unresolved.breaking.TypeVariableResolvers.resolversFor;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static com.envimate.types.ClassType.fromClassWithGenerics;
+import static com.envimate.types.TypeVariableName.typeVariableNamesOf;
+import static com.envimate.types.unresolved.breaking.TypeVariableResolvers.resolversFor;
 
 @ToString
 @EqualsAndHashCode

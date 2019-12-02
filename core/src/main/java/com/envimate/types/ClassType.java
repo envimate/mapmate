@@ -19,9 +19,9 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.types;
+package com.envimate.types;
 
-import com.envimate.mapmate.definitions.types.resolver.ResolvedMethod;
+import com.envimate.types.resolver.ResolvedMethod;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -31,10 +31,10 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 
-import static com.envimate.mapmate.definitions.types.TypeVariableName.typeVariableNamesOf;
-import static com.envimate.mapmate.definitions.types.resolver.ResolvedMethod.resolvePublicMethods;
-import static com.envimate.mapmate.definitions.types.unresolved.UnresolvedType.unresolvedType;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static com.envimate.types.TypeVariableName.typeVariableNamesOf;
+import static com.envimate.types.resolver.ResolvedMethod.resolvePublicMethods;
+import static com.envimate.types.unresolved.UnresolvedType.unresolvedType;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.joining;
@@ -128,6 +128,6 @@ public final class ClassType implements ResolvedType {
 
     @Override
     public Class<?> assignableType() {
-        return clazz;
+        return this.clazz;
     }
 }

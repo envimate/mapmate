@@ -21,11 +21,11 @@
 
 package com.envimate.mapmate.deserialization.deserializers.serializedobjects;
 
-import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.ResolvedType;
-import com.envimate.mapmate.definitions.types.resolver.ResolvedConstructor;
-import com.envimate.mapmate.definitions.types.resolver.ResolvedParameter;
 import com.envimate.mapmate.deserialization.DeserializationFields;
+import com.envimate.types.ClassType;
+import com.envimate.types.ResolvedType;
+import com.envimate.types.resolver.ResolvedConstructor;
+import com.envimate.types.resolver.ResolvedParameter;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;

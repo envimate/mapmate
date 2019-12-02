@@ -21,10 +21,10 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.deserialization;
 
-import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.resolver.ResolvedConstructor;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
+import com.envimate.types.ClassType;
+import com.envimate.types.resolver.ResolvedConstructor;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +34,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.envimate.mapmate.builder.detection.serializedobject.deserialization.Common.findMatchingMethod;
-import static com.envimate.mapmate.definitions.types.resolver.ResolvedConstructor.resolvePublicConstructors;
 import static com.envimate.mapmate.deserialization.deserializers.serializedobjects.ConstructorSerializedObjectDeserializer.createDeserializer;
+import static com.envimate.types.resolver.ResolvedConstructor.resolvePublicConstructors;
 
 @ToString
 @EqualsAndHashCode

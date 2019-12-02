@@ -21,10 +21,10 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.deserialization;
 
-import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.ResolvedType;
-import com.envimate.mapmate.definitions.types.resolver.ResolvedMethod;
-import com.envimate.mapmate.definitions.types.resolver.ResolvedParameter;
+import com.envimate.types.ClassType;
+import com.envimate.types.ResolvedType;
+import com.envimate.types.resolver.ResolvedMethod;
+import com.envimate.types.resolver.ResolvedParameter;
 
 import java.util.List;
 import java.util.Optional;

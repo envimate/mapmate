@@ -22,10 +22,10 @@
 package com.envimate.mapmate.definitions;
 
 import com.envimate.mapmate.builder.DefinitionSeed;
-import com.envimate.mapmate.definitions.types.ResolvedType;
 import com.envimate.mapmate.definitions.universal.Universal;
 import com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
 import com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
+import com.envimate.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;

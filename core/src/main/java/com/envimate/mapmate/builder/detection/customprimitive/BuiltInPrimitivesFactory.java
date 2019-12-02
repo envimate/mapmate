@@ -23,12 +23,10 @@ package com.envimate.mapmate.builder.detection.customprimitive;
 
 import com.envimate.mapmate.builder.DefinitionSeed;
 import com.envimate.mapmate.builder.RequiredCapabilities;
-import com.envimate.mapmate.builder.SeedReason;
 import com.envimate.mapmate.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.ResolvedType;
 import com.envimate.mapmate.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
+import com.envimate.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +38,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static com.envimate.mapmate.definitions.CustomPrimitiveDefinition.customPrimitiveDefinition;
-import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithoutGenerics;
+import static com.envimate.types.ClassType.fromClassWithoutGenerics;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.function.Function.identity;

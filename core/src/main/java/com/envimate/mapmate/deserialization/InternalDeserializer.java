@@ -23,7 +23,6 @@ package com.envimate.mapmate.deserialization;
 
 import com.envimate.mapmate.builder.detection.customprimitive.mapping.CustomPrimitiveMappings;
 import com.envimate.mapmate.definitions.*;
-import com.envimate.mapmate.definitions.types.ResolvedType;
 import com.envimate.mapmate.definitions.universal.*;
 import com.envimate.mapmate.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
@@ -31,6 +30,7 @@ import com.envimate.mapmate.deserialization.validation.ExceptionTracker;
 import com.envimate.mapmate.deserialization.validation.ValidationErrorsMapping;
 import com.envimate.mapmate.deserialization.validation.ValidationResult;
 import com.envimate.mapmate.injector.Injector;
+import com.envimate.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 

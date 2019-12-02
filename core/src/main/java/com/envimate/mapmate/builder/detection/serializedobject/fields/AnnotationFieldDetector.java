@@ -21,8 +21,8 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.fields;
 
-import com.envimate.mapmate.definitions.types.ClassType;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationField;
+import com.envimate.types.ClassType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +31,9 @@ import lombok.ToString;
 import java.lang.annotation.Annotation;
 import java.util.List;
 
-import static com.envimate.mapmate.definitions.types.resolver.ResolvedField.resolvedPublicFields;
 import static com.envimate.mapmate.serialization.serializers.serializedobject.SerializationField.fromPublicField;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static com.envimate.types.resolver.ResolvedField.resolvedPublicFields;
 import static java.util.stream.Collectors.toList;
 
 @ToString

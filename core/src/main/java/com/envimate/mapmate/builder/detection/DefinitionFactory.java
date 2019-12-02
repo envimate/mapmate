@@ -23,10 +23,8 @@ package com.envimate.mapmate.builder.detection;
 
 import com.envimate.mapmate.builder.DefinitionSeed;
 import com.envimate.mapmate.builder.RequiredCapabilities;
-import com.envimate.mapmate.builder.SeedReason;
 import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.ResolvedType;
+import com.envimate.types.ResolvedType;
 
 import java.util.Optional;
 

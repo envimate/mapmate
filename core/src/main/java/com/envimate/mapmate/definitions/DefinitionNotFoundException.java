@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.definitions;
 
-import com.envimate.mapmate.definitions.types.ResolvedType;
+import com.envimate.types.ResolvedType;
 
 public final class DefinitionNotFoundException extends RuntimeException {
     private DefinitionNotFoundException(final String msg) {

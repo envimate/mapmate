@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.injector;
 
-import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.types.ClassType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;

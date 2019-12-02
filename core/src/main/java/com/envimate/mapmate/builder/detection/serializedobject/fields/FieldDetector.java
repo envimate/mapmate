@@ -21,8 +21,8 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.fields;
 
-import com.envimate.mapmate.definitions.types.ClassType;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationField;
+import com.envimate.types.ClassType;
 
 import java.util.List;
 

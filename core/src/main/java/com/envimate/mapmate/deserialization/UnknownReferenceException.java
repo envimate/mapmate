@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.deserialization;
 
-import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.types.ClassType;
 
 import static java.lang.String.format;
 

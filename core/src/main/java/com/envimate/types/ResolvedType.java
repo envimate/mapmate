@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.types;
+package com.envimate.types;
 
 import java.lang.reflect.Type;
 import java.util.List;

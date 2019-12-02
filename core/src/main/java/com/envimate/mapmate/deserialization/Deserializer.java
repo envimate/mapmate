@@ -23,7 +23,6 @@ package com.envimate.mapmate.deserialization;
 
 import com.envimate.mapmate.builder.detection.customprimitive.mapping.CustomPrimitiveMappings;
 import com.envimate.mapmate.definitions.Definitions;
-import com.envimate.mapmate.definitions.types.ClassType;
 import com.envimate.mapmate.definitions.universal.Universal;
 import com.envimate.mapmate.definitions.universal.UniversalObject;
 import com.envimate.mapmate.deserialization.validation.ExceptionTracker;
@@ -35,6 +34,7 @@ import com.envimate.mapmate.injector.InjectorLambda;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.marshalling.Unmarshaller;
+import com.envimate.types.ClassType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +43,6 @@ import lombok.ToString;
 import java.util.Map;
 import java.util.Set;
 
-import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithoutGenerics;
 import static com.envimate.mapmate.definitions.universal.UniversalObject.universalObjectFromNativeMap;
 import static com.envimate.mapmate.deserialization.InternalDeserializer.internalDeserializer;
 import static com.envimate.mapmate.deserialization.Unmarshallers.unmarshallers;
@@ -51,6 +50,7 @@ import static com.envimate.mapmate.deserialization.validation.ExceptionTracker.e
 import static com.envimate.mapmate.injector.InjectorLambda.noop;
 import static com.envimate.mapmate.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static com.envimate.types.ClassType.fromClassWithoutGenerics;
 
 @ToString
 @EqualsAndHashCode

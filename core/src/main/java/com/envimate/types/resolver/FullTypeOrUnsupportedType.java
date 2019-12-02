@@ -19,13 +19,13 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions;
+package com.envimate.types.resolver;
 
-import com.envimate.mapmate.builder.DefinitionSeed;
-import com.envimate.types.ResolvedType;
+import com.envimate.types.ClassType;
+import lombok.RequiredArgsConstructor;
 
-public interface Definition {
-    ResolvedType type();
-
-    DefinitionSeed context();
+@RequiredArgsConstructor
+public final class FullTypeOrUnsupportedType {
+    private final ClassType fullType;
+    private final String unsupportedType;
 }

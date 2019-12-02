@@ -25,14 +25,12 @@ import com.envimate.mapmate.builder.DefinitionSeed;
 import com.envimate.mapmate.builder.DefinitionSeeds;
 import com.envimate.mapmate.builder.contextlog.BuildContextLog;
 import com.envimate.mapmate.builder.detection.Detector;
-import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.ResolvedType;
+import com.envimate.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;

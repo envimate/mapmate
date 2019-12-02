@@ -25,10 +25,10 @@ import com.envimate.mapmate.builder.DefinitionSeed;
 import com.envimate.mapmate.builder.RequiredCapabilities;
 import com.envimate.mapmate.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.ResolvedType;
 import com.envimate.mapmate.deserialization.deserializers.collections.CollectionDeserializer;
 import com.envimate.mapmate.serialization.serializers.collections.CollectionSerializer;
+import com.envimate.types.ClassType;
+import com.envimate.types.ResolvedType;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -37,10 +37,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static com.envimate.mapmate.definitions.CollectionDefinition.collectionDefinition;
-import static com.envimate.mapmate.definitions.types.TypeVariableName.typeVariableName;
-import static com.envimate.mapmate.definitions.types.unresolved.UnresolvedType.unresolvedType;
 import static com.envimate.mapmate.deserialization.deserializers.collections.ListCollectionDeserializer.listDeserializer;
 import static com.envimate.mapmate.serialization.serializers.collections.ListCollectionSerializer.listSerializer;
+import static com.envimate.types.TypeVariableName.typeVariableName;
+import static com.envimate.types.unresolved.UnresolvedType.unresolvedType;
 import static java.lang.String.format;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;

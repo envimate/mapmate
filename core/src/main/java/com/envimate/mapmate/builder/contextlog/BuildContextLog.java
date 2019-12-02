@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.builder.contextlog;
 
-import com.envimate.mapmate.definitions.types.ResolvedType;
+import com.envimate.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 
 import static com.envimate.mapmate.builder.contextlog.ContextLogEntry.logEntry;
 import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
 
 @ToString
 @EqualsAndHashCode

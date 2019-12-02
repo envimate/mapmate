@@ -19,37 +19,47 @@
  * under the License.
  */
 
-package com.envimate.mapmate.definitions.types.unresolved.breaking;
+package com.envimate.types;
 
-import com.envimate.mapmate.definitions.types.ClassType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.TypeVariable;
+import java.util.List;
 
-import static com.envimate.mapmate.definitions.types.ClassType.typeOfObject;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class FieldTypeVariableResolver implements TypeVariableResolver {
-    private final Field field;
+public final class TypeVariableName {
+    private final String name;
 
-    public static TypeVariableResolver fieldTypeVariableResolver(final Field field) {
-        validateNotNull(field, "field");
-        return new FieldTypeVariableResolver(field);
+    public static TypeVariableName typeVariableName(final String name) {
+        validateNotNull(name, "name");
+        return new TypeVariableName(name);
     }
 
-    @Override
-    public ClassType resolve(final Object object) {
-        try {
-            final Object value = this.field.get(object);
-            return typeOfObject(value);
-        } catch (final IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+    public static TypeVariableName typeVariableName(final TypeVariable<?> typeVariable) {
+        validateNotNull(typeVariable, "typeVariable");
+        return typeVariableName(typeVariable.getName());
+    }
+
+    public static TypeVariableName arrayComponentName() {
+        return typeVariableName("C");
+    }
+
+    public static List<TypeVariableName> typeVariableNamesOf(final Class<?> type) {
+        return stream(type.getTypeParameters())
+                .map(TypeVariableName::typeVariableName)
+                .collect(toList());
+    }
+
+    public String name() {
+        return this.name;
     }
 }

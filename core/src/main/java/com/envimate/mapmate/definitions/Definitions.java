@@ -24,7 +24,7 @@ package com.envimate.mapmate.definitions;
 import com.envimate.mapmate.builder.DefinitionSeeds;
 import com.envimate.mapmate.builder.RequiredCapabilities;
 import com.envimate.mapmate.builder.contextlog.BuildContextLog;
-import com.envimate.mapmate.definitions.types.ResolvedType;
+import com.envimate.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;

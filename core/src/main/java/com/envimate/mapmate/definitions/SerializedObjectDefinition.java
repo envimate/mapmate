@@ -22,9 +22,9 @@
 package com.envimate.mapmate.definitions;
 
 import com.envimate.mapmate.builder.DefinitionSeed;
-import com.envimate.mapmate.definitions.types.ClassType;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializedObjectSerializer;
+import com.envimate.types.ClassType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;

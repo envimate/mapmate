@@ -21,9 +21,9 @@
 
 package com.envimate.mapmate.injector;
 
-import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.ResolvedType;
 import com.envimate.mapmate.definitions.universal.Universal;
+import com.envimate.types.ClassType;
+import com.envimate.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -33,13 +33,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithoutGenerics;
-import static com.envimate.mapmate.definitions.types.ClassType.typeOfObject;
 import static com.envimate.mapmate.definitions.universal.UniversalPrimitive.universalPrimitive;
 import static com.envimate.mapmate.injector.NamedDirectInjection.namedDirectInjection;
 import static com.envimate.mapmate.injector.PropertyName.propertyName;
 import static com.envimate.mapmate.injector.TypedDirectInjection.typedDirectInjection;
 import static com.envimate.mapmate.injector.UniversalInjection.universalInjection;
+import static com.envimate.types.ClassType.fromClassWithoutGenerics;
+import static com.envimate.types.ClassType.typeOfObject;
 
 @ToString
 @EqualsAndHashCode

@@ -21,10 +21,10 @@
 
 package com.envimate.mapmate.builder.detection.serializedobject.deserialization;
 
-import com.envimate.mapmate.definitions.types.ClassType;
-import com.envimate.mapmate.definitions.types.resolver.ResolvedMethod;
 import com.envimate.mapmate.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.serialization.serializers.serializedobject.SerializationFields;
+import com.envimate.types.ClassType;
+import com.envimate.types.resolver.ResolvedMethod;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -35,9 +35,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.envimate.mapmate.builder.detection.serializedobject.IncompatibleSerializedObjectException.incompatibleSerializedObjectException;
-import static com.envimate.mapmate.definitions.types.resolver.ResolvedMethod.resolvePublicMethods;
 import static com.envimate.mapmate.deserialization.deserializers.serializedobjects.MethodSerializedObjectDeserializer.methodDeserializer;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static com.envimate.types.resolver.ResolvedMethod.resolvePublicMethods;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toList;

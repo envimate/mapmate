@@ -21,8 +21,8 @@
 
 package com.envimate.mapmate.serialization.serializers.serializedobject;
 
-import com.envimate.mapmate.definitions.types.ResolvedType;
-import com.envimate.mapmate.definitions.types.resolver.ResolvedField;
+import com.envimate.types.ResolvedType;
+import com.envimate.types.resolver.ResolvedField;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;

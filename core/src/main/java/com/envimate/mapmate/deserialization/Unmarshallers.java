@@ -22,11 +22,11 @@
 package com.envimate.mapmate.deserialization;
 
 import com.envimate.mapmate.definitions.*;
-import com.envimate.mapmate.definitions.types.ClassType;
 import com.envimate.mapmate.definitions.universal.Universal;
 import com.envimate.mapmate.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import com.envimate.mapmate.marshalling.Unmarshaller;
+import com.envimate.types.ClassType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
