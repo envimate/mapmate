@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.definitions;
 
+import com.envimate.mapmate.builder.DefinitionSeed;
 import com.envimate.mapmate.builder.DefinitionSeeds;
 import com.envimate.mapmate.builder.RequiredCapabilities;
 import com.envimate.mapmate.definitions.types.ClassType;
@@ -89,15 +90,15 @@ public final class Definitions {
                 .forCustomPrimitive(customPrimitive -> {
                     if (customPrimitive.deserializer().isEmpty()) {
                         throw new UnsupportedOperationException(
-                                format("Custom primitive '%s' is not deserializable but needs to be in order to support deserialization of '%s'",
-                                        candidate.description(), reason.description()));
+                                format("Custom primitive '%s' is not deserializable but needs to be in order to support deserialization of '%s'. %s",
+                                        candidate.description(), reason.description(), definition.context()));
                     }
                 })
                 .forSerializedObject(serializedObject -> {
                     if (serializedObject.deserializer().isEmpty()) {
                         throw new UnsupportedOperationException(
-                                format("Serialized object '%s' is not deserializable but needs to be in order to support deserialization of '%s'",
-                                        candidate.description(), reason.description()));
+                                format("Serialized object '%s' is not deserializable but needs to be in order to support deserialization of '%s'. %s",
+                                        candidate.description(), reason.description(), serializedObject.context()));
                     }
                     serializedObject.deserializer().orElseThrow()
                             .fields()

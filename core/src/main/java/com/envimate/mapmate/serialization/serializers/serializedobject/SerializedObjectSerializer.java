@@ -21,7 +21,6 @@
 
 package com.envimate.mapmate.serialization.serializers.serializedobject;
 
-import com.envimate.mapmate.definitions.types.ClassType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;

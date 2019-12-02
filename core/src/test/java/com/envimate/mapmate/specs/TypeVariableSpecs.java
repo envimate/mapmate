@@ -71,7 +71,7 @@ public final class TypeVariableSpecs {
     }
 
     @Test
-    public void aSerializedObjectWithTypeVariableFieldsCanRegisteredTwice() {
+    public void aSerializedObjectWithTypeVariableFieldsCanBeRegisteredTwice() {
         given(
                 aMapMate()
                         .withManuallyAddedType(unresolvedType(AComplexParameterizedType.class).resolve(fromClassWithoutGenerics(AString.class)))
