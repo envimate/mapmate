@@ -21,12 +21,12 @@
 
 package com.envimate.mapmate.specs;
 
-import com.envimate.mapmate.builder.detection.customprimitive.mapping.BooleanFormatException;
 import com.envimate.mapmate.domain.valid.*;
+import com.envimate.mapmate.scanner.builder.detection.customprimitive.mapping.BooleanFormatException;
 import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.MapMate.aMapMate;
-import static com.envimate.mapmate.marshalling.MarshallingType.json;
+import static com.envimate.mapmate.mapper.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.given;
 import static com.envimate.mapmate.specs.givenwhenthen.Marshallers.jsonMarshaller;
 import static com.envimate.mapmate.specs.givenwhenthen.Unmarshallers.jsonUnmarshaller;

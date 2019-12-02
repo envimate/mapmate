@@ -21,8 +21,8 @@
 
 package com.envimate.mapmate.xml;
 
-import com.envimate.mapmate.marshalling.Marshaller;
-import com.envimate.mapmate.marshalling.Unmarshaller;
+import com.envimate.mapmate.mapper.marshalling.Marshaller;
+import com.envimate.mapmate.mapper.marshalling.Unmarshaller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;

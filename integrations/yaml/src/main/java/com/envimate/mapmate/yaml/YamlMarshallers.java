@@ -21,8 +21,8 @@
 
 package com.envimate.mapmate.yaml;
 
-import com.envimate.mapmate.marshalling.Marshaller;
-import com.envimate.mapmate.marshalling.Unmarshaller;
+import com.envimate.mapmate.mapper.marshalling.Marshaller;
+import com.envimate.mapmate.mapper.marshalling.Unmarshaller;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.Yaml;

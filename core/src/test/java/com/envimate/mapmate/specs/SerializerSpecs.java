@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.envimate.mapmate.marshalling.MarshallingType.json;
+import static com.envimate.mapmate.mapper.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.givenTheExampleMapMateWithAllMarshallers;
 import static java.util.Collections.singletonList;
 

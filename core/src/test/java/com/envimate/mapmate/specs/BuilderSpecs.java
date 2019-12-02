@@ -26,7 +26,7 @@ import com.envimate.mapmate.domain.valid.*;
 import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.MapMate.aMapMate;
-import static com.envimate.mapmate.builder.recipes.scanner.ClassScannerRecipe.addAllReferencedClassesIs;
+import static com.envimate.mapmate.scanner.builder.recipes.scanner.ClassScannerRecipe.addAllReferencedClassesIs;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.given;
 
 public final class BuilderSpecs {

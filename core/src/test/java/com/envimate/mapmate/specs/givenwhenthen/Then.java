@@ -21,13 +21,13 @@
 
 package com.envimate.mapmate.specs.givenwhenthen;
 
-import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
-import com.envimate.mapmate.definitions.Definition;
-import com.envimate.mapmate.definitions.Definitions;
-import com.envimate.mapmate.definitions.SerializedObjectDefinition;
-import com.envimate.mapmate.deserialization.validation.AggregatedValidationException;
-import com.envimate.types.ClassType;
-import com.envimate.types.ResolvedType;
+import com.envimate.mapmate.mapper.definitions.CustomPrimitiveDefinition;
+import com.envimate.mapmate.mapper.definitions.Definition;
+import com.envimate.mapmate.mapper.definitions.Definitions;
+import com.envimate.mapmate.mapper.definitions.SerializedObjectDefinition;
+import com.envimate.mapmate.mapper.deserialization.validation.AggregatedValidationException;
+import com.envimate.mapmate.shared.types.ClassType;
+import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.hamcrest.core.StringContains;

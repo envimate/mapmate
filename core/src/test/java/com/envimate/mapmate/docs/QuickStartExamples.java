@@ -22,10 +22,10 @@
 package com.envimate.mapmate.docs;
 
 import com.envimate.mapmate.MapMate;
-import com.envimate.mapmate.builder.models.conventional.Body;
-import com.envimate.mapmate.builder.models.conventional.Email;
-import com.envimate.mapmate.builder.models.conventional.EmailAddress;
-import com.envimate.mapmate.builder.models.conventional.Subject;
+import com.envimate.mapmate.scanner.builder.models.conventional.Body;
+import com.envimate.mapmate.scanner.builder.models.conventional.Email;
+import com.envimate.mapmate.scanner.builder.models.conventional.EmailAddress;
+import com.envimate.mapmate.scanner.builder.models.conventional.Subject;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
 

@@ -22,8 +22,8 @@
 package com.envimate.mapmate.specs.givenwhenthen;
 
 import com.envimate.mapmate.MapMate;
-import com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedMarshallerRecipe;
 import com.envimate.mapmate.domain.exceptions.AnException;
+import com.envimate.mapmate.scanner.builder.recipes.marshallers.urlencoded.UrlEncodedMarshallerRecipe;
 
 import static com.envimate.mapmate.MapMate.aMapMate;
 import static com.envimate.mapmate.specs.givenwhenthen.Marshallers.*;

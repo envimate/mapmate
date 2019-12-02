@@ -21,9 +21,9 @@
 
 package com.envimate.mapmate.yaml;
 
-import com.envimate.mapmate.MapMateBuilder;
-import com.envimate.mapmate.builder.DependencyRegistry;
-import com.envimate.mapmate.builder.recipes.Recipe;
+import com.envimate.mapmate.scanner.builder.DependencyRegistry;
+import com.envimate.mapmate.scanner.builder.MapMateBuilder;
+import com.envimate.mapmate.scanner.builder.recipes.Recipe;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;

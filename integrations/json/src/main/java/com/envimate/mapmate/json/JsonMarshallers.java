@@ -21,8 +21,8 @@
 
 package com.envimate.mapmate.json;
 
-import com.envimate.mapmate.marshalling.Marshaller;
-import com.envimate.mapmate.marshalling.Unmarshaller;
+import com.envimate.mapmate.mapper.marshalling.Marshaller;
+import com.envimate.mapmate.mapper.marshalling.Unmarshaller;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 

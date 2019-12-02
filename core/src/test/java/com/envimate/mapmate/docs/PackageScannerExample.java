@@ -22,7 +22,7 @@
 package com.envimate.mapmate.docs;
 
 import com.envimate.mapmate.MapMate;
-import com.envimate.mapmate.builder.scanning.DefaultPackageScanner;
+import com.envimate.mapmate.scanner.builder.scanning.DefaultPackageScanner;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
 

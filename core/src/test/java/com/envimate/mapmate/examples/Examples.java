@@ -22,8 +22,8 @@
 package com.envimate.mapmate.examples;
 
 import com.envimate.mapmate.MapMate;
-import com.envimate.mapmate.deserialization.validation.AggregatedValidationException;
 import com.envimate.mapmate.examples.domain.*;
+import com.envimate.mapmate.mapper.deserialization.validation.AggregatedValidationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.jupiter.api.Test;

@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.specs.givenwhenthen;
 
-import com.envimate.mapmate.marshalling.Unmarshaller;
+import com.envimate.mapmate.mapper.marshalling.Unmarshaller;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.gson.Gson;
 import org.yaml.snakeyaml.DumperOptions;

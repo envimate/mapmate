@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.specs.givenwhenthen;
 
-import com.envimate.mapmate.definitions.Definitions;
+import com.envimate.mapmate.mapper.definitions.Definitions;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;

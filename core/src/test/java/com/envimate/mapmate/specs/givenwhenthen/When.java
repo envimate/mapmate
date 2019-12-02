@@ -22,8 +22,8 @@
 package com.envimate.mapmate.specs.givenwhenthen;
 
 import com.envimate.mapmate.MapMate;
-import com.envimate.mapmate.definitions.Definitions;
-import com.envimate.mapmate.injector.InjectorLambda;
+import com.envimate.mapmate.mapper.definitions.Definitions;
+import com.envimate.mapmate.mapper.injector.InjectorLambda;
 import com.google.gson.Gson;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

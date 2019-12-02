@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.specs.givenwhenthen;
 
-import com.envimate.mapmate.marshalling.Marshaller;
+import com.envimate.mapmate.mapper.marshalling.Marshaller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;

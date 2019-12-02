@@ -22,9 +22,9 @@
 package com.envimate.mapmate.docs;
 
 import com.envimate.mapmate.MapMate;
-import com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedMarshallerRecipe;
 import com.envimate.mapmate.examples.domain.*;
-import com.envimate.mapmate.marshalling.Unmarshaller;
+import com.envimate.mapmate.mapper.marshalling.Unmarshaller;
+import com.envimate.mapmate.scanner.builder.recipes.marshallers.urlencoded.UrlEncodedMarshallerRecipe;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.gson.Gson;
@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static com.envimate.mapmate.builder.recipes.marshallers.jackson.JacksonMarshaller.jacksonMarshallerJson;
+import static com.envimate.mapmate.scanner.builder.recipes.marshallers.jackson.JacksonMarshaller.jacksonMarshallerJson;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 

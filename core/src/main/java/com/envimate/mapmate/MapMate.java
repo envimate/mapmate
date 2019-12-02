@@ -21,11 +21,12 @@
 
 package com.envimate.mapmate;
 
-import com.envimate.mapmate.builder.scanning.PackageScanner;
-import com.envimate.mapmate.deserialization.Deserializer;
-import com.envimate.mapmate.marshalling.MarshallingType;
-import com.envimate.mapmate.serialization.Serializer;
-import com.envimate.types.ClassType;
+import com.envimate.mapmate.mapper.deserialization.Deserializer;
+import com.envimate.mapmate.mapper.marshalling.MarshallingType;
+import com.envimate.mapmate.mapper.serialization.Serializer;
+import com.envimate.mapmate.scanner.builder.MapMateBuilder;
+import com.envimate.mapmate.scanner.builder.scanning.PackageScanner;
+import com.envimate.mapmate.shared.types.ClassType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,7 @@ public final class MapMate {
         return MapMateBuilder.mapMateBuilder(packageScanner);
     }
 
-    static MapMate mapMate(final Serializer serializer, final Deserializer deserializer) {
+    public static MapMate mapMate(final Serializer serializer, final Deserializer deserializer) {
         return new MapMate(serializer, deserializer);
     }
 

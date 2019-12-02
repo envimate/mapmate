@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.specs.givenwhenthen;
 
-import com.envimate.mapmate.marshalling.MarshallingType;
+import com.envimate.mapmate.mapper.marshalling.MarshallingType;
 
 public interface WithMarshallingType {
     Then withMarshallingType(MarshallingType marshallingType);

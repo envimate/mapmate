@@ -28,7 +28,7 @@ import com.envimate.mapmate.domain.valid.AString;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import static com.envimate.mapmate.marshalling.MarshallingType.json;
+import static com.envimate.mapmate.mapper.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.given;
 import static com.envimate.mapmate.specs.givenwhenthen.MapMateInstances.theExampleMapMateWithAllMarshallers;
 
