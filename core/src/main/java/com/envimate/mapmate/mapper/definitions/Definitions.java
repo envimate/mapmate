@@ -86,26 +86,14 @@ public final class Definitions {
                 new UnsupportedOperationException(
                         format("Type '%s' is not registered but needs to be in order to support deserialization of '%s'.%s",
                                 candidate.description(), reason.description(), this.definitionScanLog.summaryFor(candidate))));
-        multiplex(definition)
-                .forCustomPrimitive(customPrimitive -> {
-                    if (customPrimitive.deserializer().isEmpty()) {
-                        throw new UnsupportedOperationException(
-                                format("Custom primitive '%s' is not deserializable but needs to be in order to support deserialization of '%s'. %s",
-                                        candidate.description(), reason.description(), this.definitionScanLog.summaryFor(candidate)));
-                    }
-                })
-                .forSerializedObject(serializedObject -> {
-                    if (serializedObject.deserializer().isEmpty()) {
-                        throw new UnsupportedOperationException(
-                                format("Serialized object '%s' is not deserializable but needs to be in order to support deserialization of '%s'. %s",
-                                        candidate.description(), reason.description(), this.definitionScanLog.summaryFor(candidate)));
-                    }
-                    serializedObject.deserializer().orElseThrow()
-                            .fields()
-                            .referencedTypes()
-                            .forEach(reference -> validateDeserialization(reference, reason, alreadyVisited));
-                })
-                .forCollection(collection -> validateDeserialization(collection.contentType(), reason, alreadyVisited));
+
+        if (definition.deserializer().isEmpty()) {
+            throw new UnsupportedOperationException(
+                    format("'%s' is not deserializable but needs to be in order to support deserialization of '%s'. %s",
+                            candidate.description(), reason.description(), this.definitionScanLog.summaryFor(candidate)));
+        } else {
+            definition.deserializer().get().requiredTypes().forEach(type -> validateDeserialization(type, reason, alreadyVisited));
+        }
     }
 
     private void validateSerialization(final ResolvedType candidate, final ResolvedType reason, final List<ResolvedType> alreadyVisited) {
@@ -117,26 +105,14 @@ public final class Definitions {
                 new UnsupportedOperationException(
                         format("Type '%s' is not registered but needs to be in order to support serialization of '%s'",
                                 candidate.description(), reason.description())));
-        multiplex(definition)
-                .forCustomPrimitive(customPrimitive -> {
-                    if (customPrimitive.serializer().isEmpty()) {
-                        throw new UnsupportedOperationException(
-                                format("Custom primitive '%s' is not serializable but needs to be in order to support serialization of '%s'",
-                                        candidate.description(), reason.description()));
-                    }
-                })
-                .forSerializedObject(serializedObject -> {
-                    if (serializedObject.serializer().isEmpty()) {
-                        throw new UnsupportedOperationException(
-                                format("Serialized object '%s' is not serializable but needs to be in order to support serialization of '%s'",
-                                        candidate.description(), reason.description()));
-                    }
-                    serializedObject.serializer().orElseThrow()
-                            .fields()
-                            .typesList()
-                            .forEach(reference -> validateSerialization(reference, reason, alreadyVisited));
-                })
-                .forCollection(collection -> validateSerialization(collection.contentType(), reason, alreadyVisited));
+
+        if (definition.serializer().isEmpty()) {
+            throw new UnsupportedOperationException(
+                    format("'%s' is not serializable but needs to be in order to support serialization of '%s'. %s",
+                            candidate.description(), reason.description(), this.definitionScanLog.summaryFor(candidate)));
+        } else {
+            definition.serializer().get().requiredTypes().forEach(type -> validateSerialization(type, reason, alreadyVisited));
+        }
     }
 
     public int countCustomPrimitives() {

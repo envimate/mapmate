@@ -21,8 +21,16 @@
 
 package com.envimate.mapmate.mapper.definitions;
 
+import com.envimate.mapmate.mapper.deserialization.deserializers.TypeDeserializer;
+import com.envimate.mapmate.mapper.serialization.serializers.TypeSerializer;
 import com.envimate.mapmate.shared.types.ResolvedType;
 
+import java.util.Optional;
+
 public interface Definition {
+    Optional<TypeSerializer> serializer();
+
+    Optional<TypeDeserializer> deserializer();
+
     ResolvedType type();
 }

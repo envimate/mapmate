@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.mapper.deserialization.deserializers.collections;
 
+import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -31,20 +32,29 @@ import java.util.List;
 import java.util.function.Function;
 
 import static com.envimate.mapmate.shared.validators.NotNullValidator.validateNotNull;
+import static java.util.Collections.singletonList;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ListCollectionDeserializer implements CollectionDeserializer {
+    private final ResolvedType componentType;
     private final Function<List<Object>, Collection<Object>> mapper;
 
-    public static CollectionDeserializer listDeserializer(final Function<List<Object>, Collection<Object>> mapper) {
+    public static CollectionDeserializer listDeserializer(final ResolvedType componentType,
+                                                          final Function<List<Object>, Collection<Object>> mapper) {
+        validateNotNull(componentType, "componentType");
         validateNotNull(mapper, "mapper");
-        return new ListCollectionDeserializer(mapper);
+        return new ListCollectionDeserializer(componentType, mapper);
     }
 
     @Override
     public Object deserialize(final List<Object> deserializedElements) {
         return this.mapper.apply(deserializedElements);
+    }
+
+    @Override
+    public List<ResolvedType> requiredTypes() {
+        return singletonList(this.componentType);
     }
 }

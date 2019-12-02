@@ -21,7 +21,9 @@
 
 package com.envimate.mapmate.mapper.definitions;
 
+import com.envimate.mapmate.mapper.deserialization.deserializers.TypeDeserializer;
 import com.envimate.mapmate.mapper.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
+import com.envimate.mapmate.mapper.serialization.serializers.TypeSerializer;
 import com.envimate.mapmate.mapper.serialization.serializers.serializedobject.SerializedObjectSerializer;
 import com.envimate.mapmate.shared.types.ClassType;
 import lombok.AccessLevel;
@@ -54,11 +56,13 @@ public final class SerializedObjectDefinition implements Definition {
         return new SerializedObjectDefinition(type, serializer, deserializer);
     }
 
-    public Optional<SerializedObjectSerializer> serializer() {
+    @Override
+    public Optional<TypeSerializer> serializer() {
         return ofNullable(this.serializer);
     }
 
-    public Optional<SerializedObjectDeserializer> deserializer() {
+    @Override
+    public Optional<TypeDeserializer> deserializer() {
         return ofNullable(this.deserializer);
     }
 

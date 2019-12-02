@@ -21,8 +21,41 @@
 
 package com.envimate.mapmate.mapper.deserialization.deserializers.collections;
 
+import com.envimate.mapmate.mapper.definitions.CollectionDefinition;
+import com.envimate.mapmate.mapper.definitions.Definition;
+import com.envimate.mapmate.mapper.definitions.universal.Universal;
+import com.envimate.mapmate.mapper.definitions.universal.UniversalCollection;
+import com.envimate.mapmate.mapper.deserialization.DeserializerCallback;
+import com.envimate.mapmate.mapper.deserialization.deserializers.TypeDeserializer;
+import com.envimate.mapmate.mapper.deserialization.validation.ExceptionTracker;
+import com.envimate.mapmate.mapper.injector.Injector;
+import com.envimate.mapmate.shared.mapping.CustomPrimitiveMappings;
+import com.envimate.mapmate.shared.types.ResolvedType;
+
+import java.util.LinkedList;
 import java.util.List;
 
-public interface CollectionDeserializer {
+import static com.envimate.mapmate.mapper.deserialization.deserializers.TypeDeserializer.castSafely;
+
+public interface CollectionDeserializer extends TypeDeserializer {
     Object deserialize(List<Object> deserializedElements);
+
+    @Override
+    default <T> T deserialize(final Universal input,
+                              final Definition definition,
+                              final ExceptionTracker exceptionTracker,
+                              final Injector injector,
+                              final DeserializerCallback callback,
+                              final CustomPrimitiveMappings customPrimitiveMappings) {
+        final UniversalCollection universalCollection = castSafely(input, UniversalCollection.class, exceptionTracker);
+        final List deserializedList = new LinkedList();
+        final ResolvedType contentType = ((CollectionDefinition) definition).contentType();
+        int index = 0;
+        for (final Universal element : universalCollection.content()) {
+            final Object deserialized = callback.deserializeRecursive(element, contentType, exceptionTracker.stepIntoArray(index), injector);
+            deserializedList.add(deserialized);
+            index = index + 1;
+        }
+        return (T) deserialize(deserializedList);
+    }
 }

@@ -21,10 +21,11 @@
 
 package com.envimate.mapmate.mapper.deserialization;
 
-import com.envimate.mapmate.mapper.definitions.*;
-import com.envimate.mapmate.mapper.definitions.universal.*;
-import com.envimate.mapmate.mapper.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
-import com.envimate.mapmate.mapper.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
+import com.envimate.mapmate.mapper.definitions.Definition;
+import com.envimate.mapmate.mapper.definitions.Definitions;
+import com.envimate.mapmate.mapper.definitions.universal.Universal;
+import com.envimate.mapmate.mapper.definitions.universal.UniversalNull;
+import com.envimate.mapmate.mapper.deserialization.deserializers.TypeDeserializer;
 import com.envimate.mapmate.mapper.deserialization.validation.ExceptionTracker;
 import com.envimate.mapmate.mapper.deserialization.validation.ValidationErrorsMapping;
 import com.envimate.mapmate.mapper.deserialization.validation.ValidationResult;
@@ -34,16 +35,14 @@ import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
-import java.util.*;
-import java.util.Map.Entry;
+import java.util.Optional;
 
-import static com.envimate.mapmate.mapper.definitions.universal.UniversalNull.universalNull;
 import static com.envimate.mapmate.shared.validators.NotNullValidator.validateNotNull;
 import static java.lang.String.format;
 
-@SuppressWarnings({"unchecked", "InstanceofConcreteClass", "CastToConcreteClass", "rawtypes"})
+@SuppressWarnings({"unchecked", "InstanceofConcreteClass"})
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-final class InternalDeserializer {
+final class InternalDeserializer implements DeserializerCallback {
     private final Definitions definitions;
     private final CustomPrimitiveMappings customPrimitiveMappings;
     private final ValidationErrorsMapping onValidationErrors;
@@ -69,17 +68,18 @@ final class InternalDeserializer {
         return result;
     }
 
-    private Object deserializeRecursive(final Universal input,
-                                        final ResolvedType targetType,
-                                        final ExceptionTracker exceptionTracker,
-                                        final Injector injector) {
+    @Override
+    public Object deserializeRecursive(final Universal input,
+                                       final ResolvedType targetType,
+                                       final ExceptionTracker exceptionTracker,
+                                       final Injector injector) {
         final Optional<Object> namedDirectInjection = injector.getDirectInjectionForPropertyPath(exceptionTracker.getPosition());
         if (namedDirectInjection.isPresent()) {
             return namedDirectInjection.get();
         }
 
         final Optional<Object> typedDirectInjection = injector.getDirectInjectionForType(targetType);
-        if(typedDirectInjection.isPresent()) {
+        if (typedDirectInjection.isPresent()) {
             return typedDirectInjection.get();
         }
 
@@ -91,108 +91,12 @@ final class InternalDeserializer {
 
         final Definition definition = this.definitions.getDefinitionForType(targetType);
         try {
-            if (definition instanceof SerializedObjectDefinition) {
-                return this.deserializeDataTransferObject(
-                        castSafely(resolved, UniversalObject.class, exceptionTracker),
-                        (SerializedObjectDefinition) definition,
-                        exceptionTracker,
-                        injector);
-            }
-            if (definition instanceof CustomPrimitiveDefinition) {
-                return this.deserializeCustomPrimitive(
-                        castSafely(resolved, UniversalPrimitive.class, exceptionTracker),
-                        (CustomPrimitiveDefinition) definition,
-                        exceptionTracker);
-            }
-            if (definition instanceof CollectionDefinition) {
-                return this.deserializeCollection(
-                        castSafely(resolved, UniversalCollection.class, exceptionTracker),
-                        (CollectionDefinition) definition,
-                        exceptionTracker,
-                        injector);
-            }
+            final TypeDeserializer deserializer = definition.deserializer().orElseThrow(() ->
+                    new UnsupportedOperationException(format("No deserializer configured for '%s'", definition.type().description())));
+            return deserializer.deserialize(resolved, definition, exceptionTracker, injector, this, this.customPrimitiveMappings);
         } catch (final WrongInputStructureException e) {
             exceptionTracker.track(e, e.getMessage());
             return null;
         }
-        throw new UnsupportedOperationException(definition.getClass().getName());
-    }
-
-    private <T> T deserializeDataTransferObject(final UniversalObject input,
-                                                final SerializedObjectDefinition definition,
-                                                final ExceptionTracker exceptionTracker,
-                                                final Injector injector) {
-        final SerializedObjectDeserializer deserializer = definition.deserializer()
-                .orElseThrow(() -> new UnsupportedOperationException(format("No deserializer configured for '%s'", definition.type().description())));
-        final DeserializationFields deserializationFields = deserializer.fields();
-        final Map<String, Object> elements = new HashMap<>(0);
-        for (final Entry<String, ResolvedType> entry : deserializationFields.fields().entrySet()) {
-            final String elementName = entry.getKey();
-            final ResolvedType elementType = entry.getValue();
-
-            final Universal elementInput = input.getField(elementName).orElse(universalNull());
-            final Object elementObject = this.deserializeRecursive(
-                    elementInput,
-                    elementType,
-                    exceptionTracker.stepInto(elementName),
-                    injector);
-            elements.put(elementName, elementObject);
-        }
-
-        if (exceptionTracker.validationResult().hasValidationErrors()) {
-            return null;
-        } else {
-            try {
-                return (T) deserializer.deserialize(elements);
-            } catch (final Exception e) {
-                final String message = format("Exception calling deserialize(type: %s, elements: %s) on deserializationMethod %s",
-                        definition.type().description(), elements, deserializer);
-                exceptionTracker.track(e, message);
-                return null;
-            }
-        }
-    }
-
-    private <T> T deserializeCustomPrimitive(final UniversalPrimitive input,
-                                             final CustomPrimitiveDefinition definition,
-                                             final ExceptionTracker exceptionTracker) {
-        try {
-            final CustomPrimitiveDeserializer deserializer = definition.deserializer().orElseThrow(() ->
-                    new UnsupportedOperationException(String.format(
-                            "Could not find deserializer for definition %s deserializing %s",
-                            definition, input
-                    )));
-            final Class<?> baseType = deserializer.baseType();
-            final Object mapped = this.customPrimitiveMappings.fromUniversal(input, baseType);
-            return (T) deserializer.deserialize(mapped);
-        } catch (final Exception e) {
-            final String message = format("Exception calling deserialize(input: %s) on definition %s", input.toNativeJava(), definition);
-            exceptionTracker.track(e, message);
-            return null;
-        }
-    }
-
-    private Object deserializeCollection(final UniversalCollection input,
-                                         final CollectionDefinition definition,
-                                         final ExceptionTracker exceptionTracker,
-                                         final Injector injector) {
-        final List deserializedList = new LinkedList();
-        final ResolvedType contentType = definition.contentType();
-        int index = 0;
-        for (final Universal element : input.content()) {
-            final Object deserialized = deserializeRecursive(element, contentType, exceptionTracker.stepIntoArray(index), injector);
-            deserializedList.add(deserialized);
-            index = index + 1;
-        }
-        return definition.deserializer().deserialize(deserializedList);
-    }
-
-    private static <T extends Universal> T castSafely(final Universal universalType,
-                                                      final Class<T> type,
-                                                      final ExceptionTracker exceptionTracker) {
-        if (!type.isInstance(universalType)) {
-            throw WrongInputStructureException.wrongInputStructureException(type, universalType, exceptionTracker.getPosition());
-        }
-        return (T) universalType;
     }
 }

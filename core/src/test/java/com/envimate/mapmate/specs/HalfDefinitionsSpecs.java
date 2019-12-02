@@ -28,9 +28,9 @@ import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.MapMate.aMapMate;
 import static com.envimate.mapmate.mapper.marshalling.MarshallingType.json;
-import static com.envimate.mapmate.scanner.builder.RequiredCapabilities.deserializationOnly;
-import static com.envimate.mapmate.scanner.builder.RequiredCapabilities.serializationOnly;
-import static com.envimate.mapmate.scanner.builder.recipes.scanner.ClassScannerRecipe.addAllReferencedClassesIs;
+import static com.envimate.mapmate.builder.RequiredCapabilities.deserializationOnly;
+import static com.envimate.mapmate.builder.RequiredCapabilities.serializationOnly;
+import static com.envimate.mapmate.builder.recipes.scanner.ClassScannerRecipe.addAllReferencedClassesIs;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.given;
 import static com.envimate.mapmate.specs.givenwhenthen.Marshallers.jsonMarshaller;
 import static com.envimate.mapmate.specs.givenwhenthen.Unmarshallers.jsonUnmarshaller;

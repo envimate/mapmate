@@ -21,7 +21,9 @@
 
 package com.envimate.mapmate.mapper.definitions;
 
+import com.envimate.mapmate.mapper.deserialization.deserializers.TypeDeserializer;
 import com.envimate.mapmate.mapper.deserialization.deserializers.collections.CollectionDeserializer;
+import com.envimate.mapmate.mapper.serialization.serializers.TypeSerializer;
 import com.envimate.mapmate.mapper.serialization.serializers.collections.CollectionSerializer;
 import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
@@ -29,7 +31,10 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.util.Optional;
+
 import static com.envimate.mapmate.shared.validators.NotNullValidator.validateNotNull;
+import static java.util.Optional.of;
 
 @ToString
 @EqualsAndHashCode
@@ -55,12 +60,13 @@ public final class CollectionDefinition implements Definition {
         return this.contentType;
     }
 
-    public CollectionSerializer serializer() {
-        return this.serializer;
+    @Override
+    public Optional<TypeSerializer> serializer() {
+        return of(this.serializer);
     }
 
-    public CollectionDeserializer deserializer() {
-        return this.deserializer;
+    public Optional<TypeDeserializer> deserializer() {
+        return of(this.deserializer);
     }
 
     @Override

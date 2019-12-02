@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.mapper.serialization.serializers.collections;
 
+import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -29,14 +30,21 @@ import lombok.ToString;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ArrayCollectionSerializer implements CollectionSerializer {
+    private final ResolvedType componentType;
 
-    public static CollectionSerializer arraySerializer() {
-        return new ArrayCollectionSerializer();
+    public static CollectionSerializer arraySerializer(final ResolvedType componentType) {
+        return new ArrayCollectionSerializer(componentType);
+    }
+
+    @Override
+    public List<ResolvedType> requiredTypes() {
+        return singletonList(this.componentType);
     }
 
     @Override

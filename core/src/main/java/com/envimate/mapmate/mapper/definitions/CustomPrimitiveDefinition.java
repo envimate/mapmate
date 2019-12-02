@@ -22,7 +22,9 @@
 package com.envimate.mapmate.mapper.definitions;
 
 import com.envimate.mapmate.mapper.definitions.universal.Universal;
+import com.envimate.mapmate.mapper.deserialization.deserializers.TypeDeserializer;
 import com.envimate.mapmate.mapper.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
+import com.envimate.mapmate.mapper.serialization.serializers.TypeSerializer;
 import com.envimate.mapmate.mapper.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
 import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
@@ -59,11 +61,11 @@ public final class CustomPrimitiveDefinition implements Definition {
         return new CustomPrimitiveDefinition(type, serializer, deserializer);
     }
 
-    public Optional<CustomPrimitiveDeserializer> deserializer() {
+    public Optional<TypeDeserializer> deserializer() {
         return ofNullable(this.deserializer);
     }
 
-    public Optional<CustomPrimitiveSerializer> serializer() {
+    public Optional<TypeSerializer> serializer() {
         return ofNullable(this.serializer);
     }
 

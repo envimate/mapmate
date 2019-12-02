@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.mapper.deserialization.deserializers.collections;
 
+import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -29,20 +30,27 @@ import lombok.ToString;
 import java.lang.reflect.Array;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
+
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ArrayCollectionDeserializer implements CollectionDeserializer {
-    private final Class<?> componentType;
+    private final ResolvedType componentType;
 
-    public static CollectionDeserializer arrayDeserializer(final Class<?> componentType) {
+    public static CollectionDeserializer arrayDeserializer(final ResolvedType componentType) {
         return new ArrayCollectionDeserializer(componentType);
+    }
+
+    @Override
+    public List<ResolvedType> requiredTypes() {
+        return singletonList(this.componentType);
     }
 
     @Override
     public Object deserialize(final List<Object> deserializedElements) {
         final int size = deserializedElements.size();
-        final Object[] array = (Object[]) Array.newInstance(this.componentType, size);
+        final Object[] array = (Object[]) Array.newInstance(this.componentType.assignableType(), size);
         for (int i = 0; i < size; ++i) {
             array[i] = deserializedElements.get(i);
         }

@@ -21,8 +21,34 @@
 
 package com.envimate.mapmate.mapper.serialization.serializers.collections;
 
+import com.envimate.mapmate.mapper.definitions.CollectionDefinition;
+import com.envimate.mapmate.mapper.definitions.Definition;
+import com.envimate.mapmate.mapper.definitions.universal.Universal;
+import com.envimate.mapmate.mapper.serialization.SerializationCallback;
+import com.envimate.mapmate.mapper.serialization.serializers.TypeSerializer;
+import com.envimate.mapmate.mapper.serialization.tracker.SerializationTracker;
+import com.envimate.mapmate.shared.mapping.CustomPrimitiveMappings;
+import com.envimate.mapmate.shared.types.ResolvedType;
+
 import java.util.List;
 
-public interface CollectionSerializer {
+import static com.envimate.mapmate.mapper.definitions.universal.UniversalCollection.universalCollection;
+import static java.util.stream.Collectors.toList;
+
+public interface CollectionSerializer extends TypeSerializer {
     List<Object> serialize(Object collection);
+
+    @Override
+    default Universal serialize(final Definition definition,
+                                final Object object,
+                                final SerializationCallback callback,
+                                final SerializationTracker tracker,
+                                final CustomPrimitiveMappings customPrimitiveMappings) {
+        final ResolvedType contentType = ((CollectionDefinition) definition).contentType();
+        final List<Universal> list = serialize(object)
+                .stream()
+                .map(element -> callback.serializeDefinition(contentType, element, tracker))
+                .collect(toList());
+        return universalCollection(list);
+    }
 }

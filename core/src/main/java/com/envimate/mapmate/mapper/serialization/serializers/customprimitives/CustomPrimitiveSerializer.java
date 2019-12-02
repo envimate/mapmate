@@ -21,6 +21,33 @@
 
 package com.envimate.mapmate.mapper.serialization.serializers.customprimitives;
 
-public interface CustomPrimitiveSerializer {
+import com.envimate.mapmate.mapper.definitions.Definition;
+import com.envimate.mapmate.mapper.definitions.universal.Universal;
+import com.envimate.mapmate.mapper.serialization.SerializationCallback;
+import com.envimate.mapmate.mapper.serialization.serializers.TypeSerializer;
+import com.envimate.mapmate.mapper.serialization.tracker.SerializationTracker;
+import com.envimate.mapmate.shared.mapping.CustomPrimitiveMappings;
+import com.envimate.mapmate.shared.types.ResolvedType;
+
+import java.util.List;
+
+import static java.util.Collections.emptyList;
+
+public interface CustomPrimitiveSerializer extends TypeSerializer {
     Object serialize(Object object);
+
+    @Override
+    default List<ResolvedType> requiredTypes() {
+        return emptyList();
+    }
+
+    @Override
+    default Universal serialize(final Definition definition,
+                                final Object object,
+                                final SerializationCallback callback,
+                                final SerializationTracker tracker,
+                                final CustomPrimitiveMappings customPrimitiveMappings) {
+        final Object serialized = serialize(object);
+        return customPrimitiveMappings.toUniversal(serialized);
+    }
 }

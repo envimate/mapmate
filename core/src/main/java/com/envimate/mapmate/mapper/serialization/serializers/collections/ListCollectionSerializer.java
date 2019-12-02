@@ -21,22 +21,32 @@
 
 package com.envimate.mapmate.mapper.serialization.serializers.collections;
 
+import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
+import static java.util.Collections.singletonList;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ListCollectionSerializer implements CollectionSerializer {
+    private final ResolvedType type;
 
-    public static CollectionSerializer listSerializer() {
-        return new ListCollectionSerializer();
+    public static CollectionSerializer listSerializer(final ResolvedType type) {
+        return new ListCollectionSerializer(type);
+    }
+
+    @Override
+    public List<ResolvedType> requiredTypes() {
+        return singletonList(this.type);
     }
 
     @SuppressWarnings("unchecked")

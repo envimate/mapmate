@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.MapMate.aMapMate;
 import static com.envimate.mapmate.mapper.marshalling.MarshallingType.json;
-import static com.envimate.mapmate.scanner.builder.recipes.scanner.ClassScannerRecipe.addAllReferencedClassesIs;
+import static com.envimate.mapmate.builder.recipes.scanner.ClassScannerRecipe.addAllReferencedClassesIs;
 import static com.envimate.mapmate.shared.types.ClassType.fromClassWithoutGenerics;
 import static com.envimate.mapmate.shared.types.unresolved.UnresolvedType.unresolvedType;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.given;

@@ -24,7 +24,7 @@ package com.envimate.mapmate.specs;
 import com.envimate.mapmate.domain.valid.AComplexNestedType;
 import com.envimate.mapmate.domain.valid.AComplexType;
 import com.envimate.mapmate.domain.valid.AComplexTypeWithArray;
-import com.envimate.mapmate.scanner.builder.recipes.marshallers.urlencoded.UrlEncodedMarshallerRecipe;
+import com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedMarshallerRecipe;
 import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.mapper.marshalling.MarshallingType.*;
