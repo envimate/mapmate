@@ -22,6 +22,7 @@
 package com.envimate.mapmate.builder.recipes.marshallers.jackson;
 
 import com.envimate.mapmate.MapMateBuilder;
+import com.envimate.mapmate.builder.DependencyRegistry;
 import com.envimate.mapmate.builder.recipes.Recipe;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -43,7 +44,7 @@ public final class JacksonMarshaller implements Recipe {
     }
 
     @Override
-    public void cook(final MapMateBuilder mapMateBuilder) {
+    public void cook(final MapMateBuilder mapMateBuilder, final DependencyRegistry dependencyRegistry) {
         final SimpleModule simpleModule = new SimpleModule();
         simpleModule.setDeserializerModifier(new AlwaysStringValueJacksonDeserializerModifier());
         this.objectMapper.setSerializationInclusion(NON_NULL);

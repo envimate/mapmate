@@ -23,6 +23,7 @@ package com.envimate.mapmate;
 
 import com.envimate.mapmate.builder.*;
 import com.envimate.mapmate.builder.contextlog.BuildContextLog;
+import com.envimate.mapmate.builder.conventional.ConventionalDetectors;
 import com.envimate.mapmate.builder.conventional.DetectorBuilder;
 import com.envimate.mapmate.builder.detection.Detector;
 import com.envimate.mapmate.builder.recipes.Recipe;
@@ -46,6 +47,7 @@ import java.util.*;
 import static com.envimate.mapmate.MapMate.mapMate;
 import static com.envimate.mapmate.builder.DefinitionSeed.definitionSeed;
 import static com.envimate.mapmate.builder.DefinitionSeeds.definitionSeeds;
+import static com.envimate.mapmate.builder.DependencyRegistry.dependency;
 import static com.envimate.mapmate.builder.DependencyRegistry.dependencyRegistry;
 import static com.envimate.mapmate.builder.RequiredCapabilities.all;
 import static com.envimate.mapmate.builder.contextlog.BuildContextLog.emptyLog;
@@ -63,7 +65,9 @@ import static java.util.Arrays.stream;
 
 public final class MapMateBuilder {
     private final BuildContextLog contextLog = emptyLog();
-    private final DependencyRegistry dependencyRegistry = dependencyRegistry();
+    private final DependencyRegistry dependencyRegistry = dependencyRegistry(
+            dependency(Detector.class, () -> this.detector)
+    );
     private final DefinitionSeeds definitionSeeds = definitionSeeds();
     private final List<Definition> addedDefinitions = new LinkedList<>();
     private final List<Recipe> recipes = new LinkedList<>();
@@ -74,6 +78,7 @@ public final class MapMateBuilder {
     private Map<MarshallingType, Marshaller> marshallerMap = new HashMap<>(1);
     private Map<MarshallingType, Unmarshaller> unmarshallerMap = new HashMap<>(1);
     private volatile InjectorFactory injectorFactory = InjectorFactory.emptyInjectorFactory();
+    private Detector detector = ConventionalDetectors.conventionalDetector();
 
     public static MapMateBuilder mapMateBuilder(final String... packageNames) {
         if (packageNames != null) {
@@ -128,7 +133,7 @@ public final class MapMateBuilder {
                                                 final ClassType type,
                                                 final RequiredCapabilities capabilities) {
         validateNotNull(type, "type");
-        final DefinitionSeed seed = definitionSeed(type).withCapability(capabilities, seedReason);
+        final DefinitionSeed seed = definitionSeed(type).withCapability(capabilities);
         return withManuallyAddedSeed(seed);
     }
 
@@ -201,7 +206,6 @@ public final class MapMateBuilder {
                 (exception, propertyPath) -> new ValidationError(exception.getMessage(), propertyPath));
     }
 
-    @SuppressWarnings("unchecked")
     public <T extends Throwable> MapMateBuilder withExceptionIndicatingValidationError(
             final Class<T> exceptionIndicatingValidationError,
             final ExceptionMappingWithPropertyPath<T> exceptionMapping) {
@@ -210,7 +214,6 @@ public final class MapMateBuilder {
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public <T extends Throwable> MapMateBuilder withExceptionIndicatingMultipleValidationErrors(
             final Class<T> exceptionType,
             final ExceptionMappingList<T> mapping) {
@@ -227,7 +230,9 @@ public final class MapMateBuilder {
     public MapMate build() {
         this.recipes.forEach(recipe -> recipe.init(this.dependencyRegistry));
 
-        this.recipes.forEach(recipe -> recipe.cook(this));
+        this.recipes.forEach(recipe -> {
+            recipe.cook(this, this.dependencyRegistry);
+        });
 
         final DefinitionsBuilder definitionsBuilder = definitionsBuilder(this.detector, this.contextLog);
         this.addedDefinitions.forEach(definitionsBuilder::addDefinition);

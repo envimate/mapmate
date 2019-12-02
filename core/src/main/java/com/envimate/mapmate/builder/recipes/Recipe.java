@@ -25,7 +25,7 @@ import com.envimate.mapmate.MapMateBuilder;
 import com.envimate.mapmate.builder.DependencyRegistry;
 
 public interface Recipe {
-    default void init(DependencyRegistry dependencyRegistry) {
+    default void init(final DependencyRegistry dependencyRegistry) {
     }
 
     void cook(MapMateBuilder mapMateBuilder, DependencyRegistry dependencyRegistry);

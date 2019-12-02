@@ -22,6 +22,7 @@
 package com.envimate.mapmate.builder.scanning;
 
 import com.envimate.mapmate.MapMateBuilder;
+import com.envimate.mapmate.builder.DependencyRegistry;
 import com.envimate.mapmate.builder.recipes.Recipe;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -42,7 +43,7 @@ public final class PackageScannerRecipe implements Recipe {
     }
 
     @Override
-    public void cook(final MapMateBuilder mapMateBuilder) {
+    public void cook(final MapMateBuilder mapMateBuilder, final DependencyRegistry dependencyRegistry) {
         this.packageScanner.scan().forEach(mapMateBuilder::withManuallyAddedType);
     }
 }

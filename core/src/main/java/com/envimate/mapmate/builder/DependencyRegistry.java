@@ -21,23 +21,55 @@
 
 package com.envimate.mapmate.builder;
 
-import com.envimate.mapmate.builder.recipes.scanner.ClassScannerRecipe;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
+@ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class DependencyRegistry {
-    private final Map<Class<?>, Object> dependencies;
+public final class DependencyRegistry {
+    private final Map<Class<?>, Dependency<?>> dependencies;
 
-    public static DependencyRegistry dependencyRegistry() {
-        return new DependencyRegistry(new HashMap<>(3));
+    public static <T> Dependency<T> dependency(final Class<T> type, final Supplier<T> content) {
+        return new Dependency<>(type, content);
+    }
+
+    public static DependencyRegistry dependencyRegistry(final Dependency<?>... content) {
+        final Map<Class<?>, Dependency<?>> indexed = Arrays.stream(content)
+                .collect(Collectors.toMap(
+                        d -> d.type,
+                        d -> d
+                ));
+        return new DependencyRegistry(new HashMap<>(indexed));
+    }
+
+    public void setDependency(final Dependency<?> dependency) {
+        this.dependencies.put(dependency.type, dependency);
     }
 
     public <T> T getDependency(final Class<T> type) {
-        return (T) dependencies.get(type); // TODO
+        final Object instance = this.dependencies.get(type);
+        return (T) instance;
+    }
+
+    @ToString
+    @EqualsAndHashCode
+    @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+    public static final class Dependency<T> {
+        private final Class<T> type;
+        private final Supplier<T> provider;
+
+        private T provide() {
+            return this.provider.get();
+        }
     }
 }
 

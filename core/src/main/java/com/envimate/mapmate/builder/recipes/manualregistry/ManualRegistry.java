@@ -23,7 +23,7 @@ package com.envimate.mapmate.builder.recipes.manualregistry;
 
 import com.envimate.mapmate.MapMateBuilder;
 import com.envimate.mapmate.builder.DefinitionSeed;
-import com.envimate.mapmate.builder.SeedReason;
+import com.envimate.mapmate.builder.DependencyRegistry;
 import com.envimate.mapmate.builder.detection.serializedobject.fields.FieldDetector;
 import com.envimate.mapmate.builder.recipes.Recipe;
 import com.envimate.mapmate.definitions.CustomPrimitiveDefinition;
@@ -46,7 +46,6 @@ import java.util.function.Function;
 
 import static com.envimate.mapmate.builder.DefinitionSeed.definitionSeed;
 import static com.envimate.mapmate.builder.RequiredCapabilities.all;
-import static com.envimate.mapmate.builder.SeedReason.manuallyAddedIn;
 import static com.envimate.mapmate.builder.detection.serializedobject.fields.ModifierFieldDetector.modifierBased;
 import static com.envimate.mapmate.definitions.CustomPrimitiveDefinition.customPrimitiveDefinition;
 import static com.envimate.mapmate.definitions.SerializedObjectDefinition.serializedObjectDefinition;
@@ -77,7 +76,7 @@ public final class ManualRegistry implements Recipe {
     public <T> ManualRegistry withCustomPrimitive(final Class<T> type,
                                                   final Function<T, String> serializationMethod,
                                                   final Function<String, T> deserializationMethod) {
-        final DefinitionSeed seed = definitionSeed(fromClassWithoutGenerics(type)).withCapability(all(), manuallyAddedIn(ManualRegistry.class, "withCustomPrimitive"));
+        final DefinitionSeed seed = definitionSeed(fromClassWithoutGenerics(type)).withCapability(all());
         return this.withCustomPrimitive(customPrimitiveDefinition(
                 seed,
                 fromClassWithoutGenerics(type),
@@ -118,9 +117,8 @@ public final class ManualRegistry implements Recipe {
         final SerializedObjectDeserializer deserializer = methodNameDeserializer(fullType, deserializationMethodName, resolvedFields);
         final SerializationFields serializationFields = serializationFields(FIELD_DETECTOR.detect(fullType));
         final SerializedObjectSerializer serializer = serializedObjectSerializer(serializationFields).orElseThrow();
-        final SeedReason reason = manuallyAddedIn(ManualRegistry.class, "withSerializedObject");
 
-        final DefinitionSeed definitionSeed = definitionSeed(fullType).withCapability(all(), reason);
+        final DefinitionSeed definitionSeed = definitionSeed(fullType).withCapability(all());
         final SerializedObjectDefinition serializedObject = serializedObjectDefinition(
                 definitionSeed, fullType, serializer, deserializer
         );
@@ -134,7 +132,7 @@ public final class ManualRegistry implements Recipe {
     }
 
     @Override
-    public void cook(final MapMateBuilder mapMateBuilder) {
+    public void cook(final MapMateBuilder mapMateBuilder, final DependencyRegistry dependencyRegistry) {
         this.definitions.forEach(mapMateBuilder::withManuallyAddedDefinition);
         this.manuallyAddedCustomPrimitiveTypes.forEach(mapMateBuilder::withManuallyAddedType);
         this.manuallyAddedSerializedObjectTypes.forEach(mapMateBuilder::withManuallyAddedType);

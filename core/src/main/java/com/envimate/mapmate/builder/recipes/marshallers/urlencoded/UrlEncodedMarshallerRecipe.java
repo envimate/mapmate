@@ -22,6 +22,7 @@
 package com.envimate.mapmate.builder.recipes.marshallers.urlencoded;
 
 import com.envimate.mapmate.MapMateBuilder;
+import com.envimate.mapmate.builder.DependencyRegistry;
 import com.envimate.mapmate.builder.recipes.Recipe;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import lombok.AccessLevel;
@@ -45,7 +46,11 @@ public final class UrlEncodedMarshallerRecipe implements Recipe {
     }
 
     @Override
-    public void cook(final MapMateBuilder mapMateBuilder) {
-        mapMateBuilder.usingMarshaller(urlEncoded(), UrlEncodedMarshaller.urlEncodedMarshaller(), urlEncodedUnmarshaller());
+    public void cook(final MapMateBuilder mapMateBuilder, final DependencyRegistry dependencyRegistry) {
+        mapMateBuilder.usingMarshaller(
+                urlEncoded(),
+                UrlEncodedMarshaller.urlEncodedMarshaller(),
+                urlEncodedUnmarshaller()
+        );
     }
 }
