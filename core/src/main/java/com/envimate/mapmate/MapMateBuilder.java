@@ -211,6 +211,7 @@ public final class MapMateBuilder {
                 (exception, propertyPath) -> new ValidationError(exception.getMessage(), propertyPath));
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends Throwable> MapMateBuilder withExceptionIndicatingValidationError(
             final Class<T> exceptionIndicatingValidationError,
             final ExceptionMappingWithPropertyPath<T> exceptionMapping) {
@@ -219,6 +220,7 @@ public final class MapMateBuilder {
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends Throwable> MapMateBuilder withExceptionIndicatingMultipleValidationErrors(
             final Class<T> exceptionType,
             final ExceptionMappingList<T> mapping) {

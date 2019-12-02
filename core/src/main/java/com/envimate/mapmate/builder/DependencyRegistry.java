@@ -57,7 +57,7 @@ public final class DependencyRegistry {
 
     public <T> T getDependency(final Class<T> type) {
         final Object instance = this.dependencies.get(type).provide();
-        return (T) instance;
+        return type.cast(instance);
     }
 
     @ToString

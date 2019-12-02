@@ -90,6 +90,7 @@ public final class NativeJavaCollectionDefinitionFactory implements DefinitionFa
         return of(definition);
     }
 
+    @SuppressWarnings("rawtypes")
     private static void addFactory(final Class<? extends Collection> collectionType,
                                    final Function<List<Object>, Collection<Object>> mapper) {
         final BiFunction<DefinitionSeed, ResolvedType, Definition> factory = (context, genericType) -> {

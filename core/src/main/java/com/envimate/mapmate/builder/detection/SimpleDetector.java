@@ -93,12 +93,15 @@ public final class SimpleDetector implements Detector {
             return empty();
         }
         for (final DefinitionFactory factory : factories) {
+            final BuildContextLog factoryContextLog = contextLog.stepInto(factory.getClass());
             final Optional<Definition> analyzedClass = factory.analyze(context, type, context.requiredCapabilities());
             if (analyzedClass.isPresent()) {
+                factoryContextLog.log(type, "know how to handle this type");
                 return analyzedClass;
+            } else {
+                factoryContextLog.logReject(type, "do not know how to handle this type");
             }
         }
-        contextLog.logReject(type, "do not know how to handle this type");
         return empty();
     }
 

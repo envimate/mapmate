@@ -80,7 +80,7 @@ public final class ManualRegistry implements Recipe {
         return this.withCustomPrimitive(customPrimitiveDefinition(
                 seed,
                 fromClassWithoutGenerics(type),
-                object -> serializationMethod.apply((T) object),
+                object -> serializationMethod.apply(type.cast(object)),
                 value -> deserializationMethod.apply((String) value)));
     }
 
