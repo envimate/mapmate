@@ -23,6 +23,7 @@ package com.envimate.mapmate.definitions;
 
 import com.envimate.mapmate.builder.DefinitionSeed;
 import com.envimate.mapmate.builder.DefinitionSeeds;
+import com.envimate.mapmate.builder.contextlog.BuildContextLog;
 import com.envimate.mapmate.builder.detection.Detector;
 import com.envimate.mapmate.definitions.types.ResolvedType;
 import lombok.AccessLevel;
@@ -45,17 +46,19 @@ public final class DefinitionsBuilder {
     private static final int INITIAL_CAPACITY = 10000;
 
     private final Map<ResolvedType, Definition> definitions = new HashMap<>(INITIAL_CAPACITY);
+    private final BuildContextLog contextLog;
     private final Detector detector;
 
-    public static DefinitionsBuilder definitionsBuilder(final Detector detector) {
-        return new DefinitionsBuilder(detector);
+    public static DefinitionsBuilder definitionsBuilder(final Detector detector,
+                                                        final BuildContextLog contextLog) {
+        return new DefinitionsBuilder(contextLog, detector);
     }
 
     public void detectAndAdd(final DefinitionSeed seed) {
         if (isPresent(seed.type())) {
             return;
         }
-        this.detector.detect(seed).ifPresent(this::addDefinition);
+        this.detector.detect(seed, contextLog).ifPresent(this::addDefinition);
     }
 
     public void addDefinition(final Definition definition) {
@@ -75,7 +78,7 @@ public final class DefinitionsBuilder {
         if (isPresent(context.type())) {
             return;
         }
-        detector.detect(context).ifPresent(definition -> {
+        detector.detect(context, contextLog).ifPresent(definition -> {
             addDefinition(definition);
             diveIntoChildren(definition, detector);
         });
@@ -96,6 +99,6 @@ public final class DefinitionsBuilder {
     }
 
     public Definitions build(final DefinitionSeeds seeds) {
-        return definitions(this.definitions, seeds);
+        return definitions(this.contextLog, this.definitions, seeds);
     }
 }

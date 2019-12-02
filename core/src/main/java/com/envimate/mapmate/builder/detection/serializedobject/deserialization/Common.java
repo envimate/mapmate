@@ -43,7 +43,11 @@ public final class Common {
     public static List<ResolvedMethod> detectDeserializerMethods(final ClassType type) {
         return type.publicMethods().stream()
                 .filter(resolvedMethod -> isStatic(resolvedMethod.method().getModifiers()))
-                .filter(resolvedMethod -> resolvedMethod.returnType().map(type::equals).orElse(false))
+                .filter(resolvedMethod -> {
+                    final Optional<ResolvedType> resolvedType = resolvedMethod.returnType();
+                    final Optional<Boolean> optional = resolvedType.map(type::equals);
+                    return optional.orElse(false);
+                })
                 .filter(resolvedMethod -> resolvedMethod.parameters().size() > 0)
                 .collect(toList());
     }

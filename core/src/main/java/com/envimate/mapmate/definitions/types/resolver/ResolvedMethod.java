@@ -61,7 +61,7 @@ public final class ResolvedMethod {
     public static ResolvedMethod resolveMethod(final Method method, final ClassType context) {
         final Type genericReturnType = method.getGenericReturnType();
         final ResolvedType returnType;
-        if (genericReturnType == Void.TYPE) {
+        if (genericReturnType != Void.TYPE) {
             returnType = resolveType(genericReturnType, context);
         } else {
             returnType = null;

@@ -137,10 +137,11 @@ public final class HalfDefinitionsSpecs {
 
     @Test
     public void classScannerRecipeRegistersParametersAsDeserializationOnly() {
-        given(aMapMate()
-                .usingRecipe(addAllReferencedClassesIs(RepositoryWithDeserializationOnlyType.class))
-                .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
-                .build()
+        given(
+                aMapMate()
+                        .usingRecipe(addAllReferencedClassesIs(RepositoryWithDeserializationOnlyType.class))
+                        .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
+                        .build()
         )
                 .when().mapMateDeserializes("" +
                 "{\n" +

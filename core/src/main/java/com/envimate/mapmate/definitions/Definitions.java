@@ -21,10 +21,9 @@
 
 package com.envimate.mapmate.definitions;
 
-import com.envimate.mapmate.builder.DefinitionSeed;
 import com.envimate.mapmate.builder.DefinitionSeeds;
 import com.envimate.mapmate.builder.RequiredCapabilities;
-import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.mapmate.builder.contextlog.BuildContextLog;
 import com.envimate.mapmate.definitions.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -45,10 +44,13 @@ import static java.util.Optional.of;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Definitions {
+    private final BuildContextLog contextLog;
     private final Map<ResolvedType, Definition> definitions;
 
-    public static Definitions definitions(final Map<ResolvedType, Definition> definitions, final DefinitionSeeds seeds) {
-        final Definitions definitionsObject = new Definitions(definitions);
+    public static Definitions definitions(final BuildContextLog contextLog,
+                                          final Map<ResolvedType, Definition> definitions,
+                                          final DefinitionSeeds seeds) {
+        final Definitions definitionsObject = new Definitions(contextLog, definitions);
         definitionsObject.validateNoUnsupportedOutgoingReferences(seeds);
         return definitionsObject;
     }
@@ -84,21 +86,21 @@ public final class Definitions {
         alreadyVisited.add(candidate);
         final Definition definition = getOptionalDefinitionForType(candidate).orElseThrow(() ->
                 new UnsupportedOperationException(
-                        format("Type '%s' is not registered but needs to be in order to support deserialization of '%s'",
-                                candidate.description(), reason.description())));
+                        format("Type '%s' is not registered but needs to be in order to support deserialization of '%s'. %s",
+                                candidate.description(), reason.description(), this.contextLog.summaryFor(candidate))));
         multiplex(definition)
                 .forCustomPrimitive(customPrimitive -> {
                     if (customPrimitive.deserializer().isEmpty()) {
                         throw new UnsupportedOperationException(
                                 format("Custom primitive '%s' is not deserializable but needs to be in order to support deserialization of '%s'. %s",
-                                        candidate.description(), reason.description(), definition.context()));
+                                        candidate.description(), reason.description(), this.contextLog.summaryFor(candidate)));
                     }
                 })
                 .forSerializedObject(serializedObject -> {
                     if (serializedObject.deserializer().isEmpty()) {
                         throw new UnsupportedOperationException(
                                 format("Serialized object '%s' is not deserializable but needs to be in order to support deserialization of '%s'. %s",
-                                        candidate.description(), reason.description(), serializedObject.context()));
+                                        candidate.description(), reason.description(), this.contextLog.summaryFor(candidate)));
                     }
                     serializedObject.deserializer().orElseThrow()
                             .fields()

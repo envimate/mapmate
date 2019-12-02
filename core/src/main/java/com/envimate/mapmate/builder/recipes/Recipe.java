@@ -22,7 +22,11 @@
 package com.envimate.mapmate.builder.recipes;
 
 import com.envimate.mapmate.MapMateBuilder;
+import com.envimate.mapmate.builder.DependencyRegistry;
 
 public interface Recipe {
-    void cook(MapMateBuilder mapMateBuilder);
+    default void init(DependencyRegistry dependencyRegistry) {
+    }
+
+    void cook(MapMateBuilder mapMateBuilder, DependencyRegistry dependencyRegistry);
 }

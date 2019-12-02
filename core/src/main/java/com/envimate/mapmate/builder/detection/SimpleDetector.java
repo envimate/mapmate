@@ -22,7 +22,9 @@
 package com.envimate.mapmate.builder.detection;
 
 import com.envimate.mapmate.builder.DefinitionSeed;
+import com.envimate.mapmate.builder.contextlog.BuildContextLog;
 import com.envimate.mapmate.definitions.Definition;
+import com.envimate.mapmate.definitions.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -52,39 +54,50 @@ public final class SimpleDetector implements Detector {
     }
 
     @Override
-    public Optional<? extends Definition> detect(final DefinitionSeed context) {
-        final Optional<? extends Definition> collection = detectCollectionDefinition(context);
+    public Optional<? extends Definition> detect(final DefinitionSeed context,
+                                                 final BuildContextLog contextLog) {
+        final Optional<? extends Definition> collection = detectCollectionDefinition(context, contextLog.stepInto(SimpleDetector.class));
         if (collection.isPresent()) {
             return collection;
         }
 
-        final Optional<? extends Definition> customPrimitive = detectCustomPrimitive(context);
+        final Optional<? extends Definition> customPrimitive = detectCustomPrimitive(context, contextLog);
         if (customPrimitive.isPresent()) {
             return customPrimitive;
         }
-        return detectSerializedObject(context);
+        return detectSerializedObject(context, contextLog);
     }
 
-    private Optional<Definition> detectCollectionDefinition(final DefinitionSeed context) {
-        return detectIn(context, this.collectionDefinitionFactories);
+    private Optional<Definition> detectCollectionDefinition(final DefinitionSeed context,
+                                                            final BuildContextLog contextLog) {
+        return detectIn(context, this.collectionDefinitionFactories, contextLog);
     }
 
-    private Optional<Definition> detectCustomPrimitive(final DefinitionSeed context) {
-        return detectIn(context, this.customPrimitiveDefinitionFactories);
+    private Optional<Definition> detectCustomPrimitive(final DefinitionSeed context,
+                                                       final BuildContextLog contextLog) {
+        return detectIn(context, this.customPrimitiveDefinitionFactories, contextLog);
     }
 
-    private Optional<Definition> detectSerializedObject(final DefinitionSeed context) {
-        return detectIn(context, this.serializedObjectDefinitionFactories);
+    private Optional<Definition> detectSerializedObject(final DefinitionSeed context,
+                                                        final BuildContextLog contextLog) {
+        return detectIn(context, this.serializedObjectDefinitionFactories, contextLog);
     }
 
     private static Optional<Definition> detectIn(final DefinitionSeed context,
-                                                 final List<DefinitionFactory> factories) {
+                                                 final List<DefinitionFactory> factories,
+                                                 final BuildContextLog contextLog) {
+        final ResolvedType type = context.type();
+        if (!type.isInstantiatable()) {
+            contextLog.logReject(type, "type is not instantiatable");
+            return empty();
+        }
         for (final DefinitionFactory factory : factories) {
-            final Optional<Definition> analyzedClass = factory.analyze(context, context.type(), context.requiredCapabilities());
+            final Optional<Definition> analyzedClass = factory.analyze(context, type, context.requiredCapabilities());
             if (analyzedClass.isPresent()) {
                 return analyzedClass;
             }
         }
+        contextLog.logReject(type, "do not know how to handle this type");
         return empty();
     }
 }

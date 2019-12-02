@@ -19,15 +19,25 @@
  * under the License.
  */
 
-package com.envimate.mapmate.builder.detection;
+package com.envimate.mapmate.builder;
 
-import com.envimate.mapmate.builder.DefinitionSeed;
-import com.envimate.mapmate.builder.contextlog.BuildContextLog;
-import com.envimate.mapmate.definitions.Definition;
+import com.envimate.mapmate.builder.recipes.scanner.ClassScannerRecipe;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
-public interface Detector {
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public class DependencyRegistry {
+    private final Map<Class<?>, Object> dependencies;
 
-    Optional<? extends Definition> detect(DefinitionSeed context, BuildContextLog contextLog);
+    public static DependencyRegistry dependencyRegistry() {
+        return new DependencyRegistry(new HashMap<>(3));
+    }
+
+    public <T> T getDependency(final Class<T> type) {
+        return (T) dependencies.get(type); // TODO
+    }
 }
+

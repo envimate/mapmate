@@ -122,7 +122,7 @@ public final class MethodSerializedObjectDeserializer implements SerializedObjec
                     "The deserialization method %s configured for the SerializedObject of type %s must not be abstract",
                     deserializationMethod, type);
         }
-        if (!deserializationMethod.returnType().equals(type)) {
+        if (!deserializationMethod.returnType().map(type::equals).orElse(false)) {
             throw incompatibleSerializedObjectException(
                     "The deserialization method %s configured for the SerializedObject of type %s must return the DTO",
                     deserializationMethod, type);

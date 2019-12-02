@@ -42,6 +42,20 @@ public interface ResolvedType {
 
     String description();
 
+    default boolean isInstantiatable() {
+        if (isAbstract()) {
+            return false;
+        }
+        if (isInterface()) {
+            return false;
+        }
+        if (isWildcard()) {
+            return false;
+        }
+        return typeParameters().stream()
+                .allMatch(ResolvedType::isInstantiatable);
+    }
+
     // START EXTERNAL
     public static boolean isSupported(final ResolvedType type) {
         if (type.isAbstract()) {

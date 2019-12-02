@@ -23,8 +23,14 @@ package com.envimate.mapmate.builder.recipes.scanner;
 
 import com.envimate.mapmate.MapMateBuilder;
 import com.envimate.mapmate.builder.DefinitionSeed;
+import com.envimate.mapmate.builder.DependencyRegistry;
+import com.envimate.mapmate.builder.contextlog.BuildContextLog;
+import com.envimate.mapmate.builder.detection.Detector;
 import com.envimate.mapmate.builder.recipes.Recipe;
+import com.envimate.mapmate.definitions.Definition;
 import com.envimate.mapmate.definitions.types.ClassType;
+import com.envimate.mapmate.definitions.types.ResolvedType;
+import com.envimate.mapmate.definitions.types.resolver.ResolvedMethod;
 import com.envimate.mapmate.definitions.types.resolver.ResolvedParameter;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -32,16 +38,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.lang.reflect.Method;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.envimate.mapmate.builder.RequiredCapabilities.deserializationOnly;
 import static com.envimate.mapmate.builder.RequiredCapabilities.serializationOnly;
-import static com.envimate.mapmate.builder.SeedReason.becauseParameterTypeOfUseCaseMethod;
-import static com.envimate.mapmate.builder.SeedReason.becauseReturnTypeOfUseCaseMethod;
 import static com.envimate.mapmate.definitions.types.ClassType.fromClassWithoutGenerics;
 import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 @ToString
@@ -60,23 +68,66 @@ public final class ClassScannerRecipe implements Recipe {
     }
 
     @Override
-    public void cook(final MapMateBuilder mapMateBuilder) {
-        this.classes.forEach(clazz -> addReferencesIn(clazz, mapMateBuilder));
+    public void cook(final MapMateBuilder mapMateBuilder, final DependencyRegistry dependencyRegistry) {
+        final Detector detector = dependencyRegistry.getDependency(Detector.class);
+        this.classes.forEach(clazz -> addReferencesIn(clazz, mapMateBuilder, detector));
     }
 
-    private static void addReferencesIn(final Class<?> clazz, final MapMateBuilder builder) {
+    private static void addReferencesIn(final Class<?> clazz, final MapMateBuilder builder, final Detector detector) {
         final ClassType fullType = fromClassWithoutGenerics(clazz);
-        fullType.publicMethods().stream()
-                .filter(method -> !OBJECT_METHODS.contains(method.method().getName()))
-                .forEach(method -> {
-                    method.returnType().map(DefinitionSeed::definitionSeed)
-                            .map(seed -> seed.withCapability(deserializationOnly(), becauseReturnTypeOfUseCaseMethod(method.method())))
-                            .ifPresent(builder::withManuallyAddedSeed);
-                    method.parameters().stream()
-                            .map(ResolvedParameter::type)
-                            .map(DefinitionSeed::definitionSeed)
-                            .map(seed -> seed.withCapability(serializationOnly(), becauseParameterTypeOfUseCaseMethod(method.method())))
-                            .forEach(builder::withManuallyAddedSeed);
-                });
+        final BuildContextLog contextLog = builder.contextLog().stepInto(ClassScannerRecipe.class);
+        final List<ResolvedMethod> publicMethods = fullType.publicMethods();
+
+        for (final ResolvedMethod method : publicMethods) {
+            if (!OBJECT_METHODS.contains(method.method().getName())) {
+                final List<ResolvedType> offenders = new LinkedList<>();
+                final List<? extends Definition> parameterDefinitions = method.parameters().stream()
+                        .map(ResolvedParameter::type)
+                        .collect(toList()).stream()
+                        .map(DefinitionSeed::definitionSeed)
+                        .map(seed -> seed.withCapability(deserializationOnly()))
+                        .map(seed -> {
+                            final Optional<? extends Definition> definition = detector.detect(seed, contextLog);
+                            if (definition.isEmpty()) {
+                                offenders.add(seed.type());
+                            }
+                            return definition;
+                        })
+                        .flatMap(Optional::stream)
+                        .collect(toList());
+                final Optional<? extends Definition> returnDefinition = method.returnType()
+                        .map(DefinitionSeed::definitionSeed)
+                        .map(seed -> seed.withCapability(serializationOnly()))
+                        .flatMap(seed -> {
+                            final Optional<? extends Definition> definition = detector.detect(seed, contextLog);
+                            if (definition.isEmpty()) {
+                                offenders.add(seed.type());
+                            }
+                            return definition;
+                        });
+
+                if (offenders.isEmpty()) {
+                    returnDefinition.ifPresent(definition -> {
+                        contextLog.log(definition.type(), "added because return type of method " + method.method().toString());
+                        builder.withManuallyAddedDefinition(definition);
+                    });
+                    parameterDefinitions.forEach(definition -> {
+                        contextLog.log(definition.type(), "added because parameter type of method " + method.method().toString());
+                        builder.withManuallyAddedDefinition(definition);
+                    });
+                } else {
+                    final String offendersString = offenders.stream()
+                            .map(ResolvedType::description)
+                            .collect(joining(", ", "[", "]"));
+                    returnDefinition.ifPresent(definition -> contextLog.log(definition.type(), format(
+                            "not added as return type of method %s because types not supported: %s",
+                            method.method().toString(), offendersString)));
+
+                    parameterDefinitions.forEach(definition -> contextLog.log(definition.type(), format(
+                            "not added as parameter type of method %stypes not supported: %s",
+                            method.method().toString(), offendersString)));
+                }
+            }
+        }
     }
 }

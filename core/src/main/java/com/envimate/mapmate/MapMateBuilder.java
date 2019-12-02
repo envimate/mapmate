@@ -22,6 +22,7 @@
 package com.envimate.mapmate;
 
 import com.envimate.mapmate.builder.*;
+import com.envimate.mapmate.builder.contextlog.BuildContextLog;
 import com.envimate.mapmate.builder.conventional.DetectorBuilder;
 import com.envimate.mapmate.builder.detection.Detector;
 import com.envimate.mapmate.builder.recipes.Recipe;
@@ -45,9 +46,10 @@ import java.util.*;
 import static com.envimate.mapmate.MapMate.mapMate;
 import static com.envimate.mapmate.builder.DefinitionSeed.definitionSeed;
 import static com.envimate.mapmate.builder.DefinitionSeeds.definitionSeeds;
+import static com.envimate.mapmate.builder.DependencyRegistry.dependencyRegistry;
 import static com.envimate.mapmate.builder.RequiredCapabilities.all;
+import static com.envimate.mapmate.builder.contextlog.BuildContextLog.emptyLog;
 import static com.envimate.mapmate.builder.conventional.ConventionalDefinitionFactories.CUSTOM_PRIMITIVE_MAPPINGS;
-import static com.envimate.mapmate.builder.conventional.ConventionalDetectors.conventionalDetectorWithAnnotations;
 import static com.envimate.mapmate.builder.scanning.DefaultPackageScanner.defaultPackageScanner;
 import static com.envimate.mapmate.builder.scanning.PackageScannerRecipe.packageScannerRecipe;
 import static com.envimate.mapmate.definitions.DefinitionsBuilder.definitionsBuilder;
@@ -60,7 +62,8 @@ import static com.envimate.mapmate.validators.NotNullValidator.validateNotNull;
 import static java.util.Arrays.stream;
 
 public final class MapMateBuilder {
-    private volatile Detector detector = conventionalDetectorWithAnnotations();
+    private final BuildContextLog contextLog = emptyLog();
+    private final DependencyRegistry dependencyRegistry = dependencyRegistry();
     private final DefinitionSeeds definitionSeeds = definitionSeeds();
     private final List<Definition> addedDefinitions = new LinkedList<>();
     private final List<Recipe> recipes = new LinkedList<>();
@@ -217,10 +220,16 @@ public final class MapMateBuilder {
         return this;
     }
 
+    public BuildContextLog contextLog() {
+        return this.contextLog;
+    }
+
     public MapMate build() {
+        this.recipes.forEach(recipe -> recipe.init(this.dependencyRegistry));
+
         this.recipes.forEach(recipe -> recipe.cook(this));
 
-        final DefinitionsBuilder definitionsBuilder = definitionsBuilder(this.detector);
+        final DefinitionsBuilder definitionsBuilder = definitionsBuilder(this.detector, this.contextLog);
         this.addedDefinitions.forEach(definitionsBuilder::addDefinition);
         this.definitionSeeds.seeds().forEach(definitionsBuilder::detectAndAdd);
 

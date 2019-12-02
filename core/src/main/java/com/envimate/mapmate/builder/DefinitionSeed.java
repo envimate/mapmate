@@ -27,6 +27,9 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import static com.envimate.mapmate.builder.MultiMap.multiMap;
 import static com.envimate.mapmate.builder.RequiredCapabilities.none;
 import static com.envimate.mapmate.builder.SeedReason.becauseChildOf;
@@ -39,26 +42,31 @@ public final class DefinitionSeed {
     private static final int INITIAL_CAPACITY = 5;
 
     private final ResolvedType type;
-    private final MultiMap<RequiredCapabilities, SeedReason> capabilities;
+    private final List<String> log = new LinkedList<>();
+    private final List<RequiredCapabilities> capabilities;
 
     public static DefinitionSeed definitionSeed(final ResolvedType fullType) {
         validateNotNull(fullType, "fullType");
-        return new DefinitionSeed(fullType, multiMap(INITIAL_CAPACITY));
+        return new DefinitionSeed(fullType, new LinkedList<>());
+    }
+
+    public void log(final String message) {
+        this.log.add(message);
     }
 
     public DefinitionSeed childForType(final ResolvedType childType) {
-        return definitionSeed(childType).withCapability(requiredCapabilities(), becauseChildOf(this));
+        throw new UnsupportedOperationException(); // TODO
     }
 
     public void merge(final DefinitionSeed other) {
         if (!other.type.equals(this.type)) {
             throw new IllegalArgumentException("Cannot merge with different type");
         }
-        this.capabilities.putAll(other.capabilities);
+        this.capabilities.addAll(other.capabilities);
     }
 
-    public DefinitionSeed withCapability(final RequiredCapabilities capability, final SeedReason reason) {
-        this.capabilities.put(capability, reason);
+    public DefinitionSeed withCapability(final RequiredCapabilities capability) {
+        this.capabilities.add(capability);
         return this;
     }
 
@@ -68,7 +76,7 @@ public final class DefinitionSeed {
 
     public RequiredCapabilities requiredCapabilities() {
         final RequiredCapabilities requiredCapabilities = none();
-        this.capabilities.keys().forEach(requiredCapabilities::add);
+        this.capabilities.forEach(requiredCapabilities::add);
         return requiredCapabilities;
     }
 }
