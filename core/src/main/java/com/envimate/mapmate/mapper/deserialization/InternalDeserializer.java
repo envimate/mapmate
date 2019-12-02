@@ -29,7 +29,7 @@ import com.envimate.mapmate.mapper.deserialization.validation.ExceptionTracker;
 import com.envimate.mapmate.mapper.deserialization.validation.ValidationErrorsMapping;
 import com.envimate.mapmate.mapper.deserialization.validation.ValidationResult;
 import com.envimate.mapmate.mapper.injector.Injector;
-import com.envimate.mapmate.scanner.builder.detection.customprimitive.mapping.CustomPrimitiveMappings;
+import com.envimate.mapmate.shared.mapping.CustomPrimitiveMappings;
 import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

@@ -23,7 +23,6 @@ package com.envimate.mapmate.mapper.definitions;
 
 import com.envimate.mapmate.mapper.deserialization.deserializers.collections.CollectionDeserializer;
 import com.envimate.mapmate.mapper.serialization.serializers.collections.CollectionSerializer;
-import com.envimate.mapmate.scanner.builder.DefinitionSeed;
 import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -36,23 +35,20 @@ import static com.envimate.mapmate.shared.validators.NotNullValidator.validateNo
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CollectionDefinition implements Definition {
-    private final DefinitionSeed context;
     private final ResolvedType type;
     private final ResolvedType contentType;
     private final CollectionSerializer serializer;
     private final CollectionDeserializer deserializer;
 
-    public static CollectionDefinition collectionDefinition(final DefinitionSeed context,
-                                                            final ResolvedType type,
+    public static CollectionDefinition collectionDefinition(final ResolvedType type,
                                                             final ResolvedType contentType,
                                                             final CollectionSerializer serializer,
                                                             final CollectionDeserializer deserializer) {
-        validateNotNull(context, "context");
         validateNotNull(type, "type");
         validateNotNull(contentType, "contentType");
         validateNotNull(serializer, "serializer");
         validateNotNull(deserializer, "deserializer");
-        return new CollectionDefinition(context, type, contentType, serializer, deserializer);
+        return new CollectionDefinition(type, contentType, serializer, deserializer);
     }
 
     public ResolvedType contentType() {
@@ -70,10 +66,5 @@ public final class CollectionDefinition implements Definition {
     @Override
     public ResolvedType type() {
         return this.type;
-    }
-
-    @Override
-    public DefinitionSeed context() {
-        return this.context;
     }
 }

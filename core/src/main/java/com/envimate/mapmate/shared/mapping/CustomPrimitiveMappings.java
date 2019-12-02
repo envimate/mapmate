@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.envimate.mapmate.scanner.builder.detection.customprimitive.mapping;
+package com.envimate.mapmate.shared.mapping;
 
 import com.envimate.mapmate.mapper.definitions.universal.UniversalBoolean;
 import com.envimate.mapmate.mapper.definitions.universal.UniversalNumber;
@@ -34,9 +34,9 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.envimate.mapmate.scanner.builder.detection.customprimitive.mapping.BooleanFormatException.booleanFormatException;
-import static com.envimate.mapmate.scanner.builder.detection.customprimitive.mapping.Mapping.mapping;
-import static com.envimate.mapmate.scanner.builder.detection.customprimitive.mapping.TypeMappings.typeMappings;
+import static com.envimate.mapmate.shared.mapping.BooleanFormatException.booleanFormatException;
+import static com.envimate.mapmate.shared.mapping.Mapping.mapping;
+import static com.envimate.mapmate.shared.mapping.TypeMappings.typeMappings;
 import static com.envimate.mapmate.mapper.definitions.universal.UniversalBoolean.universalBoolean;
 import static com.envimate.mapmate.shared.validators.NotNullValidator.validateNotNull;
 import static java.lang.Double.parseDouble;

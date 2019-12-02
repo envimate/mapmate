@@ -24,7 +24,6 @@ package com.envimate.mapmate.scanner.builder.detection.collection;
 import com.envimate.mapmate.mapper.definitions.Definition;
 import com.envimate.mapmate.mapper.deserialization.deserializers.collections.CollectionDeserializer;
 import com.envimate.mapmate.mapper.serialization.serializers.collections.CollectionSerializer;
-import com.envimate.mapmate.scanner.builder.DefinitionSeed;
 import com.envimate.mapmate.scanner.builder.RequiredCapabilities;
 import com.envimate.mapmate.scanner.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.shared.types.ClassType;
@@ -33,7 +32,6 @@ import com.envimate.mapmate.shared.types.ResolvedType;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static com.envimate.mapmate.mapper.definitions.CollectionDefinition.collectionDefinition;
@@ -46,7 +44,7 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 public final class NativeJavaCollectionDefinitionFactory implements DefinitionFactory {
-    private static final Map<Class<?>, BiFunction<DefinitionSeed, ResolvedType, Definition>> FACTORIES = new HashMap<>(20);
+    private static final Map<Class<?>, Function<ResolvedType, Definition>> FACTORIES = new HashMap<>(20);
 
     static {
         addFactory(List.class, objects -> objects);
@@ -75,8 +73,7 @@ public final class NativeJavaCollectionDefinitionFactory implements DefinitionFa
     }
 
     @Override
-    public Optional<Definition> analyze(final DefinitionSeed context,
-                                        final ResolvedType type,
+    public Optional<Definition> analyze(final ResolvedType type,
                                         final RequiredCapabilities capabilities) {
         if (!FACTORIES.containsKey(type.assignableType())) {
             return empty();
@@ -86,18 +83,18 @@ public final class NativeJavaCollectionDefinitionFactory implements DefinitionFa
                     "This should never happen. A collection of type '%s' has more than one type parameter", type.description()));
         }
         final ResolvedType genericType = ((ClassType)type).typeParameter(typeVariableName("E"));
-        final Definition definition = FACTORIES.get(type.assignableType()).apply(context, genericType);
+        final Definition definition = FACTORIES.get(type.assignableType()).apply(genericType);
         return of(definition);
     }
 
     @SuppressWarnings("rawtypes")
     private static void addFactory(final Class<? extends Collection> collectionType,
                                    final Function<List<Object>, Collection<Object>> mapper) {
-        final BiFunction<DefinitionSeed, ResolvedType, Definition> factory = (context, genericType) -> {
+        final Function<ResolvedType, Definition> factory = (genericType) -> {
             final CollectionSerializer serializer = listSerializer();
             final CollectionDeserializer deserializer = listDeserializer(mapper);
             final ClassType fullType = unresolvedType(collectionType).resolve(genericType);
-            return collectionDefinition(context, fullType, genericType, serializer, deserializer);
+            return collectionDefinition(fullType, genericType, serializer, deserializer);
         };
         FACTORIES.put(collectionType, factory);
     }

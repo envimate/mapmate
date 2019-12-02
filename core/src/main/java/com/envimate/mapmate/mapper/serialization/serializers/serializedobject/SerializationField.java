@@ -31,7 +31,7 @@ import lombok.ToString;
 import java.lang.reflect.Field;
 import java.util.function.Function;
 
-import static com.envimate.mapmate.scanner.builder.detection.serializedobject.IncompatibleSerializedObjectException.incompatibleSerializedObjectException;
+import static com.envimate.mapmate.mapper.serialization.serializers.serializedobject.IncompatibleSerializedObjectException.incompatibleSerializedObjectException;
 import static com.envimate.mapmate.shared.validators.NotNullValidator.validateNotNull;
 import static java.lang.reflect.Modifier.*;
 

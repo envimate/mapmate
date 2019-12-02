@@ -26,7 +26,6 @@ import com.envimate.mapmate.mapper.deserialization.deserializers.serializedobjec
 import com.envimate.mapmate.mapper.serialization.serializers.serializedobject.SerializationField;
 import com.envimate.mapmate.mapper.serialization.serializers.serializedobject.SerializationFields;
 import com.envimate.mapmate.mapper.serialization.serializers.serializedobject.SerializedObjectSerializer;
-import com.envimate.mapmate.scanner.builder.DefinitionSeed;
 import com.envimate.mapmate.scanner.builder.RequiredCapabilities;
 import com.envimate.mapmate.scanner.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.scanner.builder.detection.serializedobject.deserialization.SerializedObjectDeserializationDetector;
@@ -88,8 +87,7 @@ public final class SerializedObjectDefinitionFactory implements DefinitionFactor
     }
 
     @Override
-    public Optional<Definition> analyze(final DefinitionSeed context,
-                                        final ResolvedType type,
+    public Optional<Definition> analyze(final ResolvedType type,
                                         final RequiredCapabilities capabilities) {
         if(!(type instanceof ClassType)) {
             return empty();
@@ -126,7 +124,7 @@ public final class SerializedObjectDefinitionFactory implements DefinitionFactor
 
         if (serializer.isPresent() || deserializer.isPresent()) {
             return of(serializedObjectDefinition(
-                    context, classType, serializer.orElse(null), deserializer.orElse(null))
+                    classType, serializer.orElse(null), deserializer.orElse(null))
             );
         }
         return empty();

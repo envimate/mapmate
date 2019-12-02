@@ -24,7 +24,6 @@ package com.envimate.mapmate.scanner.builder.detection.customprimitive;
 import com.envimate.mapmate.mapper.definitions.Definition;
 import com.envimate.mapmate.mapper.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
 import com.envimate.mapmate.mapper.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
-import com.envimate.mapmate.scanner.builder.DefinitionSeed;
 import com.envimate.mapmate.scanner.builder.RequiredCapabilities;
 import com.envimate.mapmate.scanner.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.scanner.builder.detection.customprimitive.deserialization.CustomPrimitiveDeserializationDetector;
@@ -61,8 +60,7 @@ public final class CustomPrimitiveDefinitionFactory implements DefinitionFactory
     }
 
     @Override
-    public Optional<Definition> analyze(final DefinitionSeed context,
-                                        final ResolvedType type,
+    public Optional<Definition> analyze(final ResolvedType type,
                                         final RequiredCapabilities capabilities) {
         final CachedReflectionType cachedReflectionType = cachedReflectionType(type.assignableType());
 
@@ -84,8 +82,7 @@ public final class CustomPrimitiveDefinitionFactory implements DefinitionFactory
         }
 
         if (serializer.isPresent() || deserializer.isPresent()) {
-            return of(untypedCustomPrimitiveDefinition(
-                    context, type, serializer.orElse(null), deserializer.orElse(null))
+            return of(untypedCustomPrimitiveDefinition(type, serializer.orElse(null), deserializer.orElse(null))
             );
         }
         return empty();

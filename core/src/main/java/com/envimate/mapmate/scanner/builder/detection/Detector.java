@@ -21,13 +21,14 @@
 
 package com.envimate.mapmate.scanner.builder.detection;
 
-import com.envimate.mapmate.scanner.builder.DefinitionSeed;
-import com.envimate.mapmate.scanner.builder.contextlog.BuildContextLog;
 import com.envimate.mapmate.mapper.definitions.Definition;
+import com.envimate.mapmate.scanner.builder.RequiredCapabilities;
+import com.envimate.mapmate.scanner.builder.contextlog.BuildContextLog;
+import com.envimate.mapmate.shared.types.ResolvedType;
 
 import java.util.Optional;
 
 public interface Detector {
 
-    Optional<? extends Definition> detect(DefinitionSeed context, BuildContextLog contextLog);
+    Optional<? extends Definition> detect(ResolvedType type, RequiredCapabilities capabilities, BuildContextLog contextLog);
 }

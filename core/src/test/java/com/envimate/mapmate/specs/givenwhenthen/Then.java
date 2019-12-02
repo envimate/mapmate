@@ -30,6 +30,7 @@ import com.envimate.mapmate.shared.types.ClassType;
 import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
 
 import java.util.List;
@@ -66,6 +67,7 @@ public final class Then {
     }
 
     public Then anExceptionIsThrownWithAMessageContaining(final String message) {
+        assertThat(this.thenData.getException(), not(is(nullValue())));
         assertThat(this.thenData.getException().getMessage(), StringContains.containsString(message));
         return this;
     }

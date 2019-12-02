@@ -21,11 +21,8 @@
 
 package com.envimate.mapmate.mapper.definitions;
 
-import com.envimate.mapmate.scanner.builder.DefinitionSeed;
 import com.envimate.mapmate.shared.types.ResolvedType;
 
 public interface Definition {
     ResolvedType type();
-
-    DefinitionSeed context();
 }

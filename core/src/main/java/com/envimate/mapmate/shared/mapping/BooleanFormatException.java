@@ -19,15 +19,18 @@
  * under the License.
  */
 
-package com.envimate.mapmate.scanner.builder.detection;
+package com.envimate.mapmate.shared.mapping;
 
-import com.envimate.mapmate.mapper.definitions.Definition;
-import com.envimate.mapmate.scanner.builder.DefinitionSeed;
-import com.envimate.mapmate.scanner.builder.RequiredCapabilities;
-import com.envimate.mapmate.shared.types.ResolvedType;
+import static java.lang.String.format;
 
-import java.util.Optional;
+public final class BooleanFormatException extends RuntimeException {
 
-public interface DefinitionFactory {
-    Optional<Definition> analyze(ResolvedType type, RequiredCapabilities capabilities);
+    private BooleanFormatException(final String message) {
+        super(message);
+    }
+
+    public static BooleanFormatException booleanFormatException(final String value) {
+        final String message = format("String '%s' cannot be cast to boolean", value);
+        return new BooleanFormatException(message);
+    }
 }

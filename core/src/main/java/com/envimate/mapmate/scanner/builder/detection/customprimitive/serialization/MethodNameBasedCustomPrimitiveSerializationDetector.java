@@ -22,7 +22,7 @@
 package com.envimate.mapmate.scanner.builder.detection.customprimitive.serialization;
 
 import com.envimate.mapmate.scanner.builder.detection.customprimitive.CachedReflectionType;
-import com.envimate.mapmate.scanner.builder.detection.customprimitive.mapping.CustomPrimitiveMappings;
+import com.envimate.mapmate.shared.mapping.CustomPrimitiveMappings;
 import com.envimate.mapmate.mapper.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;

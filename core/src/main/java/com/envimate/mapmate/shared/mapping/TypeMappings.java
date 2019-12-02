@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.envimate.mapmate.scanner.builder.detection.customprimitive.mapping;
+package com.envimate.mapmate.shared.mapping;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;

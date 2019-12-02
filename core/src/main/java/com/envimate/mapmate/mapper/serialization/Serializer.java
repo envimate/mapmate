@@ -31,7 +31,7 @@ import com.envimate.mapmate.mapper.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.mapper.marshalling.MarshallingType;
 import com.envimate.mapmate.mapper.serialization.serializers.serializedobject.SerializationFields;
 import com.envimate.mapmate.mapper.serialization.tracker.SerializationTracker;
-import com.envimate.mapmate.scanner.builder.detection.customprimitive.mapping.CustomPrimitiveMappings;
+import com.envimate.mapmate.shared.mapping.CustomPrimitiveMappings;
 import com.envimate.mapmate.shared.types.ClassType;
 import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;

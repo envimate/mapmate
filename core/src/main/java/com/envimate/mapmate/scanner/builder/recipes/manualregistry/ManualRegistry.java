@@ -76,9 +76,7 @@ public final class ManualRegistry implements Recipe {
     public <T> ManualRegistry withCustomPrimitive(final Class<T> type,
                                                   final Function<T, String> serializationMethod,
                                                   final Function<String, T> deserializationMethod) {
-        final DefinitionSeed seed = definitionSeed(fromClassWithoutGenerics(type)).withCapability(all());
         return this.withCustomPrimitive(customPrimitiveDefinition(
-                seed,
                 fromClassWithoutGenerics(type),
                 object -> serializationMethod.apply(type.cast(object)),
                 value -> deserializationMethod.apply((String) value)));
@@ -118,10 +116,7 @@ public final class ManualRegistry implements Recipe {
         final SerializationFields serializationFields = serializationFields(FIELD_DETECTOR.detect(fullType));
         final SerializedObjectSerializer serializer = serializedObjectSerializer(serializationFields).orElseThrow();
 
-        final DefinitionSeed definitionSeed = definitionSeed(fullType).withCapability(all());
-        final SerializedObjectDefinition serializedObject = serializedObjectDefinition(
-                definitionSeed, fullType, serializer, deserializer
-        );
+        final SerializedObjectDefinition serializedObject = serializedObjectDefinition(fullType, serializer, deserializer);
         return this.withSerializedObject(serializedObject);
     }
 

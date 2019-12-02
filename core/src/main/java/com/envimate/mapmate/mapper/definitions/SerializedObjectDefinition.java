@@ -23,7 +23,6 @@ package com.envimate.mapmate.mapper.definitions;
 
 import com.envimate.mapmate.mapper.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
 import com.envimate.mapmate.mapper.serialization.serializers.serializedobject.SerializedObjectSerializer;
-import com.envimate.mapmate.scanner.builder.DefinitionSeed;
 import com.envimate.mapmate.shared.types.ClassType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -39,23 +38,20 @@ import static java.util.Optional.ofNullable;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SerializedObjectDefinition implements Definition {
-    private final DefinitionSeed context;
     private final ClassType type;
     private final SerializedObjectSerializer serializer;
     private final SerializedObjectDeserializer deserializer;
 
-    public static SerializedObjectDefinition serializedObjectDefinition(final DefinitionSeed context,
-                                                                        final ClassType type,
+    public static SerializedObjectDefinition serializedObjectDefinition(final ClassType type,
                                                                         final SerializedObjectSerializer serializer,
                                                                         final SerializedObjectDeserializer deserializer) {
-        validateNotNull(context, "context");
         validateNotNull(type, "type");
         if (serializer == null) {
             validateNotNull(deserializer, "deserializer");
         } else if (deserializer == null) {
             validateNotNull(serializer, "serializer");
         }
-        return new SerializedObjectDefinition(context, type, serializer, deserializer);
+        return new SerializedObjectDefinition(type, serializer, deserializer);
     }
 
     public Optional<SerializedObjectSerializer> serializer() {
@@ -69,10 +65,5 @@ public final class SerializedObjectDefinition implements Definition {
     @Override
     public ClassType type() {
         return this.type;
-    }
-
-    @Override
-    public DefinitionSeed context() {
-        return this.context;
     }
 }

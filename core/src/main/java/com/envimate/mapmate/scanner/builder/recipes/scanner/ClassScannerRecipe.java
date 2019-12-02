@@ -22,7 +22,6 @@
 package com.envimate.mapmate.scanner.builder.recipes.scanner;
 
 import com.envimate.mapmate.mapper.definitions.Definition;
-import com.envimate.mapmate.scanner.builder.DefinitionSeed;
 import com.envimate.mapmate.scanner.builder.DependencyRegistry;
 import com.envimate.mapmate.scanner.builder.MapMateBuilder;
 import com.envimate.mapmate.scanner.builder.contextlog.BuildContextLog;
@@ -84,24 +83,20 @@ public final class ClassScannerRecipe implements Recipe {
                 final List<? extends Definition> parameterDefinitions = method.parameters().stream()
                         .map(ResolvedParameter::type)
                         .collect(toList()).stream()
-                        .map(DefinitionSeed::definitionSeed)
-                        .map(seed -> seed.withCapability(deserializationOnly()))
-                        .map(seed -> {
-                            final Optional<? extends Definition> definition = detector.detect(seed, contextLog);
+                        .map(type -> {
+                            final Optional<? extends Definition> definition = detector.detect(type, deserializationOnly(), contextLog);
                             if (definition.isEmpty()) {
-                                offenders.add(seed.type());
+                                offenders.add(type);
                             }
                             return definition;
                         })
                         .flatMap(Optional::stream)
                         .collect(toList());
                 final Optional<? extends Definition> returnDefinition = method.returnType()
-                        .map(DefinitionSeed::definitionSeed)
-                        .map(seed -> seed.withCapability(serializationOnly()))
-                        .flatMap(seed -> {
-                            final Optional<? extends Definition> definition = detector.detect(seed, contextLog);
+                        .flatMap(type -> {
+                            final Optional<? extends Definition> definition = detector.detect(type, serializationOnly(), contextLog);
                             if (definition.isEmpty()) {
-                                offenders.add(seed.type());
+                                offenders.add(type);
                             }
                             return definition;
                         });

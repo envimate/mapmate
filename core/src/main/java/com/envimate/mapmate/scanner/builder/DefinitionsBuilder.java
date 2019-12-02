@@ -19,10 +19,10 @@
  * under the License.
  */
 
-package com.envimate.mapmate.mapper.definitions;
+package com.envimate.mapmate.scanner.builder;
 
-import com.envimate.mapmate.scanner.builder.DefinitionSeed;
-import com.envimate.mapmate.scanner.builder.DefinitionSeeds;
+import com.envimate.mapmate.mapper.definitions.Definition;
+import com.envimate.mapmate.mapper.definitions.Definitions;
 import com.envimate.mapmate.scanner.builder.contextlog.BuildContextLog;
 import com.envimate.mapmate.scanner.builder.detection.Detector;
 import com.envimate.mapmate.shared.types.ResolvedType;
@@ -38,6 +38,7 @@ import java.util.Map;
 
 import static com.envimate.mapmate.mapper.definitions.DefinitionMultiplexer.multiplex;
 import static com.envimate.mapmate.mapper.definitions.Definitions.definitions;
+import static com.envimate.mapmate.scanner.builder.RequiredCapabilities.all;
 
 @ToString
 @EqualsAndHashCode
@@ -54,13 +55,6 @@ public final class DefinitionsBuilder {
         return new DefinitionsBuilder(contextLog.stepInto(DefinitionsBuilder.class), detector);
     }
 
-    public void detectAndAdd(final DefinitionSeed seed) {
-        if (isPresent(seed.type())) {
-            return;
-        }
-        this.detector.detect(seed, this.contextLog).ifPresent(this::addDefinition);
-    }
-
     public void addDefinition(final Definition definition) {
         this.definitions.put(definition.type(), definition);
     }
@@ -74,14 +68,16 @@ public final class DefinitionsBuilder {
         seedDefinitions.forEach(definition -> diveIntoChildren(definition, detector, this.contextLog.stepInto(definition.type().assignableType())));
     }
 
-    private void recurse(final DefinitionSeed seed, final Detector detector, final BuildContextLog contextLog) {
-        if (isPresent(seed.type())) {
+    private void recurse(final ResolvedType type,
+                         final Detector detector,
+                         final BuildContextLog contextLog) {
+        if (isPresent(type)) {
             return;
         }
-        detector.detect(seed, contextLog).ifPresent(definition -> {
-            contextLog.log(seed.type(), "added because it is a dependency");
+        detector.detect(type, all() /* TODO */, contextLog).ifPresent(definition -> {
+            contextLog.log(type, "added because it is a dependency");
             addDefinition(definition);
-            diveIntoChildren(definition, detector, contextLog.stepInto(seed.type().assignableType()));
+            diveIntoChildren(definition, detector, contextLog.stepInto(type.assignableType()));
         });
     }
 
@@ -92,22 +88,20 @@ public final class DefinitionsBuilder {
                             serializer.fields().fields()
                                     .forEach(serializationField -> {
                                         final ResolvedType type = serializationField.type();
-                                        recurse(definition.context().childForType(type), detector, contextLog);
+                                        recurse(type, detector, contextLog);
                                     }));
                     serializedObject.deserializer().ifPresent(deserializer -> {
                         deserializer.fields().referencedTypes()
-                                .forEach(referencedType -> {
-                                    recurse(definition.context().childForType(referencedType), detector, contextLog);
-                                });
+                                .forEach(referencedType -> recurse(referencedType, detector, contextLog));
                     });
                 })
                 .forCollection(collection -> {
                     final ResolvedType contentType = collection.contentType();
-                    recurse(definition.context().childForType(contentType), detector, contextLog);
+                    recurse(contentType, detector, contextLog);
                 });
     }
 
-    public Definitions build(final DefinitionSeeds seeds) {
-        return definitions(this.contextLog, this.definitions, seeds);
+    public Definitions build() {
+        return definitions(this.contextLog, this.definitions);
     }
 }

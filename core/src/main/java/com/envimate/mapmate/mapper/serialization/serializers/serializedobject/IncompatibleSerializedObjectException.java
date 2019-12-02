@@ -19,18 +19,15 @@
  * under the License.
  */
 
-package com.envimate.mapmate.scanner.builder.detection.customprimitive.mapping;
+package com.envimate.mapmate.mapper.serialization.serializers.serializedobject;
 
-import static java.lang.String.format;
-
-public final class BooleanFormatException extends RuntimeException {
-
-    private BooleanFormatException(final String message) {
+public final class IncompatibleSerializedObjectException extends RuntimeException {
+    private IncompatibleSerializedObjectException(final String message) {
         super(message);
     }
 
-    public static BooleanFormatException booleanFormatException(final String value) {
-        final String message = format("String '%s' cannot be cast to boolean", value);
-        return new BooleanFormatException(message);
+    public static IncompatibleSerializedObjectException incompatibleSerializedObjectException(final String messageFormat,
+                                                                                              final Object... args) {
+        return new IncompatibleSerializedObjectException(String.format(messageFormat, args));
     }
 }

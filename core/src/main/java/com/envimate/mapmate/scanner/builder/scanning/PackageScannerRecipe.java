@@ -25,11 +25,13 @@ import com.envimate.mapmate.scanner.builder.DependencyRegistry;
 import com.envimate.mapmate.scanner.builder.MapMateBuilder;
 import com.envimate.mapmate.scanner.builder.contextlog.BuildContextLog;
 import com.envimate.mapmate.scanner.builder.recipes.Recipe;
+import com.envimate.mapmate.shared.types.ClassType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import static com.envimate.mapmate.shared.types.ClassType.fromClassWithoutGenerics;
 import static com.envimate.mapmate.shared.validators.NotNullValidator.validateNotNull;
 
 @ToString
@@ -46,6 +48,6 @@ public final class PackageScannerRecipe implements Recipe {
     @Override
     public void cook(final MapMateBuilder mapMateBuilder, final DependencyRegistry dependencyRegistry) {
             final BuildContextLog contextLog = mapMateBuilder.contextLog().stepInto(PackageScannerRecipe.class);
-        this.packageScanner.scan().forEach(type -> mapMateBuilder.withManuallyAddedType(type, contextLog));
+        this.packageScanner.scan().forEach(type -> mapMateBuilder.withManuallyAddedType(fromClassWithoutGenerics(type), contextLog));
     }
 }

@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.envimate.mapmate.mapper.deserialization.DeserializationFields.deserializationFields;
-import static com.envimate.mapmate.scanner.builder.detection.serializedobject.IncompatibleSerializedObjectException.incompatibleSerializedObjectException;
+import static com.envimate.mapmate.mapper.serialization.serializers.serializedobject.IncompatibleSerializedObjectException.incompatibleSerializedObjectException;
 import static java.lang.reflect.Modifier.isAbstract;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.util.stream.Collectors.toList;

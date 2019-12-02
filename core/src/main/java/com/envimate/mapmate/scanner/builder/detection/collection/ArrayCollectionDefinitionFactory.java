@@ -52,8 +52,7 @@ public final class ArrayCollectionDefinitionFactory implements DefinitionFactory
     }
 
     @Override
-    public Optional<Definition> analyze(final DefinitionSeed context,
-                                        final ResolvedType type,
+    public Optional<Definition> analyze(final ResolvedType type,
                                         final RequiredCapabilities capabilities) {
         if (!(type instanceof ArrayType)) {
             return empty();
@@ -63,6 +62,6 @@ public final class ArrayCollectionDefinitionFactory implements DefinitionFactory
 
         final CollectionSerializer serializer = arraySerializer();
         final CollectionDeserializer deserializer = arrayDeserializer(genericType.assignableType());
-        return of(collectionDefinition(context, type, genericType, serializer, deserializer));
+        return of(collectionDefinition(type, genericType, serializer, deserializer));
     }
 }

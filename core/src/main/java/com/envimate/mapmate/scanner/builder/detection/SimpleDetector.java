@@ -22,7 +22,7 @@
 package com.envimate.mapmate.scanner.builder.detection;
 
 import com.envimate.mapmate.mapper.definitions.Definition;
-import com.envimate.mapmate.scanner.builder.DefinitionSeed;
+import com.envimate.mapmate.scanner.builder.RequiredCapabilities;
 import com.envimate.mapmate.scanner.builder.contextlog.BuildContextLog;
 import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
@@ -54,47 +54,51 @@ public final class SimpleDetector implements Detector {
     }
 
     @Override
-    public Optional<? extends Definition> detect(final DefinitionSeed context,
+    public Optional<? extends Definition> detect(final ResolvedType type,
+                                                 final RequiredCapabilities capabilities,
                                                  final BuildContextLog parentLog) {
         final BuildContextLog contextLog = parentLog.stepInto(SimpleDetector.class);
-        final Optional<? extends Definition> collection = detectCollectionDefinition(context, contextLog);
+        final Optional<? extends Definition> collection = detectCollectionDefinition(type, capabilities, contextLog);
         if (collection.isPresent()) {
             return collection;
         }
 
-        final Optional<? extends Definition> customPrimitive = detectCustomPrimitive(context, contextLog);
+        final Optional<? extends Definition> customPrimitive = detectCustomPrimitive(type, capabilities, contextLog);
         if (customPrimitive.isPresent()) {
             return customPrimitive;
         }
-        return detectSerializedObject(context, contextLog);
+        return detectSerializedObject(type, capabilities, contextLog);
     }
 
-    private Optional<Definition> detectCollectionDefinition(final DefinitionSeed context,
+    private Optional<Definition> detectCollectionDefinition(final ResolvedType type,
+                                                            final RequiredCapabilities capabilities,
                                                             final BuildContextLog contextLog) {
-        return detectIn(context, this.collectionDefinitionFactories, contextLog);
+        return detectIn(type, capabilities, this.collectionDefinitionFactories, contextLog);
     }
 
-    private Optional<Definition> detectCustomPrimitive(final DefinitionSeed context,
+    private Optional<Definition> detectCustomPrimitive(final ResolvedType type,
+                                                       final RequiredCapabilities capabilities,
                                                        final BuildContextLog contextLog) {
-        return detectIn(context, this.customPrimitiveDefinitionFactories, contextLog);
+        return detectIn(type, capabilities, this.customPrimitiveDefinitionFactories, contextLog);
     }
 
-    private Optional<Definition> detectSerializedObject(final DefinitionSeed context,
+    private Optional<Definition> detectSerializedObject(final ResolvedType type,
+                                                        final RequiredCapabilities capabilities,
                                                         final BuildContextLog contextLog) {
-        return detectIn(context, this.serializedObjectDefinitionFactories, contextLog);
+        return detectIn(type, capabilities, this.serializedObjectDefinitionFactories, contextLog);
     }
 
-    private static Optional<Definition> detectIn(final DefinitionSeed context,
+    private static Optional<Definition> detectIn(final ResolvedType type,
+                                                 final RequiredCapabilities capabilities,
                                                  final List<DefinitionFactory> factories,
                                                  final BuildContextLog contextLog) {
-        final ResolvedType type = context.type();
         if (!isSupported(type)) {
             contextLog.logReject(type, "type is not supported because it contains wildcard generics (\"?\")");
             return empty();
         }
         for (final DefinitionFactory factory : factories) {
             final BuildContextLog factoryContextLog = contextLog.stepInto(factory.getClass());
-            final Optional<Definition> analyzedClass = factory.analyze(context, type, context.requiredCapabilities());
+            final Optional<Definition> analyzedClass = factory.analyze(type, capabilities);
             if (analyzedClass.isPresent()) {
                 factoryContextLog.log(type, "know how to handle this type");
                 return analyzedClass;

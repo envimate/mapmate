@@ -22,15 +22,12 @@
 package com.envimate.mapmate.mapper.definitions;
 
 import com.envimate.mapmate.mapper.DefinitionScanLog;
-import com.envimate.mapmate.scanner.builder.DefinitionSeeds;
-import com.envimate.mapmate.scanner.builder.RequiredCapabilities;
 import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -48,10 +45,9 @@ public final class Definitions {
     private final Map<ResolvedType, Definition> definitions;
 
     public static Definitions definitions(final DefinitionScanLog definitionScanLog,
-                                          final Map<ResolvedType, Definition> definitions,
-                                          final DefinitionSeeds seeds) {
+                                          final Map<ResolvedType, Definition> definitions) {
         final Definitions definitionsObject = new Definitions(definitionScanLog, definitions);
-        definitionsObject.validateNoUnsupportedOutgoingReferences(seeds);
+        //definitionsObject.validateNoUnsupportedOutgoingReferences(seeds);
         return definitionsObject;
     }
 
@@ -67,6 +63,7 @@ public final class Definitions {
         return of(this.definitions.get(targetType));
     }
 
+        /*
     public void validateNoUnsupportedOutgoingReferences(final DefinitionSeeds seeds) {
         for (final ResolvedType type : seeds.types()) {
             final RequiredCapabilities capabilities = seeds.forType(type).requiredCapabilities();
@@ -78,6 +75,7 @@ public final class Definitions {
             }
         }
     }
+         */
 
     private void validateDeserialization(final ResolvedType candidate, final ResolvedType reason, final List<ResolvedType> alreadyVisited) {
         if (alreadyVisited.contains(candidate)) {

@@ -22,7 +22,7 @@
 package com.envimate.mapmate.specs;
 
 import com.envimate.mapmate.domain.valid.*;
-import com.envimate.mapmate.scanner.builder.detection.customprimitive.mapping.BooleanFormatException;
+import com.envimate.mapmate.shared.mapping.BooleanFormatException;
 import org.junit.jupiter.api.Test;
 
 import static com.envimate.mapmate.MapMate.aMapMate;

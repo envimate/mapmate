@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.envimate.mapmate.scanner.builder.detection.customprimitive.mapping;
+package com.envimate.mapmate.shared.mapping;
 
 import com.envimate.mapmate.mapper.definitions.universal.Universal;
 import com.envimate.mapmate.mapper.definitions.universal.UniversalPrimitive;

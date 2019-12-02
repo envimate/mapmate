@@ -23,7 +23,6 @@ package com.envimate.mapmate.scanner.builder.detection.customprimitive;
 
 import com.envimate.mapmate.mapper.definitions.Definition;
 import com.envimate.mapmate.mapper.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
-import com.envimate.mapmate.scanner.builder.DefinitionSeed;
 import com.envimate.mapmate.scanner.builder.RequiredCapabilities;
 import com.envimate.mapmate.scanner.builder.detection.DefinitionFactory;
 import com.envimate.mapmate.shared.types.ResolvedType;
@@ -47,7 +46,7 @@ import static java.util.function.Function.identity;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class BuiltInPrimitivesFactory implements DefinitionFactory {
-    private static final Map<ResolvedType, Function<DefinitionSeed, Definition>> PRIMITIVE_DEFINITIONS;
+    private static final Map<ResolvedType, Definition> PRIMITIVE_DEFINITIONS;
 
     static {
         PRIMITIVE_DEFINITIONS = new HashMap<>();
@@ -71,17 +70,16 @@ public final class BuiltInPrimitivesFactory implements DefinitionFactory {
     }
 
     @Override
-    public Optional<Definition> analyze(final DefinitionSeed context,
-                                        final ResolvedType type,
+    public Optional<Definition> analyze(final ResolvedType type,
                                         final RequiredCapabilities capabilities) {
         if (PRIMITIVE_DEFINITIONS.containsKey(type)) {
-            return of(PRIMITIVE_DEFINITIONS.get(type).apply(context));
+            return of(PRIMITIVE_DEFINITIONS.get(type));
         }
         return empty();
     }
 
-    private static <T> Function<DefinitionSeed, Definition> toCustomPrimitiveDefinition(final Class<T> type,
-                                                                                        final Function<String, T> deserializer) {
+    private static <T> Definition toCustomPrimitiveDefinition(final Class<T> type,
+                                                              final Function<String, T> deserializer) {
         final CustomPrimitiveSerializer customPrimitiveSerializer = obj -> {
             if (obj != null) {
                 return String.valueOf(obj);
@@ -89,9 +87,9 @@ public final class BuiltInPrimitivesFactory implements DefinitionFactory {
                 return null;
             }
         };
-        return reason -> customPrimitiveDefinition(
-                reason,
-                fromClassWithoutGenerics(type),
+        final ResolvedType resolvedType = fromClassWithoutGenerics(type);
+        return customPrimitiveDefinition(
+                resolvedType,
                 customPrimitiveSerializer,
                 value -> deserializer.apply((String) value));
     }

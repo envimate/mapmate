@@ -24,7 +24,6 @@ package com.envimate.mapmate.mapper.definitions;
 import com.envimate.mapmate.mapper.definitions.universal.Universal;
 import com.envimate.mapmate.mapper.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
 import com.envimate.mapmate.mapper.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
-import com.envimate.mapmate.scanner.builder.DefinitionSeed;
 import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -40,28 +39,24 @@ import static java.util.Optional.ofNullable;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CustomPrimitiveDefinition implements Definition {
-    private final DefinitionSeed context;
     private final ResolvedType type;
     private final CustomPrimitiveSerializer serializer;
     private final CustomPrimitiveDeserializer deserializer;
 
     public static <T, U extends Universal> CustomPrimitiveDefinition customPrimitiveDefinition(
-            final DefinitionSeed context,
             final ResolvedType type,
             final CustomPrimitiveSerializer serializer,
             final CustomPrimitiveDeserializer deserializer
     ) {
-        return untypedCustomPrimitiveDefinition(context, type, serializer, deserializer);
+        return untypedCustomPrimitiveDefinition(type, serializer, deserializer);
     }
 
     public static CustomPrimitiveDefinition untypedCustomPrimitiveDefinition(
-            final DefinitionSeed context,
             final ResolvedType type,
             final CustomPrimitiveSerializer serializer,
             final CustomPrimitiveDeserializer deserializer) {
-        validateNotNull(context, "context");
         validateNotNull(type, "type");
-        return new CustomPrimitiveDefinition(context, type, serializer, deserializer);
+        return new CustomPrimitiveDefinition(type, serializer, deserializer);
     }
 
     public Optional<CustomPrimitiveDeserializer> deserializer() {
@@ -75,10 +70,5 @@ public final class CustomPrimitiveDefinition implements Definition {
     @Override
     public ResolvedType type() {
         return this.type;
-    }
-
-    @Override
-    public DefinitionSeed context() {
-        return null;
     }
 }
