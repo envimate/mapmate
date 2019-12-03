@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.specs.givenwhenthen;
 
-import com.envimate.mapmate.shared.types.ClassType;
+import com.envimate.mapmate.shared.types.ResolvedType;
 
 import static com.envimate.mapmate.shared.types.ClassType.fromClassWithoutGenerics;
 
@@ -30,5 +30,5 @@ public interface ToStage {
         return toTheType(fromClassWithoutGenerics(type));
     }
 
-    Then toTheType(ClassType fullType);
+    Then toTheType(ResolvedType fullType);
 }

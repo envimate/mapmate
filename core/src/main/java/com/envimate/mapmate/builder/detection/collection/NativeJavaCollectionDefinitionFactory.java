@@ -93,7 +93,7 @@ public final class NativeJavaCollectionDefinitionFactory implements DefinitionFa
         final Function<ResolvedType, Definition> factory = (genericType) -> {
             final CollectionSerializer serializer = listSerializer(genericType);
             final CollectionDeserializer deserializer = listDeserializer(genericType, mapper);
-            final ClassType fullType = unresolvedType(collectionType).resolve(genericType);
+            final ResolvedType fullType = unresolvedType(collectionType).resolve(genericType);
             return collectionDefinition(fullType, genericType, serializer, deserializer);
         };
         FACTORIES.put(collectionType, factory);

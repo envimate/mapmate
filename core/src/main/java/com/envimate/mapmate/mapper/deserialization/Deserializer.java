@@ -35,6 +35,7 @@ import com.envimate.mapmate.mapper.marshalling.MarshallingType;
 import com.envimate.mapmate.mapper.marshalling.Unmarshaller;
 import com.envimate.mapmate.shared.mapping.CustomPrimitiveMappings;
 import com.envimate.mapmate.shared.types.ClassType;
+import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -86,7 +87,7 @@ public final class Deserializer {
     }
 
     public <T> T deserializeFromMap(final Map<String, Object> input,
-                                    final ClassType targetType) {
+                                    final ResolvedType targetType) {
         return deserializeFromMap(input, targetType, noop());
     }
 
@@ -97,7 +98,7 @@ public final class Deserializer {
     }
 
     public <T> T deserializeFromMap(final Map<String, Object> input,
-                                    final ClassType targetType,
+                                    final ResolvedType targetType,
                                     final InjectorLambda injectorProducer) {
         final UniversalObject universalObject = universalObjectFromNativeMap(input);
         return deserialize(universalObject, targetType, injectorProducer);
@@ -127,7 +128,7 @@ public final class Deserializer {
 
     @SuppressWarnings("unchecked")
     public <T> T deserialize(final String input,
-                             final ClassType targetType,
+                             final ResolvedType targetType,
                              final MarshallingType marshallingType) {
         return (T) deserialize(input, targetType, marshallingType, noop());
     }
@@ -142,7 +143,7 @@ public final class Deserializer {
     }
 
     public Object deserialize(final String input,
-                              final ClassType targetType,
+                              final ResolvedType targetType,
                               final MarshallingType marshallingType,
                               final InjectorLambda injectorProducer) {
         validateNotNull(input, "input");
@@ -151,7 +152,7 @@ public final class Deserializer {
     }
 
     private <T> T deserialize(final Universal input,
-                              final ClassType targetType,
+                              final ResolvedType targetType,
                               final InjectorLambda injectorProducer) {
         validateNotNull(input, "input");
         validateNotNull(targetType, "targetType");

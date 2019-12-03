@@ -47,7 +47,7 @@ public final class ClassType implements ResolvedType {
     private final Class<?> clazz;
     private final Map<TypeVariableName, ResolvedType> typeParameters;
 
-    public static ClassType typeOfObject(final Object object) {
+    public static ResolvedType typeOfObject(final Object object) {
         validateNotNull(object, "object");
         return unresolvedType(object.getClass()).resolveFromObject(object);
     }

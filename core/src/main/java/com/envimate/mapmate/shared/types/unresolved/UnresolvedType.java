@@ -21,7 +21,6 @@
 
 package com.envimate.mapmate.shared.types.unresolved;
 
-import com.envimate.mapmate.shared.types.ClassType;
 import com.envimate.mapmate.shared.types.ResolvedType;
 import com.envimate.mapmate.shared.types.TypeVariableName;
 import com.envimate.mapmate.shared.types.unresolved.breaking.TypeVariableResolvers;
@@ -53,7 +52,7 @@ public final class UnresolvedType {
         return new UnresolvedType(type, typeVariableNamesOf(type), resolvers);
     }
 
-    public ClassType resolve(final ResolvedType... values) {
+    public ResolvedType resolve(final ResolvedType... values) {
         if (values.length != this.variables.size()) {
             throw new IllegalArgumentException();
         }
@@ -63,10 +62,14 @@ public final class UnresolvedType {
             final ResolvedType value = values[i];
             resolvedParameters.put(name, value);
         }
-        return fromClassWithGenerics(this.type, resolvedParameters);
+        if(resolvedParameters.isEmpty()) {
+            return ResolvedType.resolvedType(this.type);
+        } else {
+            return fromClassWithGenerics(this.type, resolvedParameters);
+        }
     }
 
-    public ClassType resolveFromObject(final Object object) {
+    public ResolvedType resolveFromObject(final Object object) {
         final List<ResolvedType> typeList = this.resolvers.resolve(object);
         return resolve(typeList.toArray(ResolvedType[]::new));
     }

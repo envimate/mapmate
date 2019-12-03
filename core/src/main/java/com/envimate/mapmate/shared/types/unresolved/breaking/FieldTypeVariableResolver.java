@@ -21,7 +21,6 @@
 
 package com.envimate.mapmate.shared.types.unresolved.breaking;
 
-import com.envimate.mapmate.shared.types.ClassType;
 import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -30,7 +29,6 @@ import lombok.ToString;
 
 import java.lang.reflect.Field;
 
-import static com.envimate.mapmate.shared.types.ClassType.typeOfObject;
 import static com.envimate.mapmate.shared.types.unresolved.UnresolvedType.unresolvedType;
 import static com.envimate.mapmate.shared.validators.NotNullValidator.validateNotNull;
 
@@ -46,7 +44,7 @@ public final class FieldTypeVariableResolver implements TypeVariableResolver {
     }
 
     @Override
-    public ClassType resolve(final Object object) {
+    public ResolvedType resolve(final Object object) {
         try {
             final Object value = this.field.get(object);
             return unresolvedType(value.getClass()).resolveFromObject(value);

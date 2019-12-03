@@ -27,6 +27,7 @@ import com.envimate.mapmate.mapper.serialization.Serializer;
 import com.envimate.mapmate.builder.MapMateBuilder;
 import com.envimate.mapmate.builder.scanning.PackageScanner;
 import com.envimate.mapmate.shared.types.ClassType;
+import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -91,7 +92,7 @@ public final class MapMate {
         return this.deserializer.deserialize(json, targetType, marshallingType);
     }
 
-    public <T> T deserialize(final String json, final ClassType targetType, final MarshallingType marshallingType) {
+    public <T> T deserialize(final String json, final ResolvedType targetType, final MarshallingType marshallingType) {
         return this.deserializer.deserialize(json, targetType, marshallingType);
     }
 }

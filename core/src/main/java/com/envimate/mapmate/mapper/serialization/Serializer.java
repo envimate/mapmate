@@ -120,7 +120,7 @@ public final class Serializer implements SerializationCallback {
             return null;
         }
 
-        final ClassType type = typeOfObject(object);
+        final ResolvedType type = typeOfObject(object);
         return serializeDefinition(type, object, serializationTracker()).toNativeJava();
     }
 

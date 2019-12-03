@@ -71,7 +71,7 @@ public final class Injector {
         return put(fromClassWithoutGenerics(type), instance);
     }
 
-    public Injector put(final ClassType type, final Object instance) {
+    public Injector put(final ResolvedType type, final Object instance) {
         this.typedDirectInjections.add(typedDirectInjection(type, instance));
         return this;
     }

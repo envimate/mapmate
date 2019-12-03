@@ -25,14 +25,17 @@ import com.envimate.mapmate.domain.parameterized.AComplexParameterizedType;
 import com.envimate.mapmate.domain.repositories.RepositoryWithTypeVariableReference;
 import com.envimate.mapmate.domain.valid.ANumber;
 import com.envimate.mapmate.domain.valid.AString;
+import com.envimate.mapmate.shared.types.ArrayType;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Array;
 import java.util.List;
 
 import static com.envimate.mapmate.MapMate.aMapMate;
 import static com.envimate.mapmate.builder.recipes.scanner.ClassScannerRecipe.addAllReferencedClassesIs;
 import static com.envimate.mapmate.mapper.marshalling.MarshallingType.json;
+import static com.envimate.mapmate.shared.types.ArrayType.fromArrayClass;
 import static com.envimate.mapmate.shared.types.ClassType.fromClassWithoutGenerics;
 import static com.envimate.mapmate.shared.types.unresolved.UnresolvedType.unresolvedType;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.given;
@@ -123,5 +126,26 @@ public final class TypeVariableSpecs {
                 .withMarshallingType(json())
                 .noExceptionHasBeenThrown()
                 .theSerializationResultWas("");
+    }
+
+    @Test
+    public void aSerializedObjectWithTypeVariableCanSerializedIfTheValueOfTheTypeVariableIsAnArray() {
+        given(
+                aMapMate()
+                        .withManuallyAddedType(
+                                unresolvedType(AComplexParameterizedType.class)
+                                        .resolve(fromArrayClass(AString[].class)))
+                        .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
+                        .build()
+        )
+                .when().mapMateSerializes(AComplexParameterizedType.deserialize(new AString[]{(AString.fromStringValue("foo"))}))
+                .withMarshallingType(json())
+                .noExceptionHasBeenThrown()
+                .theSerializationResultWas("" +
+                        "{\n" +
+                        "  \"value\": [\n" +
+                        "    \"foo\"\n" +
+                        "  ]\n" +
+                        "}");
     }
 }

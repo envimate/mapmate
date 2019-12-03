@@ -21,7 +21,7 @@
 
 package com.envimate.mapmate.mapper.injector;
 
-import com.envimate.mapmate.shared.types.ClassType;
+import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -33,16 +33,16 @@ import static com.envimate.mapmate.shared.validators.NotNullValidator.validateNo
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TypedDirectInjection {
-    private final ClassType type;
+    private final ResolvedType type;
     private final Object value;
 
-    public static TypedDirectInjection typedDirectInjection(final ClassType type, final Object value) {
+    public static TypedDirectInjection typedDirectInjection(final ResolvedType type, final Object value) {
         validateNotNull(type, "type");
         validateNotNull(value, "value");
         return new TypedDirectInjection(type, value);
     }
 
-    public ClassType type() {
+    public ResolvedType type() {
         return this.type;
     }
 

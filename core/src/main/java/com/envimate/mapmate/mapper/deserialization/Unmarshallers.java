@@ -27,6 +27,7 @@ import com.envimate.mapmate.mapper.marshalling.MarshallerRegistry;
 import com.envimate.mapmate.mapper.marshalling.MarshallingType;
 import com.envimate.mapmate.mapper.marshalling.Unmarshaller;
 import com.envimate.mapmate.shared.types.ClassType;
+import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -78,7 +79,7 @@ final class Unmarshallers {
 
     @SuppressWarnings({"InstanceofConcreteClass", "unchecked"})
     Universal unmarshal(final String input,
-                        final ClassType targetType,
+                        final ResolvedType targetType,
                         final MarshallingType marshallingType) {
         validateNotNull(input, "input");
         if (input.isEmpty()) {

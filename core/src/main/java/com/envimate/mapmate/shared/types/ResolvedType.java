@@ -24,7 +24,18 @@ package com.envimate.mapmate.shared.types;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import static com.envimate.mapmate.shared.types.ArrayType.fromArrayClass;
+import static com.envimate.mapmate.shared.types.ClassType.fromClassWithoutGenerics;
+
 public interface ResolvedType {
+
+    static ResolvedType resolvedType(final Class<?> type) {
+        if (type.isArray()) {
+            return fromArrayClass(type);
+        } else {
+            return fromClassWithoutGenerics(type);
+        }
+    }
 
     static ResolvedType resolveType(final Type type, final ClassType fullType) {
         return TypeResolver.resolveType(type, fullType);
@@ -54,20 +65,5 @@ public interface ResolvedType {
         }
         return typeParameters().stream()
                 .allMatch(ResolvedType::isInstantiatable);
-    }
-
-    // START EXTERNAL
-    public static boolean isSupported(final ResolvedType type) {
-        if (type.isAbstract()) {
-            return false;
-        }
-        if (type.isInterface()) {
-            return false;
-        }
-        if (type.isWildcard()) {
-            return false;
-        }
-        return type.typeParameters().stream()
-                .anyMatch(type1 -> !isSupported(type1));
     }
 }
