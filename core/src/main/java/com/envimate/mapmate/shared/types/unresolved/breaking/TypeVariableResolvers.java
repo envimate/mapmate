@@ -27,14 +27,19 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.envimate.mapmate.shared.types.unresolved.breaking.MethodParameterVariableResolver.methodParameterVariableResolver;
 import static com.envimate.mapmate.shared.validators.NotNullValidator.validateNotNull;
 import static java.util.Arrays.stream;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 
 @ToString
@@ -59,10 +64,23 @@ public final class TypeVariableResolvers {
     }
 
     private static Optional<TypeVariableResolver> resolverForVariable(final TypeVariable<?> typeVariable, final Class<?> type) {
-        return stream(type.getFields())
+        final Optional<TypeVariableResolver> fieldResolver = stream(type.getFields())
                 .filter(field -> typeVariable.equals(field.getGenericType()))
                 .map(FieldTypeVariableResolver::fieldTypeVariableResolver)
                 .findFirst();
+        return fieldResolver;
+    }
+
+    private static Optional<TypeVariableResolver> resolverForMethod(final TypeVariable<?> typeVariable, final Method method) {
+        final Parameter[] parameters = method.getParameters();
+        for (int i = 0; i < parameters.length; i++) {
+            final Parameter parameter = parameters[i];
+            if (!parameter.getParameterizedType().equals(typeVariable)) {
+                continue;
+            }
+            return of(methodParameterVariableResolver(method.getName(), method.getParameterTypes(), i));
+        }
+        return empty();
     }
 
     private static TypeVariableResolvers resolvers(final List<String> relevantTypeVariables,
