@@ -32,13 +32,13 @@ import com.envimate.mapmate.mapper.injector.Injector;
 import com.envimate.mapmate.shared.mapping.CustomPrimitiveMappings;
 import com.envimate.mapmate.shared.types.ResolvedType;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import static com.envimate.mapmate.mapper.deserialization.deserializers.TypeDeserializer.castSafely;
 import static java.util.Collections.singletonList;
 
+@SuppressWarnings({"CastToConcreteClass", "rawtypes", "unchecked"})
 public interface CollectionDeserializer extends TypeDeserializer {
     Object deserialize(List<Object> deserializedElements);
 

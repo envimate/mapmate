@@ -22,9 +22,7 @@
 package com.envimate.mapmate.mapper.deserialization.deserializers;
 
 import com.envimate.mapmate.mapper.definitions.Definition;
-import com.envimate.mapmate.mapper.definitions.SerializedObjectDefinition;
 import com.envimate.mapmate.mapper.definitions.universal.Universal;
-import com.envimate.mapmate.mapper.definitions.universal.UniversalObject;
 import com.envimate.mapmate.mapper.deserialization.DeserializerCallback;
 import com.envimate.mapmate.mapper.deserialization.WrongInputStructureException;
 import com.envimate.mapmate.mapper.deserialization.validation.ExceptionTracker;
@@ -50,6 +48,6 @@ public interface TypeDeserializer {
         if (!type.isInstance(universalType)) {
             throw WrongInputStructureException.wrongInputStructureException(type, universalType, exceptionTracker.getPosition());
         }
-        return (T) universalType;
+        return type.cast(universalType);
     }
 }

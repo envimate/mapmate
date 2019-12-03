@@ -22,9 +22,7 @@
 package com.envimate.mapmate.mapper.deserialization.deserializers.customprimitives;
 
 import com.envimate.mapmate.mapper.definitions.Definition;
-import com.envimate.mapmate.mapper.definitions.SerializedObjectDefinition;
 import com.envimate.mapmate.mapper.definitions.universal.Universal;
-import com.envimate.mapmate.mapper.definitions.universal.UniversalObject;
 import com.envimate.mapmate.mapper.definitions.universal.UniversalPrimitive;
 import com.envimate.mapmate.mapper.deserialization.DeserializerCallback;
 import com.envimate.mapmate.mapper.deserialization.deserializers.TypeDeserializer;
@@ -52,6 +50,7 @@ public interface CustomPrimitiveDeserializer extends TypeDeserializer {
 
     Object deserialize(Object value) throws Exception;
 
+    @SuppressWarnings("unchecked")
     @Override
     default <T> T deserialize(final Universal input,
                               final Definition definition,

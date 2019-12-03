@@ -51,6 +51,7 @@ public interface SerializedObjectDeserializer extends TypeDeserializer {
 
     DeserializationFields fields();
 
+    @SuppressWarnings("unchecked")
     @Override
     default <T> T deserialize(final Universal input,
                               final Definition definition,
