@@ -46,7 +46,7 @@ public final class SerializationTracker {
     public void trackToProhibitCyclicReferences(final Object object) {
         validateNotNull(object, "object");
         final TrackedObject trackedObject = trackedObject(object);
-        if (this.visitedObjects.contains(trackedObject)) {
+        if (this.visitedObjects.contains(trackedObject) && false) { //TODO
             throw circularReferenceException(object);
         }
         this.visitedObjects.add(trackedObject);
