@@ -21,36 +21,40 @@
 
 package com.envimate.mapmate.shared.types.unresolved.breaking;
 
-import com.envimate.mapmate.shared.types.ClassType;
 import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
-import static com.envimate.mapmate.shared.types.ClassType.typeOfObject;
-import static com.envimate.mapmate.shared.types.unresolved.UnresolvedType.unresolvedType;
-import static com.envimate.mapmate.shared.validators.NotNullValidator.validateNotNull;
+import static com.envimate.mapmate.shared.types.ClassType.fromClassWithoutGenerics;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class FieldTypeVariableResolver implements TypeVariableResolver {
-    private final Field field;
+public final class MethodParameterVariableResolver implements TypeVariableResolver {
+    private final String methodName;
+    private final Class<?>[] parameterTypes;
+    private final int parameterIndex;
 
-    public static TypeVariableResolver fieldTypeVariableResolver(final Field field) {
-        validateNotNull(field, "field");
-        return new FieldTypeVariableResolver(field);
+    public static MethodParameterVariableResolver methodParameterVariableResolver(final String methodName,
+                                                                                  final Class<?>[] parameterTypes,
+                                                                                  final int parameterIndex) {
+        return new MethodParameterVariableResolver(methodName, parameterTypes, parameterIndex);
     }
 
     @Override
-    public ClassType resolve(final Object object) {
+    public ResolvedType resolve(final Object object) {
         try {
-            final Object value = this.field.get(object);
-            return unresolvedType(value.getClass()).resolveFromObject(value);
-        } catch (final IllegalAccessException e) {
+            final Method method = object.getClass().getMethod(this.methodName, this.parameterTypes);
+            final Parameter parameter = method.getParameters()[this.parameterIndex];
+            final Class<?> type = parameter.getType();
+            return fromClassWithoutGenerics(type);
+            //final Type parameterizedType = parameter.getParameterizedType();
+        } catch (final NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }

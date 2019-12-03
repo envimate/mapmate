@@ -25,11 +25,14 @@ import com.envimate.mapmate.domain.parameterized.AComplexParameterizedType;
 import com.envimate.mapmate.domain.repositories.RepositoryWithTypeVariableReference;
 import com.envimate.mapmate.domain.valid.ANumber;
 import com.envimate.mapmate.domain.valid.AString;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static com.envimate.mapmate.MapMate.aMapMate;
-import static com.envimate.mapmate.mapper.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.builder.recipes.scanner.ClassScannerRecipe.addAllReferencedClassesIs;
+import static com.envimate.mapmate.mapper.marshalling.MarshallingType.json;
 import static com.envimate.mapmate.shared.types.ClassType.fromClassWithoutGenerics;
 import static com.envimate.mapmate.shared.types.unresolved.UnresolvedType.unresolvedType;
 import static com.envimate.mapmate.specs.givenwhenthen.Given.given;
@@ -103,5 +106,22 @@ public final class TypeVariableSpecs {
                         "{\n" +
                         "  \"value\": \"foo\"\n" +
                         "}");
+    }
+
+    @Disabled
+    @Test
+    public void aSerializedObjectWithTypeVariableFieldCanBeSerializedIfTheValueOfTheTypeVariableIsAnInterfaceWithTypeVariables() {
+        given(
+                aMapMate()
+                        .withManuallyAddedType(
+                                unresolvedType(AComplexParameterizedType.class)
+                                        .resolve(unresolvedType(List.class).resolve(fromClassWithoutGenerics(AString.class))))
+                        .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
+                        .build()
+        )
+                .when().mapMateSerializes(AComplexParameterizedType.deserialize(List.of(AString.fromStringValue("foo"))))
+                .withMarshallingType(json())
+                .noExceptionHasBeenThrown()
+                .theSerializationResultWas("");
     }
 }
