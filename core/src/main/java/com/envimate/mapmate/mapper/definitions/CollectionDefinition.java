@@ -31,10 +31,11 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.envimate.mapmate.shared.validators.NotNullValidator.validateNotNull;
-import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
 
 @ToString
 @EqualsAndHashCode
@@ -51,8 +52,12 @@ public final class CollectionDefinition implements Definition {
                                                             final CollectionDeserializer deserializer) {
         validateNotNull(type, "type");
         validateNotNull(contentType, "contentType");
-        validateNotNull(serializer, "serializer");
-        validateNotNull(deserializer, "deserializer");
+        if (Objects.isNull(deserializer)) {
+            validateNotNull(serializer, "serializer");
+        }
+        if (Objects.isNull(serializer)) {
+            validateNotNull(deserializer, "deserializer");
+        }
         return new CollectionDefinition(type, contentType, serializer, deserializer);
     }
 
@@ -62,11 +67,12 @@ public final class CollectionDefinition implements Definition {
 
     @Override
     public Optional<TypeSerializer> serializer() {
-        return of(this.serializer);
+        return ofNullable(this.serializer);
     }
 
+    @Override
     public Optional<TypeDeserializer> deserializer() {
-        return of(this.deserializer);
+        return ofNullable(this.deserializer);
     }
 
     @Override

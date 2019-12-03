@@ -28,11 +28,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-
-import static java.util.Collections.singletonList;
 
 @ToString
 @EqualsAndHashCode
@@ -44,15 +41,15 @@ public final class ListCollectionSerializer implements CollectionSerializer {
         return new ListCollectionSerializer(type);
     }
 
-    @Override
-    public List<ResolvedType> requiredTypes() {
-        return singletonList(this.type);
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public List<Object> serialize(final Object collection) {
         final Collection<Object> realCollection = (Collection<Object>) collection;
         return new LinkedList<>(realCollection);
+    }
+
+    @Override
+    public ResolvedType contentType() {
+        return this.type;
     }
 }

@@ -30,7 +30,6 @@ import lombok.ToString;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 
 @ToString
 @EqualsAndHashCode
@@ -43,13 +42,13 @@ public final class ArrayCollectionSerializer implements CollectionSerializer {
     }
 
     @Override
-    public List<ResolvedType> requiredTypes() {
-        return singletonList(this.componentType);
-    }
-
-    @Override
     public List<Object> serialize(final Object collection) {
         final Object[] array = (Object[]) collection;
         return asList(array);
+    }
+
+    @Override
+    public ResolvedType contentType() {
+        return this.componentType;
     }
 }

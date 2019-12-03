@@ -44,6 +44,7 @@ import lombok.ToString;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.envimate.mapmate.builder.RequiredCapabilities.deserializationOnly;
@@ -158,7 +159,12 @@ public final class DefinitionsBuilder {
         if (nullOrInstance(deserializer, CollectionDeserializer.class) && nullOrInstance(serializer, CollectionSerializer.class)) {
             final CollectionSerializer collectionSerializer = (CollectionSerializer) serializer;
             final CollectionDeserializer collectionDeserializer = (CollectionDeserializer) deserializer;
-            final ResolvedType contentType = collectionDeserializer.contentType();
+            final ResolvedType contentType;
+            if(Objects.nonNull(collectionSerializer)) {
+                contentType = collectionSerializer.contentType();
+            } else {
+                contentType = collectionDeserializer.contentType();
+            }
             return CollectionDefinition.collectionDefinition(type, contentType, collectionSerializer, collectionDeserializer);
         }
 

@@ -33,11 +33,13 @@ import com.envimate.mapmate.shared.types.ResolvedType;
 import java.util.List;
 
 import static com.envimate.mapmate.mapper.definitions.universal.UniversalCollection.universalCollection;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 public interface CollectionSerializer extends TypeSerializer {
     List<Object> serialize(Object collection);
 
+    @SuppressWarnings("CastToConcreteClass")
     @Override
     default Universal serialize(final Definition definition,
                                 final Object object,
@@ -51,4 +53,11 @@ public interface CollectionSerializer extends TypeSerializer {
                 .collect(toList());
         return universalCollection(list);
     }
+
+    @Override
+    default List<ResolvedType> requiredTypes() {
+        return singletonList(this.contentType());
+    }
+
+    ResolvedType contentType();
 }
