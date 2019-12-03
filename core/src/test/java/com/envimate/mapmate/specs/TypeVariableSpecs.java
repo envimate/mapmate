@@ -66,7 +66,7 @@ public final class TypeVariableSpecs {
                 .when().mapMateDeserializes("" +
                 "{\n" +
                 "  \"value\": \"foo\"\n" +
-                "}").as(json()).toTheType(unresolvedType(AComplexParameterizedType.class).resolve(fromClassWithoutGenerics(AString.class)))
+                "}").from(json()).toTheType(unresolvedType(AComplexParameterizedType.class).resolve(fromClassWithoutGenerics(AString.class)))
                 .noExceptionHasBeenThrown();
     }
 

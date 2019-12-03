@@ -32,7 +32,7 @@ public final class SchematicSpecs {
     @Test
     public void wrongSchemaFormatCausesSensibleException() {
         givenTheExampleMapMateWithAllMarshallers()
-                .when().mapMateDeserializes("{\"arrayList\": {}, \"array\": []}").as(json()).toTheType(AComplexTypeWithCollections.class)
+                .when().mapMateDeserializes("{\"arrayList\": {}, \"array\": []}").from(json()).toTheType(AComplexTypeWithCollections.class)
                 .anExceptionIsThrownWithAMessageContaining("Unrecognized exception deserializing field 'arrayList': " +
                         "Requiring the input to be an 'collection' but found '{}' at 'arrayList'");
     }

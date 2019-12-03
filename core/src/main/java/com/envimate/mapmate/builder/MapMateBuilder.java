@@ -230,7 +230,12 @@ public final class MapMateBuilder {
         });
 
         final DefinitionsBuilder definitionsBuilder = definitionsBuilder(this.detector, this.contextLog);
-        this.addedDefinitions.forEach(definitionsBuilder::addDefinition);
+
+        this.addedDefinitions.forEach(definition -> {
+            final ResolvedType type = definition.type();
+            definition.serializer().ifPresent(serializer -> definitionsBuilder.addSerializer(type, serializer));
+            definition.deserializer().ifPresent(deserializer -> definitionsBuilder.addDeserializer(type, deserializer));
+        });
 
         definitionsBuilder.resolveRecursively(this.detector);
         final Definitions definitions = definitionsBuilder.build();

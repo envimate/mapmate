@@ -28,11 +28,11 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.envimate.mapmate.mapper.definitions.DefinitionMultiplexer.multiplex;
 import static com.envimate.mapmate.mapper.definitions.DefinitionNotFoundException.definitionNotFound;
 import static java.lang.String.format;
 import static java.util.Optional.of;
@@ -47,7 +47,7 @@ public final class Definitions {
     public static Definitions definitions(final DefinitionScanLog definitionScanLog,
                                           final Map<ResolvedType, Definition> definitions) {
         final Definitions definitionsObject = new Definitions(definitionScanLog, definitions);
-        //definitionsObject.validateNoUnsupportedOutgoingReferences(seeds);
+        definitionsObject.validateNoUnsupportedOutgoingReferences();
         return definitionsObject;
     }
 
@@ -63,19 +63,16 @@ public final class Definitions {
         return of(this.definitions.get(targetType));
     }
 
-        /*
-    public void validateNoUnsupportedOutgoingReferences(final DefinitionSeeds seeds) {
-        for (final ResolvedType type : seeds.types()) {
-            final RequiredCapabilities capabilities = seeds.forType(type).requiredCapabilities();
-            if (capabilities.hasDeserialization()) {
-                validateDeserialization(type, type, new LinkedList<>());
+    private void validateNoUnsupportedOutgoingReferences() {
+        this.definitions.values().forEach(definition -> {
+            if(definition.deserializer().isPresent()) {
+                validateDeserialization(definition.type(), definition.type(), new LinkedList<>());
             }
-            if (capabilities.hasSerialization()) {
-                validateSerialization(type, type, new LinkedList<>());
+            if(definition.serializer().isPresent()) {
+                validateSerialization(definition.type(), definition.type(), new LinkedList<>());
             }
-        }
+        });
     }
-         */
 
     private void validateDeserialization(final ResolvedType candidate, final ResolvedType reason, final List<ResolvedType> alreadyVisited) {
         if (alreadyVisited.contains(candidate)) {

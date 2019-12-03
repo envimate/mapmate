@@ -43,8 +43,8 @@ public final class ArrayCollectionDeserializer implements CollectionDeserializer
     }
 
     @Override
-    public List<ResolvedType> requiredTypes() {
-        return singletonList(this.componentType);
+    public ResolvedType contentType() {
+        return this.componentType;
     }
 
     @Override

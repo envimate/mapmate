@@ -42,7 +42,7 @@ public final class InjectionSpecs {
                 injector -> injector
                         .put("complexType1.stringB", AString.fromStringValue("test"))
                         .put("complexType2.number1", ANumber.fromStringValue("45")))
-                .as(json()).toTheType(AComplexNestedType.class)
+                .from(json()).toTheType(AComplexNestedType.class)
                 .theDeserializedObjectIs(AComplexNestedType.deserialize(
                         AComplexType.deserialize(
                                 AString.fromStringValue("a"),
@@ -71,7 +71,7 @@ public final class InjectionSpecs {
                 injector -> injector
                         .put(AString.fromStringValue("test"))
                         .put(AString.fromStringValue("test")))
-                .as(json()).toTheType(AComplexNestedType.class)
+                .from(json()).toTheType(AComplexNestedType.class)
                 .theDeserializedObjectIs(AComplexNestedType.deserialize(
                         AComplexType.deserialize(
                                 AString.fromStringValue("test"),
@@ -98,7 +98,7 @@ public final class InjectionSpecs {
                         "{\"number1\":\"3\",\"number2\":\"4\",\"stringA\":\"c\",\"stringB\":\"d\"}" +
                         "}",
                 injector -> injector.put(AString.class, AString.fromStringValue("test")))
-                .as(json()).toTheType(AComplexNestedType.class)
+                .from(json()).toTheType(AComplexNestedType.class)
                 .theDeserializedObjectIs(AComplexNestedType.deserialize(
                         AComplexType.deserialize(
                                 AString.fromStringValue("test"),
@@ -125,7 +125,7 @@ public final class InjectionSpecs {
                         "{\"number1\":\"3\",\"number2\":\"4\"}" +
                         "}",
                 injector -> injector.put("complexType2.stringA", AString.fromStringValue("test")))
-                .as(json()).toTheType(AComplexNestedType.class)
+                .from(json()).toTheType(AComplexNestedType.class)
                 .theDeserializedObjectIs(AComplexNestedType.deserialize(
                         AComplexType.deserialize(
                                 AString.fromStringValue("a"),
@@ -153,7 +153,7 @@ public final class InjectionSpecs {
                         "}",
                 injector -> injector.put(AString.fromStringValue("test"))
         )
-                .as(json()).toTheType(AComplexNestedType.class)
+                .from(json()).toTheType(AComplexNestedType.class)
                 .theDeserializedObjectIs(AComplexNestedType.deserialize(
                         AComplexType.deserialize(
                                 AString.fromStringValue("test"),
@@ -183,7 +183,7 @@ public final class InjectionSpecs {
                         .put("complexType1.stringB", "test")
                         .put("complexType2.number1", "45")
         )
-                .as(json()).toTheType(AComplexNestedType.class)
+                .from(json()).toTheType(AComplexNestedType.class)
                 .theDeserializedObjectIs(AComplexNestedType.deserialize(
                         AComplexType.deserialize(
                                 AString.fromStringValue("a"),
@@ -208,7 +208,7 @@ public final class InjectionSpecs {
                     injector.put("arrayList.[0]", "injected");
                     injector.put("array.[0]", "42");
                 })
-                .as(json()).toTheType(AComplexTypeWithCollections.class)
+                .from(json()).toTheType(AComplexTypeWithCollections.class)
                 .noExceptionHasBeenThrown()
                 .theDeserializedObjectIs(
                         AComplexTypeWithCollections.deserialize(

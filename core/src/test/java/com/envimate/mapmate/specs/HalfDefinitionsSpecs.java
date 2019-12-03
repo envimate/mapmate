@@ -58,7 +58,7 @@ public final class HalfDefinitionsSpecs {
                         .usingJsonMarshaller(jsonMarshaller(), jsonUnmarshaller())
                         .build()
         )
-                .when().mapMateDeserializes("\"foo\"").as(json()).toTheType(ADeserializationOnlyString.class)
+                .when().mapMateDeserializes("\"foo\"").from(json()).toTheType(ADeserializationOnlyString.class)
                 .noExceptionHasBeenThrown()
                 .theDeserializedObjectIs(ADeserializationOnlyString.fromStringValue("foo"));
     }
@@ -91,7 +91,7 @@ public final class HalfDefinitionsSpecs {
                 "{\n" +
                 "  \"string\": \"foo\"\n" +
                 "}")
-                .as(json()).toTheType(ADeserializationOnlyComplexType.class)
+                .from(json()).toTheType(ADeserializationOnlyComplexType.class)
                 .noExceptionHasBeenThrown()
                 .theDeserializedObjectIs(ADeserializationOnlyComplexType.deserialize(ADeserializationOnlyString.fromStringValue("foo")));
     }
@@ -147,7 +147,7 @@ public final class HalfDefinitionsSpecs {
                 "{\n" +
                 "  \"string\": \"foo\"\n" +
                 "}")
-                .as(json()).toTheType(ADeserializationOnlyComplexType.class)
+                .from(json()).toTheType(ADeserializationOnlyComplexType.class)
                 .noExceptionHasBeenThrown()
                 .theDeserializedObjectIs(ADeserializationOnlyComplexType.deserialize(ADeserializationOnlyString.fromStringValue("foo")));
     }

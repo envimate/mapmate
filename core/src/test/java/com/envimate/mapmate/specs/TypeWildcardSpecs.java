@@ -38,8 +38,7 @@ public final class TypeWildcardSpecs {
                         .build())
                 .when().mapMateIsInstantiated()
                 .anExceptionIsThrownWithAMessageContaining("Type 'java.util.List<?>' is not registered but needs to be in order to support deserialization of 'com.envimate.mapmate.domain.wildcards.AComplexTypeWithWildcardedCollection'.\n" +
-                        "Log entries for 'java.util.List<?>'\n" +
-                        "DefinitionsBuilder -> AComplexTypeWithWildcardedCollection -> SimpleDetector: rejecting 'java.util.List<?>' because: type is not supported because it contains wildcard generics (\"?\")");
+                        "Log entries for 'java.util.List<?>'\n");
     }
 
     @Test
@@ -51,7 +50,6 @@ public final class TypeWildcardSpecs {
         )
                 .when().mapMateIsInstantiated()
                 .anExceptionIsThrownWithAMessageContaining("Type 'java.util.List<?>' is not registered but needs to be in order to support deserialization of 'com.envimate.mapmate.domain.wildcards.AComplexTypeWithTypeWildcards'.\n" +
-                        "Log entries for 'java.util.List<?>'\n" +
-                        "DefinitionsBuilder -> AComplexTypeWithTypeWildcards -> SimpleDetector: rejecting 'java.util.List<?>' because: type is not supported because it contains wildcard generics (\"?\")");
+                        "Log entries for 'java.util.List<?>'\n");
     }
 }

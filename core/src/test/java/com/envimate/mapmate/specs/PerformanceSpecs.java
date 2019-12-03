@@ -72,7 +72,7 @@ public final class PerformanceSpecs {
                     "  \"stringA\": \"asdf\",\n" +
                     "  \"stringB\": \"qwer\"\n" +
                     "}")
-                    .as(json()).toTheType(AComplexType.class)
+                    .from(json()).toTheType(AComplexType.class)
                     .noExceptionHasBeenThrown()
                     .theDeserializedObjectIs(AComplexType.deserialize(
                             AString.fromStringValue("asdf"),

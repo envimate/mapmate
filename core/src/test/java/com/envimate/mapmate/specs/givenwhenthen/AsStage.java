@@ -24,5 +24,5 @@ package com.envimate.mapmate.specs.givenwhenthen;
 import com.envimate.mapmate.mapper.marshalling.MarshallingType;
 
 public interface AsStage {
-    ToStage as(MarshallingType marshallingType);
+    ToStage from(MarshallingType marshallingType);
 }

@@ -23,21 +23,34 @@ package com.envimate.mapmate.builder;
 
 import com.envimate.mapmate.builder.contextlog.BuildContextLog;
 import com.envimate.mapmate.builder.detection.Detector;
+import com.envimate.mapmate.mapper.definitions.CollectionDefinition;
 import com.envimate.mapmate.mapper.definitions.Definition;
 import com.envimate.mapmate.mapper.definitions.Definitions;
+import com.envimate.mapmate.mapper.definitions.SerializedObjectDefinition;
+import com.envimate.mapmate.mapper.deserialization.deserializers.TypeDeserializer;
+import com.envimate.mapmate.mapper.deserialization.deserializers.collections.CollectionDeserializer;
+import com.envimate.mapmate.mapper.deserialization.deserializers.customprimitives.CustomPrimitiveDeserializer;
+import com.envimate.mapmate.mapper.deserialization.deserializers.serializedobjects.SerializedObjectDeserializer;
+import com.envimate.mapmate.mapper.serialization.serializers.TypeSerializer;
+import com.envimate.mapmate.mapper.serialization.serializers.collections.CollectionSerializer;
+import com.envimate.mapmate.mapper.serialization.serializers.customprimitives.CustomPrimitiveSerializer;
+import com.envimate.mapmate.mapper.serialization.serializers.serializedobject.SerializedObjectSerializer;
+import com.envimate.mapmate.shared.types.ClassType;
 import com.envimate.mapmate.shared.types.ResolvedType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-import static com.envimate.mapmate.builder.RequiredCapabilities.all;
+import static com.envimate.mapmate.builder.RequiredCapabilities.deserializationOnly;
+import static com.envimate.mapmate.builder.RequiredCapabilities.serializationOnly;
+import static com.envimate.mapmate.mapper.definitions.CustomPrimitiveDefinition.untypedCustomPrimitiveDefinition;
 import static com.envimate.mapmate.mapper.definitions.Definitions.definitions;
+import static java.util.stream.Collectors.toMap;
 
 @ToString
 @EqualsAndHashCode
@@ -45,7 +58,9 @@ import static com.envimate.mapmate.mapper.definitions.Definitions.definitions;
 public final class DefinitionsBuilder {
     private static final int INITIAL_CAPACITY = 10000;
 
-    private final Map<ResolvedType, Definition> definitions = new HashMap<>(INITIAL_CAPACITY);
+    private final DefinitionsBuilder2<TypeDeserializer> deserializers = DefinitionsBuilder2.definitionsBuilder("deserializer");
+    private final DefinitionsBuilder2<TypeSerializer> serializers = DefinitionsBuilder2.definitionsBuilder("serializer");
+
     private final BuildContextLog contextLog;
     private final Detector detector;
 
@@ -54,42 +69,107 @@ public final class DefinitionsBuilder {
         return new DefinitionsBuilder(contextLog.stepInto(DefinitionsBuilder.class), detector);
     }
 
-    public void addDefinition(final Definition definition) {
-        this.definitions.put(definition.type(), definition);
+    public void addSerializer(final ResolvedType type,
+                              final TypeSerializer serializer) {
+        this.serializers.add(type, serializer);
     }
 
-    private boolean isPresent(final ResolvedType detectionCandidate) {
-        return this.definitions.containsKey(detectionCandidate);
+    public void addDeserializer(final ResolvedType type,
+                                final TypeDeserializer deserializer) {
+        this.deserializers.add(type, deserializer);
     }
 
     public void resolveRecursively(final Detector detector) {
-        final List<Definition> seedDefinitions = new LinkedList<>(this.definitions.values());
-        seedDefinitions.forEach(definition -> diveIntoChildren(definition, detector, this.contextLog.stepInto(definition.type().assignableType())));
+        this.serializers.values().forEach(serializer -> diveIntoSerializerChildren(serializer, detector, this.contextLog));
+        this.deserializers.values().forEach(deserializer -> diveIntoDeserializerChildren(deserializer, detector, this.contextLog));
     }
 
-    private void recurse(final ResolvedType type,
-                         final Detector detector,
-                         final BuildContextLog contextLog) {
-        if (isPresent(type)) {
+    private void recurseDeserializers(final ResolvedType type,
+                                      final Detector detector,
+                                      final BuildContextLog contextLog) {
+        if (this.deserializers.isPresent(type)) {
             return;
         }
-        detector.detect(type, all() /* TODO */, contextLog).ifPresent(definition -> {
+        detector.detect(type, deserializationOnly(), contextLog).ifPresent(definition -> {
             contextLog.log(type, "added because it is a dependency");
-            addDefinition(definition);
-            diveIntoChildren(definition, detector, contextLog.stepInto(type.assignableType()));
+            definition.deserializer().ifPresent(deserializer -> {
+                this.deserializers.add(type, deserializer);
+                diveIntoDeserializerChildren(deserializer, detector, contextLog);
+            });
         });
     }
 
-    private void diveIntoChildren(final Definition definition, final Detector detector, final BuildContextLog contextLog) {
-        definition.deserializer().ifPresent(typeDeserializer -> typeDeserializer.requiredTypes().forEach(type -> {
-            recurse(type, detector, contextLog);
-        }));
-        definition.serializer().ifPresent(typeSerializer -> typeSerializer.requiredTypes().forEach(type -> {
-            recurse(type, detector, contextLog);
-        }));
+    private void diveIntoDeserializerChildren(final TypeDeserializer deserializer,
+                                              final Detector detector,
+                                              final BuildContextLog contextLog) {
+        deserializer.requiredTypes().forEach(requiredType -> recurseDeserializers(requiredType, detector, contextLog.stepInto(requiredType.assignableType())));
+    }
+
+    private void recurseSerializers(final ResolvedType type,
+                                    final Detector detector,
+                                    final BuildContextLog contextLog) {
+        if (this.serializers.isPresent(type)) {
+            return;
+        }
+        detector.detect(type, serializationOnly(), contextLog).ifPresent(definition -> {
+            contextLog.log(type, "added because it is a dependency");
+            definition.serializer().ifPresent(serializer -> {
+                this.serializers.add(type, serializer);
+                diveIntoSerializerChildren(serializer, detector, contextLog);
+            });
+        });
+    }
+
+    private void diveIntoSerializerChildren(final TypeSerializer serializer,
+                                            final Detector detector,
+                                            final BuildContextLog contextLog) {
+        serializer.requiredTypes().forEach(requiredType -> recurseSerializers(requiredType, detector, contextLog.stepInto(requiredType.assignableType())));
     }
 
     public Definitions build() {
-        return definitions(this.contextLog, this.definitions);
+        final Set<ResolvedType> allTypes = new HashSet<>();
+        allTypes.addAll(this.deserializers.keys());
+        allTypes.addAll(this.serializers.keys());
+
+        final Map<ResolvedType, Definition> definitions = allTypes.stream()
+                .map(this::definitionForType)
+                .collect(toMap(Definition::type, definition -> definition));
+        return definitions(this.contextLog, definitions);
+    }
+
+    private Definition definitionForType(final ResolvedType type) {
+        final TypeDeserializer deserializer = this.deserializers.get(type).orElse(null);
+        final TypeSerializer serializer = this.serializers.get(type).orElse(null);
+
+
+        if (nullOrInstance(deserializer, CustomPrimitiveDeserializer.class) && nullOrInstance(serializer, CustomPrimitiveSerializer.class)) {
+            final CustomPrimitiveSerializer customPrimitiveSerializer = (CustomPrimitiveSerializer) serializer;
+            final CustomPrimitiveDeserializer customPrimitiveDeserializer = (CustomPrimitiveDeserializer) deserializer;
+            return untypedCustomPrimitiveDefinition(type, customPrimitiveSerializer, customPrimitiveDeserializer);
+        }
+
+        if (nullOrInstance(deserializer, SerializedObjectDeserializer.class) && nullOrInstance(serializer, SerializedObjectSerializer.class)) {
+            final SerializedObjectSerializer serializedObjectSerializer = (SerializedObjectSerializer) serializer;
+            final SerializedObjectDeserializer serializedObjectDeserializer = (SerializedObjectDeserializer) deserializer;
+            final ClassType classType = (ClassType) type;
+            return SerializedObjectDefinition.serializedObjectDefinition(classType, serializedObjectSerializer, serializedObjectDeserializer);
+        }
+
+        if (nullOrInstance(deserializer, CollectionDeserializer.class) && nullOrInstance(serializer, CollectionSerializer.class)) {
+            final CollectionSerializer collectionSerializer = (CollectionSerializer) serializer;
+            final CollectionDeserializer collectionDeserializer = (CollectionDeserializer) deserializer;
+            final ResolvedType contentType = collectionDeserializer.contentType();
+            return CollectionDefinition.collectionDefinition(type, contentType, collectionSerializer, collectionDeserializer);
+        }
+
+        throw new UnsupportedOperationException("It is not clear what type of definition to assign to " + type.description() +
+                " with deserializer " + deserializer + " and serializer " + serializer);
+    }
+
+    private static boolean nullOrInstance(final Object candidate, final Class<?> type) {
+        if (candidate == null) {
+            return true;
+        }
+        return type.isInstance(candidate);
     }
 }

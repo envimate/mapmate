@@ -38,7 +38,7 @@ public final class ExceptionTrackingSpecs {
                 "  \"number2\": \"5\",\n" +
                 "  \"stringA\": \"asdf\",\n" +
                 "  \"stringB\": \"qwer\"\n" +
-                "}").as(json()).toTheType(AComplexType.class)
+                "}").from(json()).toTheType(AComplexType.class)
                 .anExceptionIsThrownWithAMessageContaining("Unrecognized exception deserializing field 'number1': " +
                         "Exception calling deserialize(input: x) on definition");
     }
@@ -52,7 +52,7 @@ public final class ExceptionTrackingSpecs {
                 "  \"number2\": \"5000\",\n" +
                 "  \"stringA\": \"asdf\",\n" +
                 "  \"stringB\": \"qwer\"\n" +
-                "}").as(json()).toTheType(AComplexType.class)
+                "}").from(json()).toTheType(AComplexType.class)
                 .anExceptionIsThrownWithAMessageContaining("deserialization encountered validation errors." +
                         " Validation error at 'number2', value cannot be over 50; ");
     }
@@ -94,7 +94,7 @@ public final class ExceptionTrackingSpecs {
                 "  \"number2\": \"5000\",\n" +
                 "  \"stringA\": \"asdf\",\n" +
                 "  \"stringB\": \"qwer\"\n" +
-                "}").as(json()).toTheType(AComplexType.class)
+                "}").from(json()).toTheType(AComplexType.class)
                 .anExceptionIsThrownWithAMessageContaining("deserialization encountered validation errors." +
                         " Validation error at 'number1', value cannot be over 50;" +
                         " Validation error at 'number2', value cannot be over 50; ");

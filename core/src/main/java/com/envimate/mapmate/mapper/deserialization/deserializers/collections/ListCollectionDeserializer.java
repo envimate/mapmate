@@ -54,7 +54,7 @@ public final class ListCollectionDeserializer implements CollectionDeserializer 
     }
 
     @Override
-    public List<ResolvedType> requiredTypes() {
-        return singletonList(this.componentType);
+    public ResolvedType contentType() {
+        return this.componentType;
     }
 }
