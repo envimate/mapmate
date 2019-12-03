@@ -21,6 +21,7 @@
 
 package com.envimate.mapmate.mapper.serialization.serializers.serializedobject;
 
+import com.envimate.mapmate.mapper.serialization.serializers.serializedobject.queries.SerializationFieldQuery;
 import com.envimate.mapmate.shared.types.ResolvedType;
 import com.envimate.mapmate.shared.types.resolver.ResolvedField;
 import lombok.AccessLevel;
@@ -29,9 +30,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.lang.reflect.Field;
-import java.util.function.Function;
 
 import static com.envimate.mapmate.mapper.serialization.serializers.serializedobject.IncompatibleSerializedObjectException.incompatibleSerializedObjectException;
+import static com.envimate.mapmate.mapper.serialization.serializers.serializedobject.queries.PublicFieldQuery.publicFieldQuery;
 import static com.envimate.mapmate.shared.validators.NotNullValidator.validateNotNull;
 import static java.lang.reflect.Modifier.*;
 
@@ -41,11 +42,11 @@ import static java.lang.reflect.Modifier.*;
 public final class SerializationField {
     private final ResolvedType type;
     private final String name;
-    private final Function<Object, Object> query;
+    private final SerializationFieldQuery query;
 
     public static SerializationField serializationField(final ResolvedType type,
                                                         final String name,
-                                                        final Function<Object, Object> query) {
+                                                        final SerializationFieldQuery query) {
         validateNotNull(type, "type");
         validateNotNull(name, "name");
         validateNotNull(query, "query");
@@ -59,7 +60,7 @@ public final class SerializationField {
         validateFieldModifiers(declaringType, field.field());
         final ResolvedType fullType = field.type();
         final String name = field.name();
-        final Function<Object, Object> query = object -> readField(object, field.field());
+        final SerializationFieldQuery query = publicFieldQuery(field.field());
         return serializationField(fullType, name, query);
     }
 
@@ -73,15 +74,7 @@ public final class SerializationField {
 
     public Object query(final Object object) {
         validateNotNull(object, "object");
-        return this.query.apply(object);
-    }
-
-    private static Object readField(final Object object, final Field field) {
-        try {
-            return field.get(object);
-        } catch (final IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        return this.query.query(object);
     }
 
     private static void validateFieldModifiers(final ResolvedType type, final Field field) {
