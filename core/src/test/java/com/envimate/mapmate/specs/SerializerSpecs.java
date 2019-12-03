@@ -22,6 +22,7 @@
 package com.envimate.mapmate.specs;
 
 import com.envimate.mapmate.domain.valid.*;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -171,6 +172,11 @@ public final class SerializerSpecs {
                 .when().mapMateSerializes(given1).withMarshallingType(json())
                 .anExceptionIsThrownWithAMessageContaining("a circular reference has been detected for objects " +
                         "of type com.envimate.mapmate.domain.valid.ACyclicType");
+    }
+
+    @Test
+    public void givenNoCyclicTypeWithMultipleReferencesToSameInstance_whenSerializing_thenPassesValidation() {
+        Assertions.fail("This test has yet to be invented");
     }
 
     @Test
